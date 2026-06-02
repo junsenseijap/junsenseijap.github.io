@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jun Sensei — 日本語</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Shippori+Mincho:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red:       #C0392B;
+      --red-dark:  #922B21;
+      --red-glow:  rgba(192,57,43,0.18);
+      --ink:       #0D0D0D;
+      --paper:     #F5F0E8;
+      --paper2:    #EDE8DC;
+      --gold:      #B8960C;
+      --gold-lt:   #D4AF37;
+      --white:     #FDFAF4;
+      --gray:      #8a8275;
+      --shadow:    rgba(0,0,0,0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--ink);
+      font-family: 'Inter', sans-serif;
+      color: var(--paper);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(192,57,43,0.12) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.02) 60px),
+        repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.02) 60px);
+      pointer-events: none; z-index: 0;
+    }
+
+    .kanji-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .kanji-bg span {
+      position: absolute;
+      font-family: 'Noto Serif JP', serif;
+      color: rgba(192,57,43,0.06);
+      font-size: clamp(60px, 12vw, 160px);
+      font-weight: 700;
+      user-select: none;
+      animation: floatKanji 20s ease-in-out infinite;
+    }
+    .kanji-bg span:nth-child(1) { top: 5%;  left: 3%;  animation-delay: 0s;   font-size: 120px; }
+    .kanji-bg span:nth-child(2) { top: 20%; right: 5%; animation-delay: -5s;  font-size: 180px; }
+    .kanji-bg span:nth-child(3) { top: 55%; left: 8%;  animation-delay: -10s; font-size: 100px; }
+    .kanji-bg span:nth-child(4) { bottom: 10%; right: 8%; animation-delay: -15s; font-size: 140px; }
+    .kanji-bg span:nth-child(5) { top: 40%; left: 45%; animation-delay: -7s; font-size: 80px; opacity: 0.5; }
+
+    @keyframes floatKanji {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50%       { transform: translateY(-20px) rotate(3deg); }
+    }
+
+    /* ── LAYOUT ── */
+    #app { position: relative; z-index: 1; min-height: 100vh; }
+
+    /* ── LOGIN PAGE ── */
+    #page-login {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh; padding: 2rem;
+    }
+
+    .login-box {
+      background: rgba(13,13,13,0.85);
+      border: 1px solid rgba(192,57,43,0.4);
+      border-radius: 4px;
+      padding: 3rem 2.5rem;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 0 60px rgba(192,57,43,0.1), 0 20px 60px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      animation: fadeUp 0.6s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-logo {
+      text-align: center; margin-bottom: 2.5rem;
+    }
+    .login-logo .jp-title {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 2.8rem; font-weight: 700;
+      color: var(--red);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 30px rgba(192,57,43,0.5);
+      display: block;
+    }
+    .login-logo .en-title {
+      font-size: 0.75rem; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--gold-lt);
+      font-weight: 300; display: block; margin-top: 0.3rem;
+    }
+    .login-logo .divider {
+      width: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      margin: 1rem auto;
+    }
+
+    .form-group { margin-bottom: 1.4rem; }
+    .form-group label {
+      display: block; font-size: 0.7rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold-lt); margin-bottom: 0.5rem; font-weight: 500;
+    }
+    .form-group input {
+      width: 100%; padding: 0.85rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(192,57,43,0.3);
+      border-radius: 2px; color: var(--paper);
+      font-size: 1rem; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-glow);
+    }
+    .form-group input::placeholder { color: rgba(245,240,232,0.25); }
+
+    .btn-login {
+      width: 100%; padding: 0.95rem;
+      background: var(--red); border: none;
+      color: white; font-size: 0.8rem;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      font-weight: 500; cursor: pointer;
+      border-radius: 2px; margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-login:hover {
+      background: var(--red-dark);
+      box-shadow: 0 4px 20px rgba(192,57,43,0.4);
+    }
+    .btn-login:active { transform: scale(0.98); }
+
+    .login-error {
+      background: rgba(192,57,43,0.15);
+      border: 1px solid rgba(192,57,43,0.4);
+      border-radius: 2px; padding: 0.75rem 1rem;
+      font-size: 0.85rem; color: #e57373;
+      margin-top: 1rem; display: none; text-align: center;
+    }
+
+    /* ── HEADER ── */
+    #header {
+      display: none;
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,13,13,0.92);
+      border-bottom: 1px solid rgba(192,57,43,0.3);
+      backdrop-filter: blur(12px);
+      padding: 0.9rem 2rem;
+      flex-direction: row; align-items: center; justify-content: space-between;
+    }
+    .header-logo {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.3rem; color: var(--red); font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+    .header-logo span { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--gold-lt); display: block; }
+    .header-user {
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .header-user .user-name {
+      font-size: 0.85rem; color: var(--paper);
+    }
+    .header-user .role-badge {
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      padding: 0.2rem 0.6rem; border-radius: 2px;
+      text-transform: uppercase; font-weight: 500;
+    }
+    .role-badge.admin { background: var(--red); color: white; }
+    .role-badge.student { background: rgba(184,150,12,0.2); color: var(--gold-lt); border: 1px solid var(--gold); }
+
+    .btn-logout {
+      background: transparent; border: 1px solid rgba(192,57,43,0.4);
+      color: var(--gray); font-size: 0.75rem; padding: 0.4rem 0.9rem;
+      border-radius: 2px; cursor: pointer; letter-spacing: 0.1em;
+      text-transform: uppercase; transition: all 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--paper); }
+
+    /* ── MAIN CONTENT ── */
+    #page-student, #page-admin {
+      display: none; padding: 2.5rem 2rem; max-width: 1100px; margin: 0 auto;
+    }
+
+    .page-title {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.8rem; font-weight: 700;
+      color: var(--paper); margin-bottom: 0.4rem;
+    }
+    .page-subtitle {
+      font-size: 0.78rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold-lt);
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── CONTENT GRID (Student) ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .content-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(192,57,43,0.2);
+      border-radius: 4px; padding: 1.4rem;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.4s ease both;
+    }
+    .content-card:hover {
+      border-color: rgba(192,57,43,0.5);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(192,57,43,0.1);
+    }
+
+    .card-type {
+      display: inline-block;
+      font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+      padding: 0.2rem 0.6rem; border-radius: 2px; margin-bottom: 0.8rem;
+      font-weight: 600;
+    }
+    .type-audio  { background: rgba(46,125,50,0.2);  color: #81c784; border: 1px solid rgba(46,125,50,0.4); }
+    .type-video  { background: rgba(21,101,192,0.2); color: #64b5f6; border: 1px solid rgba(21,101,192,0.4); }
+    .type-pdf    { background: rgba(192,57,43,0.2);  color: #ef9a9a; border: 1px solid rgba(192,57,43,0.4); }
+    .type-image  { background: rgba(123,31,162,0.2); color: #ce93d8; border: 1px solid rgba(123,31,162,0.4); }
+
+    .card-title {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1rem; font-weight: 700;
+      color: var(--paper); margin-bottom: 0.4rem; line-height: 1.4;
+    }
+    .card-meta {
+      font-size: 0.75rem; color: var(--gray); margin-bottom: 1.2rem;
+    }
+    .card-meta span { margin-right: 0.8rem; }
+
+    .btn-view {
+      display: inline-block; width: 100%;
+      padding: 0.6rem 1rem; text-align: center;
+      background: transparent; border: 1px solid rgba(192,57,43,0.5);
+      color: var(--red); font-size: 0.75rem; letter-spacing: 0.15em;
+      text-transform: uppercase; border-radius: 2px; cursor: pointer;
+      text-decoration: none; transition: all 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .btn-view:hover {
+      background: var(--red); color: white;
+      box-shadow: 0 4px 15px rgba(192,57,43,0.3);
+    }
+
+    .empty-state {
+      text-align: center; padding: 4rem 2rem; color: var(--gray);
+    }
+    .empty-state .jp { font-family: 'Shippori Mincho', serif; font-size: 3rem; color: rgba(192,57,43,0.2); display: block; margin-bottom: 1rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── ADMIN PANEL ── */
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .admin-layout { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(192,57,43,0.2);
+      border-radius: 4px; overflow: hidden;
+    }
+    .panel-header {
+      background: rgba(192,57,43,0.1);
+      border-bottom: 1px solid rgba(192,57,43,0.2);
+      padding: 1rem 1.2rem;
+      font-size: 0.7rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold-lt); font-weight: 600;
+    }
+
+    .student-list { list-style: none; }
+    .student-item {
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .student-item:hover { background: rgba(192,57,43,0.08); }
+    .student-item.active { background: rgba(192,57,43,0.15); border-left: 2px solid var(--red); }
+    .student-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Shippori Mincho', serif; font-size: 0.85rem; color: var(--red);
+      flex-shrink: 0; font-weight: 700;
+    }
+    .student-info { flex: 1; min-width: 0; }
+    .student-name { font-size: 0.9rem; color: var(--paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .student-id { font-size: 0.7rem; color: var(--gray); }
+
+    /* Admin right panel */
+    .admin-right { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .selected-student-info {
+      padding: 1.5rem 1.2rem;
+      border-bottom: 1px solid rgba(192,57,43,0.15);
+    }
+    .selected-name {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.3rem; font-weight: 700; color: var(--paper);
+    }
+    .selected-sub { font-size: 0.75rem; color: var(--gray); margin-top: 0.2rem; }
+
+    .content-manage-list { list-style: none; padding: 0.5rem 0; }
+    .content-manage-item {
+      padding: 0.75rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .content-manage-item:last-child { border-bottom: none; }
+
+    .content-manage-info { flex: 1; min-width: 0; }
+    .content-manage-title { font-size: 0.88rem; color: var(--paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .content-manage-meta { font-size: 0.7rem; color: var(--gray); margin-top: 0.15rem; }
+
+    .btn-unlock {
+      padding: 0.4rem 0.9rem; border-radius: 2px; cursor: pointer;
+      font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-family: 'Inter', sans-serif; font-weight: 500; flex-shrink: 0;
+      transition: all 0.2s; border: 1px solid;
+    }
+    .btn-unlock.locked {
+      background: transparent; border-color: rgba(46,125,50,0.5); color: #81c784;
+    }
+    .btn-unlock.locked:hover { background: rgba(46,125,50,0.15); }
+    .btn-unlock.unlocked {
+      background: transparent; border-color: rgba(192,57,43,0.5); color: #ef9a9a;
+    }
+    .btn-unlock.unlocked:hover { background: rgba(192,57,43,0.15); }
+
+    .unlock-status {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .unlock-status.on  { background: #81c784; box-shadow: 0 0 6px rgba(129,199,132,0.6); }
+    .unlock-status.off { background: rgba(255,255,255,0.15); }
+
+    /* ── LOADING ── */
+    .loading {
+      text-align: center; padding: 3rem; color: var(--gray); font-size: 0.85rem;
+    }
+    .spinner {
+      width: 28px; height: 28px; margin: 0 auto 1rem;
+      border: 2px solid rgba(192,57,43,0.2);
+      border-top-color: var(--red);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: rgba(13,13,13,0.95); border: 1px solid rgba(192,57,43,0.4);
+      color: var(--paper); padding: 0.8rem 1.5rem; border-radius: 4px;
+      font-size: 0.85rem; z-index: 999; transition: transform 0.3s ease;
+      backdrop-filter: blur(12px); white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: rgba(46,125,50,0.6); }
+    #toast.error   { border-color: rgba(192,57,43,0.6); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 500px) {
+      .login-box { padding: 2rem 1.5rem; }
+      #page-student, #page-admin { padding: 1.5rem 1rem; }
+      #header { padding: 0.75rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background kanji -->
+<div class="kanji-bg">
+  <span>語</span><span>日</span><span>本</span><span>学</span><span>文</span>
+</div>
+
+<div id="app">
+
+  <!-- ══ LOGIN ══ -->
+  <div id="page-login">
+    <div class="login-box">
+      <div class="login-logo">
+        <span class="jp-title">六月先生</span>
+        <div class="divider"></div>
+        <span class="en-title">Jun Sensei · Học Tiếng Nhật</span>
+      </div>
+      <div class="form-group">
+        <label>ID / Mã học viên</label>
+        <input type="number" id="input-id" placeholder="Ex: 2" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label>PIN</label>
+        <input type="password" id="input-pin" placeholder="••••" maxlength="6" autocomplete="off"/>
+      </div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">
+        入る — Đăng nhập
+      </button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+
+  <!-- ══ HEADER ══ -->
+  <div id="header">
+    <div class="header-logo">
+      六月先生
+      <span>Jun Sensei</span>
+    </div>
+    <div class="header-user">
+      <span class="user-name" id="header-name"></span>
+      <span class="role-badge" id="header-role"></span>
+      <button class="btn-logout" onclick="doLogout()">出る</button>
+    </div>
+  </div>
+
+  <!-- ══ STUDENT DASHBOARD ══ -->
+  <div id="page-student">
+    <div class="page-title" id="student-greeting">こんにちは</div>
+    <div class="page-subtitle">Nội dung đã mở khoá · Unlocked Content</div>
+    <div id="content-grid-wrap">
+      <div class="loading"><div class="spinner"></div>Đang tải nội dung...</div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN DASHBOARD ══ -->
+  <div id="page-admin">
+    <div class="page-title">管理画面</div>
+    <div class="page-subtitle">Admin Panel · Quản lý học viên</div>
+    <div class="admin-layout">
+
+      <!-- Left: student list -->
+      <div class="panel">
+        <div class="panel-header">学生リスト · Học viên</div>
+        <ul class="student-list" id="student-list">
+          <li class="loading"><div class="spinner"></div></li>
+        </ul>
+      </div>
+
+      <!-- Right: content management -->
+      <div class="admin-right">
+        <div class="panel" id="admin-content-panel">
+          <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
+          <div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.85rem;">
+            ← Chọn một học viên để quản lý nội dung
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — remplace par ton URL Apps Script
+// ══════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoqxEZiuBRDMsUCFLh-n4NpugzYhKPrcoHuvSbolzVvHZFsJw/exec";
+
+// ══════════════════════════════════════════════
+// SESSION (3 mois)
+// ══════════════════════════════════════════════
+const SESSION_KEY = "jun_session";
+const SESSION_DAYS = 90;
+
+function saveSession(user) {
+  const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ user, expiry }));
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const { user, expiry } = JSON.parse(raw);
+    if (Date.now() > expiry) { localStorage.removeItem(SESSION_KEY); return null; }
+    return user;
+  } catch { return null; }
+}
+
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+// ══════════════════════════════════════════════
+// API HELPER
+// ══════════════════════════════════════════════
+async function api(params) {
+  const url = API_URL + "?" + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function toast(msg, type = "success") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "show " + type;
+  setTimeout(() => { el.className = ""; }, 3000);
+}
+
+// ══════════════════════════════════════════════
+// SHOW/HIDE PAGES
+// ══════════════════════════════════════════════
+function showPage(name) {
+  document.getElementById("page-login").style.display   = name === "login"   ? "flex"  : "none";
+  document.getElementById("page-student").style.display = name === "student" ? "block" : "none";
+  document.getElementById("page-admin").style.display   = name === "admin"   ? "block" : "none";
+  document.getElementById("header").style.display       = name !== "login"   ? "flex"  : "none";
+}
+
+// ══════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════
+async function doLogin() {
+  const id  = document.getElementById("input-id").value.trim();
+  const pin = document.getElementById("input-pin").value.trim();
+  const err = document.getElementById("login-error");
+  const btn = document.getElementById("btn-login");
+
+  if (!id || !pin) { showError("Vui lòng nhập ID và PIN"); return; }
+
+  btn.textContent = "...";
+  btn.disabled = true;
+  err.style.display = "none";
+
+  try {
+    const data = await api({ action: "login", id, pin });
+    if (data.success) {
+      saveSession(data.user);
+      initUser(data.user);
+    } else {
+      showError(data.message || "ID hoặc PIN không đúng");
+    }
+  } catch (e) {
+    showError("Lỗi kết nối. Vui lòng thử lại.");
+  }
+
+  btn.textContent = "入る — Đăng nhập";
+  btn.disabled = false;
+}
+
+function showError(msg) {
+  const err = document.getElementById("login-error");
+  err.textContent = msg;
+  err.style.display = "block";
+}
+
+// Enter key
+document.getElementById("input-pin").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+// ══════════════════════════════════════════════
+// INIT USER
+// ══════════════════════════════════════════════
+function initUser(user) {
+  document.getElementById("header-name").textContent = user.name + " " + (user.familyName || "");
+  const roleEl = document.getElementById("header-role");
+  roleEl.textContent = user.role;
+  roleEl.className = "role-badge " + (user.role === "Admin" ? "admin" : "student");
+
+  if (user.role === "Admin") {
+    showPage("admin");
+    loadAdminPanel(user);
+  } else {
+    showPage("student");
+    loadStudentContent(user);
+  }
+}
+
+// ══════════════════════════════════════════════
+// LOGOUT
+// ══════════════════════════════════════════════
+function doLogout() {
+  clearSession();
+  document.getElementById("input-id").value = "";
+  document.getElementById("input-pin").value = "";
+  document.getElementById("login-error").style.display = "none";
+  showPage("login");
+}
+
+// ══════════════════════════════════════════════
+// STUDENT — load content
+// ══════════════════════════════════════════════
+async function loadStudentContent(user) {
+  document.getElementById("student-greeting").textContent =
+    "こんにちは、" + (user.name || "") + " さん";
+
+  const wrap = document.getElementById("content-grid-wrap");
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Đang tải nội dung...</div>';
+
+  try {
+    const data = await api({ action: "getMyContent", studentId: user.id });
+    if (!data.success) { wrap.innerHTML = '<div class="empty-state"><span class="jp">無</span><p>Lỗi tải nội dung</p></div>'; return; }
+
+    if (!data.content || data.content.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><span class="jp">待</span><p>Chưa có nội dung nào được mở khoá.<br>Hãy chờ giáo viên cập nhật nhé!</p></div>';
+      return;
+    }
+
+    wrap.innerHTML = '<div class="content-grid">' + data.content.map(renderContentCard).join("") + '</div>';
+  } catch (e) {
+    wrap.innerHTML = '<div class="empty-state"><span class="jp">×</span><p>Lỗi kết nối</p></div>';
+  }
+}
+
+function renderContentCard(c) {
+  const typeClass = "type-" + (c.type || "pdf").toLowerCase();
+  const typeLabel = (c.type || "").toUpperCase();
+  const meta = [c.level, c.courseN ? "Bài " + c.courseN : ""].filter(Boolean).join(" · ");
+  const date = c.unlockedDate ? "Mở khoá: " + c.unlockedDate : "";
+  return `
+    <div class="content-card">
+      <span class="card-type ${typeClass}">${typeLabel}</span>
+      <div class="card-title">${c.title || "Nội dung"}</div>
+      <div class="card-meta">
+        <span>${meta}</span><br><span style="color:var(--gold);opacity:0.7">${date}</span>
+      </div>
+      <a class="btn-view" href="${c.driveLink}" target="_blank" rel="noopener">
+        開く · Xem / Tải
+      </a>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+// ADMIN — load students
+// ══════════════════════════════════════════════
+let adminUser = null;
+let allContent = [];
+let selectedStudentId = null;
+let studentAccessMap = {}; // studentId -> Set of contentIds
+
+async function loadAdminPanel(user) {
+  adminUser = user;
+  const list = document.getElementById("student-list");
+  list.innerHTML = '<li class="loading"><div class="spinner"></div></li>';
+
+  try {
+    const [studentsData, contentData] = await Promise.all([
+      api({ action: "getStudents", adminId: user.id, pin: getStoredPin() }),
+      api({ action: "getAllContent", adminId: user.id, pin: getStoredPin() })
+    ]);
+
+    allContent = contentData.success ? contentData.content : [];
+
+    if (!studentsData.success) { list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.85rem">Lỗi tải học viên</li>'; return; }
+
+    const students = studentsData.students || [];
+    if (students.length === 0) {
+      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.85rem">Chưa có học viên</li>';
+      return;
+    }
+
+    list.innerHTML = students.map(s => `
+      <li class="student-item" onclick="selectStudent(${s.id}, '${s.name}', '${s.familyName}')" id="stu-${s.id}">
+        <div class="student-avatar">${(s.name || "?")[0]}</div>
+        <div class="student-info">
+          <div class="student-name">${s.name} ${s.familyName || ""}</div>
+          <div class="student-id">ID: ${s.id}</div>
+        </div>
+      </li>`).join("");
+
+  } catch (e) {
+    list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.85rem">Lỗi kết nối</li>';
+  }
+}
+
+function getStoredPin() {
+  // PIN stored in memory for session (not persisted for security)
+  return window._adminPin || "";
+}
+
+async function selectStudent(id, name, familyName) {
+  selectedStudentId = id;
+
+  // Highlight active
+  document.querySelectorAll(".student-item").forEach(el => el.classList.remove("active"));
+  const el = document.getElementById("stu-" + id);
+  if (el) el.classList.add("active");
+
+  const panel = document.getElementById("admin-content-panel");
+  panel.innerHTML = `
+    <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
+    <div class="selected-student-info">
+      <div class="selected-name">${name} ${familyName}</div>
+      <div class="selected-sub">ID: ${id}</div>
+    </div>
+    <div class="loading"><div class="spinner"></div>Đang tải...</div>`;
+
+  try {
+    const data = await api({ action: "getMyContent", studentId: id });
+    const unlocked = new Set((data.content || []).map(c => String(c.id)));
+    studentAccessMap[id] = unlocked;
+    renderContentManage(id, name, familyName, unlocked);
+  } catch {
+    panel.innerHTML += '<div style="padding:1rem;color:var(--gray)">Lỗi tải dữ liệu</div>';
+  }
+}
+
+function renderContentManage(studentId, name, familyName, unlocked) {
+  const panel = document.getElementById("admin-content-panel");
+
+  const items = allContent.map(c => {
+    const isUnlocked = unlocked.has(String(c.id));
+    const typeClass  = "type-" + (c.type || "pdf").toLowerCase();
+    return `
+      <li class="content-manage-item">
+        <div class="unlock-status ${isUnlocked ? 'on' : 'off'}"></div>
+        <div class="content-manage-info">
+          <div class="content-manage-title">${c.title}</div>
+          <div class="content-manage-meta"><span class="card-type ${typeClass}" style="font-size:0.55rem;padding:0.1rem 0.4rem">${(c.type||'').toUpperCase()}</span> ${c.level || ''} · Bài ${c.courseN || '?'}</div>
+        </div>
+        <button class="btn-unlock ${isUnlocked ? 'unlocked' : 'locked'}"
+          id="btn-c-${c.id}"
+          onclick="toggleContent(${studentId}, ${c.id}, ${isUnlocked})">
+          ${isUnlocked ? '🔒 Khoá' : '🔓 Mở'}
+        </button>
+      </li>`;
+  }).join("");
+
+  panel.innerHTML = `
+    <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
+    <div class="selected-student-info">
+      <div class="selected-name">${name} ${familyName}</div>
+      <div class="selected-sub">ID: ${studentId} · ${unlocked.size} nội dung đã mở</div>
+    </div>
+    ${allContent.length === 0
+      ? '<div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.85rem">Chưa có nội dung trong CONTENT sheet</div>'
+      : '<ul class="content-manage-list">' + items + '</ul>'
+    }`;
+}
+
+async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
+  const btn = document.getElementById("btn-c-" + contentId);
+  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+
+  const action = isCurrentlyUnlocked ? "lockContent" : "unlockContent";
+  const pin = getStoredPin();
+
+  try {
+    const data = await api({ action, adminId: adminUser.id, pin, studentId, contentId });
+    if (data.success) {
+      toast(data.message, "success");
+      // Refresh
+      const accessData = await api({ action: "getMyContent", studentId });
+      const unlocked = new Set((accessData.content || []).map(c => String(c.id)));
+      studentAccessMap[studentId] = unlocked;
+      const el = document.querySelector(`#stu-${studentId} .student-name`);
+      const parts = el ? el.textContent.trim().split(" ") : ["", ""];
+      renderContentManage(studentId, parts[0], parts.slice(1).join(" "), unlocked);
+    } else {
+      toast(data.message || "Lỗi", "error");
+      if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? '🔒 Khoá' : '🔓 Mở'; }
+    }
+  } catch {
+    toast("Lỗi kết nối", "error");
+    if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? '🔒 Khoá' : '🔓 Mở'; }
+  }
+}
+
+// ══════════════════════════════════════════════
+// INIT — check session on load
+// ══════════════════════════════════════════════
+(function init() {
+  showPage("login");
+  const user = loadSession();
+  if (user) {
+    initUser(user);
+  }
+})();
+</script>
+</body>
+</html>
