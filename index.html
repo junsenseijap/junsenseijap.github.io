@@ -456,14 +456,14 @@
     <div class="login-box">
       <div class="login-logo">
         <span class="cherry-icon">🌸</span>
-        <span class="jp-title">六月先生</span>
+        <span class="jp-title">ジュン先生</span>
         <div class="divider"></div>
         <span class="en-title">Jun Sensei · Học Tiếng Nhật</span>
         <span class="tagline">Lớp tiếng Nhật tư duy &amp; tự giác</span>
       </div>
       <div class="form-group">
-        <label>ID / Mã học viên</label>
-        <input type="number" id="input-id" placeholder="Ex: 2" autocomplete="off"/>
+        <label>Số điện thoại · Téléphone · 電話番号</label>
+        <input type="tel" id="input-id" placeholder="Ex: 0664146887" autocomplete="tel"/>
       </div>
       <div class="form-group">
         <label>PIN</label>
@@ -481,7 +481,7 @@
     <div class="header-logo">
       <span class="cherry-sm">🌸</span>
       <div>
-        六月先生
+        ジュン先生
         <span class="header-logo-sub">Jun Sensei · 日本語</span>
       </div>
     </div>
@@ -571,21 +571,21 @@ function showPage(name) {
 }
 
 async function doLogin() {
-  const id  = document.getElementById("input-id").value.trim();
-  const pin = document.getElementById("input-pin").value.trim();
-  const err = document.getElementById("login-error");
-  const btn = document.getElementById("btn-login");
-  if (!id || !pin) { showError("Vui lòng nhập ID và PIN"); return; }
+  const phone = document.getElementById("input-id").value.trim();
+  const pin   = document.getElementById("input-pin").value.trim();
+  const err   = document.getElementById("login-error");
+  const btn   = document.getElementById("btn-login");
+  if (!phone || !pin) { showError("Vui lòng nhập số điện thoại và PIN"); return; }
   btn.textContent = "..."; btn.disabled = true;
   err.style.display = "none";
   try {
-    const data = await api({ action: "login", id, pin });
+    const data = await api({ action: "login", phone, pin });
     if (data.success) {
       if (data.user.role === "Admin") window._adminPin = pin;
       saveSession(data.user);
       initUser(data.user);
     } else {
-      showError(data.message || "ID hoặc PIN không đúng");
+      showError(data.message || "Số điện thoại hoặc PIN không đúng");
     }
   } catch (e) {
     showError("Lỗi kết nối. Vui lòng thử lại.");
