@@ -438,9 +438,69 @@
       #page-student, #page-admin { padding: 1.5rem 1rem; }
       #header { padding: 0.75rem 1rem; }
     }
+
+    /* ══════════════════════════════════════
+       LANGUAGE BAR
+    ══════════════════════════════════════ */
+    #lang-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(250,250,250,0.97);
+      border-bottom: 1px solid rgba(232,75,122,0.12);
+      backdrop-filter: blur(14px);
+      display: flex; justify-content: center; align-items: center;
+      gap: 0.2rem; padding: 0.35rem 1rem;
+      box-shadow: 0 1px 8px rgba(232,75,122,0.07);
+    }
+    .lang-btn {
+      background: transparent; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.7rem;
+      font-weight: 500; letter-spacing: 0.08em;
+      padding: 0.28rem 0.75rem; border-radius: 99px;
+      color: var(--gray); transition: all 0.18s;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .lang-btn .flag { font-size: 0.9rem; line-height: 1; }
+    .lang-btn:hover { color: var(--pink); background: var(--pink-pale); }
+    .lang-btn.active {
+      color: var(--pink); background: var(--pink-pale);
+      border: 1.5px solid rgba(232,75,122,0.25);
+      font-weight: 600;
+    }
+    .lang-sep {
+      color: rgba(232,75,122,0.2); font-size: 0.7rem; user-select: none;
+    }
+
+    /* push all pages down to account for lang-bar (~36px) */
+    #page-login { padding-top: calc(2rem + 36px); }
+    #header { top: 36px; }
+    #page-student, #page-admin { padding-top: calc(2.5rem + 36px); }
+    @media (max-width: 500px) {
+      #page-login { padding-top: calc(1.5rem + 36px); }
+      #page-student, #page-admin { padding-top: calc(1.5rem + 36px); }
+    }
   </style>
 </head>
 <body>
+
+<!-- ══ LANGUAGE BAR ══ -->
+<div id="lang-bar">
+  <button class="lang-btn active" onclick="setLang('vi')" id="lang-vi">
+    <span class="flag">🇻🇳</span> Tiếng Việt
+  </button>
+  <span class="lang-sep">|</span>
+  <button class="lang-btn" onclick="setLang('ja')" id="lang-ja">
+    <span class="flag">🇯🇵</span> 日本語
+  </button>
+  <span class="lang-sep">|</span>
+  <button class="lang-btn" onclick="setLang('en')" id="lang-en">
+    <span class="flag">🇬🇧</span> English
+  </button>
+  <span class="lang-sep">|</span>
+  <button class="lang-btn" onclick="setLang('fr')" id="lang-fr">
+    <span class="flag">🇫🇷</span> Français
+  </button>
+</div>
+
 
 <!-- Pétales de sakura -->
 <div class="petals-bg">
@@ -497,18 +557,18 @@
     <div class="page-title" id="student-greeting">こんにちは</div>
     <div class="page-subtitle">🌸 Nội dung đã mở khoá · Unlocked Content</div>
     <div id="content-grid-wrap">
-      <div class="loading"><div class="spinner"></div>Đang tải nội dung...</div>
+      <div id="initial-loading" class="loading"><div class="spinner"></div>Đang tải nội dung...</div>
     </div>
   </div>
 
   <!-- ══ ADMIN DASHBOARD ══ -->
   <div id="page-admin">
     <div class="page-title">管理画面</div>
-    <div class="page-subtitle">🌸 Admin Panel · Quản lý học viên</div>
+    <div class="page-subtitle" id="admin-subtitle-el">🌸 Admin Panel · Quản lý học viên</div>
     <div class="admin-layout">
 
       <div class="panel">
-        <div class="panel-header">学生リスト · Học viên</div>
+        <div class="panel-header" id="ph-students">学生リスト · Học viên</div>
         <ul class="student-list" id="student-list">
           <li class="loading"><div class="spinner"></div></li>
         </ul>
@@ -517,7 +577,7 @@
       <div class="admin-right">
         <div class="panel" id="admin-content-panel">
           <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
-          <div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem;">
+          <div id="select-student-hint" style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem;">
             ← Chọn một học viên để quản lý nội dung
           </div>
         </div>
@@ -575,7 +635,7 @@ async function doLogin() {
   const pin   = document.getElementById("input-pin").value.trim();
   const err   = document.getElementById("login-error");
   const btn   = document.getElementById("btn-login");
-  if (!phone || !pin) { showError("Vui lòng nhập số điện thoại và PIN"); return; }
+  if (!phone || !pin) { showError(t("loginErrEmpty")); return; }
   btn.textContent = "..."; btn.disabled = true;
   err.style.display = "none";
   try {
@@ -585,12 +645,12 @@ async function doLogin() {
       saveSession(data.user);
       initUser(data.user);
     } else {
-      showError(data.message || "Số điện thoại hoặc PIN không đúng");
+      showError(data.message || t("loginErrWrong"));
     }
   } catch (e) {
-    showError("Lỗi kết nối. Vui lòng thử lại.");
+    showError(t("loginErrConn"));
   }
-  btn.textContent = "入る — Đăng nhập"; btn.disabled = false;
+  btn.textContent = t("loginBtn"); btn.disabled = false;
 }
 
 function showError(msg) {
@@ -621,30 +681,30 @@ function doLogout() {
 
 async function loadStudentContent(user) {
   document.getElementById("student-greeting").textContent =
-    "こんにちは、" + (user.name || "") + " さん";
+    t("studentGreeting", user.name || "");
   const wrap = document.getElementById("content-grid-wrap");
-  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Đang tải nội dung...</div>';
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>' + t("loadingContent") + '</div>';
   try {
     const data = await api({ action: "getMyContent", studentId: user.id });
     if (!data.success) {
-      wrap.innerHTML = '<div class="empty-state"><span class="jp">無</span><p>Lỗi tải nội dung</p></div>';
+      wrap.innerHTML = '<div class="empty-state"><span class="jp">無</span><p>' + t("errContent") + '</p></div>';
       return;
     }
     if (!data.content || data.content.length === 0) {
-      wrap.innerHTML = '<div class="empty-state"><span class="jp">待</span><p>Chưa có nội dung nào được mở khoá.<br>Hãy chờ giáo viên cập nhật nhé! 🌸</p></div>';
+      wrap.innerHTML = '<div class="empty-state"><span class="jp">待</span><p>' + t("emptyContent") + '</p></div>';
       return;
     }
     wrap.innerHTML = '<div class="content-grid">' + data.content.map(renderContentCard).join("") + '</div>';
   } catch (e) {
-    wrap.innerHTML = '<div class="empty-state"><span class="jp">×</span><p>Lỗi kết nối</p></div>';
+    wrap.innerHTML = '<div class="empty-state"><span class="jp">×</span><p>' + t("errConn") + '</p></div>';
   }
 }
 
 function renderContentCard(c) {
   const typeClass = "type-" + (c.type || "pdf").toLowerCase();
   const typeLabel = (c.type || "").toUpperCase();
-  const meta = [c.level, c.courseN ? "Bài " + c.courseN : ""].filter(Boolean).join(" · ");
-  const date = c.unlockedDate ? "🌸 Mở khoá: " + c.unlockedDate : "";
+  const meta = [c.level, c.courseN ? t("lessonLabel") + " " + c.courseN : ""].filter(Boolean).join(" · ");
+  const date = c.unlockedDate ? "🌸 " + (currentLang === "fr" ? "Débloqué le" : currentLang === "ja" ? "解除日" : currentLang === "en" ? "Unlocked" : "Mở khoá") + ": " + c.unlockedDate : "";
   return `
     <div class="content-card">
       <span class="card-type ${typeClass}">${typeLabel}</span>
@@ -653,9 +713,7 @@ function renderContentCard(c) {
         <span>${meta}</span><br>
         <span style="color:var(--pink);opacity:0.65;font-size:0.7rem;">${date}</span>
       </div>
-      <a class="btn-view" href="${c.driveLink}" target="_blank" rel="noopener">
-        開く · Xem / Tải
-      </a>
+      <a class="btn-view" href="${c.driveLink}" target="_blank" rel="noopener">${t('viewBtn')}</a>
     </div>`;
 }
 
@@ -664,7 +722,7 @@ let adminUser = null, allContent = [], selectedStudentId = null, studentAccessMa
 async function loadAdminPanel(user) {
   adminUser = user;
   const list = document.getElementById("student-list");
-  list.innerHTML = '<li class="loading"><div class="spinner"></div></li>';
+  list.innerHTML = '<li class="loading"><div class="spinner"></div>' + t("loadingStudents") + '</li>';
   try {
     const [studentsData, contentData] = await Promise.all([
       api({ action: "getStudents",   adminId: user.id, pin: getStoredPin() }),
@@ -672,12 +730,12 @@ async function loadAdminPanel(user) {
     ]);
     allContent = contentData.success ? contentData.content : [];
     if (!studentsData.success) {
-      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">Lỗi tải học viên</li>';
+      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errStudents") + '</li>';
       return;
     }
     const students = studentsData.students || [];
     if (students.length === 0) {
-      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">Chưa có học viên</li>';
+      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</li>';
       return;
     }
     list.innerHTML = students.map(s => `
@@ -689,7 +747,7 @@ async function loadAdminPanel(user) {
         </div>
       </li>`).join("");
   } catch (e) {
-    list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">Lỗi kết nối</li>';
+    list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errConn") + '</li>';
   }
 }
 
@@ -702,19 +760,19 @@ async function selectStudent(id, name, familyName) {
   if (el) el.classList.add("active");
   const panel = document.getElementById("admin-content-panel");
   panel.innerHTML = `
-    <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
+    <div class="panel-header">${t("contentHeader")}</div>
     <div class="selected-student-info">
       <div class="selected-name">${name} ${familyName}</div>
       <div class="selected-sub">ID: ${id}</div>
     </div>
-    <div class="loading"><div class="spinner"></div>Đang tải...</div>`;
+    <div class="loading"><div class="spinner"></div>${t("loadingStudents")}</div>`;
   try {
     const data = await api({ action: "getMyContent", studentId: id });
     const unlocked = new Set((data.content || []).map(c => String(c.id)));
     studentAccessMap[id] = unlocked;
     renderContentManage(id, name, familyName, unlocked);
   } catch {
-    panel.innerHTML += '<div style="padding:1rem;color:var(--gray)">Lỗi tải dữ liệu</div>';
+    panel.innerHTML += '<div style="padding:1rem;color:var(--gray)">' + t('errConn') + '</div>';
   }
 }
 
@@ -736,18 +794,18 @@ function renderContentManage(studentId, name, familyName, unlocked) {
         <button class="btn-unlock ${isUnlocked ? 'unlocked' : 'locked'}"
           id="btn-c-${c.id}"
           onclick="toggleContent(${studentId}, ${c.id}, ${isUnlocked})">
-          ${isUnlocked ? '🔒 Khoá' : '🔓 Mở'}
+          ${isUnlocked ? t('btnLock') : t('btnUnlock')}
         </button>
       </li>`;
   }).join("");
   panel.innerHTML = `
-    <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
+    <div class="panel-header">${t("contentHeader")}</div>
     <div class="selected-student-info">
       <div class="selected-name">${name} ${familyName}</div>
-      <div class="selected-sub">ID: ${studentId} · ${unlocked.size} nội dung đã mở 🌸</div>
+      <div class="selected-sub">ID: ${studentId} · ${t("unlockedCount", unlocked.size)}</div>
     </div>
     ${allContent.length === 0
-      ? '<div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem">Chưa có nội dung trong CONTENT sheet</div>'
+      ? '<div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem">' + t("noContentSheet") + '</div>'
       : '<ul class="content-manage-list">' + items + '</ul>'
     }`;
 }
@@ -767,16 +825,238 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
       const parts = el ? el.textContent.trim().split(" ") : ["", ""];
       renderContentManage(studentId, parts[0], parts.slice(1).join(" "), unlocked);
     } else {
-      toast(data.message || "Lỗi", "error");
-      if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? '🔒 Khoá' : '🔓 Mở'; }
+      toast(data.message || t("errToggle"), "error");
+      if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? t('btnLock') : t('btnUnlock'); }
     }
   } catch {
-    toast("Lỗi kết nối", "error");
-    if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? '🔒 Khoá' : '🔓 Mở'; }
+    toast(t("errToggle"), "error");
+    if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? t('btnLock') : t('btnUnlock'); }
   }
 }
 
+
+// ══════════════════════════════════════════════
+// i18n — TRADUCTIONS
+// ══════════════════════════════════════════════
+const TRANSLATIONS = {
+  vi: {
+    loginLabel:      "Số điện thoại",
+    loginPlaceholder:"Ví dụ: 0664146887",
+    pinLabel:        "Mã PIN",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — Đăng nhập",
+    loginTagline:    "Lớp tiếng Nhật tư duy & tự giác",
+    loginSubtitle:   "Jun Sensei · Học Tiếng Nhật",
+    loginErrEmpty:   "Vui lòng nhập số điện thoại và PIN",
+    loginErrWrong:   "Số điện thoại hoặc PIN không đúng",
+    loginErrConn:    "Lỗi kết nối. Vui lòng thử lại.",
+    logoutBtn:       "出る",
+    studentGreeting: (name) => `こんにちは、${name} さん`,
+    studentSubtitle: "🌸 Nội dung đã mở khoá · Unlocked Content",
+    loadingContent:  "Đang tải nội dung...",
+    emptyContent:    "Chưa có nội dung nào được mở khoá.<br>Hãy chờ giáo viên cập nhật nhé! 🌸",
+    errContent:      "Lỗi tải nội dung",
+    errConn:         "Lỗi kết nối",
+    viewBtn:         "開く · Xem / Tải",
+    lessonLabel:     "Bài",
+    adminTitle:      "管理画面",
+    adminSubtitle:   "🌸 Admin Panel · Quản lý học viên",
+    studentListHeader: "学生リスト · Học viên",
+    contentHeader:   "コンテンツ管理 · Quản lý nội dung",
+    selectStudent:   "← Chọn một học viên để quản lý nội dung",
+    loadingStudents: "Đang tải...",
+    errStudents:     "Lỗi tải học viên",
+    noStudents:      "Chưa có học viên",
+    noContentSheet:  "Chưa có nội dung trong CONTENT sheet",
+    unlockedCount:   (n) => `${n} nội dung đã mở 🌸`,
+    btnUnlock:       "🔓 Mở",
+    btnLock:         "🔒 Khoá",
+    errToggle:       "Lỗi kết nối",
+    disabledAccount: "Tài khoản đã bị vô hiệu hóa",
+  },
+  ja: {
+    loginLabel:      "電話番号",
+    loginPlaceholder:"例: 0664146887",
+    pinLabel:        "PIN番号",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — ログイン",
+    loginTagline:    "考えて・自立して学ぶ日本語教室",
+    loginSubtitle:   "ジュン先生 · 日本語クラス",
+    loginErrEmpty:   "電話番号とPINを入力してください",
+    loginErrWrong:   "電話番号またはPINが正しくありません",
+    loginErrConn:    "接続エラー。もう一度お試しください。",
+    logoutBtn:       "出る",
+    studentGreeting: (name) => `こんにちは、${name} さん`,
+    studentSubtitle: "🌸 解除済みコンテンツ",
+    loadingContent:  "コンテンツを読み込み中...",
+    emptyContent:    "まだコンテンツが解除されていません。<br>先生の更新をお待ちください 🌸",
+    errContent:      "コンテンツの読み込みエラー",
+    errConn:         "接続エラー",
+    viewBtn:         "開く · 表示 / ダウンロード",
+    lessonLabel:     "レッスン",
+    adminTitle:      "管理画面",
+    adminSubtitle:   "🌸 管理パネル · 学生管理",
+    studentListHeader: "学生リスト",
+    contentHeader:   "コンテンツ管理",
+    selectStudent:   "← 学生を選択してコンテンツを管理する",
+    loadingStudents: "読み込み中...",
+    errStudents:     "学生の読み込みエラー",
+    noStudents:      "学生がまだいません",
+    noContentSheet:  "CONTENTシートにコンテンツがありません",
+    unlockedCount:   (n) => `${n} 件のコンテンツが解除済み 🌸`,
+    btnUnlock:       "🔓 解除",
+    btnLock:         "🔒 ロック",
+    errToggle:       "接続エラー",
+    disabledAccount: "アカウントが無効です",
+  },
+  en: {
+    loginLabel:      "Phone number",
+    loginPlaceholder:"e.g. 0664146887",
+    pinLabel:        "PIN",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — Sign in",
+    loginTagline:    "Mindful & independent Japanese learning",
+    loginSubtitle:   "Jun Sensei · Japanese Class",
+    loginErrEmpty:   "Please enter your phone number and PIN",
+    loginErrWrong:   "Incorrect phone number or PIN",
+    loginErrConn:    "Connection error. Please try again.",
+    logoutBtn:       "Sign out",
+    studentGreeting: (name) => `Hello, ${name}!`,
+    studentSubtitle: "🌸 Unlocked Content",
+    loadingContent:  "Loading content...",
+    emptyContent:    "No content unlocked yet.<br>Check back after your next lesson! 🌸",
+    errContent:      "Error loading content",
+    errConn:         "Connection error",
+    viewBtn:         "開く · View / Download",
+    lessonLabel:     "Lesson",
+    adminTitle:      "Admin Panel",
+    adminSubtitle:   "🌸 Student Management",
+    studentListHeader: "Student List",
+    contentHeader:   "Content Management",
+    selectStudent:   "← Select a student to manage their content",
+    loadingStudents: "Loading...",
+    errStudents:     "Error loading students",
+    noStudents:      "No students yet",
+    noContentSheet:  "No content found in CONTENT sheet",
+    unlockedCount:   (n) => `${n} content unlocked 🌸`,
+    btnUnlock:       "🔓 Unlock",
+    btnLock:         "🔒 Lock",
+    errToggle:       "Connection error",
+    disabledAccount: "Account is disabled",
+  },
+  fr: {
+    loginLabel:      "Numéro de téléphone",
+    loginPlaceholder:"Ex: 0664146887",
+    pinLabel:        "Code PIN",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — Se connecter",
+    loginTagline:    "Cours de japonais réfléchi & autonome",
+    loginSubtitle:   "Jun Sensei · Cours de Japonais",
+    loginErrEmpty:   "Veuillez saisir votre téléphone et PIN",
+    loginErrWrong:   "Numéro de téléphone ou PIN incorrect",
+    loginErrConn:    "Erreur de connexion. Réessayez.",
+    logoutBtn:       "出る",
+    studentGreeting: (name) => `Bonjour, ${name} !`,
+    studentSubtitle: "🌸 Contenu débloqué",
+    loadingContent:  "Chargement du contenu...",
+    emptyContent:    "Aucun contenu débloqué pour l'instant.<br>Votre professeur mettra à jour bientôt ! 🌸",
+    errContent:      "Erreur de chargement",
+    errConn:         "Erreur de connexion",
+    viewBtn:         "開く · Voir / Télécharger",
+    lessonLabel:     "Cours",
+    adminTitle:      "Tableau de bord",
+    adminSubtitle:   "🌸 Panneau admin · Gestion des élèves",
+    studentListHeader: "Liste des élèves",
+    contentHeader:   "Gestion du contenu",
+    selectStudent:   "← Sélectionnez un élève pour gérer son contenu",
+    loadingStudents: "Chargement...",
+    errStudents:     "Erreur de chargement des élèves",
+    noStudents:      "Aucun élève pour l'instant",
+    noContentSheet:  "Aucun contenu dans l'onglet CONTENT",
+    unlockedCount:   (n) => `${n} contenu(s) débloqué(s) 🌸`,
+    btnUnlock:       "🔓 Débloquer",
+    btnLock:         "🔒 Bloquer",
+    errToggle:       "Erreur de connexion",
+    disabledAccount: "Compte désactivé",
+  }
+};
+
+const LANG_KEY = "jun_lang";
+let currentLang = localStorage.getItem(LANG_KEY) || "vi";
+
+function t(key, ...args) {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.vi;
+  const val = dict[key];
+  if (typeof val === "function") return val(...args);
+  return val || key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+
+  // Update active button
+  ["vi","ja","en","fr"].forEach(l => {
+    const btn = document.getElementById("lang-" + l);
+    if (btn) btn.classList.toggle("active", l === lang);
+  });
+
+  // Update html lang attribute
+  document.documentElement.lang = lang;
+
+  // Re-render all visible text
+  applyLang();
+}
+
+function applyLang() {
+  // Login page
+  const labelEl = document.querySelector('#page-login .form-group:first-of-type label');
+  if (labelEl) labelEl.textContent = t("loginLabel");
+  const phoneInput = document.getElementById("input-id");
+  if (phoneInput) phoneInput.placeholder = t("loginPlaceholder");
+  const pinLabel = document.querySelector('#page-login .form-group:last-of-type label');
+  if (pinLabel) pinLabel.textContent = t("pinLabel");
+  const pinInput = document.getElementById("input-pin");
+  if (pinInput) pinInput.placeholder = t("pinPlaceholder");
+  const loginBtn = document.getElementById("btn-login");
+  if (loginBtn && !loginBtn.disabled) loginBtn.textContent = t("loginBtn");
+  const tagline = document.querySelector(".login-logo .tagline");
+  if (tagline) tagline.textContent = t("loginTagline");
+  const enTitle = document.querySelector(".login-logo .en-title");
+  if (enTitle) enTitle.textContent = t("loginSubtitle");
+  const logoutBtn = document.querySelector(".btn-logout");
+  if (logoutBtn) logoutBtn.textContent = t("logoutBtn");
+
+  // Student page
+  const sub = document.querySelector("#page-student .page-subtitle");
+  if (sub) sub.innerHTML = t("studentSubtitle");
+  const adminTitle = document.querySelector("#page-admin .page-title");
+  if (adminTitle) adminTitle.textContent = t("adminTitle");
+  const adminSub = document.querySelector("#page-admin .page-subtitle");
+  if (adminSub) adminSub.innerHTML = t("adminSubtitle");
+  const phStudents = document.getElementById("ph-students");
+  if (phStudents) phStudents.textContent = t("studentListHeader");
+  const hint = document.getElementById("select-student-hint");
+  if (hint) hint.textContent = t("selectStudent");
+  const adminSubEl = document.getElementById("admin-subtitle-el");
+  if (adminSubEl) adminSubEl.innerHTML = t("adminSubtitle");
+  const initLoading = document.getElementById("initial-loading");
+  if (initLoading) initLoading.childNodes[1].textContent = t("loadingContent");
+}
+
+// Override showError to use current lang
+const _origShowError = window.showError;
+
 (function init() {
+  // Init language
+  currentLang = localStorage.getItem(LANG_KEY) || "vi";
+  ["vi","ja","en","fr"].forEach(l => {
+    const btn = document.getElementById("lang-" + l);
+    if (btn) btn.classList.toggle("active", l === currentLang);
+  });
+  document.documentElement.lang = currentLang;
+  applyLang();
+
   showPage("login");
   const user = loadSession();
   if (user) initUser(user);
