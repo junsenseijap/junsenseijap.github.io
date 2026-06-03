@@ -448,18 +448,22 @@
       border-bottom: 1px solid rgba(232,75,122,0.12);
       backdrop-filter: blur(14px);
       display: flex; justify-content: center; align-items: center;
-      gap: 0.2rem; padding: 0.35rem 1rem;
+      gap: 0.2rem; padding: 0.3rem 1rem;
+      height: 36px;
       box-shadow: 0 1px 8px rgba(232,75,122,0.07);
+      white-space: nowrap; overflow: hidden;
     }
     .lang-btn {
       background: transparent; border: none; cursor: pointer;
       font-family: 'DM Sans', sans-serif; font-size: 0.7rem;
       font-weight: 500; letter-spacing: 0.08em;
-      padding: 0.28rem 0.75rem; border-radius: 99px;
+      padding: 0.22rem 0.7rem; border-radius: 99px;
       color: var(--gray); transition: all 0.18s;
-      display: flex; align-items: center; gap: 0.35rem;
+      display: flex; align-items: center; gap: 0.3rem;
+      white-space: nowrap; line-height: 1;
     }
-    .lang-btn .flag { font-size: 0.9rem; line-height: 1; }
+    .lang-btn .flag { font-size: 0.95rem; line-height: 1; flex-shrink: 0; }
+    .lang-btn .lang-label { display: inline; }
     .lang-btn:hover { color: var(--pink); background: var(--pink-pale); }
     .lang-btn.active {
       color: var(--pink); background: var(--pink-pale);
@@ -467,16 +471,170 @@
       font-weight: 600;
     }
     .lang-sep {
-      color: rgba(232,75,122,0.2); font-size: 0.7rem; user-select: none;
+      color: rgba(232,75,122,0.2); font-size: 0.7rem; user-select: none; flex-shrink: 0;
     }
 
-    /* push all pages down to account for lang-bar (~36px) */
+    /* push all pages down to account for lang-bar (36px fixed) */
     #page-login { padding-top: calc(2rem + 36px); }
     #header { top: 36px; }
     #page-student, #page-admin { padding-top: calc(2.5rem + 36px); }
-    @media (max-width: 500px) {
+
+    /* Mobile : drapeaux seulement, pas de texte */
+    @media (max-width: 600px) {
+      .lang-btn .lang-label { display: none; }
+      .lang-btn { padding: 0.22rem 0.55rem; gap: 0; }
+      .lang-btn .flag { font-size: 1.25rem; }
+      #lang-bar { gap: 0.1rem; }
       #page-login { padding-top: calc(1.5rem + 36px); }
       #page-student, #page-admin { padding-top: calc(1.5rem + 36px); }
+    }
+
+    /* ══════════════════════════════════════
+       BOTTOM NAV BAR
+    ══════════════════════════════════════ */
+    #bottom-nav {
+      display: none; /* shown after login */
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: rgba(250,250,250,0.97);
+      border-top: 1px solid rgba(232,75,122,0.15);
+      backdrop-filter: blur(14px);
+      height: 62px;
+      box-shadow: 0 -2px 16px rgba(232,75,122,0.08);
+      justify-content: space-around; align-items: center;
+      padding: 0 0.5rem;
+    }
+    .nav-tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.2rem; cursor: pointer; padding: 0.4rem 0;
+      border: none; background: transparent;
+      color: var(--gray); transition: color 0.18s;
+      font-family: 'DM Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-tab .nav-icon { font-size: 1.3rem; line-height: 1; transition: transform 0.18s; }
+    .nav-tab .nav-label { font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+    .nav-tab:hover .nav-icon, .nav-tab.active .nav-icon { transform: translateY(-2px); }
+    .nav-tab.active { color: var(--pink); }
+    .nav-tab.active .nav-label { font-weight: 700; }
+
+    /* push page content above bottom nav */
+    #page-student, #page-admin { padding-bottom: 80px; }
+
+    /* ══════════════════════════════════════
+       PROFILE PAGE
+    ══════════════════════════════════════ */
+    #page-profile {
+      display: none; padding: 2.5rem 2rem; max-width: 540px; margin: 0 auto;
+      padding-top: calc(2.5rem + 36px); padding-bottom: 80px;
+    }
+    .profile-avatar-wrap {
+      display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-soft), var(--blue-pale));
+      border: 2.5px solid rgba(232,75,122,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Zen Antique Soft', serif; font-size: 2rem; color: var(--pink);
+      margin-bottom: 0.8rem;
+      box-shadow: 0 4px 20px rgba(232,75,122,0.15);
+    }
+    .profile-name { font-family: 'Zen Antique Soft', serif; font-size: 1.4rem; color: var(--ink); }
+    .profile-role { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); margin-top: 0.2rem; }
+
+    .profile-card {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(232,75,122,0.12);
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 2px 14px rgba(232,75,122,0.06);
+      margin-bottom: 1.2rem;
+    }
+    .profile-card-header {
+      background: linear-gradient(135deg, var(--pink-pale), var(--blue-pale));
+      border-bottom: 1px solid rgba(232,75,122,0.1);
+      padding: 0.8rem 1.2rem;
+      font-size: 0.65rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--ink2); font-weight: 600;
+    }
+    .profile-field {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid rgba(44,26,34,0.05);
+    }
+    .profile-field:last-child { border-bottom: none; }
+    .profile-field-icon { font-size: 1rem; flex-shrink: 0; opacity: 0.6; }
+    .profile-field-content { flex: 1; min-width: 0; }
+    .profile-field-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); margin-bottom: 0.15rem; }
+    .profile-field-value { font-size: 0.92rem; color: var(--ink2); }
+
+    /* PIN change form */
+    .pin-form { padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    .pin-input-wrap { position: relative; }
+    .pin-input-wrap input {
+      width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem;
+      background: var(--bg-soft);
+      border: 1.5px solid rgba(232,75,122,0.2);
+      border-radius: 10px; color: var(--ink);
+      font-size: 1rem; font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    }
+    .pin-input-wrap input:focus {
+      border-color: var(--pink); background: #fff;
+      box-shadow: 0 0 0 3px var(--pink-glow);
+    }
+    .pin-toggle {
+      position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 1rem;
+      color: var(--gray); padding: 0; line-height: 1;
+    }
+    .btn-save-pin {
+      width: 100%; padding: 0.9rem;
+      background: linear-gradient(135deg, var(--pink), var(--pink-mid));
+      border: none; color: white; font-size: 0.78rem;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      font-weight: 500; cursor: pointer; border-radius: 10px;
+      transition: opacity 0.2s, box-shadow 0.2s; font-family: 'DM Sans', sans-serif;
+      box-shadow: 0 4px 16px rgba(232,75,122,0.3);
+    }
+    .btn-save-pin:hover { opacity: 0.9; }
+    .btn-save-pin:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pin-msg {
+      font-size: 0.8rem; text-align: center; padding: 0.5rem;
+      border-radius: 8px; display: none;
+    }
+    .pin-msg.success { background: rgba(158,196,160,0.2); color: #4a8a55; }
+    .pin-msg.error   { background: var(--pink-pale); color: var(--pink); }
+
+    /* ══════════════════════════════════════
+       ADD STUDENT PAGE (Admin)
+    ══════════════════════════════════════ */
+    #page-add-student {
+      display: none; padding: 2.5rem 2rem; max-width: 540px; margin: 0 auto;
+      padding-top: calc(2.5rem + 36px); padding-bottom: 80px;
+    }
+    .add-student-form { display: flex; flex-direction: column; gap: 1rem; }
+    .add-student-form .form-group { margin-bottom: 0; }
+    .btn-add-student {
+      width: 100%; padding: 0.95rem;
+      background: linear-gradient(135deg, var(--pink), var(--pink-mid));
+      border: none; color: white; font-size: 0.78rem;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      font-weight: 500; cursor: pointer; border-radius: 10px;
+      transition: opacity 0.2s, box-shadow 0.2s; font-family: 'DM Sans', sans-serif;
+      box-shadow: 0 4px 16px rgba(232,75,122,0.3); margin-top: 0.5rem;
+    }
+    .btn-add-student:hover { opacity: 0.9; }
+    .btn-add-student:disabled { opacity: 0.5; cursor: not-allowed; }
+    .add-msg {
+      font-size: 0.8rem; text-align: center; padding: 0.6rem 1rem;
+      border-radius: 8px; display: none; margin-top: 0.5rem;
+    }
+    .add-msg.success { background: rgba(158,196,160,0.2); color: #4a8a55; }
+    .add-msg.error   { background: var(--pink-pale); color: var(--pink); }
+
+    @media (max-width: 600px) {
+      #page-profile, #page-add-student { padding: 1.5rem 1rem; padding-top: calc(1.5rem + 36px); padding-bottom: 80px; }
     }
   </style>
 </head>
@@ -484,20 +642,13 @@
 
 <!-- ══ LANGUAGE BAR ══ -->
 <div id="lang-bar">
-  <button class="lang-btn active" onclick="setLang('vi')" id="lang-vi">
-    <span class="flag">🇻🇳</span> Tiếng Việt
-  </button>
+  <button class="lang-btn active" onclick="setLang('vi')" id="lang-vi"><span class="flag">🇻🇳</span><span class="lang-label"> Tiếng Việt</span></button>
   <span class="lang-sep">|</span>
-  <button class="lang-btn" onclick="setLang('ja')" id="lang-ja">
-    <span class="flag">🇯🇵</span> 日本語
-  </button>
+  <button class="lang-btn" onclick="setLang('ja')" id="lang-ja"><span class="flag">🇯🇵</span><span class="lang-label"> 日本語</span></button>
   <span class="lang-sep">|</span>
-  <button class="lang-btn" onclick="setLang('en')" id="lang-en">
-    <span class="flag">🇬🇧</span> English
-  </button>
+  <button class="lang-btn" onclick="setLang('en')" id="lang-en"><span class="flag">🇬🇧</span><span class="lang-label"> English</span></button>
   <span class="lang-sep">|</span>
-  <button class="lang-btn" onclick="setLang('fr')" id="lang-fr">
-    <span class="flag">🇫🇷</span> Français
+  <button class="lang-btn" onclick="setLang('fr')" id="lang-fr"><span class="flag">🇫🇷</span><span class="lang-label"> Français</span>
   </button>
 </div>
 
@@ -588,6 +739,111 @@
 
 </div>
 
+
+<!-- ══ BOTTOM NAV ══ -->
+<div id="bottom-nav">
+  <!-- filled dynamically based on role -->
+</div>
+
+<!-- ══ PROFILE PAGE ══ -->
+<div id="page-profile">
+  <div class="profile-avatar-wrap">
+    <div class="profile-avatar" id="profile-avatar-letter">?</div>
+    <div class="profile-name" id="profile-fullname"></div>
+    <div class="profile-role" id="profile-role-label"></div>
+  </div>
+
+  <!-- Info card (read-only) -->
+  <div class="profile-card">
+    <div class="profile-card-header" id="ph-info">👤 Thông tin cá nhân</div>
+    <div class="profile-field">
+      <span class="profile-field-icon">🔢</span>
+      <div class="profile-field-content">
+        <div class="profile-field-label" id="pfl-id">ID</div>
+        <div class="profile-field-value" id="pf-id">—</div>
+      </div>
+    </div>
+    <div class="profile-field">
+      <span class="profile-field-icon">👤</span>
+      <div class="profile-field-content">
+        <div class="profile-field-label" id="pfl-name">Nom</div>
+        <div class="profile-field-value" id="pf-name">—</div>
+      </div>
+    </div>
+    <div class="profile-field">
+      <span class="profile-field-icon">📱</span>
+      <div class="profile-field-content">
+        <div class="profile-field-label" id="pfl-phone">Téléphone</div>
+        <div class="profile-field-value" id="pf-phone">—</div>
+      </div>
+    </div>
+    <div class="profile-field">
+      <span class="profile-field-icon">✉️</span>
+      <div class="profile-field-content">
+        <div class="profile-field-label" id="pfl-email">Email</div>
+        <div class="profile-field-value" id="pf-email">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN change card -->
+  <div class="profile-card">
+    <div class="profile-card-header" id="ph-pin">🔐 Changer le PIN</div>
+    <div class="pin-form">
+      <div class="pin-input-wrap">
+        <input type="password" id="pin-old" maxlength="6" placeholder="PIN actuel"/>
+        <button class="pin-toggle" onclick="togglePin('pin-old')">👁</button>
+      </div>
+      <div class="pin-input-wrap">
+        <input type="password" id="pin-new" maxlength="6" placeholder="Nouveau PIN"/>
+        <button class="pin-toggle" onclick="togglePin('pin-new')">👁</button>
+      </div>
+      <div class="pin-input-wrap">
+        <input type="password" id="pin-confirm" maxlength="6" placeholder="Confirmer le nouveau PIN"/>
+        <button class="pin-toggle" onclick="togglePin('pin-confirm')">👁</button>
+      </div>
+      <div class="pin-msg" id="pin-msg"></div>
+      <button class="btn-save-pin" id="btn-save-pin" onclick="doChangePin()">🔐 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
+<div id="page-add-student">
+  <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
+  <div class="page-subtitle" id="add-student-sub">Nouveau compte étudiant</div>
+  <div class="profile-card" style="margin-top:1.5rem">
+    <div class="profile-card-header" id="ph-add">📋 Informations</div>
+    <div class="add-student-form" style="padding:1.2rem">
+      <div class="form-group">
+        <label id="asl-fname">Prénom</label>
+        <input type="text" id="as-name" placeholder="Lionel"/>
+      </div>
+      <div class="form-group">
+        <label id="asl-lname">Nom de famille</label>
+        <input type="text" id="as-family" placeholder="Sandri"/>
+      </div>
+      <div class="form-group">
+        <label id="asl-phone">Téléphone</label>
+        <input type="tel" id="as-phone" placeholder="0664146887"/>
+      </div>
+      <div class="form-group">
+        <label id="asl-email">Email</label>
+        <input type="email" id="as-email" placeholder="lionel@email.com"/>
+      </div>
+      <div class="form-group">
+        <label id="asl-pin">PIN initial</label>
+        <input type="text" id="as-pin" placeholder="0000" maxlength="6"/>
+      </div>
+      <div class="add-msg" id="add-msg"></div>
+      <button class="btn-add-student" id="btn-add-student" onclick="doAddStudent()">
+        ➕ Ajouter l'élève
+      </button>
+    </div>
+  </div>
+</div>
+
+
 <div id="toast"></div>
 
 <script>
@@ -628,6 +884,10 @@ function showPage(name) {
   document.getElementById("page-student").style.display = name === "student" ? "block" : "none";
   document.getElementById("page-admin").style.display   = name === "admin"   ? "block" : "none";
   document.getElementById("header").style.display       = name !== "login"   ? "flex"  : "none";
+  if (name === "login") {
+    document.getElementById("page-profile").style.display     = "none";
+    document.getElementById("page-add-student").style.display = "none";
+  }
 }
 
 async function doLogin() {
@@ -663,19 +923,26 @@ document.getElementById("input-pin").addEventListener("keydown", e => {
 });
 
 function initUser(user) {
+  currentUserGlobal = user;
   document.getElementById("header-name").textContent = user.name + " " + (user.familyName || "");
   const roleEl = document.getElementById("header-role");
   roleEl.textContent = user.role;
   roleEl.className = "role-badge " + (user.role === "Admin" ? "admin" : "student");
+  buildBottomNav(user.role);
+  loadProfilePage(user);
+  currentNavTab = "home";
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
   else { showPage("student"); loadStudentContent(user); }
 }
 
 function doLogout() {
-  clearSession(); window._adminPin = undefined;
+  clearSession(); window._adminPin = undefined; currentUserGlobal = null;
   document.getElementById("input-id").value = "";
   document.getElementById("input-pin").value = "";
   document.getElementById("login-error").style.display = "none";
+  document.getElementById("bottom-nav").style.display = "none";
+  document.getElementById("page-profile").style.display = "none";
+  document.getElementById("page-add-student").style.display = "none";
   showPage("login");
 }
 
@@ -835,6 +1102,172 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
 }
 
 
+
+// ══════════════════════════════════════════════
+// BOTTOM NAV
+// ══════════════════════════════════════════════
+let currentNavTab = "home";
+let currentUserGlobal = null;
+
+function buildBottomNav(role) {
+  const nav = document.getElementById("bottom-nav");
+  nav.style.display = "flex";
+  if (role === "Admin") {
+    nav.innerHTML = `
+      <button class="nav-tab active" id="nav-home" onclick="switchTab('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-i="navHome">Accueil</span>
+      </button>
+      <button class="nav-tab" id="nav-add" onclick="switchTab('add')">
+        <span class="nav-icon">➕</span>
+        <span class="nav-label" data-i="navAdd">Ajouter</span>
+      </button>
+      <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label" data-i="navProfile">Profil</span>
+      </button>`;
+  } else {
+    nav.innerHTML = `
+      <button class="nav-tab active" id="nav-home" onclick="switchTab('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-i="navHome">Accueil</span>
+      </button>
+      <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label" data-i="navProfile">Profil</span>
+      </button>`;
+  }
+  applyNavLang();
+}
+
+function switchTab(tab) {
+  currentNavTab = tab;
+  const role = currentUserGlobal?.role;
+
+  // Update active state
+  ["home","profile","add"].forEach(t => {
+    const btn = document.getElementById("nav-" + t);
+    if (btn) btn.classList.toggle("active", t === tab);
+  });
+
+  // Show/hide pages
+  const isAdmin = role === "Admin";
+  document.getElementById("page-student").style.display  = (!isAdmin && tab === "home") ? "block" : "none";
+  document.getElementById("page-admin").style.display    = (isAdmin  && tab === "home") ? "block" : "none";
+  document.getElementById("page-profile").style.display  = tab === "profile" ? "block" : "none";
+  document.getElementById("page-add-student").style.display = (isAdmin && tab === "add") ? "block" : "none";
+}
+
+// ══════════════════════════════════════════════
+// PROFILE PAGE
+// ══════════════════════════════════════════════
+function loadProfilePage(user) {
+  document.getElementById("profile-avatar-letter").textContent = (user.name || "?")[0].toUpperCase();
+  document.getElementById("profile-fullname").textContent = (user.name || "") + " " + (user.familyName || "");
+  document.getElementById("profile-role-label").textContent = user.role;
+  document.getElementById("pf-id").textContent   = user.id || "—";
+  document.getElementById("pf-name").textContent = (user.name || "—") + " " + (user.familyName || "");
+  document.getElementById("pf-phone").textContent = user.phone || "—";
+  document.getElementById("pf-email").textContent = user.email || "—";
+  // Clear PIN fields
+  ["pin-old","pin-new","pin-confirm"].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = "";
+  });
+  const msg = document.getElementById("pin-msg");
+  if (msg) msg.style.display = "none";
+}
+
+function togglePin(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.type = el.type === "password" ? "text" : "password";
+}
+
+async function doChangePin() {
+  const oldPin     = document.getElementById("pin-old").value.trim();
+  const newPin     = document.getElementById("pin-new").value.trim();
+  const confirmPin = document.getElementById("pin-confirm").value.trim();
+  const msg        = document.getElementById("pin-msg");
+  const btn        = document.getElementById("btn-save-pin");
+
+  const showPinMsg = (text, type) => {
+    msg.textContent = text; msg.className = "pin-msg " + type; msg.style.display = "block";
+  };
+
+  if (!oldPin || !newPin || !confirmPin) return showPinMsg(t("pinErrEmpty"), "error");
+  if (newPin !== confirmPin)              return showPinMsg(t("pinErrMatch"), "error");
+  if (newPin.length < 4)                  return showPinMsg(t("pinErrLen"),   "error");
+
+  btn.disabled = true; btn.textContent = "...";
+  try {
+    const data = await api({
+      action: "changePin",
+      userId: currentUserGlobal.id,
+      oldPin, newPin
+    });
+    if (data.success) {
+      showPinMsg(t("pinSuccess"), "success");
+      // Update stored pin for admin
+      if (currentUserGlobal.role === "Admin") window._adminPin = newPin;
+      ["pin-old","pin-new","pin-confirm"].forEach(id => document.getElementById(id).value = "");
+    } else {
+      showPinMsg(data.message || t("pinErrWrong"), "error");
+    }
+  } catch {
+    showPinMsg(t("pinErrConn"), "error");
+  }
+  btn.disabled = false; btn.textContent = "🔐 " + t("pinSaveBtn");
+}
+
+// ══════════════════════════════════════════════
+// ADD STUDENT (Admin)
+// ══════════════════════════════════════════════
+async function doAddStudent() {
+  const name    = document.getElementById("as-name").value.trim();
+  const family  = document.getElementById("as-family").value.trim();
+  const phone   = document.getElementById("as-phone").value.trim();
+  const email   = document.getElementById("as-email").value.trim();
+  const pin     = document.getElementById("as-pin").value.trim();
+  const msg     = document.getElementById("add-msg");
+  const btn     = document.getElementById("btn-add-student");
+
+  const showAddMsg = (text, type) => {
+    msg.textContent = text; msg.className = "add-msg " + type; msg.style.display = "block";
+  };
+
+  if (!name || !family || !phone || !pin) return showAddMsg(t("addErrEmpty"), "error");
+
+  btn.disabled = true; btn.textContent = "...";
+  try {
+    const data = await api({
+      action: "addStudent",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin(),
+      name, family, phone, email, studentPin: pin
+    });
+    if (data.success) {
+      showAddMsg(t("addSuccess"), "success");
+      ["as-name","as-family","as-phone","as-email","as-pin"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      // Refresh student list in background
+      loadAdminPanel(currentUserGlobal);
+    } else {
+      showAddMsg(data.message || t("addErrFail"), "error");
+    }
+  } catch {
+    showAddMsg(t("addErrConn"), "error");
+  }
+  btn.disabled = false; btn.textContent = "➕ " + t("addBtn");
+}
+
+function applyNavLang() {
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const key = el.getAttribute("data-i");
+    if (key) el.textContent = t(key);
+  });
+}
+
 // ══════════════════════════════════════════════
 // i18n — TRADUCTIONS
 // ══════════════════════════════════════════════
@@ -873,6 +1306,38 @@ const TRANSLATIONS = {
     btnLock:         "🔒 Khoá",
     errToggle:       "Lỗi kết nối",
     disabledAccount: "Tài khoản đã bị vô hiệu hóa",
+    navHome:         "Trang chủ",
+    navProfile:      "Hồ sơ",
+    navAdd:          "Thêm",
+    profileInfo:     "👤 Thông tin cá nhân",
+    profilePinCard:  "🔐 Đổi mật khẩu PIN",
+    pflId:           "Mã số",
+    pflName:         "Họ và tên",
+    pflPhone:        "Điện thoại",
+    pflEmail:        "Email",
+    pinOldPlaceholder: "PIN hiện tại",
+    pinNewPlaceholder: "PIN mới",
+    pinConfPlaceholder:"Xác nhận PIN mới",
+    pinSaveBtn:      "Lưu",
+    pinErrEmpty:     "Vui lòng điền đầy đủ",
+    pinErrMatch:     "PIN xác nhận không khớp",
+    pinErrLen:       "PIN phải có ít nhất 4 ký tự",
+    pinErrWrong:     "PIN hiện tại không đúng",
+    pinErrConn:      "Lỗi kết nối",
+    pinSuccess:      "✅ PIN đã được cập nhật!",
+    addStudentTitle: "➕ Thêm học viên",
+    addStudentSub:   "Tạo tài khoản mới",
+    addInfo:         "📋 Thông tin",
+    addLFname:       "Tên",
+    addLLname:       "Họ",
+    addLPhone:       "Điện thoại",
+    addLEmail:       "Email",
+    addLPin:         "PIN ban đầu",
+    addBtn:          "Thêm học viên",
+    addErrEmpty:     "Vui lòng điền đầy đủ các trường bắt buộc",
+    addErrFail:      "Không thể thêm học viên",
+    addErrConn:      "Lỗi kết nối",
+    addSuccess:      "✅ Học viên đã được thêm thành công!",
   },
   ja: {
     loginLabel:      "電話番号",
@@ -908,6 +1373,38 @@ const TRANSLATIONS = {
     btnLock:         "🔒 ロック",
     errToggle:       "接続エラー",
     disabledAccount: "アカウントが無効です",
+    navHome:         "ホーム",
+    navProfile:      "プロフィール",
+    navAdd:          "追加",
+    profileInfo:     "👤 個人情報",
+    profilePinCard:  "🔐 PINを変更",
+    pflId:           "ID",
+    pflName:         "氏名",
+    pflPhone:        "電話番号",
+    pflEmail:        "メール",
+    pinOldPlaceholder: "現在のPIN",
+    pinNewPlaceholder: "新しいPIN",
+    pinConfPlaceholder:"新しいPINを確認",
+    pinSaveBtn:      "保存",
+    pinErrEmpty:     "すべての項目を入力してください",
+    pinErrMatch:     "PINが一致しません",
+    pinErrLen:       "PINは4文字以上必要です",
+    pinErrWrong:     "現在のPINが正しくありません",
+    pinErrConn:      "接続エラー",
+    pinSuccess:      "✅ PINが更新されました！",
+    addStudentTitle: "➕ 学生を追加",
+    addStudentSub:   "新規アカウント作成",
+    addInfo:         "📋 情報",
+    addLFname:       "名前",
+    addLLname:       "苗字",
+    addLPhone:       "電話番号",
+    addLEmail:       "メール",
+    addLPin:         "初期PIN",
+    addBtn:          "学生を追加",
+    addErrEmpty:     "必須項目を入力してください",
+    addErrFail:      "学生の追加に失敗しました",
+    addErrConn:      "接続エラー",
+    addSuccess:      "✅ 学生が追加されました！",
   },
   en: {
     loginLabel:      "Phone number",
@@ -943,6 +1440,38 @@ const TRANSLATIONS = {
     btnLock:         "🔒 Lock",
     errToggle:       "Connection error",
     disabledAccount: "Account is disabled",
+    navHome:         "Home",
+    navProfile:      "Profile",
+    navAdd:          "Add",
+    profileInfo:     "👤 Personal Info",
+    profilePinCard:  "🔐 Change PIN",
+    pflId:           "ID",
+    pflName:         "Full name",
+    pflPhone:        "Phone",
+    pflEmail:        "Email",
+    pinOldPlaceholder: "Current PIN",
+    pinNewPlaceholder: "New PIN",
+    pinConfPlaceholder:"Confirm new PIN",
+    pinSaveBtn:      "Save",
+    pinErrEmpty:     "Please fill in all fields",
+    pinErrMatch:     "PINs do not match",
+    pinErrLen:       "PIN must be at least 4 characters",
+    pinErrWrong:     "Current PIN is incorrect",
+    pinErrConn:      "Connection error",
+    pinSuccess:      "✅ PIN updated successfully!",
+    addStudentTitle: "➕ Add Student",
+    addStudentSub:   "Create new account",
+    addInfo:         "📋 Information",
+    addLFname:       "First name",
+    addLLname:       "Last name",
+    addLPhone:       "Phone",
+    addLEmail:       "Email",
+    addLPin:         "Initial PIN",
+    addBtn:          "Add student",
+    addErrEmpty:     "Please fill in all required fields",
+    addErrFail:      "Failed to add student",
+    addErrConn:      "Connection error",
+    addSuccess:      "✅ Student added successfully!",
   },
   fr: {
     loginLabel:      "Numéro de téléphone",
@@ -978,6 +1507,38 @@ const TRANSLATIONS = {
     btnLock:         "🔒 Bloquer",
     errToggle:       "Erreur de connexion",
     disabledAccount: "Compte désactivé",
+    navHome:         "Accueil",
+    navProfile:      "Profil",
+    navAdd:          "Ajouter",
+    profileInfo:     "👤 Informations personnelles",
+    profilePinCard:  "🔐 Changer le PIN",
+    pflId:           "Identifiant",
+    pflName:         "Nom complet",
+    pflPhone:        "Téléphone",
+    pflEmail:        "Email",
+    pinOldPlaceholder: "PIN actuel",
+    pinNewPlaceholder: "Nouveau PIN",
+    pinConfPlaceholder:"Confirmer le nouveau PIN",
+    pinSaveBtn:      "Enregistrer",
+    pinErrEmpty:     "Veuillez remplir tous les champs",
+    pinErrMatch:     "Les PIN ne correspondent pas",
+    pinErrLen:       "Le PIN doit faire au moins 4 caractères",
+    pinErrWrong:     "PIN actuel incorrect",
+    pinErrConn:      "Erreur de connexion",
+    pinSuccess:      "✅ PIN mis à jour avec succès !",
+    addStudentTitle: "➕ Ajouter un élève",
+    addStudentSub:   "Créer un nouveau compte",
+    addInfo:         "📋 Informations",
+    addLFname:       "Prénom",
+    addLLname:       "Nom de famille",
+    addLPhone:       "Téléphone",
+    addLEmail:       "Email",
+    addLPin:         "PIN initial",
+    addBtn:          "Ajouter l'élève",
+    addErrEmpty:     "Veuillez remplir les champs obligatoires",
+    addErrFail:      "Impossible d'ajouter l'élève",
+    addErrConn:      "Erreur de connexion",
+    addSuccess:      "✅ Élève ajouté avec succès !",
   }
 };
 
@@ -1042,6 +1603,28 @@ function applyLang() {
   if (adminSubEl) adminSubEl.innerHTML = t("adminSubtitle");
   const initLoading = document.getElementById("initial-loading");
   if (initLoading) initLoading.childNodes[1].textContent = t("loadingContent");
+  // Profile labels
+  const pfl_id    = document.getElementById("pfl-id");    if(pfl_id)    pfl_id.textContent    = t("pflId");
+  const pfl_name  = document.getElementById("pfl-name");  if(pfl_name)  pfl_name.textContent  = t("pflName");
+  const pfl_phone = document.getElementById("pfl-phone"); if(pfl_phone) pfl_phone.textContent = t("pflPhone");
+  const pfl_email = document.getElementById("pfl-email"); if(pfl_email) pfl_email.textContent = t("pflEmail");
+  const ph_info   = document.getElementById("ph-info");   if(ph_info)   ph_info.textContent   = t("profileInfo");
+  const ph_pin    = document.getElementById("ph-pin");    if(ph_pin)    ph_pin.textContent    = t("profilePinCard");
+  const pinOld = document.getElementById("pin-old"); if(pinOld) pinOld.placeholder = t("pinOldPlaceholder");
+  const pinNew = document.getElementById("pin-new"); if(pinNew) pinNew.placeholder = t("pinNewPlaceholder");
+  const pinConf= document.getElementById("pin-confirm"); if(pinConf) pinConf.placeholder = t("pinConfPlaceholder");
+  const savePinBtn = document.getElementById("btn-save-pin"); if(savePinBtn && !savePinBtn.disabled) savePinBtn.textContent = "🔐 " + t("pinSaveBtn");
+  // Add student labels
+  const ph_add = document.getElementById("ph-add"); if(ph_add) ph_add.textContent = t("addInfo");
+  const asl_fn = document.getElementById("asl-fname"); if(asl_fn) asl_fn.textContent = t("addLFname");
+  const asl_ln = document.getElementById("asl-lname"); if(asl_ln) asl_ln.textContent = t("addLLname");
+  const asl_ph = document.getElementById("asl-phone"); if(asl_ph) asl_ph.textContent = t("addLPhone");
+  const asl_em = document.getElementById("asl-email"); if(asl_em) asl_em.textContent = t("addLEmail");
+  const asl_pi = document.getElementById("asl-pin");   if(asl_pi) asl_pi.textContent = t("addLPin");
+  const addBtn2 = document.getElementById("btn-add-student"); if(addBtn2 && !addBtn2.disabled) addBtn2.textContent = "➕ " + t("addBtn");
+  const addTitle = document.getElementById("add-student-title"); if(addTitle) addTitle.textContent = t("addStudentTitle");
+  const addSub   = document.getElementById("add-student-sub");   if(addSub)   addSub.textContent   = t("addStudentSub");
+  applyNavLang();
 }
 
 // Override showError to use current lang
