@@ -247,7 +247,7 @@
        MAIN PAGES
     ══════════════════════════════════════ */
     #page-student, #page-admin {
-      display: none; padding: 2.5rem 2rem; max-width: 1100px; margin: 0 auto;
+      display: none; padding: 1rem 2rem 2rem; max-width: 1100px; margin: 0 auto;
     }
 
     .page-title {
@@ -258,7 +258,7 @@
     .page-subtitle {
       font-size: 0.7rem; letter-spacing: 0.24em;
       text-transform: uppercase; color: var(--pink);
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.2rem;
     }
 
     /* ── CONTENT GRID ── */
@@ -410,6 +410,107 @@
     .unlock-status.on  { background: #4a8a55; box-shadow: 0 0 5px rgba(74,138,85,0.5); }
     .unlock-status.off { background: rgba(44,26,34,0.12); }
 
+
+    /* ══ STUDENT DROPDOWN ══ */
+    .student-dropdown-wrap { position: relative; margin-bottom: 1.2rem; }
+    .student-dropdown-btn {
+      width: 100%; padding: 0.85rem 1.2rem;
+      background: var(--bg-card);
+      border: 1.5px solid rgba(232,75,122,0.25);
+      border-radius: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 0.8rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      color: var(--ink2); transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 10px rgba(232,75,122,0.07);
+    }
+    .student-dropdown-btn:hover { border-color: var(--pink); }
+    .student-dropdown-btn.open { border-color: var(--pink); box-shadow: 0 0 0 3px var(--pink-glow); border-radius: 12px 12px 0 0; }
+    .student-dropdown-btn .dd-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--pink-soft), var(--blue-pale));
+      border: 1.5px solid rgba(232,75,122,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Zen Antique Soft', serif; font-size: 0.85rem; color: var(--pink);
+    }
+    .student-dropdown-btn .dd-label { flex: 1; text-align: left; }
+    .student-dropdown-btn .dd-arrow { font-size: 0.75rem; color: var(--gray); transition: transform 0.2s; }
+    .student-dropdown-btn.open .dd-arrow { transform: rotate(180deg); }
+    .student-dropdown-list {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      background: var(--bg-card);
+      border: 1.5px solid var(--pink); border-top: none;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 8px 24px rgba(232,75,122,0.15);
+      max-height: 260px; overflow-y: auto;
+    }
+    .student-dropdown-list.open { display: block; }
+    .dd-student-item {
+      padding: 0.75rem 1.2rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.8rem;
+      border-bottom: 1px solid rgba(44,26,34,0.04);
+      transition: background 0.15s; font-size: 0.88rem; color: var(--ink2);
+    }
+    .dd-student-item:last-child { border-bottom: none; }
+    .dd-student-item:hover { background: var(--pink-pale); }
+    .dd-student-item.selected { background: linear-gradient(135deg, var(--pink-pale), rgba(123,175,212,0.1)); color: var(--pink); font-weight: 600; }
+
+    /* ══ LEVEL ACCORDION ══ */
+    .level-accordion { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.8rem; }
+    .level-row {
+      border: 1.5px solid rgba(232,75,122,0.15);
+      border-radius: 10px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .level-row.has-content { border-color: rgba(232,75,122,0.25); }
+    .level-header {
+      padding: 0.85rem 1.1rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.8rem;
+      background: var(--bg-card); transition: background 0.15s;
+      user-select: none;
+    }
+    .level-header:hover { background: var(--pink-pale); }
+    .level-badge {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      padding: 0.2rem 0.65rem; border-radius: 99px;
+      background: linear-gradient(135deg, var(--pink), var(--pink-mid));
+      color: white; flex-shrink: 0;
+    }
+    .level-label { flex: 1; font-size: 0.88rem; color: var(--ink2); }
+    .level-count { font-size: 0.68rem; color: var(--gray); }
+    .level-arrow { font-size: 0.7rem; color: var(--gray); transition: transform 0.2s; }
+    .level-row.open .level-arrow { transform: rotate(180deg); }
+    .level-courses { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
+    .level-row.open .level-courses { display: block; }
+
+    /* Course row inside level */
+    .course-row {
+      border-bottom: 1px solid rgba(44,26,34,0.04);
+      overflow: hidden;
+    }
+    .course-row:last-child { border-bottom: none; }
+    .course-header {
+      padding: 0.7rem 1.1rem 0.7rem 2rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.7rem;
+      background: rgba(253,232,239,0.3); transition: background 0.15s;
+      user-select: none;
+    }
+    .course-header:hover { background: var(--pink-pale); }
+    .course-label { flex: 1; font-size: 0.83rem; color: var(--ink2); }
+    .course-unlocked-count { font-size: 0.65rem; color: var(--gray); }
+    .course-arrow { font-size: 0.65rem; color: var(--gray); transition: transform 0.2s; }
+    .course-row.open .course-arrow { transform: rotate(180deg); }
+    .course-contents { display: none; }
+    .course-row.open .course-contents { display: block; }
+
+    /* Content item inside course */
+    .content-manage-item {
+      padding: 0.6rem 1.1rem 0.6rem 2.8rem;
+      border-bottom: 1px solid rgba(44,26,34,0.03);
+      display: flex; align-items: center; gap: 0.7rem;
+      background: white;
+    }
+    .content-manage-item:last-child { border-bottom: none; }
+
     /* ── LOADING ── */
     .loading { text-align: center; padding: 3rem; color: var(--gray); font-size: 0.84rem; }
     .spinner {
@@ -435,7 +536,8 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 500px) {
       .login-box { padding: 2rem 1.5rem; }
-      #page-student, #page-admin { padding: 1.5rem 1rem; }
+      #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
+      #page-profile, #page-add-student { padding: 0.3rem 0.8rem 80px; }
       #header { padding: 0.75rem 1rem; }
     }
 
@@ -477,7 +579,7 @@
     /* push all pages down to account for lang-bar (36px fixed) */
     #page-login { padding-top: calc(2rem + 36px); }
     #header { top: 36px; }
-    #page-student, #page-admin { padding-top: calc(0.8rem + 36px); }
+    #page-student, #page-admin { padding-top: calc(0.5rem + 36px); }
 
     /* Mobile : drapeaux seulement, pas de texte */
     @media (max-width: 600px) {
@@ -486,8 +588,8 @@
       .lang-btn .flag { font-size: 1.25rem; }
       #lang-bar { gap: 0.1rem; }
       #page-login { padding-top: calc(1.5rem + 36px); }
-      #page-student, #page-admin { padding-top: calc(0.5rem + 36px); }
-      #page-profile, #page-add-student { padding-top: calc(0.5rem + 36px) !important; }
+      #page-student, #page-admin { padding-top: calc(0.3rem + 36px); }
+      #page-profile, #page-add-student { padding-top: calc(0.3rem + 36px); }
     }
 
     /* ══════════════════════════════════════
@@ -530,7 +632,7 @@
       padding-top: calc(2.5rem + 36px); padding-bottom: 80px;
     }
     .profile-avatar-wrap {
-      display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;
+      display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem;
     }
     .profile-avatar {
       width: 72px; height: 72px; border-radius: 50%;
@@ -611,8 +713,7 @@
        ADD STUDENT PAGE (Admin)
     ══════════════════════════════════════ */
     #page-add-student {
-      display: none; padding: 0.8rem 2rem; max-width: 540px; margin: 0 auto;
-      padding-top: calc(0.8rem + 36px); padding-bottom: 80px;
+      display: none; padding: 0.5rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
     }
     .add-student-form { display: flex; flex-direction: column; gap: 1rem; }
     .add-student-form .form-group { margin-bottom: 0; }
@@ -721,24 +822,25 @@
   <div id="page-admin">
     <div class="page-title">管理画面</div>
     <div class="page-subtitle" id="admin-subtitle-el">🌸 Admin Panel · Quản lý học viên</div>
-    <div class="admin-layout">
 
-      <div class="panel">
-        <div class="panel-header" id="ph-students">学生リスト · Học viên</div>
-        <ul class="student-list" id="student-list">
-          <li class="loading"><div class="spinner"></div></li>
-        </ul>
+    <!-- Student dropdown -->
+    <div class="student-dropdown-wrap">
+      <button class="student-dropdown-btn" id="student-dd-btn" onclick="toggleStudentDropdown()">
+        <div class="dd-avatar" id="dd-avatar">?</div>
+        <span class="dd-label" id="dd-label">— Chọn học viên —</span>
+        <span class="dd-arrow">▼</span>
+      </button>
+      <div class="student-dropdown-list" id="student-dd-list">
+        <div class="loading" style="padding:1rem"><div class="spinner"></div></div>
       </div>
+    </div>
 
-      <div class="admin-right">
-        <div class="panel" id="admin-content-panel">
-          <div class="panel-header">コンテンツ管理 · Quản lý nội dung</div>
-          <div id="select-student-hint" style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem;">
-            ← Chọn một học viên để quản lý nội dung
-          </div>
-        </div>
+    <!-- Content panel -->
+    <div class="panel" id="admin-content-panel">
+      <div class="panel-header" id="ph-content-manage">コンテンツ管理</div>
+      <div id="select-student-hint" style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem;">
+        ↑ Chọn một học viên để quản lý nội dung
       </div>
-
     </div>
   </div>
 
@@ -991,48 +1093,68 @@ function renderContentCard(c) {
 
 let adminUser = null, allContent = [], selectedStudentId = null, studentAccessMap = {};
 
+let allStudents = [];
+
 async function loadAdminPanel(user) {
   adminUser = user;
-  const list = document.getElementById("student-list");
-  list.innerHTML = '<li class="loading"><div class="spinner"></div>' + t("loadingStudents") + '</li>';
+  const ddList = document.getElementById("student-dd-list");
+  ddList.innerHTML = '<div class="loading" style="padding:1rem"><div class="spinner"></div></div>';
   try {
     const [studentsData, contentData] = await Promise.all([
       api({ action: "getStudents",   adminId: user.id, pin: getStoredPin() }),
       api({ action: "getAllContent", adminId: user.id, pin: getStoredPin() })
     ]);
-    allContent = contentData.success ? contentData.content : [];
+    // Filter out content with empty fields (only ID filled)
+    allContent = (contentData.success ? contentData.content : []).filter(c =>
+      c.title && String(c.title).trim() !== ""
+    );
     if (!studentsData.success) {
-      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errStudents") + '</li>';
+      ddList.innerHTML = '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errStudents") + '</div>';
       return;
     }
-    const students = studentsData.students || [];
-    if (students.length === 0) {
-      list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</li>';
+    allStudents = studentsData.students || [];
+    if (allStudents.length === 0) {
+      ddList.innerHTML = '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</div>';
       return;
     }
-    list.innerHTML = students.map(s => `
-      <li class="student-item" onclick="selectStudent(${s.id}, '${s.name}', '${s.familyName}')" id="stu-${s.id}">
-        <div class="student-avatar">${(s.name || "?")[0]}</div>
-        <div class="student-info">
-          <div class="student-name">${s.name} ${s.familyName || ""}</div>
-          <div class="student-id">ID: ${s.id}</div>
-        </div>
-      </li>`).join("");
+    ddList.innerHTML = allStudents.map(s => `
+      <div class="dd-student-item" onclick="selectStudentFromDD(${s.id}, '${s.name}', '${s.familyName || ''}')" id="dd-stu-${s.id}">
+        <div class="dd-avatar">${(s.name || "?")[0]}</div>
+        ${s.name} ${s.familyName || ""}
+      </div>`).join("");
   } catch (e) {
-    list.innerHTML = '<li style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errConn") + '</li>';
+    ddList.innerHTML = '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errConn") + '</div>';
   }
+}
+
+function toggleStudentDropdown() {
+  const btn  = document.getElementById("student-dd-btn");
+  const list = document.getElementById("student-dd-list");
+  const open = list.classList.toggle("open");
+  btn.classList.toggle("open", open);
+}
+
+function selectStudentFromDD(id, name, familyName) {
+  // Update button
+  const btn = document.getElementById("student-dd-btn");
+  document.getElementById("dd-avatar").textContent = (name || "?")[0];
+  document.getElementById("dd-label").textContent  = name + " " + familyName;
+  btn.classList.remove("open");
+  document.getElementById("student-dd-list").classList.remove("open");
+  // Mark selected
+  document.querySelectorAll(".dd-student-item").forEach(el => el.classList.remove("selected"));
+  const el = document.getElementById("dd-stu-" + id);
+  if (el) el.classList.add("selected");
+  selectStudent(id, name, familyName);
 }
 
 function getStoredPin() { return window._adminPin || ""; }
 
 async function selectStudent(id, name, familyName) {
   selectedStudentId = id;
-  document.querySelectorAll(".student-item").forEach(el => el.classList.remove("active"));
-  const el = document.getElementById("stu-" + id);
-  if (el) el.classList.add("active");
   const panel = document.getElementById("admin-content-panel");
   panel.innerHTML = `
-    <div class="panel-header">${t("contentHeader")}</div>
+    <div class="panel-header" id="ph-content-manage">${t("contentHeader")}</div>
     <div class="selected-student-info">
       <div class="selected-name">${name} ${familyName}</div>
       <div class="selected-sub">ID: ${id}</div>
@@ -1050,36 +1172,103 @@ async function selectStudent(id, name, familyName) {
 
 function renderContentManage(studentId, name, familyName, unlocked) {
   const panel = document.getElementById("admin-content-panel");
-  const items = allContent.map(c => {
-    const isUnlocked = unlocked.has(String(c.id));
-    const typeClass  = "type-" + (c.type || "pdf").toLowerCase();
-    return `
-      <li class="content-manage-item">
-        <div class="unlock-status ${isUnlocked ? 'on' : 'off'}"></div>
-        <div class="content-manage-info">
-          <div class="content-manage-title">${c.title}</div>
-          <div class="content-manage-meta">
-            <span class="card-type ${typeClass}" style="font-size:0.52rem;padding:0.1rem 0.4rem">${(c.type||'').toUpperCase()}</span>
-            ${c.level || ''} · Bài ${c.courseN || '?'}
+
+  if (allContent.length === 0) {
+    panel.innerHTML = `
+      <div class="panel-header">${t("contentHeader")}</div>
+      <div class="selected-student-info">
+        <div class="selected-name">${name} ${familyName}</div>
+        <div class="selected-sub">ID: ${studentId} · ${t("unlockedCount", unlocked.size)}</div>
+      </div>
+      <div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("noContentSheet")}</div>`;
+    return;
+  }
+
+  // Group by level, then by courseN
+  const LEVELS = ["N5","N4","N3","N2","N1"];
+  const byLevel = {};
+  LEVELS.forEach(l => byLevel[l] = {});
+
+  allContent.forEach(c => {
+    const lvl = c.level || "?";
+    if (!byLevel[lvl]) byLevel[lvl] = {};
+    const cn = c.courseN || "?";
+    if (!byLevel[lvl][cn]) byLevel[lvl][cn] = [];
+    byLevel[lvl][cn].push(c);
+  });
+
+  const levelRows = LEVELS.map(lvl => {
+    const courses = byLevel[lvl];
+    const courseKeys = Object.keys(courses).sort((a,b) => Number(a)-Number(b));
+    if (courseKeys.length === 0) return ""; // skip empty levels
+
+    const totalItems = courseKeys.reduce((n,k) => n + courses[k].length, 0);
+    const unlockedInLevel = courseKeys.reduce((n,k) =>
+      n + courses[k].filter(c => unlocked.has(String(c.id))).length, 0);
+
+    const courseRows = courseKeys.map(cn => {
+      const items = courses[cn];
+      const unlockedInCourse = items.filter(c => unlocked.has(String(c.id))).length;
+      const contentItems = items.map(c => {
+        const isUnlocked = unlocked.has(String(c.id));
+        const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
+        return `
+          <div class="content-manage-item">
+            <div class="unlock-status ${isUnlocked ? 'on' : 'off'}"></div>
+            <div class="content-manage-info">
+              <div class="content-manage-title">${c.title}</div>
+              <div class="content-manage-meta">
+                <span class="card-type ${typeClass}" style="font-size:0.5rem;padding:0.1rem 0.35rem">${(c.type||'').toUpperCase()}</span>
+              </div>
+            </div>
+            <button class="btn-unlock ${isUnlocked ? 'unlocked' : 'locked'}"
+              id="btn-c-${c.id}"
+              onclick="toggleContent(${studentId}, ${c.id}, ${isUnlocked})">
+              ${isUnlocked ? t('btnLock') : t('btnUnlock')}
+            </button>
+          </div>`;
+      }).join("");
+
+      return `
+        <div class="course-row" id="course-${lvl}-${cn}">
+          <div class="course-header" onclick="toggleCourse('${lvl}','${cn}')">
+            <span class="course-label">${t('lessonLabel')} ${cn}</span>
+            <span class="course-unlocked-count">${unlockedInCourse}/${items.length} 🌸</span>
+            <span class="course-arrow">▼</span>
           </div>
+          <div class="course-contents">${contentItems}</div>
+        </div>`;
+    }).join("");
+
+    return `
+      <div class="level-row has-content" id="level-row-${lvl}">
+        <div class="level-header" onclick="toggleLevel('${lvl}')">
+          <span class="level-badge">${lvl}</span>
+          <span class="level-label">${totalItems} contenu${totalItems>1?'s':''}</span>
+          <span class="level-count">${unlockedInLevel}/${totalItems} débloqué${unlockedInLevel>1?'s':''}</span>
+          <span class="level-arrow">▼</span>
         </div>
-        <button class="btn-unlock ${isUnlocked ? 'unlocked' : 'locked'}"
-          id="btn-c-${c.id}"
-          onclick="toggleContent(${studentId}, ${c.id}, ${isUnlocked})">
-          ${isUnlocked ? t('btnLock') : t('btnUnlock')}
-        </button>
-      </li>`;
+        <div class="level-courses">${courseRows}</div>
+      </div>`;
   }).join("");
+
   panel.innerHTML = `
     <div class="panel-header">${t("contentHeader")}</div>
     <div class="selected-student-info">
       <div class="selected-name">${name} ${familyName}</div>
       <div class="selected-sub">ID: ${studentId} · ${t("unlockedCount", unlocked.size)}</div>
     </div>
-    ${allContent.length === 0
-      ? '<div style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem">' + t("noContentSheet") + '</div>'
-      : '<ul class="content-manage-list">' + items + '</ul>'
-    }`;
+    <div class="level-accordion">${levelRows}</div>`;
+}
+
+function toggleLevel(lvl) {
+  const row = document.getElementById("level-row-" + lvl);
+  if (row) row.classList.toggle("open");
+}
+
+function toggleCourse(lvl, cn) {
+  const row = document.getElementById("course-" + lvl + "-" + cn);
+  if (row) row.classList.toggle("open");
 }
 
 async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
@@ -1093,9 +1282,8 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
       const accessData = await api({ action: "getMyContent", studentId });
       const unlocked = new Set((accessData.content || []).map(c => String(c.id)));
       studentAccessMap[studentId] = unlocked;
-      const el = document.querySelector(`#stu-${studentId} .student-name`);
-      const parts = el ? el.textContent.trim().split(" ") : ["", ""];
-      renderContentManage(studentId, parts[0], parts.slice(1).join(" "), unlocked);
+      const stu = allStudents.find(s => String(s.id) === String(studentId)) || {};
+      renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
     } else {
       toast(data.message || t("errToggle"), "error");
       if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? t('btnLock') : t('btnUnlock'); }
