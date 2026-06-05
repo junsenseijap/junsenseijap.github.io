@@ -537,13 +537,14 @@
     /* ══ FORM TYPE CONTENT ══ */
     .type-form { background: rgba(103,58,183,0.15); color: #9c6fde; border: 1px solid rgba(103,58,183,0.35); }
     .btn-assign-content {
-      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-      background: rgba(103,58,183,0.12); border: 1.5px solid rgba(103,58,183,0.4);
-      color: #9c6fde; font-size: 1.1rem; font-weight: 700; line-height: 1;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; padding: 0; font-family: 'DM Sans',sans-serif;
+      display: inline-block; width: 100%; padding: 0.6rem 1rem;
+      text-align: center; background: linear-gradient(135deg,rgba(103,58,183,0.15),rgba(103,58,183,0.08));
+      border: 1.5px solid rgba(103,58,183,0.4); color: #9c6fde;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border-radius: 8px; cursor: pointer; font-family: 'DM Sans',sans-serif;
+      font-weight: 600; transition: all 0.2s;
     }
-    .btn-assign-content:hover { background: rgba(103,58,183,0.25); transform: scale(1.1); }
+    .btn-assign-content:hover { background: rgba(103,58,183,0.25); }
     .btn-assign-content:disabled { opacity: 0.45; cursor: not-allowed; }
 
     /* Score display in student exercise list */
@@ -595,7 +596,7 @@
       .login-box { padding: 2rem 1.5rem; }
       #page-login { padding-top: 2rem; }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
-      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.4rem 0.8rem 80px; }
+      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.3rem 0.8rem 80px; }
       #header { padding: 0.75rem 1rem; }
     }
 
@@ -869,42 +870,7 @@
     }
     .assign-msg.success { background: rgba(74,138,85,0.12); color: #4a8a55; }
     .assign-msg.error   { background: var(--pink-pale); color: var(--pink); }
-
-    /* ══ INNER PAGES PADDING — PERMANENT ══ */
-    #page-profile, #page-add-student,
-    #page-exercises, #page-admin-exercises {
-      padding-top: 0.5rem !important;
-    }
-    @media (max-width: 600px) {
-      #page-profile, #page-add-student,
-      #page-exercises, #page-admin-exercises {
-        padding-top: 0.3rem !important;
-      }
-    }
-
-    /* ══ EXERCISE ACCORDION ══ */
-    .ex-detail-row { display:none; border-top:1px solid rgba(232,75,122,0.08); background:rgba(253,232,239,0.15); }
-    .ex-detail-row.open { display:block; }
-    .ex-expand-btn { background:transparent; border:none; cursor:pointer; font-size:0.7rem; color:var(--gray); padding:0.2rem 0.5rem; border-radius:6px; transition:all 0.15s; flex-shrink:0; }
-    .ex-expand-btn:hover { background:var(--pink-pale); color:var(--pink); }
-    .ex-score-badge { font-size:0.7rem; font-weight:700; padding:0.18rem 0.6rem; border-radius:99px; flex-shrink:0; }
-    .ex-score-badge.good    { background:rgba(74,138,85,0.12);  color:#4a8a55; border:1px solid rgba(74,138,85,0.3); }
-    .ex-score-badge.medium  { background:rgba(255,193,7,0.12);  color:#b8860b; border:1px solid rgba(255,193,7,0.3); }
-    .ex-score-badge.pending { background:rgba(44,26,34,0.06);   color:var(--gray); border:1px solid rgba(44,26,34,0.1); }
-    .ex-detail-item { padding:0.55rem 1.2rem 0.55rem 3rem; display:flex; align-items:center; gap:0.7rem; border-bottom:1px solid rgba(44,26,34,0.04); font-size:0.82rem; }
-    .ex-detail-item:last-child { border-bottom:none; }
-    .ex-detail-title { flex:1; color:var(--ink2); }
-
-    /* ══ PERMANENT PADDING FIX ══ */
-    #page-profile, #page-add-student,
-    #page-exercises, #page-admin-exercises { padding-top: 0.5rem !important; }
-    @media (max-width:600px) {
-      #page-profile, #page-add-student,
-      #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
-    }
-    /* PERMANENT PADDING */
-
-    /* ══ STUDENT HOME STATS ══ */
+/* ══ STUDENT HOME STATS ══ */
     .stats-card {
       background: var(--bg-card); border: 1.5px solid rgba(232,75,122,0.12);
       border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;
@@ -968,6 +934,14 @@
       color: var(--pink); font-size: 0.65rem; font-weight: 600;
       cursor: pointer; text-decoration: none; font-family: 'DM Sans', sans-serif;
       white-space: nowrap;
+    }
+
+/* ══ PERMANENT PADDING FIX ══ */
+    #page-profile, #page-add-student,
+    #page-exercises, #page-admin-exercises { padding-top: 0.5rem !important; }
+    @media (max-width:600px) {
+      #page-profile, #page-add-student,
+      #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
     }
   </style>
 </head>
@@ -1079,9 +1053,9 @@
   <div class="profile-card" style="margin-bottom:1rem">
     <div class="profile-card-header">🌐 Langue · Language · Ngôn ngữ</div>
     <div style="display:flex;gap:0.6rem;padding:1rem 1.2rem">
-      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.5rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇻🇳</button>
-      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.5rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇬🇧</button>
-      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.5rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇫🇷</button>
+      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇻🇳<br><span style="font-size:0.62rem;letter-spacing:0.05em">Việt</span></button>
+      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇬🇧<br><span style="font-size:0.62rem;letter-spacing:0.05em">English</span></button>
+      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇫🇷<br><span style="font-size:0.62rem;letter-spacing:0.05em">Français</span></button>
     </div>
   </div>
 
@@ -1123,8 +1097,16 @@
     <div class="profile-card-header" id="ph-pin">🔐 Changer le PIN</div>
     <div class="pin-form">
       <div class="pin-input-wrap">
+        <input type="password" id="pin-old" maxlength="6" placeholder="PIN actuel"/>
+        <button class="pin-toggle" onclick="togglePin('pin-old')">👁</button>
+      </div>
+      <div class="pin-input-wrap">
         <input type="password" id="pin-new" maxlength="6" placeholder="Nouveau PIN"/>
         <button class="pin-toggle" onclick="togglePin('pin-new')">👁</button>
+      </div>
+      <div class="pin-input-wrap">
+        <input type="password" id="pin-confirm" maxlength="6" placeholder="Confirmer le nouveau PIN"/>
+        <button class="pin-toggle" onclick="togglePin('pin-confirm')">👁</button>
       </div>
       <div class="pin-msg" id="pin-msg"></div>
       <button class="btn-save-pin" id="btn-save-pin" onclick="doChangePin()">🔐 Enregistrer</button>
@@ -1434,6 +1416,26 @@ async function loadStudentContent(user) {
   }
 }
 
+function renderContentCard(c) {
+  const typeClass = "type-" + (c.type || "pdf").toLowerCase();
+  const typeLabel = (c.type || "").toUpperCase();
+  const meta = [c.level, c.courseN ? t("lessonLabel") + " " + c.courseN : ""].filter(Boolean).join(" · ");
+  const date = c.unlockedDate ? "🌸 " + (currentLang === "fr" ? "Débloqué le" : currentLang === "ja" ? "解除日" : currentLang === "en" ? "Unlocked" : "Mở khoá") + ": " + c.unlockedDate : "";
+  return `
+    <div class="content-card">
+      <span class="card-type ${typeClass}">${typeLabel}</span>
+      <div class="card-title">${c.title || "Nội dung"}</div>
+      <div class="card-meta">
+        <span>${meta}</span><br>
+        <span style="color:var(--pink);opacity:0.65;font-size:0.7rem;">${date}</span>
+      </div>
+      <a class="btn-view" href="${c.driveLink}" target="_blank" rel="noopener">${t('viewBtn')}</a>
+    </div>`;
+}
+
+let adminUser = null, allContent = [], selectedStudentId = null, studentAccessMap = {};
+
+let allStudents = [];
 
 async function loadAdminPanel(user) {
   adminUser = user;
@@ -1572,6 +1574,8 @@ function renderContentManage(studentId, name, familyName, unlocked) {
           const isUnlocked = unlocked.has(String(c.id));
           const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
           if (isForm) {
+            const safeUrl   = (c.driveLink||"").replace(/'/g, "%27");
+            const safeTitle = c.title.replace(/'/g, "%27");
             return `
               <div class="content-manage-item">
                 <div class="unlock-status" style="background:rgba(103,58,183,0.5);box-shadow:0 0 6px rgba(103,58,183,0.4)"></div>
@@ -1582,8 +1586,8 @@ function renderContentManage(studentId, name, familyName, unlocked) {
                   </div>
                 </div>
                 <button class="btn-assign-content" id="btn-assign-${c.id}"
-                  onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||"")}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
-                  +
+                  onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||'')}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
+                  ➕ Assigner
                 </button>
               </div>`;
           }
@@ -1685,6 +1689,451 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
 }
 
 
+
+// ══════════════════════════════════════════════
+// BOTTOM NAV
+// ══════════════════════════════════════════════
+let currentNavTab = "home";
+let currentUserGlobal = null;
+
+function buildBottomNav(role) {
+  const nav = document.getElementById("bottom-nav");
+  nav.style.display = "flex";
+  if (role === "Admin") {
+    nav.innerHTML = `
+      <button class="nav-tab active" id="nav-home" onclick="switchTab('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-i="navHome">Accueil</span>
+      </button>
+      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label" data-i="navExercises">Exercices</span>
+      </button>
+      <button class="nav-tab" id="nav-add" onclick="switchTab('add')">
+        <span class="nav-icon">➕</span>
+        <span class="nav-label" data-i="navAdd">Ajouter</span>
+      </button>
+      <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label" data-i="navProfile">Profil</span>
+      </button>`;
+  } else {
+    nav.innerHTML = `
+      <button class="nav-tab active" id="nav-home" onclick="switchTab('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-i="navHome">Accueil</span>
+      </button>
+      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label" data-i="navExercises">Exercices</span>
+      </button>
+      <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label" data-i="navProfile">Profil</span>
+      </button>`;
+  }
+  // Exercise page labels
+  const exPageTitle = document.getElementById("ex-page-title"); if(exPageTitle) exPageTitle.textContent = "📝 " + t("navExercises");
+  const adminExT    = document.getElementById("admin-ex-title"); if(adminExT)   adminExT.textContent    = "📊 " + t("navExercises");
+  const inProgLabel = document.getElementById("ex-inprogress-label"); if(inProgLabel) inProgLabel.textContent = t("exInProgress");
+  const compLabel   = document.getElementById("ex-completed-label");  if(compLabel)   compLabel.textContent   = t("exCompleted");
+  const assignLbl   = document.getElementById("assign-ex-label"); if(assignLbl) assignLbl.textContent = t("exAssignLabel");
+  const aexLStu  = document.getElementById("aex-lstu");   if(aexLStu)  aexLStu.textContent  = t("exAssignLStu");
+  const aexLT    = document.getElementById("aex-ltitle"); if(aexLT)    aexLT.textContent    = t("exAssignLTitle");
+  const aexLU    = document.getElementById("aex-lurl");   if(aexLU)    aexLU.textContent    = t("exAssignLUrl");
+  const assignBL = document.getElementById("assign-btn-label"); if(assignBL) assignBL.textContent = t("exAssignBtn");
+  applyNavLang();
+}
+
+function switchTab(tab) {
+  currentNavTab = tab;
+  const role = currentUserGlobal?.role;
+  const isAdmin = role === "Admin";
+
+  // Update active state
+  ["home","profile","add","exercises"].forEach(k => {
+    const btn = document.getElementById("nav-" + k);
+    if (btn) btn.classList.toggle("active", k === tab);
+  });
+
+  // Show/hide pages
+  document.getElementById("page-student").style.display         = (!isAdmin && tab === "home")      ? "block" : "none";
+  document.getElementById("page-admin").style.display           = (isAdmin  && tab === "home")      ? "block" : "none";
+  document.getElementById("page-profile").style.display         = tab === "profile"                 ? "block" : "none";
+  document.getElementById("page-add-student").style.display     = (isAdmin  && tab === "add")       ? "block" : "none";
+  document.getElementById("page-exercises").style.display       = (!isAdmin && tab === "exercises") ? "block" : "none";
+  document.getElementById("page-admin-exercises").style.display = (isAdmin  && tab === "exercises") ? "block" : "none";
+
+  // Load on demand
+  if (tab === "exercises") {
+    if (isAdmin) loadAdminExercises();
+    else         loadStudentExercises();
+  }
+}
+
+// ══════════════════════════════════════════════
+// PROFILE PAGE
+// ══════════════════════════════════════════════
+function loadProfilePage(user) {
+  document.getElementById("profile-avatar-letter").textContent = (user.name || "?")[0].toUpperCase();
+  document.getElementById("profile-fullname").textContent = (user.name || "") + " " + (user.familyName || "");
+  document.getElementById("profile-role-label").textContent = user.role;
+  document.getElementById("pf-id").textContent   = user.id || "—";
+  document.getElementById("pf-name").textContent = (user.name || "—") + " " + (user.familyName || "");
+  document.getElementById("pf-phone").textContent = user.phone || "—";
+  document.getElementById("pf-email").textContent = user.email || "—";
+  // Clear PIN fields
+  ["pin-old","pin-new","pin-confirm"].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = "";
+  });
+  const msg = document.getElementById("pin-msg");
+  if (msg) msg.style.display = "none";
+}
+
+function togglePin(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.type = el.type === "password" ? "text" : "password";
+}
+
+async function doChangePin() {
+  const oldPin     = document.getElementById("pin-old").value.trim();
+  const newPin     = document.getElementById("pin-new").value.trim();
+  const confirmPin = document.getElementById("pin-confirm").value.trim();
+  const msg        = document.getElementById("pin-msg");
+  const btn        = document.getElementById("btn-save-pin");
+
+  const showPinMsg = (text, type) => {
+    msg.textContent = text; msg.className = "pin-msg " + type; msg.style.display = "block";
+  };
+
+  if (!oldPin || !newPin || !confirmPin) return showPinMsg(t("pinErrEmpty"), "error");
+  if (newPin !== confirmPin)              return showPinMsg(t("pinErrMatch"), "error");
+  if (newPin.length < 4)                  return showPinMsg(t("pinErrLen"),   "error");
+
+  btn.disabled = true; btn.textContent = "...";
+  try {
+    const data = await api({
+      action: "changePin",
+      userId: currentUserGlobal.id,
+      oldPin, newPin
+    });
+    if (data.success) {
+      showPinMsg(t("pinSuccess"), "success");
+      // Update stored pin for admin
+      if (currentUserGlobal.role === "Admin") window._adminPin = newPin;
+      ["pin-old","pin-new","pin-confirm"].forEach(id => document.getElementById(id).value = "");
+    } else {
+      showPinMsg(data.message || t("pinErrWrong"), "error");
+    }
+  } catch {
+    showPinMsg(t("pinErrConn"), "error");
+  }
+  btn.disabled = false; btn.textContent = "🔐 " + t("pinSaveBtn");
+}
+
+// ══════════════════════════════════════════════
+// ADD STUDENT (Admin)
+// ══════════════════════════════════════════════
+async function doAddStudent() {
+  const name    = document.getElementById("as-name").value.trim();
+  const family  = document.getElementById("as-family").value.trim();
+  const phone   = document.getElementById("as-phone").value.trim();
+  const email   = document.getElementById("as-email").value.trim();
+  const pin     = document.getElementById("as-pin").value.trim();
+  const msg     = document.getElementById("add-msg");
+  const btn     = document.getElementById("btn-add-student");
+
+  const showAddMsg = (text, type) => {
+    msg.textContent = text; msg.className = "add-msg " + type; msg.style.display = "block";
+  };
+
+  if (!name || !family || !phone || !pin) return showAddMsg(t("addErrEmpty"), "error");
+
+  btn.disabled = true; btn.textContent = "...";
+  try {
+    const data = await api({
+      action: "addStudent",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin(),
+      name, family, phone, email, studentPin: pin
+    });
+    if (data.success) {
+      showAddMsg(t("addSuccess"), "success");
+      ["as-name","as-family","as-phone","as-email","as-pin"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      // Refresh student list in background
+      loadAdminPanel(currentUserGlobal);
+    } else {
+      showAddMsg(data.message || t("addErrFail"), "error");
+    }
+  } catch {
+    showAddMsg(t("addErrConn"), "error");
+  }
+  btn.disabled = false; btn.textContent = "➕ " + t("addBtn");
+}
+
+
+
+// ══════════════════════════════════════════════════════════════
+// ASSIGN FORM CONTENT — from admin content tree
+// ══════════════════════════════════════════════════════════════
+async function assignFormContent(studentId, contentId, formBaseUrl, title) {
+  const btn = document.getElementById("btn-assign-" + contentId);
+  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+
+  // Build personalized URL
+  const personalizedUrl = formBaseUrl
+    ? formBaseUrl + (formBaseUrl.includes("?") ? "&" : "?") + FORM_ENTRY_ID + "=" + studentId
+    : "";
+
+  try {
+    const data = await api({
+      action:    "assignExercise",
+      adminId:   currentUserGlobal.id,
+      pin:       getStoredPin(),
+      studentId, title,
+      formUrl:   personalizedUrl,
+      baseFormUrl: formBaseUrl,
+      entryId:   FORM_ENTRY_ID
+    });
+    if (data.success) {
+      toast("✅ " + title + " assigné !", "success");
+    } else {
+      toast(data.message || t("exAssignErr"), "error");
+    }
+  } catch {
+    toast(t("errConn"), "error");
+  }
+  if (btn) { btn.disabled = false; btn.textContent = "➕ Assigner"; }
+}
+
+// ══════════════════════════════════════════════
+// EXERCISES — STUDENT
+// ══════════════════════════════════════════════
+async function loadStudentExercises() {
+  const inBody  = document.getElementById("ex-stu-inprogress-body");
+  const comBody = document.getElementById("ex-stu-completed-body");
+  if (!inBody || !comBody) return;
+
+  try {
+    const [exData, scoresData] = await Promise.all([
+      api({ action:"getMyExercises", studentId: currentUserGlobal.id }),
+      api({ action:"getMyScores",    studentId: currentUserGlobal.id })
+    ]);
+
+    const exercises = exData.exercises || [];
+    const scoresMap = {};
+    (scoresData.scores||[]).forEach(s => { scoresMap[String(s.exerciseId)] = s; });
+
+    const inProgress = exercises.filter(ex => ex.status !== "done");
+    const completed  = exercises.filter(ex => ex.status === "done");
+
+    document.getElementById("ex-stu-inprogress-count").textContent = inProgress.length;
+    document.getElementById("ex-stu-completed-count").textContent  = completed.length;
+
+    // En cours
+    if (inProgress.length === 0) {
+      inBody.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`;
+    } else {
+      inBody.innerHTML = inProgress.map(ex => `
+        <div class="ex-card" id="ex-card-${ex.id}">
+          <div class="ex-card-info">
+            <div class="ex-card-title">${ex.title}</div>
+            <div class="ex-card-meta">📅 ${ex.assignedDate||"—"}</div>
+          </div>
+          <div class="ex-card-actions">
+            ${ex.formUrl ? `<a class="btn-ex-open" href="${ex.formUrl}" target="_blank" rel="noopener">📋 ${t("exOpen")}</a>` : ""}
+            <button class="btn-ex-done" id="btn-done-${ex.id}" onclick="markExerciseDone(${ex.id})">${t("exMarkDone")}</button>
+          </div>
+        </div>`).join("");
+    }
+
+    // Terminés
+    if (completed.length === 0) {
+      comBody.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
+    } else {
+      comBody.innerHTML = completed.map(ex => {
+        const sc = scoresMap[String(ex.id)];
+        let scoreLine = "";
+        if (sc && sc.maxScore > 0) {
+          const pct = sc.score/sc.maxScore;
+          const cls = pct >= 0.7 ? "good" : "medium";
+          scoreLine = `<div class="ex-score-line ${cls}">🎯 ${sc.score}/${sc.maxScore} pts</div>`;
+        }
+        return `
+          <div class="ex-card done">
+            <div class="ex-card-info">
+              <div class="ex-card-title">${ex.title}</div>
+              <div class="ex-card-meta">📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
+              ${scoreLine}
+            </div>
+            <span class="ex-status-badge done">✅ ${t("exDone")}</span>
+          </div>`;
+      }).join("");
+    }
+
+  } catch(e) {
+    console.error(e);
+    inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
+  }
+
+}
+
+async function markExerciseDone(exId) {
+  const btn = document.getElementById("btn-done-" + exId);
+  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+  try {
+    const data = await api({
+      action: "markExerciseDone",
+      studentId: currentUserGlobal.id,
+      exerciseId: exId
+    });
+    if (data.success) {
+      toast(t("exMarkedDone"), "success");
+      loadStudentExercises();
+    } else {
+      toast(data.message || t("errToggle"), "error");
+      if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
+    }
+  } catch {
+    toast(t("errConn"), "error");
+    if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
+  }
+}
+
+// ══════════════════════════════════════════════
+// EXERCISES — ADMIN
+// ══════════════════════════════════════════════
+async function loadAdminExercises() {
+  const wrap = document.getElementById("admin-ex-list");
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
+
+  try {
+    const [exData, scoresResp] = await Promise.all([
+      api({ action:"getExercisesAdmin", adminId:currentUserGlobal.id, pin:getStoredPin() }),
+      api({ action:"getScoresAdmin",    adminId:currentUserGlobal.id, pin:getStoredPin() })
+    ]);
+    if (!exData.success) { wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
+
+    const scoresMap = {};
+    (scoresResp.scores||[]).forEach(s => { scoresMap[s.studentId+"_"+s.exerciseId] = s; });
+
+    const studentMap = {};
+    allStudents.forEach(s => { studentMap[String(s.id)] = s; });
+
+    // Group by student
+    const byStudent = {};
+    (exData.exercises||[]).forEach(ex => {
+      const sid = String(ex.studentId);
+      if (!byStudent[sid]) byStudent[sid] = { total:0, done:0, exercises:[], lastDate:"" };
+      byStudent[sid].total++;
+      if (ex.status==="done") byStudent[sid].done++;
+      if (ex.assignedDate > byStudent[sid].lastDate) byStudent[sid].lastDate = ex.assignedDate;
+      byStudent[sid].exercises.push(ex);
+    });
+
+    // Sort: in-progress first (by lastDate desc), then completed (by lastDate desc)
+    const entries = Object.entries(byStudent);
+    entries.sort(([,a],[,b]) => {
+      const aComplete = a.done === a.total;
+      const bComplete = b.done === b.total;
+      if (aComplete !== bComplete) return aComplete ? 1 : -1;
+      return b.lastDate.localeCompare(a.lastDate);
+    });
+
+    if (entries.length === 0) {
+      wrap.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--gray)">${t("exNoneInProgress")}</div>`;
+      return;
+    }
+
+    wrap.innerHTML = entries.map(([sid, stuData]) => {
+      const stu = studentMap[sid] || { name:"ID "+sid, familyName:"" };
+      const isComplete = stuData.done === stuData.total;
+      const rowId = "ex-row-"+sid;
+
+      const detailItems = stuData.exercises.map(ex => {
+        const sc = scoresMap[sid+"_"+ex.id];
+        let badge = "";
+        if (ex.status==="done" && sc && sc.maxScore>0) {
+          const pct = sc.score/sc.maxScore;
+          badge = `<span class="ex-score-badge ${pct>=0.7?"good":"medium"}">${sc.score}/${sc.maxScore}</span>`;
+        } else if (ex.status==="done") {
+          badge = `<span class="ex-score-badge good">✅</span>`;
+        } else {
+          badge = `<span class="ex-score-badge pending">⏳</span>`;
+        }
+        return `<div class="ex-detail-item">
+          <span class="ex-detail-title">${ex.title}</span>
+          ${badge}
+        </div>`;
+      }).join("");
+
+      return `<div style="margin-bottom:0.6rem">
+        <div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);box-shadow:0 2px 8px rgba(232,75,122,0.06)" onclick="toggleExRow('${rowId}')">
+          <div class="ex-admin-avatar">${(stu.name||"?")[0]}</div>
+          <div class="ex-admin-info">
+            <div class="ex-admin-name">${stu.name} ${stu.familyName||""}</div>
+            <div class="ex-admin-detail">${stuData.done}/${stuData.total} exercice(s)</div>
+          </div>
+          <span class="ex-progress-badge ${isComplete?"complete":"partial"}">${stuData.done}/${stuData.total}</span>
+          <button class="ex-expand-btn">▼</button>
+        </div>
+        <div class="ex-detail-row" id="${rowId}">${detailItems}</div>
+      </div>`;
+    }).join("");
+
+  } catch(err) {
+    console.error(err);
+    wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
+  }
+}
+
+async function doAssignExercise() {
+  const stuEl = document.getElementById("aex-student"); if(!stuEl) return;
+  const studentId = stuEl.value;
+  const title     = document.getElementById("aex-title").value.trim();
+  const formUrl   = document.getElementById("aex-url").value.trim();
+  const msg       = document.getElementById("assign-msg");
+  const btn       = document.getElementById("btn-assign");
+
+  const showMsg = (text, type) => { msg.textContent = text; msg.className = "assign-msg " + type; msg.style.display = "block"; };
+
+  if (!studentId || !title) return showMsg(t("exAssignErrEmpty"), "error");
+
+  btn.disabled = true;
+  try {
+    const data = await api({
+      action: "assignExercise",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin(),
+      studentId, title, formUrl
+    });
+    if (data.success) {
+      showMsg(t("exAssignSuccess"), "success");
+      ["aex-student","aex-title","aex-url"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
+      loadAdminExercises();
+    } else {
+      showMsg(data.message || t("exAssignErr"), "error");
+    }
+  } catch {
+    showMsg(t("errConn"), "error");
+  }
+  btn.disabled = false;
+}
+
+function toggleExSection(type) {
+  document.getElementById("ex-" + type + "-section")?.classList.toggle("open");
+}
+
+function applyNavLang() {
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const key = el.getAttribute("data-i");
+    if (key) el.textContent = t(key);
+  });
+}
 
 // ══════════════════════════════════════════════
 // i18n — TRADUCTIONS
@@ -2050,428 +2499,13 @@ function applyLang() {
 // Override showError to use current lang
 const _origShowError = window.showError;
 
-(function init() {
-  // Init language
-  currentLang = localStorage.getItem(LANG_KEY) || "vi";
-  document.documentElement.lang = currentLang;
-  applyLang();
-
-  showPage("login");
-  const user = loadSession();
-  if (user) initUser(user);
-})();
-</script>
-</body>
-</html
-// ══════════════════════════════════════════════
-// BOTTOM NAV
-// ══════════════════════════════════════════════
-let currentNavTab = "home";
-let currentUserGlobal = null;
-
-function buildBottomNav(role) {
-  const nav = document.getElementById("bottom-nav");
-  nav.style.display = "flex";
-  if (role === "Admin") {
-    nav.innerHTML = `
-      <button class="nav-tab active" id="nav-home" onclick="switchTab('home')">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label" data-i="navHome">Accueil</span>
-      </button>
-      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
-        <span class="nav-icon">📊</span>
-        <span class="nav-label" data-i="navExercises">Exercices</span>
-      </button>
-      <button class="nav-tab" id="nav-add" onclick="switchTab('add')">
-        <span class="nav-icon">➕</span>
-        <span class="nav-label" data-i="navAdd">Ajouter</span>
-      </button>
-      <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
-        <span class="nav-icon">👤</span>
-        <span class="nav-label" data-i="navProfile">Profil</span>
-      </button>`;
-  } else {
-    nav.innerHTML = `
-      <button class="nav-tab active" id="nav-home" onclick="switchTab('home')">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label" data-i="navHome">Accueil</span>
-      </button>
-      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
-        <span class="nav-icon">📝</span>
-        <span class="nav-label" data-i="navExercises">Exercices</span>
-      </button>
-      <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
-        <span class="nav-icon">👤</span>
-        <span class="nav-label" data-i="navProfile">Profil</span>
-      </button>`;
-  }
-  // Exercise page labels
-  const exPageTitle = document.getElementById("ex-page-title"); if(exPageTitle) exPageTitle.textContent = "📝 " + t("navExercises");
-  const adminExT    = document.getElementById("admin-ex-title"); if(adminExT)   adminExT.textContent    = "📊 " + t("navExercises");
-  const inProgLabel = document.getElementById("ex-inprogress-label"); if(inProgLabel) inProgLabel.textContent = t("exInProgress");
-  const compLabel   = document.getElementById("ex-completed-label");  if(compLabel)   compLabel.textContent   = t("exCompleted");
-  const assignLbl   = document.getElementById("assign-ex-label"); if(assignLbl) assignLbl.textContent = t("exAssignLabel");
-  const aexLStu  = document.getElementById("aex-lstu");   if(aexLStu)  aexLStu.textContent  = t("exAssignLStu");
-  const aexLT    = document.getElementById("aex-ltitle"); if(aexLT)    aexLT.textContent    = t("exAssignLTitle");
-  const aexLU    = document.getElementById("aex-lurl");   if(aexLU)    aexLU.textContent    = t("exAssignLUrl");
-  const assignBL = document.getElementById("assign-btn-label"); if(assignBL) assignBL.textContent = t("exAssignBtn");
-  applyNavLang();
-}
-
-function switchTab(tab) {
-  currentNavTab = tab;
-  const role = currentUserGlobal?.role;
-  const isAdmin = role === "Admin";
-
-  // Update active state
-  ["home","profile","add","exercises"].forEach(k => {
-    const btn = document.getElementById("nav-" + k);
-    if (btn) btn.classList.toggle("active", k === tab);
-  });
-
-  // Show/hide pages
-  document.getElementById("page-student").style.display         = (!isAdmin && tab === "home")      ? "block" : "none";
-  document.getElementById("page-admin").style.display           = (isAdmin  && tab === "home")      ? "block" : "none";
-  document.getElementById("page-profile").style.display         = tab === "profile"                 ? "block" : "none";
-  document.getElementById("page-add-student").style.display     = (isAdmin  && tab === "add")       ? "block" : "none";
-  document.getElementById("page-exercises").style.display       = (!isAdmin && tab === "exercises") ? "block" : "none";
-  document.getElementById("page-admin-exercises").style.display = (isAdmin  && tab === "exercises") ? "block" : "none";
-
-  // Load on demand
-  if (tab === "exercises") {
-    if (isAdmin) loadAdminExercises();
-    else         loadStudentExercises();
-  }
-}
-
-// ══════════════════════════════════════════════
-// PROFILE PAGE
-// ══════════════════════════════════════════════
-function loadProfilePage(user) {
-  document.getElementById("profile-avatar-letter").textContent = (user.name || "?")[0].toUpperCase();
-  document.getElementById("profile-fullname").textContent = (user.name || "") + " " + (user.familyName || "");
-  document.getElementById("profile-role-label").textContent = user.role;
-  document.getElementById("pf-id").textContent   = user.id || "—";
-  document.getElementById("pf-name").textContent = (user.name || "—") + " " + (user.familyName || "");
-  document.getElementById("pf-phone").textContent = user.phone || "—";
-  document.getElementById("pf-email").textContent = user.email || "—";
-  // Clear PIN fields
-  ["pin-old","pin-new","pin-confirm"].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = "";
-  });
-  const msg = document.getElementById("pin-msg");
-  if (msg) msg.style.display = "none";
-}
-
-function togglePin(inputId) {
-  const el = document.getElementById(inputId);
-  if (!el) return;
-  el.type = el.type === "password" ? "text" : "password";
-}
-
-async function doChangePin() {
-  const oldPin     = document.getElementById("pin-old").value.trim();
-  const newPin     = document.getElementById("pin-new").value.trim();
-  const confirmPin = document.getElementById("pin-confirm").value.trim();
-  const msg        = document.getElementById("pin-msg");
-  const btn        = document.getElementById("btn-save-pin");
-
-  const showPinMsg = (text, type) => {
-    msg.textContent = text; msg.className = "pin-msg " + type; msg.style.display = "block";
-  };
-
-  if (!oldPin || !newPin || !confirmPin) return showPinMsg(t("pinErrEmpty"), "error");
-  if (newPin !== confirmPin)              return showPinMsg(t("pinErrMatch"), "error");
-  if (newPin.length < 4)                  return showPinMsg(t("pinErrLen"),   "error");
-
-  btn.disabled = true; btn.textContent = "...";
-  try {
-    const data = await api({
-      action: "changePin",
-      userId: currentUserGlobal.id,
-      oldPin, newPin
-    });
-    if (data.success) {
-      showPinMsg(t("pinSuccess"), "success");
-      // Update stored pin for admin
-      if (currentUserGlobal.role === "Admin") window._adminPin = newPin;
-      const pn = document.getElementById("pin-new"); if(pn) pn.value = "";
-    } else {
-      showPinMsg(data.message || t("pinErrWrong"), "error");
-    }
-  } catch {
-    showPinMsg(t("pinErrConn"), "error");
-  }
-  btn.disabled = false; btn.textContent = "🔐 " + t("pinSaveBtn");
-}
-
-// ══════════════════════════════════════════════
-// ADD STUDENT (Admin)
-// ══════════════════════════════════════════════
-async function doAddStudent() {
-  const name    = document.getElementById("as-name").value.trim();
-  const family  = document.getElementById("as-family").value.trim();
-  const phone   = document.getElementById("as-phone").value.trim();
-  const email   = document.getElementById("as-email").value.trim();
-  const pin     = document.getElementById("as-pin").value.trim();
-  const msg     = document.getElementById("add-msg");
-  const btn     = document.getElementById("btn-add-student");
-
-  const showAddMsg = (text, type) => {
-    msg.textContent = text; msg.className = "add-msg " + type; msg.style.display = "block";
-  };
-
-  if (!name || !family || !phone || !pin) return showAddMsg(t("addErrEmpty"), "error");
-
-  btn.disabled = true; btn.textContent = "...";
-  try {
-    const data = await api({
-      action: "addStudent",
-      adminId: currentUserGlobal.id,
-      pin: getStoredPin(),
-      name, family, phone, email, studentPin: pin
-    });
-    if (data.success) {
-      showAddMsg(t("addSuccess"), "success");
-      ["as-name","as-family","as-phone","as-email","as-pin"].forEach(id => {
-        document.getElementById(id).value = "";
-      });
-      // Refresh student list in background
-      loadAdminPanel(currentUserGlobal);
-    } else {
-      showAddMsg(data.message || t("addErrFail"), "error");
-    }
-  } catch {
-    showAddMsg(t("addErrConn"), "error");
-  }
-  btn.disabled = false; btn.textContent = "➕ " + t("addBtn");
-}
-
-
-
-// ══════════════════════════════════════════════════════════════
-// ASSIGN FORM CONTENT — from admin content tree
-// ══════════════════════════════════════════════════════════════
-async function assignFormContent(studentId, contentId, formBaseUrl, title) {
-  const btn = document.getElementById("btn-assign-" + contentId);
-  if (btn) { btn.disabled = true; btn.textContent = "..."; }
-
-  // Build personalized URL
-  const personalizedUrl = formBaseUrl
-    ? formBaseUrl + (formBaseUrl.includes("?") ? "&" : "?") + FORM_ENTRY_ID + "=" + studentId
-    : "";
-
-  try {
-    const data = await api({
-      action:    "assignExercise",
-      adminId:   currentUserGlobal.id,
-      pin:       getStoredPin(),
-      studentId, title,
-      formUrl:   personalizedUrl,
-      baseFormUrl: formBaseUrl,
-      entryId:   FORM_ENTRY_ID
-    });
-    if (data.success) {
-      toast("✅ " + title + " assigné !", "success");
-    } else {
-      toast(data.message || t("exAssignErr"), "error");
-    }
-  } catch {
-    toast(t("errConn"), "error");
-  }
-  if (btn) { btn.disabled = false; btn.textContent = "➕ Assigner"; }
-}
-
-// ══════════════════════════════════════════════
-// EXERCISES — STUDENT
-// ══════════════════════════════════════════════
-async function loadStudentExercises() {
-  const inBody  = document.getElementById("ex-stu-inprogress-body");
-  const comBody = document.getElementById("ex-stu-completed-body");
-  if (!inBody || !comBody) return;
-
-  try {
-    const [exData, scoresData] = await Promise.all([
-      api({ action:"getMyExercises", studentId: currentUserGlobal.id }),
-      api({ action:"getMyScores",    studentId: currentUserGlobal.id })
-    ]);
-
-    const exercises = exData.exercises || [];
-    const scoresMap = {};
-    (scoresData.scores||[]).forEach(s => { scoresMap[String(s.exerciseId)] = s; });
-
-    const inProgress = exercises.filter(ex => ex.status !== "done");
-    const completed  = exercises.filter(ex => ex.status === "done");
-
-    document.getElementById("ex-stu-inprogress-count").textContent = inProgress.length;
-    document.getElementById("ex-stu-completed-count").textContent  = completed.length;
-
-    // En cours
-    if (inProgress.length === 0) {
-      inBody.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`;
-    } else {
-      inBody.innerHTML = inProgress.map(ex => `
-        <div class="ex-card" id="ex-card-${ex.id}">
-          <div class="ex-card-info">
-            <div class="ex-card-title">${ex.title}</div>
-            <div class="ex-card-meta">📅 ${ex.assignedDate||"—"}</div>
-          </div>
-          <div class="ex-card-actions">
-            ${ex.formUrl ? `<a class="btn-ex-open" href="${ex.formUrl}" target="_blank" rel="noopener">📋 ${t("exOpen")}</a>` : ""}
-            <button class="btn-ex-done" id="btn-done-${ex.id}" onclick="markExerciseDone(${ex.id})">${t("exMarkDone")}</button>
-          </div>
-        </div>`).join("");
-    }
-
-    // Terminés
-    if (completed.length === 0) {
-      comBody.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
-    } else {
-      comBody.innerHTML = completed.map(ex => {
-        const sc = scoresMap[String(ex.id)];
-        let scoreLine = "";
-        if (sc && sc.maxScore > 0) {
-          const pct = sc.score/sc.maxScore;
-          const cls = pct >= 0.7 ? "good" : "medium";
-          scoreLine = `<div class="ex-score-line ${cls}">🎯 ${sc.score}/${sc.maxScore} pts</div>`;
-        }
-        return `
-          <div class="ex-card done">
-            <div class="ex-card-info">
-              <div class="ex-card-title">${ex.title}</div>
-              <div class="ex-card-meta">📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
-              ${scoreLine}
-            </div>
-            <span class="ex-status-badge done">✅ ${t("exDone")}</span>
-          </div>`;
-      }).join("");
-    }
-
-  } catch(e) {
-    console.error(e);
-    inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
-  }
-
-}
-
-
-async function markExerciseDone(exId) {
-  const btn = document.getElementById("btn-done-" + exId);
-  if (btn) { btn.disabled = true; btn.textContent = "..."; }
-  try {
-    const data = await api({
-      action: "markExerciseDone",
-      studentId: currentUserGlobal.id,
-      exerciseId: exId
-    });
-    if (data.success) {
-      toast(t("exMarkedDone"), "success");
-      loadStudentExercises();
-    } else {
-      toast(data.message || t("errToggle"), "error");
-      if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
-    }
-  } catch {
-    toast(t("errConn"), "error");
-    if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
-  }
-}
-
-// ══════════════════════════════════════════════
-// EXERCISES — ADMIN
-// ══════════════════════════════════════════════
-async function loadAdminExercises() {
-  const wrap = document.getElementById("admin-ex-list");
-  if (!wrap) return;
-  wrap.innerHTML = '<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
-
-  try {
-    const [exData, scoresResp] = await Promise.all([
-      api({ action:"getExercisesAdmin", adminId:currentUserGlobal.id, pin:getStoredPin() }),
-      api({ action:"getScoresAdmin",    adminId:currentUserGlobal.id, pin:getStoredPin() })
-    ]);
-    if (!exData.success) { wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
-
-    const scoresMap = {};
-    (scoresResp.scores||[]).forEach(s => { scoresMap[s.studentId+"_"+s.exerciseId] = s; });
-
-    const studentMap = {};
-    allStudents.forEach(s => { studentMap[String(s.id)] = s; });
-
-    // Group by student
-    const byStudent = {};
-    (exData.exercises||[]).forEach(ex => {
-      const sid = String(ex.studentId);
-      if (!byStudent[sid]) byStudent[sid] = { total:0, done:0, exercises:[], lastDate:"" };
-      byStudent[sid].total++;
-      if (ex.status==="done") byStudent[sid].done++;
-      if (ex.assignedDate > byStudent[sid].lastDate) byStudent[sid].lastDate = ex.assignedDate;
-      byStudent[sid].exercises.push(ex);
-    });
-
-    // Sort: in-progress first (by lastDate desc), then completed (by lastDate desc)
-    const entries = Object.entries(byStudent);
-    entries.sort(([,a],[,b]) => {
-      const aComplete = a.done === a.total;
-      const bComplete = b.done === b.total;
-      if (aComplete !== bComplete) return aComplete ? 1 : -1;
-      return b.lastDate.localeCompare(a.lastDate);
-    });
-
-    if (entries.length === 0) {
-      wrap.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--gray)">${t("exNoneInProgress")}</div>`;
-      return;
-    }
-
-    wrap.innerHTML = entries.map(([sid, stuData]) => {
-      const stu = studentMap[sid] || { name:"ID "+sid, familyName:"" };
-      const isComplete = stuData.done === stuData.total;
-      const rowId = "ex-row-"+sid;
-
-      const detailItems = stuData.exercises.map(ex => {
-        const sc = scoresMap[sid+"_"+ex.id];
-        let badge = "";
-        if (ex.status==="done" && sc && sc.maxScore>0) {
-          const pct = sc.score/sc.maxScore;
-          badge = `<span class="ex-score-badge ${pct>=0.7?"good":"medium"}">${sc.score}/${sc.maxScore}</span>`;
-        } else if (ex.status==="done") {
-          badge = `<span class="ex-score-badge good">✅</span>`;
-        } else {
-          badge = `<span class="ex-score-badge pending">⏳</span>`;
-        }
-        return `<div class="ex-detail-item">
-          <span class="ex-detail-title">${ex.title}</span>
-          ${badge}
-        </div>`;
-      }).join("");
-
-      return `<div style="margin-bottom:0.6rem">
-        <div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);box-shadow:0 2px 8px rgba(232,75,122,0.06)" onclick="toggleExRow('${rowId}')">
-          <div class="ex-admin-avatar">${(stu.name||"?")[0]}</div>
-          <div class="ex-admin-info">
-            <div class="ex-admin-name">${stu.name} ${stu.familyName||""}</div>
-            <div class="ex-admin-detail">${stuData.done}/${stuData.total} exercice(s)</div>
-          </div>
-          <span class="ex-progress-badge ${isComplete?"complete":"partial"}">${stuData.done}/${stuData.total}</span>
-          <button class="ex-expand-btn">▼</button>
-        </div>
-        <div class="ex-detail-row" id="${rowId}">${detailItems}</div>
-      </div>`;
-    }).join("");
-
-  } catch(err) {
-    console.error(err);
-    wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
-  }
-}
-
 
 function toggleExRow(rowId) {
   const row = document.getElementById(rowId);
   if (!row) return;
-  row.classList.toggle("open");
-  const btn = row.previousElementSibling?.querySelector(".ex-expand-btn");
-  if (btn) btn.textContent = row.classList.contains("open") ? "▲" : "▼";
+  row.classList.toggle('open');
+  const btn = row.previousElementSibling?.querySelector('.ex-expand-btn');
+  if (btn) btn.textContent = row.classList.contains('open') ? '▲' : '▼';
 }
 
 (function init() {
