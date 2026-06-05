@@ -1599,7 +1599,7 @@ async function doChangePin() {
   if (newPin.length < 4) return showPinMsg(t("pinErrLen"),   "error");
   btn.disabled = true; btn.textContent = "...";
   try {
-    const data = await api({ action:"changePin", userId:currentUserGlobal.id, oldPin:getStoredPin()||"0000", newPin });
+    const data = await api({ action:"changePin", userId:currentUserGlobal.id, newPin });
     if (data.success) {
       showPinMsg(t("pinSuccess"), "success");
       if (currentUserGlobal.role==="Admin") window._adminPin = newPin;
