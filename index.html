@@ -247,7 +247,7 @@
        MAIN PAGES
     ══════════════════════════════════════ */
     #page-student, #page-admin {
-      display: none; padding: 0.8rem 1.2rem 80px; max-width: 1100px; margin: 0 auto;
+      display: none; padding: 1rem 2rem 2rem; max-width: 1100px; margin: 0 auto;
     }
 
     .page-title {
@@ -537,6 +537,7 @@
     @media (max-width: 500px) {
       .login-box { padding: 2rem 1.5rem; }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
+      #page-profile, #page-add-student { padding: 0.3rem 0.8rem 80px; }
       #header { padding: 0.75rem 1rem; }
     }
 
@@ -578,7 +579,7 @@
     /* push all pages down to account for lang-bar (36px fixed) */
     #page-login { padding-top: calc(2rem + 36px); }
     #header { top: 36px; }
-    /* page-student and page-admin use sticky header so no extra padding-top needed */
+    #page-student, #page-admin { padding-top: calc(0.5rem + 36px); }
 
     /* Mobile : drapeaux seulement, pas de texte */
     @media (max-width: 600px) {
@@ -587,8 +588,8 @@
       .lang-btn .flag { font-size: 1.25rem; }
       #lang-bar { gap: 0.1rem; }
       #page-login { padding-top: calc(1.5rem + 36px); }
-      #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
-      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.5rem 0.8rem 80px; }
+      #page-student, #page-admin { padding-top: calc(0.3rem + 36px); }
+      #page-profile, #page-add-student { padding-top: calc(0.3rem + 36px); }
     }
 
     /* ══════════════════════════════════════
@@ -620,16 +621,18 @@
     .nav-tab.active { color: var(--pink); }
     .nav-tab.active .nav-label { font-weight: 700; }
 
-    /* push page content above bottom nav — already included in full padding shorthand */
+    /* push page content above bottom nav */
+    #page-student, #page-admin { padding-bottom: 80px; }
 
     /* ══════════════════════════════════════
        PROFILE PAGE
     ══════════════════════════════════════ */
     #page-profile {
-      display: none; padding: 0.8rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
+      display: none; padding: 2.5rem 2rem; max-width: 540px; margin: 0 auto;
+      padding-top: calc(2.5rem + 36px); padding-bottom: 80px;
     }
     .profile-avatar-wrap {
-      display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;
+      display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem;
     }
     .profile-avatar {
       width: 72px; height: 72px; border-radius: 50%;
@@ -710,7 +713,7 @@
        ADD STUDENT PAGE (Admin)
     ══════════════════════════════════════ */
     #page-add-student {
-      display: none; padding: 0.8rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
+      display: none; padding: 0.5rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
     }
     .add-student-form { display: flex; flex-direction: column; gap: 1rem; }
     .add-student-form .form-group { margin-bottom: 0; }
@@ -734,32 +737,132 @@
 
 
 
-    /* ══ REFRESH BUTTON ══ */
-    #refresh-btn {
-      background: transparent; border: none; cursor: pointer;
-      width: 28px; height: 28px; display: none; /* shown after login */
-      align-items: center; justify-content: center;
-      color: var(--gray); border-radius: 99px;
-      transition: color 0.18s, transform 0.3s;
-      padding: 0; flex-shrink: 0;
-      margin-left: 0.3rem;
+    /* ══════════════════════════════════════
+       EXERCISE PAGES
+    ══════════════════════════════════════ */
+    #page-exercises, #page-admin-exercises {
+      display: none; padding: 0.5rem 1.2rem 80px; max-width: 700px; margin: 0 auto;
     }
-    #refresh-btn:hover { color: var(--pink); }
-    #refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
 
-    /* ══ PULL TO REFRESH ══ */
-    #ptr-indicator {
-      position: fixed; top: 36px; left: 50%; transform: translateX(-50%) translateY(-60px);
-      z-index: 90; background: var(--bg-card);
-      border: 1.5px solid rgba(232,75,122,0.2);
-      border-radius: 99px; padding: 0.4rem 1.1rem;
-      font-size: 0.75rem; color: var(--pink);
-      box-shadow: 0 4px 16px rgba(232,75,122,0.12);
-      transition: transform 0.25s ease; white-space: nowrap;
-      display: flex; align-items: center; gap: 0.4rem;
-      pointer-events: none;
+    /* Student exercise card */
+    .ex-card {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(232,75,122,0.15);
+      border-radius: 14px; padding: 1.1rem 1.2rem;
+      margin-bottom: 0.8rem;
+      display: flex; align-items: center; gap: 1rem;
+      box-shadow: 0 2px 10px rgba(232,75,122,0.06);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    #ptr-indicator.visible { transform: translateX(-50%) translateY(8px); }
+    .ex-card:hover { border-color: rgba(232,75,122,0.3); box-shadow: 0 4px 16px rgba(232,75,122,0.1); }
+    .ex-card.done { opacity: 0.65; }
+    .ex-card-info { flex: 1; min-width: 0; }
+    .ex-card-title { font-size: 0.92rem; color: var(--ink); font-weight: 500; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ex-card-meta  { font-size: 0.7rem; color: var(--gray); }
+    .ex-status-badge {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      padding: 0.22rem 0.65rem; border-radius: 99px; flex-shrink: 0;
+    }
+    .ex-status-badge.pending  { background: rgba(255,193,7,0.15); color: #b8860b; border: 1px solid rgba(255,193,7,0.4); }
+    .ex-status-badge.done     { background: rgba(74,138,85,0.12); color: #4a8a55; border: 1px solid rgba(74,138,85,0.35); }
+    .ex-card-actions { display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0; }
+    .btn-ex-open {
+      padding: 0.35rem 0.8rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+      font-family: 'DM Sans', sans-serif; border: 1.5px solid rgba(74,138,85,0.4);
+      background: rgba(74,138,85,0.08); color: #4a8a55; transition: all 0.18s;
+      text-decoration: none; text-align: center;
+    }
+    .btn-ex-open:hover { background: rgba(74,138,85,0.18); }
+    .btn-ex-done {
+      padding: 0.35rem 0.8rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+      font-family: 'DM Sans', sans-serif; border: 1.5px solid var(--pink);
+      background: var(--pink-pale); color: var(--pink); transition: all 0.18s;
+    }
+    .btn-ex-done:hover { background: rgba(232,75,122,0.15); }
+    .btn-ex-done:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Admin exercise accordion */
+    .ex-accordion { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+    .ex-section {
+      border: 1.5px solid rgba(232,75,122,0.15);
+      border-radius: 12px; overflow: hidden;
+    }
+    .ex-section-header {
+      padding: 0.9rem 1.2rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.8rem;
+      background: var(--bg-card); user-select: none;
+      transition: background 0.15s;
+    }
+    .ex-section-header:hover { background: var(--pink-pale); }
+    .ex-section-icon { font-size: 1.1rem; }
+    .ex-section-label { flex: 1; font-size: 0.92rem; font-weight: 600; color: var(--ink2); }
+    .ex-section-count {
+      font-size: 0.68rem; padding: 0.2rem 0.6rem; border-radius: 99px;
+      font-weight: 600;
+    }
+    .ex-section-count.inprogress { background: rgba(255,193,7,0.15); color: #b8860b; }
+    .ex-section-count.completed  { background: rgba(74,138,85,0.12); color: #4a8a55; }
+    .ex-section-arrow { font-size: 0.7rem; color: var(--gray); transition: transform 0.2s; }
+    .ex-section.open .ex-section-arrow { transform: rotate(180deg); }
+    .ex-section-body { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
+    .ex-section.open .ex-section-body { display: block; }
+
+    /* Admin exercise row */
+    .ex-admin-row {
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid rgba(44,26,34,0.05);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .ex-admin-row:last-child { border-bottom: none; }
+    .ex-admin-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--pink-soft), var(--blue-pale));
+      border: 1.5px solid rgba(232,75,122,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; color: var(--pink); font-weight: 600;
+    }
+    .ex-admin-info { flex: 1; min-width: 0; }
+    .ex-admin-name { font-size: 0.87rem; color: var(--ink); font-weight: 500; }
+    .ex-admin-detail { font-size: 0.68rem; color: var(--gray); margin-top: 0.12rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ex-progress-badge {
+      font-size: 0.72rem; font-weight: 700; padding: 0.22rem 0.7rem;
+      border-radius: 99px; flex-shrink: 0;
+    }
+    .ex-progress-badge.partial  { background: rgba(255,193,7,0.15); color: #b8860b; border: 1px solid rgba(255,193,7,0.3); }
+    .ex-progress-badge.complete { background: rgba(74,138,85,0.12); color: #4a8a55; border: 1px solid rgba(74,138,85,0.3); }
+
+    /* Assign exercise form */
+    .assign-ex-form {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(232,75,122,0.15);
+      border-radius: 14px; padding: 1.2rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 10px rgba(232,75,122,0.06);
+    }
+    .assign-ex-title {
+      font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--pink); font-weight: 600; margin-bottom: 1rem;
+    }
+    .assign-ex-form .form-group { margin-bottom: 0.8rem; }
+    .assign-ex-form .form-group:last-of-type { margin-bottom: 1rem; }
+    .btn-assign {
+      width: 100%; padding: 0.85rem;
+      background: linear-gradient(135deg, var(--pink), var(--pink-mid));
+      border: none; color: white; font-size: 0.75rem;
+      letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500;
+      cursor: pointer; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+      box-shadow: 0 4px 14px rgba(232,75,122,0.28); transition: opacity 0.2s;
+    }
+    .btn-assign:hover { opacity: 0.88; }
+    .btn-assign:disabled { opacity: 0.45; cursor: not-allowed; }
+    .assign-msg {
+      font-size: 0.8rem; text-align: center; padding: 0.5rem 1rem;
+      border-radius: 8px; display: none; margin-top: 0.6rem;
+    }
+    .assign-msg.success { background: rgba(74,138,85,0.12); color: #4a8a55; }
+    .assign-msg.error   { background: var(--pink-pale); color: var(--pink); }
   </style>
 </head>
 <body>
@@ -774,18 +877,8 @@
   <span class="lang-sep">|</span>
   <button class="lang-btn" onclick="setLang('fr')" id="lang-fr"><span class="flag">🇫🇷</span><span class="lang-label"> Français</span>
   </button>
-  <span class="lang-sep" id="refresh-sep" style="display:none">|</span>
-  <button id="refresh-btn" onclick="doRefresh()" title="Actualiser">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="23 4 23 10 17 10"/>
-      <polyline points="1 20 1 14 7 14"/>
-      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-    </svg>
-  </button>
 </div>
 
-<!-- Pull to refresh indicator -->
-<div id="ptr-indicator">↓ Relâchez pour actualiser</div>
 
 <!-- Pétales de sakura -->
 <div class="petals-bg">
@@ -985,6 +1078,71 @@
 </div>
 
 
+
+<!-- ══ STUDENT EXERCISES PAGE ══ -->
+<div id="page-exercises">
+  <div class="page-title" id="ex-page-title">📝 Exercices</div>
+  <div class="page-subtitle" id="ex-page-sub">🌸 Mes exercices</div>
+  <div id="ex-student-list">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN EXERCISES PAGE ══ -->
+<div id="page-admin-exercises">
+  <div class="page-title" id="admin-ex-title">📊 Exercices</div>
+  <div class="page-subtitle" id="admin-ex-sub">🌸 Suivi des exercices</div>
+
+  <!-- Assign exercise form -->
+  <div class="assign-ex-form">
+    <div class="assign-ex-title" id="assign-ex-label">➕ Assigner un exercice</div>
+    <div class="form-group">
+      <label id="aex-lstu">Élève</label>
+      <select id="aex-student" style="width:100%;padding:0.75rem 1rem;background:var(--bg-soft);border:1.5px solid rgba(232,75,122,0.2);border-radius:10px;color:var(--ink);font-size:0.92rem;font-family:'DM Sans',sans-serif;outline:none;">
+        <option value="">— Sélectionner —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label id="aex-ltitle">Titre de l'exercice</label>
+      <input type="text" id="aex-title" placeholder="N3 - Cours 1 - Test grammaire"/>
+    </div>
+    <div class="form-group">
+      <label id="aex-lurl">Lien Google Form</label>
+      <input type="url" id="aex-url" placeholder="https://forms.gle/..."/>
+    </div>
+    <div class="assign-msg" id="assign-msg"></div>
+    <button class="btn-assign" id="btn-assign" onclick="doAssignExercise()">
+      ➕ <span id="assign-btn-label">Assigner</span>
+    </button>
+  </div>
+
+  <!-- Progress accordion -->
+  <div class="ex-accordion">
+    <div class="ex-section" id="ex-inprogress-section">
+      <div class="ex-section-header" onclick="toggleExSection('inprogress')">
+        <span class="ex-section-icon">⏳</span>
+        <span class="ex-section-label" id="ex-inprogress-label">En cours</span>
+        <span class="ex-section-count inprogress" id="ex-inprogress-count">0</span>
+        <span class="ex-section-arrow">▼</span>
+      </div>
+      <div class="ex-section-body" id="ex-inprogress-body">
+        <div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>
+      </div>
+    </div>
+    <div class="ex-section" id="ex-completed-section">
+      <div class="ex-section-header" onclick="toggleExSection('completed')">
+        <span class="ex-section-icon">✅</span>
+        <span class="ex-section-label" id="ex-completed-label">Terminés</span>
+        <span class="ex-section-count completed" id="ex-completed-count">0</span>
+        <span class="ex-section-arrow">▼</span>
+      </div>
+      <div class="ex-section-body" id="ex-completed-body">
+        <div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1026,8 +1184,10 @@ function showPage(name) {
   document.getElementById("page-admin").style.display   = name === "admin"   ? "block" : "none";
   document.getElementById("header").style.display       = name !== "login"   ? "flex"  : "none";
   if (name === "login") {
-    document.getElementById("page-profile").style.display     = "none";
-    document.getElementById("page-add-student").style.display = "none";
+    document.getElementById("page-profile").style.display         = "none";
+    document.getElementById("page-add-student").style.display     = "none";
+    document.getElementById("page-exercises").style.display       = "none";
+    document.getElementById("page-admin-exercises").style.display = "none";
   }
 }
 
@@ -1071,7 +1231,6 @@ function initUser(user) {
   roleEl.className = "role-badge " + (user.role === "Admin" ? "admin" : "student");
   buildBottomNav(user.role);
   loadProfilePage(user);
-  showRefreshBtn(true);
   currentNavTab = "home";
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
   else { showPage("student"); loadStudentContent(user); }
@@ -1082,9 +1241,11 @@ function doLogout() {
   document.getElementById("input-id").value = "";
   document.getElementById("input-pin").value = "";
   document.getElementById("login-error").style.display = "none";
-  document.getElementById("bottom-nav").style.display = "none";
-  document.getElementById("page-profile").style.display = "none";
-  document.getElementById("page-add-student").style.display = "none";
+  document.getElementById("bottom-nav").style.display             = "none";
+  document.getElementById("page-profile").style.display           = "none";
+  document.getElementById("page-add-student").style.display       = "none";
+  document.getElementById("page-exercises").style.display         = "none";
+  document.getElementById("page-admin-exercises").style.display   = "none";
   showPage("login");
 }
 
@@ -1346,6 +1507,10 @@ function buildBottomNav(role) {
         <span class="nav-icon">🏠</span>
         <span class="nav-label" data-i="navHome">Accueil</span>
       </button>
+      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label" data-i="navExercises">Exercices</span>
+      </button>
       <button class="nav-tab" id="nav-add" onclick="switchTab('add')">
         <span class="nav-icon">➕</span>
         <span class="nav-label" data-i="navAdd">Ajouter</span>
@@ -1360,31 +1525,53 @@ function buildBottomNav(role) {
         <span class="nav-icon">🏠</span>
         <span class="nav-label" data-i="navHome">Accueil</span>
       </button>
+      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label" data-i="navExercises">Exercices</span>
+      </button>
       <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
         <span class="nav-icon">👤</span>
         <span class="nav-label" data-i="navProfile">Profil</span>
       </button>`;
   }
+  // Exercise page labels
+  const exPageTitle = document.getElementById("ex-page-title"); if(exPageTitle) exPageTitle.textContent = "📝 " + t("navExercises");
+  const exPageSub   = document.getElementById("ex-page-sub");   if(exPageSub)   exPageSub.textContent   = t("exEmpty");
+  const adminExT    = document.getElementById("admin-ex-title"); if(adminExT)   adminExT.textContent    = "📊 " + t("navExercises");
+  const inProgLabel = document.getElementById("ex-inprogress-label"); if(inProgLabel) inProgLabel.textContent = t("exInProgress");
+  const compLabel   = document.getElementById("ex-completed-label");  if(compLabel)   compLabel.textContent   = t("exCompleted");
+  const assignLbl   = document.getElementById("assign-ex-label"); if(assignLbl) assignLbl.textContent = t("exAssignLabel");
+  const aexLStu  = document.getElementById("aex-lstu");   if(aexLStu)  aexLStu.textContent  = t("exAssignLStu");
+  const aexLT    = document.getElementById("aex-ltitle"); if(aexLT)    aexLT.textContent    = t("exAssignLTitle");
+  const aexLU    = document.getElementById("aex-lurl");   if(aexLU)    aexLU.textContent    = t("exAssignLUrl");
+  const assignBL = document.getElementById("assign-btn-label"); if(assignBL) assignBL.textContent = t("exAssignBtn");
   applyNavLang();
-  const ptr = document.getElementById('ptr-indicator'); if(ptr) ptr.textContent = '↓ ' + t('ptrRelease');
 }
 
 function switchTab(tab) {
   currentNavTab = tab;
   const role = currentUserGlobal?.role;
+  const isAdmin = role === "Admin";
 
   // Update active state
-  ["home","profile","add"].forEach(t => {
-    const btn = document.getElementById("nav-" + t);
-    if (btn) btn.classList.toggle("active", t === tab);
+  ["home","profile","add","exercises"].forEach(k => {
+    const btn = document.getElementById("nav-" + k);
+    if (btn) btn.classList.toggle("active", k === tab);
   });
 
   // Show/hide pages
-  const isAdmin = role === "Admin";
-  document.getElementById("page-student").style.display  = (!isAdmin && tab === "home") ? "block" : "none";
-  document.getElementById("page-admin").style.display    = (isAdmin  && tab === "home") ? "block" : "none";
-  document.getElementById("page-profile").style.display  = tab === "profile" ? "block" : "none";
-  document.getElementById("page-add-student").style.display = (isAdmin && tab === "add") ? "block" : "none";
+  document.getElementById("page-student").style.display         = (!isAdmin && tab === "home")      ? "block" : "none";
+  document.getElementById("page-admin").style.display           = (isAdmin  && tab === "home")      ? "block" : "none";
+  document.getElementById("page-profile").style.display         = tab === "profile"                 ? "block" : "none";
+  document.getElementById("page-add-student").style.display     = (isAdmin  && tab === "add")       ? "block" : "none";
+  document.getElementById("page-exercises").style.display       = (!isAdmin && tab === "exercises") ? "block" : "none";
+  document.getElementById("page-admin-exercises").style.display = (isAdmin  && tab === "exercises") ? "block" : "none";
+
+  // Load on demand
+  if (tab === "exercises") {
+    if (isAdmin) loadAdminExercises();
+    else         loadStudentExercises();
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -1490,6 +1677,172 @@ async function doAddStudent() {
   btn.disabled = false; btn.textContent = "➕ " + t("addBtn");
 }
 
+
+// ══════════════════════════════════════════════
+// EXERCISES — STUDENT
+// ══════════════════════════════════════════════
+async function loadStudentExercises() {
+  const wrap = document.getElementById("ex-student-list");
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const data = await api({ action: "getMyExercises", studentId: currentUserGlobal.id });
+    if (!data.success || !data.exercises?.length) {
+      wrap.innerHTML = `<div class="empty-state"><span class="jp">無</span><p>${t("exEmpty")}</p></div>`;
+      return;
+    }
+    wrap.innerHTML = data.exercises.map(ex => {
+      const isDone = ex.status === "done";
+      return `
+        <div class="ex-card ${isDone ? 'done' : ''}" id="ex-card-${ex.id}">
+          <div class="ex-card-info">
+            <div class="ex-card-title">${ex.title}</div>
+            <div class="ex-card-meta">📅 ${ex.assignedDate || "—"}</div>
+          </div>
+          <div class="ex-card-actions">
+            ${ex.formUrl ? `<a class="btn-ex-open" href="${ex.formUrl}" target="_blank" rel="noopener">📋 ${t("exOpen")}</a>` : ""}
+            ${isDone
+              ? `<span class="ex-status-badge done">✅ ${t("exDone")}</span>`
+              : `<button class="btn-ex-done" id="btn-done-${ex.id}" onclick="markExerciseDone(${ex.id})">${t("exMarkDone")}</button>`
+            }
+          </div>
+        </div>`;
+    }).join("");
+  } catch {
+    wrap.innerHTML = `<div class="empty-state"><span class="jp">×</span><p>${t("errConn")}</p></div>`;
+  }
+}
+
+async function markExerciseDone(exId) {
+  const btn = document.getElementById("btn-done-" + exId);
+  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+  try {
+    const data = await api({
+      action: "markExerciseDone",
+      studentId: currentUserGlobal.id,
+      exerciseId: exId
+    });
+    if (data.success) {
+      toast(t("exMarkedDone"), "success");
+      loadStudentExercises();
+    } else {
+      toast(data.message || t("errToggle"), "error");
+      if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
+    }
+  } catch {
+    toast(t("errConn"), "error");
+    if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
+  }
+}
+
+// ══════════════════════════════════════════════
+// EXERCISES — ADMIN
+// ══════════════════════════════════════════════
+async function loadAdminExercises() {
+  // Fill student dropdown in assign form
+  const sel = document.getElementById("aex-student");
+  if (sel.options.length <= 1 && allStudents.length > 0) {
+    allStudents.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.name + " " + (s.familyName || "");
+      sel.appendChild(opt);
+    });
+  }
+
+  const inBody  = document.getElementById("ex-inprogress-body");
+  const comBody = document.getElementById("ex-completed-body");
+  inBody.innerHTML  = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
+  comBody.innerHTML = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
+
+  try {
+    const data = await api({
+      action: "getExercisesAdmin",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin()
+    });
+    if (!data.success) { inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
+
+    // Group by student, compute progress
+    const studentMap = {};
+    allStudents.forEach(s => { studentMap[String(s.id)] = s; });
+
+    const byStudent = {};
+    (data.exercises || []).forEach(ex => {
+      const sid = String(ex.studentId);
+      if (!byStudent[sid]) byStudent[sid] = { total: 0, done: 0, exercises: [] };
+      byStudent[sid].total++;
+      if (ex.status === "done") byStudent[sid].done++;
+      byStudent[sid].exercises.push(ex);
+    });
+
+    const inProgressRows = [], completedRows = [];
+    Object.entries(byStudent).forEach(([sid, data]) => {
+      const stu = studentMap[sid] || { name: "ID " + sid, familyName: "" };
+      const isComplete = data.done === data.total;
+      const latestDate = data.exercises.map(e => e.assignedDate).sort().reverse()[0] || "—";
+      const exTitles = data.exercises.map(e => e.title).join(" · ");
+      const row = `
+        <div class="ex-admin-row">
+          <div class="ex-admin-avatar">${(stu.name||"?")[0]}</div>
+          <div class="ex-admin-info">
+            <div class="ex-admin-name">${stu.name} ${stu.familyName || ""}</div>
+            <div class="ex-admin-detail" title="${exTitles}">📅 ${latestDate} · ${exTitles}</div>
+          </div>
+          <span class="ex-progress-badge ${isComplete ? 'complete' : 'partial'}">${data.done}/${data.total}</span>
+        </div>`;
+      if (isComplete) completedRows.push(row);
+      else            inProgressRows.push(row);
+    });
+
+    document.getElementById("ex-inprogress-count").textContent = inProgressRows.length;
+    document.getElementById("ex-completed-count").textContent  = completedRows.length;
+
+    inBody.innerHTML  = inProgressRows.length  ? inProgressRows.join("")  : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneInProgress")}</div>`;
+    comBody.innerHTML = completedRows.length ? completedRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
+
+  } catch {
+    inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
+  }
+}
+
+async function doAssignExercise() {
+  const studentId = document.getElementById("aex-student").value;
+  const title     = document.getElementById("aex-title").value.trim();
+  const formUrl   = document.getElementById("aex-url").value.trim();
+  const msg       = document.getElementById("assign-msg");
+  const btn       = document.getElementById("btn-assign");
+
+  const showMsg = (text, type) => { msg.textContent = text; msg.className = "assign-msg " + type; msg.style.display = "block"; };
+
+  if (!studentId || !title) return showMsg(t("exAssignErrEmpty"), "error");
+
+  btn.disabled = true;
+  try {
+    const data = await api({
+      action: "assignExercise",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin(),
+      studentId, title, formUrl
+    });
+    if (data.success) {
+      showMsg(t("exAssignSuccess"), "success");
+      document.getElementById("aex-student").value = "";
+      document.getElementById("aex-title").value   = "";
+      document.getElementById("aex-url").value     = "";
+      loadAdminExercises();
+    } else {
+      showMsg(data.message || t("exAssignErr"), "error");
+    }
+  } catch {
+    showMsg(t("errConn"), "error");
+  }
+  btn.disabled = false;
+}
+
+function toggleExSection(type) {
+  document.getElementById("ex-" + type + "-section")?.classList.toggle("open");
+}
+
 function applyNavLang() {
   document.querySelectorAll("[data-i]").forEach(el => {
     const key = el.getAttribute("data-i");
@@ -1567,6 +1920,24 @@ const TRANSLATIONS = {
     addErrFail:      "Không thể thêm học viên",
     addErrConn:      "Lỗi kết nối",
     addSuccess:      "✅ Học viên đã được thêm thành công!",
+    navExercises:    "Bài tập",
+    exEmpty:         "Chưa có bài tập nào được giao 🌸",
+    exOpen:          "Mở",
+    exDone:          "Hoàn thành",
+    exMarkDone:      "✅ Xong",
+    exMarkedDone:    "✅ Đã đánh dấu hoàn thành!",
+    exNoneInProgress:"Không có bài tập đang làm",
+    exNoneCompleted: "Chưa có bài tập hoàn thành",
+    exAssignLabel:   "➕ Giao bài tập",
+    exAssignLStu:    "Học viên",
+    exAssignLTitle:  "Tên bài tập",
+    exAssignLUrl:    "Link Google Form",
+    exAssignBtn:     "Giao bài",
+    exAssignErrEmpty:"Vui lòng chọn học viên và điền tên bài",
+    exAssignSuccess: "✅ Bài tập đã được giao!",
+    exAssignErr:     "Không thể giao bài tập",
+    exInProgress:    "⏳ Đang làm",
+    exCompleted:     "✅ Đã hoàn thành",
   },
   ja: {
     loginLabel:      "電話番号",
@@ -1634,6 +2005,24 @@ const TRANSLATIONS = {
     addErrFail:      "学生の追加に失敗しました",
     addErrConn:      "接続エラー",
     addSuccess:      "✅ 学生が追加されました！",
+    navExercises:    "練習",
+    exEmpty:         "まだ練習問題がありません 🌸",
+    exOpen:          "開く",
+    exDone:          "完了",
+    exMarkDone:      "✅ 完了にする",
+    exMarkedDone:    "✅ 完了としてマークしました！",
+    exNoneInProgress:"進行中の練習なし",
+    exNoneCompleted: "完了した練習なし",
+    exAssignLabel:   "➕ 練習を割り当て",
+    exAssignLStu:    "学生",
+    exAssignLTitle:  "練習タイトル",
+    exAssignLUrl:    "Google FormリンK",
+    exAssignBtn:     "割り当て",
+    exAssignErrEmpty:"学生と題名を入力してください",
+    exAssignSuccess: "✅ 練習が割り当てられました！",
+    exAssignErr:     "割り当て失敗",
+    exInProgress:    "⏳ 進行中",
+    exCompleted:     "✅ 完了済み",
   },
   en: {
     loginLabel:      "Phone number",
@@ -1701,6 +2090,24 @@ const TRANSLATIONS = {
     addErrFail:      "Failed to add student",
     addErrConn:      "Connection error",
     addSuccess:      "✅ Student added successfully!",
+    navExercises:    "Exercises",
+    exEmpty:         "No exercises assigned yet 🌸",
+    exOpen:          "Open",
+    exDone:          "Done",
+    exMarkDone:      "✅ Mark done",
+    exMarkedDone:    "✅ Marked as done!",
+    exNoneInProgress:"No exercises in progress",
+    exNoneCompleted: "No completed exercises yet",
+    exAssignLabel:   "➕ Assign exercise",
+    exAssignLStu:    "Student",
+    exAssignLTitle:  "Exercise title",
+    exAssignLUrl:    "Google Form link",
+    exAssignBtn:     "Assign",
+    exAssignErrEmpty:"Please select a student and enter a title",
+    exAssignSuccess: "✅ Exercise assigned!",
+    exAssignErr:     "Failed to assign exercise",
+    exInProgress:    "⏳ In Progress",
+    exCompleted:     "✅ Completed",
   },
   fr: {
     loginLabel:      "Numéro de téléphone",
@@ -1768,6 +2175,24 @@ const TRANSLATIONS = {
     addErrFail:      "Impossible d'ajouter l'élève",
     addErrConn:      "Erreur de connexion",
     addSuccess:      "✅ Élève ajouté avec succès !",
+    navExercises:    "Exercices",
+    exEmpty:         "Aucun exercice assigné pour l'instant 🌸",
+    exOpen:          "Ouvrir",
+    exDone:          "Terminé",
+    exMarkDone:      "✅ Marquer terminé",
+    exMarkedDone:    "✅ Marqué comme terminé !",
+    exNoneInProgress:"Aucun exercice en cours",
+    exNoneCompleted: "Aucun exercice terminé pour l'instant",
+    exAssignLabel:   "➕ Assigner un exercice",
+    exAssignLStu:    "Élève",
+    exAssignLTitle:  "Titre de l'exercice",
+    exAssignLUrl:    "Lien Google Form",
+    exAssignBtn:     "Assigner",
+    exAssignErrEmpty:"Veuillez choisir un élève et saisir un titre",
+    exAssignSuccess: "✅ Exercice assigné avec succès !",
+    exAssignErr:     "Impossible d'assigner l'exercice",
+    exInProgress:    "⏳ En cours",
+    exCompleted:     "✅ Terminés",
   }
 };
 
@@ -1856,75 +2281,6 @@ function applyLang() {
 
 // Override showError to use current lang
 const _origShowError = window.showError;
-
-
-// ══════════════════════════════════════════════
-// REFRESH
-// ══════════════════════════════════════════════
-function doRefresh() {
-  const btn = document.getElementById("refresh-btn");
-  if (!btn || btn.classList.contains("spinning")) return;
-  btn.classList.add("spinning");
-  const tab = currentNavTab;
-  const role = currentUserGlobal?.role;
-  const isAdmin = role === "Admin";
-
-  const done = () => setTimeout(() => btn.classList.remove("spinning"), 400);
-
-  if (tab === "home") {
-    if (isAdmin) loadAdminPanel(currentUserGlobal).then(done);
-    else         loadStudentContent(currentUserGlobal).then(done);
-  } else if (tab === "exercises") {
-    if (isAdmin) loadAdminExercises().then(done);
-    else         loadStudentExercises().then(done);
-  } else {
-    done();
-  }
-}
-
-function showRefreshBtn(show) {
-  const btn = document.getElementById("refresh-btn");
-  const sep = document.getElementById("refresh-sep");
-  if (btn) btn.style.display = show ? "flex" : "none";
-  if (sep) sep.style.display = show ? "inline" : "none";
-}
-
-// ── Pull to refresh ──
-let ptrStartY = 0, ptrActive = false, ptrTriggered = false;
-const PTR_THRESHOLD = 70;
-
-document.addEventListener("touchstart", e => {
-  if (!currentUserGlobal) return;
-  const scrollEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-  const scrolled = scrollEl?.closest("#student-dd-list, .student-dropdown-list");
-  if (scrolled) return; // don't trigger inside dropdowns
-  if (window.scrollY === 0) {
-    ptrStartY = e.touches[0].clientY;
-    ptrActive = true;
-    ptrTriggered = false;
-  }
-}, { passive: true });
-
-document.addEventListener("touchmove", e => {
-  if (!ptrActive) return;
-  const dist = e.touches[0].clientY - ptrStartY;
-  const ind  = document.getElementById("ptr-indicator");
-  if (dist > 20 && window.scrollY === 0) {
-    const progress = Math.min(dist / PTR_THRESHOLD, 1);
-    if (progress >= 1 && !ptrTriggered) {
-      ind?.classList.add("visible");
-      ptrTriggered = true;
-    }
-  }
-}, { passive: true });
-
-document.addEventListener("touchend", () => {
-  if (!ptrActive) return;
-  ptrActive = false;
-  const ind = document.getElementById("ptr-indicator");
-  ind?.classList.remove("visible");
-  if (ptrTriggered) { ptrTriggered = false; doRefresh(); }
-});
 
 (function init() {
   // Init language
