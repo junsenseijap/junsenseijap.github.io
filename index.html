@@ -1687,6 +1687,383 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
 
 
 // ══════════════════════════════════════════════
+// i18n — TRADUCTIONS
+// ══════════════════════════════════════════════
+const TRANSLATIONS = {
+  vi: {
+    loginLabel:      "Số điện thoại",
+    loginPlaceholder:"Ví dụ: 0664146887",
+    pinLabel:        "Mã PIN",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — Đăng nhập",
+    loginTagline:    "Lớp tiếng Nhật tư duy & tự giác",
+    loginSubtitle:   "Jun Sensei · Học Tiếng Nhật",
+    loginErrEmpty:   "Vui lòng nhập số điện thoại và PIN",
+    loginErrWrong:   "Số điện thoại hoặc PIN không đúng",
+    loginErrConn:    "Lỗi kết nối. Vui lòng thử lại.",
+    logoutBtn:       "出る",
+    studentGreeting: (name) => `こんにちは、${name} さん`,
+    studentSubtitle: "🌸 Nội dung đã mở khoá · Unlocked Content",
+    loadingContent:  "Đang tải nội dung...",
+    emptyContent:    "Chưa có nội dung nào được mở khoá.<br>Hãy chờ giáo viên cập nhật nhé! 🌸",
+    errContent:      "Lỗi tải nội dung",
+    errConn:         "Lỗi kết nối",
+    viewBtn:         "開く · Xem / Tải",
+    lessonLabel:     "Bài",
+    adminTitle:      "管理画面",
+    adminSubtitle:   "🌸 Admin Panel · Quản lý học viên",
+    studentListHeader: "学生リスト · Học viên",
+    contentHeader:   "コンテンツ管理 · Quản lý nội dung",
+    selectStudent:   "← Chọn một học viên để quản lý nội dung",
+    loadingStudents: "Đang tải...",
+    errStudents:     "Lỗi tải học viên",
+    noStudents:      "Chưa có học viên",
+    noContentSheet:  "Chưa có nội dung trong CONTENT sheet",
+    unlockedCount:   (n) => `${n} nội dung đã mở 🌸`,
+    btnUnlock:       "🔓 Mở",
+    btnLock:         "🔒 Khoá",
+    errToggle:       "Lỗi kết nối",
+    disabledAccount: "Tài khoản đã bị vô hiệu hóa",
+    navHome:         "Trang chủ",
+    navProfile:      "Hồ sơ",
+    navAdd:          "Thêm",
+    profileInfo:     "👤 Thông tin cá nhân",
+    profilePinCard:  "🔐 Đổi mật khẩu PIN",
+    pflId:           "Mã số",
+    pflName:         "Họ và tên",
+    pflPhone:        "Điện thoại",
+    pflEmail:        "Email",
+    pinOldPlaceholder: "PIN hiện tại",
+    pinNewPlaceholder: "PIN mới",
+    pinConfPlaceholder:"Xác nhận PIN mới",
+    pinSaveBtn:      "Lưu",
+    pinErrEmpty:     "Vui lòng điền đầy đủ",
+    pinErrMatch:     "PIN xác nhận không khớp",
+    pinErrLen:       "PIN phải có ít nhất 4 ký tự",
+    pinErrWrong:     "PIN hiện tại không đúng",
+    pinErrConn:      "Lỗi kết nối",
+    pinSuccess:      "✅ PIN đã được cập nhật!",
+    addStudentTitle: "➕ Thêm học viên",
+    addStudentSub:   "Tạo tài khoản mới",
+    addInfo:         "📋 Thông tin",
+    addLFname:       "Tên",
+    addLLname:       "Họ",
+    addLPhone:       "Điện thoại",
+    addLEmail:       "Email",
+    addLPin:         "PIN ban đầu",
+    addBtn:          "Thêm học viên",
+    addErrEmpty:     "Vui lòng điền đầy đủ các trường bắt buộc",
+    addErrFail:      "Không thể thêm học viên",
+    addErrConn:      "Lỗi kết nối",
+    addSuccess:      "✅ Học viên đã được thêm thành công!",
+    courseTypeGrammar: "Ngữ pháp",
+    courseTypeVocab:   "Từ vựng",
+    courseTypeOther:   "Khác",
+    contentCount:      (n) => `${n} nội dung`,
+    navExercises:    "Bài tập",
+    exEmpty:         "Chưa có bài tập nào được giao 🌸",
+    exOpen:          "Mở",
+    exDone:          "Hoàn thành",
+    exMarkDone:      "✅ Xong",
+    exMarkedDone:    "✅ Đã đánh dấu hoàn thành!",
+    exNoneInProgress:"Không có bài tập đang làm",
+    exNoneCompleted: "Chưa có bài tập hoàn thành",
+    exAssignLabel:   "➕ Giao bài tập",
+    exAssignLStu:    "Học viên",
+    exAssignLTitle:  "Tên bài tập",
+    exAssignLUrl:    "Link Google Form",
+    exAssignBtn:     "Giao bài",
+    exAssignErrEmpty:"Vui lòng chọn học viên và điền tên bài",
+    exAssignSuccess: "✅ Bài tập đã được giao!",
+    exAssignErr:     "Không thể giao bài tập",
+    exInProgress:    "⏳ Đang làm",
+    exCompleted:     "✅ Đã hoàn thành",
+  },
+  en: {
+    loginLabel:      "Phone number",
+    loginPlaceholder:"e.g. 0664146887",
+    pinLabel:        "PIN",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — Sign in",
+    loginTagline:    "Mindful & independent Japanese learning",
+    loginSubtitle:   "Jun Sensei · Japanese Class",
+    loginErrEmpty:   "Please enter your phone number and PIN",
+    loginErrWrong:   "Incorrect phone number or PIN",
+    loginErrConn:    "Connection error. Please try again.",
+    logoutBtn:       "Sign out",
+    studentGreeting: (name) => `Hello, ${name}!`,
+    studentSubtitle: "🌸 Unlocked Content",
+    loadingContent:  "Loading content...",
+    emptyContent:    "No content unlocked yet.<br>Check back after your next lesson! 🌸",
+    errContent:      "Error loading content",
+    errConn:         "Connection error",
+    viewBtn:         "開く · View / Download",
+    lessonLabel:     "Lesson",
+    adminTitle:      "Admin Panel",
+    adminSubtitle:   "🌸 Student Management",
+    studentListHeader: "Student List",
+    contentHeader:   "Content Management",
+    selectStudent:   "← Select a student to manage their content",
+    loadingStudents: "Loading...",
+    errStudents:     "Error loading students",
+    noStudents:      "No students yet",
+    noContentSheet:  "No content found in CONTENT sheet",
+    unlockedCount:   (n) => `${n} content unlocked 🌸`,
+    btnUnlock:       "🔓 Unlock",
+    btnLock:         "🔒 Lock",
+    errToggle:       "Connection error",
+    disabledAccount: "Account is disabled",
+    navHome:         "Home",
+    navProfile:      "Profile",
+    navAdd:          "Add",
+    profileInfo:     "👤 Personal Info",
+    profilePinCard:  "🔐 Change PIN",
+    pflId:           "ID",
+    pflName:         "Full name",
+    pflPhone:        "Phone",
+    pflEmail:        "Email",
+    pinOldPlaceholder: "Current PIN",
+    pinNewPlaceholder: "New PIN",
+    pinConfPlaceholder:"Confirm new PIN",
+    pinSaveBtn:      "Save",
+    pinErrEmpty:     "Please fill in all fields",
+    pinErrMatch:     "PINs do not match",
+    pinErrLen:       "PIN must be at least 4 characters",
+    pinErrWrong:     "Current PIN is incorrect",
+    pinErrConn:      "Connection error",
+    pinSuccess:      "✅ PIN updated successfully!",
+    addStudentTitle: "➕ Add Student",
+    addStudentSub:   "Create new account",
+    addInfo:         "📋 Information",
+    addLFname:       "First name",
+    addLLname:       "Last name",
+    addLPhone:       "Phone",
+    addLEmail:       "Email",
+    addLPin:         "Initial PIN",
+    addBtn:          "Add student",
+    addErrEmpty:     "Please fill in all required fields",
+    addErrFail:      "Failed to add student",
+    addErrConn:      "Connection error",
+    addSuccess:      "✅ Student added successfully!",
+    courseTypeGrammar: "Grammar",
+    courseTypeVocab:   "Vocabulary",
+    courseTypeOther:   "Other",
+    contentCount:      (n) => `${n} item(s)`,
+    navExercises:    "Exercises",
+    exEmpty:         "No exercises assigned yet 🌸",
+    exOpen:          "Open",
+    exDone:          "Done",
+    exMarkDone:      "✅ Mark done",
+    exMarkedDone:    "✅ Marked as done!",
+    exNoneInProgress:"No exercises in progress",
+    exNoneCompleted: "No completed exercises yet",
+    exAssignLabel:   "➕ Assign exercise",
+    exAssignLStu:    "Student",
+    exAssignLTitle:  "Exercise title",
+    exAssignLUrl:    "Google Form link",
+    exAssignBtn:     "Assign",
+    exAssignErrEmpty:"Please select a student and enter a title",
+    exAssignSuccess: "✅ Exercise assigned!",
+    exAssignErr:     "Failed to assign exercise",
+    exInProgress:    "⏳ In Progress",
+    exCompleted:     "✅ Completed",
+  },
+  fr: {
+    loginLabel:      "Numéro de téléphone",
+    loginPlaceholder:"Ex: 0664146887",
+    pinLabel:        "Code PIN",
+    pinPlaceholder:  "••••",
+    loginBtn:        "入る — Se connecter",
+    loginTagline:    "Cours de japonais réfléchi & autonome",
+    loginSubtitle:   "Jun Sensei · Cours de Japonais",
+    loginErrEmpty:   "Veuillez saisir votre téléphone et PIN",
+    loginErrWrong:   "Numéro de téléphone ou PIN incorrect",
+    loginErrConn:    "Erreur de connexion. Réessayez.",
+    logoutBtn:       "出る",
+    studentGreeting: (name) => `Bonjour, ${name} !`,
+    studentSubtitle: "🌸 Contenu débloqué",
+    loadingContent:  "Chargement du contenu...",
+    emptyContent:    "Aucun contenu débloqué pour l'instant.<br>Votre professeur mettra à jour bientôt ! 🌸",
+    errContent:      "Erreur de chargement",
+    errConn:         "Erreur de connexion",
+    viewBtn:         "開く · Voir / Télécharger",
+    lessonLabel:     "Cours",
+    adminTitle:      "Tableau de bord",
+    adminSubtitle:   "🌸 Panneau admin · Gestion des élèves",
+    studentListHeader: "Liste des élèves",
+    contentHeader:   "Gestion du contenu",
+    selectStudent:   "← Sélectionnez un élève pour gérer son contenu",
+    loadingStudents: "Chargement...",
+    errStudents:     "Erreur de chargement des élèves",
+    noStudents:      "Aucun élève pour l'instant",
+    noContentSheet:  "Aucun contenu dans l'onglet CONTENT",
+    unlockedCount:   (n) => `${n} contenu(s) débloqué(s) 🌸`,
+    btnUnlock:       "🔓 Débloquer",
+    btnLock:         "🔒 Bloquer",
+    errToggle:       "Erreur de connexion",
+    disabledAccount: "Compte désactivé",
+    navHome:         "Accueil",
+    navProfile:      "Profil",
+    navAdd:          "Ajouter",
+    profileInfo:     "👤 Informations personnelles",
+    profilePinCard:  "🔐 Changer le PIN",
+    pflId:           "Identifiant",
+    pflName:         "Nom complet",
+    pflPhone:        "Téléphone",
+    pflEmail:        "Email",
+    pinOldPlaceholder: "PIN actuel",
+    pinNewPlaceholder: "Nouveau PIN",
+    pinConfPlaceholder:"Confirmer le nouveau PIN",
+    pinSaveBtn:      "Enregistrer",
+    pinErrEmpty:     "Veuillez remplir tous les champs",
+    pinErrMatch:     "Les PIN ne correspondent pas",
+    pinErrLen:       "Le PIN doit faire au moins 4 caractères",
+    pinErrWrong:     "PIN actuel incorrect",
+    pinErrConn:      "Erreur de connexion",
+    pinSuccess:      "✅ PIN mis à jour avec succès !",
+    addStudentTitle: "➕ Ajouter un élève",
+    addStudentSub:   "Créer un nouveau compte",
+    addInfo:         "📋 Informations",
+    addLFname:       "Prénom",
+    addLLname:       "Nom de famille",
+    addLPhone:       "Téléphone",
+    addLEmail:       "Email",
+    addLPin:         "PIN initial",
+    addBtn:          "Ajouter l'élève",
+    addErrEmpty:     "Veuillez remplir les champs obligatoires",
+    addErrFail:      "Impossible d'ajouter l'élève",
+    addErrConn:      "Erreur de connexion",
+    addSuccess:      "✅ Élève ajouté avec succès !",
+    courseTypeGrammar: "Grammaire",
+    courseTypeVocab:   "Vocabulaire",
+    courseTypeOther:   "Autre",
+    contentCount:      (n) => `${n} contenu${n>1?"s":""}`,
+    navExercises:    "Exercices",
+    exEmpty:         "Aucun exercice assigné pour l'instant 🌸",
+    exOpen:          "Ouvrir",
+    exDone:          "Terminé",
+    exMarkDone:      "✅ Marquer terminé",
+    exMarkedDone:    "✅ Marqué comme terminé !",
+    exNoneInProgress:"Aucun exercice en cours",
+    exNoneCompleted: "Aucun exercice terminé pour l'instant",
+    exAssignLabel:   "➕ Assigner un exercice",
+    exAssignLStu:    "Élève",
+    exAssignLTitle:  "Titre de l'exercice",
+    exAssignLUrl:    "Lien Google Form",
+    exAssignBtn:     "Assigner",
+    exAssignErrEmpty:"Veuillez choisir un élève et saisir un titre",
+    exAssignSuccess: "✅ Exercice assigné avec succès !",
+    exAssignErr:     "Impossible d'assigner l'exercice",
+    exInProgress:    "⏳ En cours",
+    exCompleted:     "✅ Terminés",
+  }
+};
+
+const LANG_KEY = "jun_lang";
+let currentLang = localStorage.getItem(LANG_KEY) || "vi";
+
+function t(key, ...args) {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS['vi'];
+  const val = dict[key];
+  if (typeof val === "function") return val(...args);
+  return val || key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+
+  // Update html lang attribute
+  document.documentElement.lang = lang;
+
+  // Update profile language buttons active state
+  ["vi","en","fr"].forEach(l => {
+    const btn = document.getElementById("lang-" + l);
+    if (!btn) return;
+    const isActive = l === lang;
+    btn.style.background    = isActive ? "var(--pink-pale)" : "var(--bg-soft)";
+    btn.style.borderColor   = isActive ? "var(--pink)"      : "rgba(232,75,122,0.2)";
+    btn.style.color         = isActive ? "var(--pink)"      : "var(--ink)";
+    btn.style.fontWeight    = isActive ? "700"              : "400";
+  });
+
+  // Re-render all visible text
+  applyLang();
+}
+
+function applyLang() {
+  // Login page
+  const labelEl = document.querySelector('#page-login .form-group:first-of-type label');
+  if (labelEl) labelEl.textContent = t("loginLabel");
+  const phoneInput = document.getElementById("input-id");
+  if (phoneInput) phoneInput.placeholder = t("loginPlaceholder");
+  const pinLabel = document.querySelector('#page-login .form-group:last-of-type label');
+  if (pinLabel) pinLabel.textContent = t("pinLabel");
+  const pinInput = document.getElementById("input-pin");
+  if (pinInput) pinInput.placeholder = t("pinPlaceholder");
+  const loginBtn = document.getElementById("btn-login");
+  if (loginBtn && !loginBtn.disabled) loginBtn.textContent = t("loginBtn");
+  const tagline = document.querySelector(".login-logo .tagline");
+  if (tagline) tagline.textContent = t("loginTagline");
+  const enTitle = document.querySelector(".login-logo .en-title");
+  if (enTitle) enTitle.textContent = t("loginSubtitle");
+
+  // Student page
+  const sub = document.querySelector("#page-student .page-subtitle");
+  if (sub) sub.innerHTML = t("studentSubtitle");
+  const adminTitle = document.querySelector("#page-admin .page-title");
+  if (adminTitle) adminTitle.textContent = t("adminTitle");
+  const adminSub = document.querySelector("#page-admin .page-subtitle");
+  if (adminSub) adminSub.innerHTML = t("adminSubtitle");
+  const phStudents = document.getElementById("ph-students");
+  if (phStudents) phStudents.textContent = t("studentListHeader");
+  const hint = document.getElementById("select-student-hint");
+  if (hint) hint.textContent = t("selectStudent");
+  const adminSubEl = document.getElementById("admin-subtitle-el");
+  if (adminSubEl) adminSubEl.innerHTML = t("adminSubtitle");
+  const initLoading = document.getElementById("initial-loading");
+  if (initLoading) initLoading.childNodes[1].textContent = t("loadingContent");
+  // Profile labels
+  const pfl_id    = document.getElementById("pfl-id");    if(pfl_id)    pfl_id.textContent    = t("pflId");
+  const pfl_name  = document.getElementById("pfl-name");  if(pfl_name)  pfl_name.textContent  = t("pflName");
+  const pfl_phone = document.getElementById("pfl-phone"); if(pfl_phone) pfl_phone.textContent = t("pflPhone");
+  const pfl_email = document.getElementById("pfl-email"); if(pfl_email) pfl_email.textContent = t("pflEmail");
+  const ph_info   = document.getElementById("ph-info");   if(ph_info)   ph_info.textContent   = t("profileInfo");
+  const ph_pin    = document.getElementById("ph-pin");    if(ph_pin)    ph_pin.textContent    = t("profilePinCard");
+  const pinOld = document.getElementById("pin-old"); if(pinOld) pinOld.placeholder = t("pinOldPlaceholder");
+  const pinNew = document.getElementById("pin-new"); if(pinNew) pinNew.placeholder = t("pinNewPlaceholder");
+  const pinConf= document.getElementById("pin-confirm"); if(pinConf) pinConf.placeholder = t("pinConfPlaceholder");
+  const savePinBtn = document.getElementById("btn-save-pin"); if(savePinBtn && !savePinBtn.disabled) savePinBtn.textContent = "🔐 " + t("pinSaveBtn");
+  // Add student labels
+  const ph_add = document.getElementById("ph-add"); if(ph_add) ph_add.textContent = t("addInfo");
+  const asl_fn = document.getElementById("asl-fname"); if(asl_fn) asl_fn.textContent = t("addLFname");
+  const asl_ln = document.getElementById("asl-lname"); if(asl_ln) asl_ln.textContent = t("addLLname");
+  const asl_ph = document.getElementById("asl-phone"); if(asl_ph) asl_ph.textContent = t("addLPhone");
+  const asl_em = document.getElementById("asl-email"); if(asl_em) asl_em.textContent = t("addLEmail");
+  const asl_pi = document.getElementById("asl-pin");   if(asl_pi) asl_pi.textContent = t("addLPin");
+  const addBtn2 = document.getElementById("btn-add-student"); if(addBtn2 && !addBtn2.disabled) addBtn2.textContent = "➕ " + t("addBtn");
+  const addTitle = document.getElementById("add-student-title"); if(addTitle) addTitle.textContent = t("addStudentTitle");
+  const addSub   = document.getElementById("add-student-sub");   if(addSub)   addSub.textContent   = t("addStudentSub");
+  applyNavLang();
+}
+
+// Override showError to use current lang
+const _origShowError = window.showError;
+
+(function init() {
+  // Init language
+  currentLang = localStorage.getItem(LANG_KEY) || "vi";
+  document.documentElement.lang = currentLang;
+  applyLang();
+
+  showPage("login");
+  const user = loadSession();
+  if (user) initUser(user);
+})();
+</script>
+</body>
+</html
+// ══════════════════════════════════════════════
 // BOTTOM NAV
 // ══════════════════════════════════════════════
 let currentNavTab = "home";
