@@ -537,14 +537,14 @@
     /* ══ FORM TYPE CONTENT ══ */
     .type-form { background: rgba(103,58,183,0.15); color: #9c6fde; border: 1px solid rgba(103,58,183,0.35); }
     .btn-assign-content {
-      display: inline-block; width: 100%; padding: 0.6rem 1rem;
-      text-align: center; background: linear-gradient(135deg,rgba(103,58,183,0.15),rgba(103,58,183,0.08));
-      border: 1.5px solid rgba(103,58,183,0.4); color: #9c6fde;
-      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
-      border-radius: 8px; cursor: pointer; font-family: 'DM Sans',sans-serif;
-      font-weight: 600; transition: all 0.2s;
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(103,58,183,0.12); border: 1.5px solid rgba(103,58,183,0.4);
+      color: #9c6fde; font-size: 1rem; font-weight: 700; line-height: 1;
+      cursor: pointer; font-family: 'DM Sans',sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; padding: 0;
     }
-    .btn-assign-content:hover { background: rgba(103,58,183,0.25); }
+    .btn-assign-content:hover { background: rgba(103,58,183,0.25); transform: scale(1.1); }
     .btn-assign-content:disabled { opacity: 0.45; cursor: not-allowed; }
 
     /* Score display in student exercise list */
@@ -596,7 +596,7 @@
       .login-box { padding: 2rem 1.5rem; }
       #page-login { padding-top: 2rem; }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
-      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.3rem 0.8rem 80px; }
+      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.4rem 0.8rem 80px; }
       #header { padding: 0.75rem 1rem; }
     }
 
@@ -967,6 +967,14 @@
     </div>
   </div>
 
+</div>
+
+
+<!-- ══ BOTTOM NAV ══ -->
+<div id="bottom-nav">
+  <!-- filled dynamically based on role -->
+</div>
+
 <!-- ══ PROFILE PAGE ══ -->
 <div id="page-profile">
   <div class="profile-avatar-wrap">
@@ -1041,7 +1049,6 @@
   </div>
 </div>
 
-
 <!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
 <div id="page-add-student">
   <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
@@ -1079,7 +1086,6 @@
 
 
 
-
 <!-- ══ STUDENT EXERCISES PAGE ══ -->
 <div id="page-exercises">
   <div class="page-title" id="ex-page-title">📝 Exercices</div>
@@ -1088,7 +1094,6 @@
     <div class="loading"><div class="spinner"></div></div>
   </div>
 </div>
-
 
 <!-- ══ ADMIN EXERCISES PAGE ══ -->
 <div id="page-admin-exercises">
@@ -1121,16 +1126,6 @@
     </div>
   </div>
 </div>
-
-
-</div>
-
-
-<!-- ══ BOTTOM NAV ══ -->
-<div id="bottom-nav">
-  <!-- filled dynamically based on role -->
-</div>
-
 
 <div id="toast"></div>
 
@@ -1415,27 +1410,8 @@ function renderContentManage(studentId, name, familyName, unlocked) {
         const items = cnMap[cn];
         const unlockedInCN = items.filter(c => unlocked.has(String(c.id))).length;
         const contentItems = items.map(c => {
-          const isForm     = (c.type||"").toLowerCase() === "form";
           const isUnlocked = unlocked.has(String(c.id));
           const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
-          if (isForm) {
-            const safeUrl   = (c.driveLink||"").replace(/'/g, "%27");
-            const safeTitle = c.title.replace(/'/g, "%27");
-            return `
-              <div class="content-manage-item">
-                <div class="unlock-status" style="background:rgba(103,58,183,0.5);box-shadow:0 0 6px rgba(103,58,183,0.4)"></div>
-                <div class="content-manage-info">
-                  <div class="content-manage-title">${c.title}</div>
-                  <div class="content-manage-meta">
-                    <span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span>
-                  </div>
-                </div>
-                <button class="btn-assign-content" id="btn-assign-${c.id}"
-                  onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||'')}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
-                  ➕ Assigner
-                </button>
-              </div>`;
-          }
           return `
             <div class="content-manage-item">
               <div class="unlock-status ${isUnlocked ? "on" : "off"}"></div>
@@ -1952,7 +1928,7 @@ const TRANSLATIONS = {
     emptyContent:    "Chưa có nội dung nào được mở khoá.<br>Hãy chờ giáo viên cập nhật nhé! 🌸",
     errContent:      "Lỗi tải nội dung",
     errConn:         "Lỗi kết nối",
-    viewBtn:         "開く · Xem / Tải",
+    viewBtn:         "Consulter",
     lessonLabel:     "Bài",
     adminTitle:      "管理画面",
     adminSubtitle:   "🌸 Admin Panel · Quản lý học viên",
@@ -2006,7 +1982,7 @@ const TRANSLATIONS = {
     contentCount:      (n) => `${n} nội dung`,
     navExercises:    "Bài tập",
     exEmpty:         "Chưa có bài tập nào được giao 🌸",
-    exOpen:          "Mở",
+    exOpen:          "Ouvrir",
     exDone:          "Hoàn thành",
     exMarkDone:      "✅ Xong",
     exMarkedDone:    "✅ Đã đánh dấu hoàn thành!",
@@ -2020,8 +1996,8 @@ const TRANSLATIONS = {
     exAssignErrEmpty:"Vui lòng chọn học viên và điền tên bài",
     exAssignSuccess: "✅ Bài tập đã được giao!",
     exAssignErr:     "Không thể giao bài tập",
-    exInProgress:    "⏳ Đang làm",
-    exCompleted:     "✅ Đã hoàn thành",
+    exInProgress:    "Đang làm",
+    exCompleted:     "Đã hoàn thành",
   },
   en: {
     loginLabel:      "Phone number",
@@ -2041,7 +2017,7 @@ const TRANSLATIONS = {
     emptyContent:    "No content unlocked yet.<br>Check back after your next lesson! 🌸",
     errContent:      "Error loading content",
     errConn:         "Connection error",
-    viewBtn:         "開く · View / Download",
+    viewBtn:         "Consulter",
     lessonLabel:     "Lesson",
     adminTitle:      "Admin Panel",
     adminSubtitle:   "🌸 Student Management",
@@ -2095,7 +2071,7 @@ const TRANSLATIONS = {
     contentCount:      (n) => `${n} item(s)`,
     navExercises:    "Exercises",
     exEmpty:         "No exercises assigned yet 🌸",
-    exOpen:          "Open",
+    exOpen:          "Ouvrir",
     exDone:          "Done",
     exMarkDone:      "✅ Mark done",
     exMarkedDone:    "✅ Marked as done!",
@@ -2109,8 +2085,8 @@ const TRANSLATIONS = {
     exAssignErrEmpty:"Please select a student and enter a title",
     exAssignSuccess: "✅ Exercise assigned!",
     exAssignErr:     "Failed to assign exercise",
-    exInProgress:    "⏳ In Progress",
-    exCompleted:     "✅ Completed",
+    exInProgress:    "In Progress",
+    exCompleted:     "Completed",
   },
   fr: {
     loginLabel:      "Numéro de téléphone",
@@ -2130,7 +2106,7 @@ const TRANSLATIONS = {
     emptyContent:    "Aucun contenu débloqué pour l'instant.<br>Votre professeur mettra à jour bientôt ! 🌸",
     errContent:      "Erreur de chargement",
     errConn:         "Erreur de connexion",
-    viewBtn:         "開く · Voir / Télécharger",
+    viewBtn:         "Consulter",
     lessonLabel:     "Cours",
     adminTitle:      "Tableau de bord",
     adminSubtitle:   "🌸 Panneau admin · Gestion des élèves",
@@ -2198,8 +2174,8 @@ const TRANSLATIONS = {
     exAssignErrEmpty:"Veuillez choisir un élève et saisir un titre",
     exAssignSuccess: "✅ Exercice assigné avec succès !",
     exAssignErr:     "Impossible d'assigner l'exercice",
-    exInProgress:    "⏳ En cours",
-    exCompleted:     "✅ Terminés",
+    exInProgress:    "En cours",
+    exCompleted:     "Terminés",
   }
 };
 
