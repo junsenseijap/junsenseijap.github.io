@@ -611,7 +611,7 @@
       #lang-bar { gap: 0.1rem; }
       #page-login { padding-top: calc(1.5rem + 36px); }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
-      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.5rem 0.8rem 80px; }
+      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 84px 0.8rem 80px; }
     }
 
     /* ══════════════════════════════════════
@@ -650,7 +650,7 @@
        PROFILE PAGE
     ══════════════════════════════════════ */
     #page-profile {
-      display: none; padding: 0.8rem 1.2rem 80px; max-width: 540px; margin: 0 auto; padding-top: 0.8rem;
+      display: none; padding: 93px 1.2rem 80px; max-width: 540px; margin: 0 auto;
     }
     .profile-avatar-wrap {
       display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem;
@@ -734,7 +734,7 @@
        ADD STUDENT PAGE (Admin)
     ══════════════════════════════════════ */
     #page-add-student {
-      display: none; padding: 0.8rem 1.2rem 80px; max-width: 540px; margin: 0 auto; padding-top: 0.8rem;
+      display: none; padding: 93px 1.2rem 80px; max-width: 540px; margin: 0 auto;
     }
     .add-student-form { display: flex; flex-direction: column; gap: 1rem; }
     .add-student-form .form-group { margin-bottom: 0; }
@@ -762,7 +762,7 @@
        EXERCISE PAGES
     ══════════════════════════════════════ */
     #page-exercises, #page-admin-exercises {
-      display: none; padding: 0.8rem 1.2rem 80px; max-width: 700px; margin: 0 auto; padding-top: 0.8rem;
+      display: none; padding: 93px 1.2rem 80px; max-width: 700px; margin: 0 auto;
     }
 
     /* Student exercise card */
@@ -1200,7 +1200,7 @@ async function doLogin() {
   try {
     const data = await api({ action: "login", phone, pin });
     if (data.success) {
-      if (data.user.role === "Admin") window._adminPin = pin;
+      if (data.user.role === "Admin") { window._adminPin = pin; data.user._pin = pin; }
       saveSession(data.user);
       initUser(data.user);
     } else {
@@ -1366,8 +1366,8 @@ async function selectStudent(id, name, familyName) {
 
 function translateCourseT(raw) {
   const r = (raw || "").toLowerCase().trim();
-  if (r.includes("gram") || r.includes("文法") || r.includes("ng") && r.includes("ph")) return { label: t("courseTypeGrammar"), icon: "📖" };
-  if (r.includes("vocab") || r.includes("語彙") || r.includes("t") && r.includes("v")) return { label: t("courseTypeVocab"), icon: "📝" };
+  if (r.includes("gram") || r.includes("文法") || r.includes("grammaire") || r.includes("ngữ pháp")) return { label: t("courseTypeGrammar"), icon: "📖" };
+  if (r.includes("vocab") || r.includes("語彙") || r.includes("vocabulaire") || r.includes("từ vựng")) return { label: t("courseTypeVocab"), icon: "📝" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
 }
 
@@ -1786,10 +1786,11 @@ async function loadAdminExercises() {
   comBody.innerHTML = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
 
   try {
+    const pin = getStoredPin() || window._adminPin || "";
     const data = await api({
       action: "getExercisesAdmin",
       adminId: currentUserGlobal.id,
-      pin: getStoredPin()
+      pin: pin
     });
     if (!data.success) { inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
 
@@ -1951,6 +1952,10 @@ const TRANSLATIONS = {
     addErrFail:      "Không thể thêm học viên",
     addErrConn:      "Lỗi kết nối",
     addSuccess:      "✅ Học viên đã được thêm thành công!",
+    courseTypeGrammar: "Ngữ pháp",
+    courseTypeVocab:   "Từ vựng",
+    courseTypeOther:   "Khác",
+    contentCount:      (n) => `${n} nội dung`,
     navExercises:    "Bài tập",
     exEmpty:         "Chưa có bài tập nào được giao 🌸",
     exOpen:          "Mở",
@@ -2036,6 +2041,10 @@ const TRANSLATIONS = {
     addErrFail:      "学生の追加に失敗しました",
     addErrConn:      "接続エラー",
     addSuccess:      "✅ 学生が追加されました！",
+    courseTypeGrammar: "文法",
+    courseTypeVocab:   "語彙",
+    courseTypeOther:   "その他",
+    contentCount:      (n) => `${n} コンテンツ`,
     navExercises:    "練習",
     exEmpty:         "まだ練習問題がありません 🌸",
     exOpen:          "開く",
@@ -2121,6 +2130,10 @@ const TRANSLATIONS = {
     addErrFail:      "Failed to add student",
     addErrConn:      "Connection error",
     addSuccess:      "✅ Student added successfully!",
+    courseTypeGrammar: "Grammar",
+    courseTypeVocab:   "Vocabulary",
+    courseTypeOther:   "Other",
+    contentCount:      (n) => `${n} item(s)`,
     navExercises:    "Exercises",
     exEmpty:         "No exercises assigned yet 🌸",
     exOpen:          "Open",
@@ -2206,6 +2219,10 @@ const TRANSLATIONS = {
     addErrFail:      "Impossible d'ajouter l'élève",
     addErrConn:      "Erreur de connexion",
     addSuccess:      "✅ Élève ajouté avec succès !",
+    courseTypeGrammar: "Grammaire",
+    courseTypeVocab:   "Vocabulaire",
+    courseTypeOther:   "Autre",
+    contentCount:      (n) => `${n} contenu${n>1?"s":""}`,
     navExercises:    "Exercices",
     exEmpty:         "Aucun exercice assigné pour l'instant 🌸",
     exOpen:          "Ouvrir",
