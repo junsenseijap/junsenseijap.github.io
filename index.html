@@ -537,13 +537,14 @@
     /* ══ FORM TYPE CONTENT ══ */
     .type-form { background: rgba(103,58,183,0.15); color: #9c6fde; border: 1px solid rgba(103,58,183,0.35); }
     .btn-assign-content {
-      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-      background: rgba(103,58,183,0.12); border: 1.5px solid rgba(103,58,183,0.4);
-      color: #9c6fde; font-size: 1.1rem; font-weight: 700; line-height: 1;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; padding: 0;
+      display: inline-block; width: 100%; padding: 0.6rem 1rem;
+      text-align: center; background: linear-gradient(135deg,rgba(103,58,183,0.15),rgba(103,58,183,0.08));
+      border: 1.5px solid rgba(103,58,183,0.4); color: #9c6fde;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border-radius: 8px; cursor: pointer; font-family: 'DM Sans',sans-serif;
+      font-weight: 600; transition: all 0.2s;
     }
-    .btn-assign-content:hover { background: rgba(103,58,183,0.25); transform: scale(1.1); }
+    .btn-assign-content:hover { background: rgba(103,58,183,0.25); }
     .btn-assign-content:disabled { opacity: 0.45; cursor: not-allowed; }
 
     /* Score display in student exercise list */
@@ -942,15 +943,8 @@
       #page-profile, #page-add-student,
       #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
     }
-    /* PERMANENT PADDING */
-    #page-profile, #page-add-student,
-    #page-exercises, #page-admin-exercises { padding-top: 0.5rem !important; }
-    @media (max-width:600px) {
-      #page-profile, #page-add-student,
-      #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
-    }
     /* ADMIN DASHBOARD */
-    .dash-stat-row{display:flex;align-items:center;gap:1rem;padding:0.9rem 1.2rem;background:var(--bg-card);border:1.5px solid rgba(232,75,122,0.12);border-radius:12px;margin-bottom:0.7rem;box-shadow:0 2px 8px rgba(232,75,122,0.06);}
+    .dash-stat-row{display:flex;align-items:center;gap:1rem;padding:0.9rem 1.2rem;background:var(--bg-card);border:1.5px solid rgba(232,75,122,0.12);border-radius:12px;margin-bottom:0.7rem;}
     .dash-stat-icon{font-size:1.4rem;flex-shrink:0;}
     .dash-stat-label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);}
     .dash-stat-value{font-size:1.5rem;font-weight:700;color:var(--ink);}
@@ -1079,9 +1073,9 @@
   <div class="profile-card" style="margin-bottom:1rem">
     <div class="profile-card-header">🌐 Langue · Language · Ngôn ngữ</div>
     <div style="display:flex;gap:0.6rem;padding:1rem 1.2rem">
-      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇻🇳</button>
-      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇬🇧</button>
-      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇫🇷</button>
+      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.18s">🇻🇳</button>
+      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.18s">🇬🇧</button>
+      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.18s">🇫🇷</button>
     </div>
   </div>
 
@@ -1218,7 +1212,7 @@
 
 
   <!-- ══ ADMIN STATS DASHBOARD ══ -->
-  <div id="page-admin-dashboard" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto;padding-top:0.5rem !important">
+  <div id="page-admin-dashboard" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto">
     <div class="page-title">📊 Tableau de bord</div>
     <div class="page-subtitle">🌸 Vue d'ensemble</div>
     <div class="dash-stat-row">
@@ -1228,7 +1222,6 @@
     <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);font-weight:600;margin:0.8rem 0 0.5rem">📊 Moyennes de la classe</div>
     <div id="dash-avg-content"><div class="loading"><div class="spinner"></div></div></div>
   </div>
-
 
 <!-- ══ BOTTOM NAV ══ -->
 <div id="bottom-nav">
@@ -1350,7 +1343,7 @@ async function loadStudentContent(user) {
     const [contentData, scoresData, statsData] = await Promise.all([
       api({ action:"getMyContent",    studentId: user.id }),
       api({ action:"getMyScores",     studentId: user.id }),
-      api({ action:"getStudentStats", studentId: user.id })
+      api({ action:"getStudentStats", studentId: user.id }).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
     ]);
 
     const content = contentData.content || [];
@@ -1444,6 +1437,9 @@ async function loadStudentContent(user) {
 
   } catch(e) {
     console.error(e);
+    const pw=document.getElementById("student-progress-levels"); if(pw) pw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
+    const aw=document.getElementById("student-avg-content"); if(aw) aw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
+    const rw=document.getElementById("student-recent-content"); if(rw) rw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
   }
 }
 
@@ -1618,7 +1614,8 @@ function renderContentManage(studentId, name, familyName, unlocked) {
                 </div>
                 <button class="btn-assign-content" id="btn-assign-${c.id}"
                   onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||'')}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
-                  +</button>
+                  ➕ Assigner
+                </button>
               </div>`;
           }
           return `
@@ -1796,14 +1793,14 @@ function switchTab(tab) {
   document.getElementById("page-profile").style.display         = tab === "profile"                 ? "block" : "none";
   document.getElementById("page-add-student").style.display     = (isAdmin  && tab === "add")       ? "block" : "none";
   document.getElementById("page-exercises").style.display       = (!isAdmin && tab === "exercises") ? "block" : "none";
-  document.getElementById("page-admin-exercises").style.display = (isAdmin  && tab==="exercises")  ? "block":"none";
-  const _dash=document.getElementById("page-admin-dashboard"); if(_dash) _dash.style.display=(isAdmin&&tab==="dashboard")?"block":"none";
+  document.getElementById("page-admin-exercises").style.display = (isAdmin&&tab==="exercises")?"block":"none";
+  const _d=document.getElementById("page-admin-dashboard"); if(_d) _d.style.display=(isAdmin&&tab==="dashboard")?"block":"none";
 
   // Load on demand
   if (tab === "exercises") {
     if (isAdmin) loadAdminExercises();
     else         loadStudentExercises();
-  } else if (tab==="dashboard" && isAdmin) { loadAdminDashboard(); }
+  } else if (tab==="dashboard"&&isAdmin) { loadAdminDashboard(); }
 }
 
 // ══════════════════════════════════════════════
@@ -1835,7 +1832,7 @@ async function doChangePin() {
   const newPin = document.getElementById("pin-new").value.trim();
   const msg = document.getElementById("pin-msg");
   const btn = document.getElementById("btn-save-pin");
-  const show = (t2,c) => { msg.textContent=t2; msg.className="pin-msg "+c; msg.style.display="block"; };
+  const show = (txt,cls) => { msg.textContent=txt; msg.className="pin-msg "+cls; msg.style.display="block"; };
   if (!newPin)           return show(t("pinErrEmpty"),"error");
   if (newPin.length < 4) return show(t("pinErrLen"),  "error");
   btn.disabled=true; btn.textContent="...";
@@ -1936,12 +1933,12 @@ async function loadStudentExercises() {
       api({action:"getMyScores",   studentId:currentUserGlobal.id})
     ]);
     const exercises=exData.exercises||[];
-    const scMap={};
-    (scData.scores||[]).forEach(s=>{scMap[String(s.exerciseId)]=s;});
+    const scMap={};(scData.scores||[]).forEach(s=>{scMap[String(s.exerciseId)]=s;});
     const inP=exercises.filter(ex=>ex.status!=="done");
     const done=exercises.filter(ex=>ex.status==="done");
     document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
     document.getElementById("ex-stu-completed-count").textContent=done.length;
+    // Smart title: use title if meaningful, else level
     const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
     if(!inP.length){
       inBody.innerHTML=`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`;
@@ -1950,7 +1947,7 @@ async function loadStudentExercises() {
         <div class="ex-card" id="ex-card-${ex.id}">
           <div class="ex-card-info">
             <div class="ex-card-title">${gt(ex)}</div>
-            <div class="ex-card-meta">${ex.level||""} · 📅 ${ex.assignedDate||"—"}</div>
+            <div class="ex-card-meta">${ex.level?ex.level+" · ":""}📅 ${ex.assignedDate||"—"}</div>
           </div>
           <div class="ex-card-actions">
             ${ex.formUrl?`<a class="btn-ex-open" href="${ex.formUrl}" target="_blank" rel="noopener">📋 ${t("exOpen")}</a>`:""}
@@ -1967,14 +1964,17 @@ async function loadStudentExercises() {
         return `<div class="ex-card done">
           <div class="ex-card-info">
             <div class="ex-card-title">${gt(ex)}</div>
-            <div class="ex-card-meta">${ex.level||""} · 📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
+            <div class="ex-card-meta">${ex.level?ex.level+" · ":""}📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
             ${sl}
           </div>
           <span class="ex-status-badge done">✅ ${t("exDone")}</span>
         </div>`;
       }).join("");
     }
-  }catch(e){console.error(e);if(inBody)inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;}
+  }catch(e){
+    console.error(e);
+    if(inBody) inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
+  }
 }
 
 
