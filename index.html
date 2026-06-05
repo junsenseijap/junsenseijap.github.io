@@ -511,6 +511,28 @@
     }
     .content-manage-item:last-child { border-bottom: none; }
 
+
+    /* ══ COURSE TYPE (Grammaire / Vocabulaire) ══ */
+    .coursetype-row {
+      border-bottom: 1px solid rgba(44,26,34,0.05); overflow: hidden;
+    }
+    .coursetype-row:last-child { border-bottom: none; }
+    .coursetype-header {
+      padding: 0.65rem 1.1rem 0.65rem 1.8rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.7rem;
+      background: rgba(214,235,247,0.25); transition: background 0.15s;
+      user-select: none;
+    }
+    .coursetype-header:hover { background: rgba(214,235,247,0.5); }
+    .coursetype-icon { font-size: 0.9rem; flex-shrink: 0; }
+    .coursetype-label { flex: 1; font-size: 0.82rem; color: var(--ink2); font-weight: 500; }
+    .coursetype-count { font-size: 0.65rem; color: var(--gray); }
+    .coursetype-arrow { font-size: 0.65rem; color: var(--gray); transition: transform 0.2s; }
+    .coursetype-row.open .coursetype-arrow { transform: rotate(180deg); }
+    .coursetype-courses { display: none; }
+    .coursetype-row.open .coursetype-courses { display: block; }
+    .coursetype-courses .course-header { padding-left: 2.8rem; background: rgba(253,232,239,0.2); }
+    .coursetype-courses .content-manage-item { padding-left: 3.5rem; }
     /* ── LOADING ── */
     .loading { text-align: center; padding: 3rem; color: var(--gray); font-size: 0.84rem; }
     .spinner {
@@ -537,7 +559,7 @@
     @media (max-width: 500px) {
       .login-box { padding: 2rem 1.5rem; }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
-      #page-profile, #page-add-student { padding: 0.3rem 0.8rem 80px; }
+
       #header { padding: 0.75rem 1rem; }
     }
 
@@ -576,10 +598,10 @@
       color: rgba(232,75,122,0.2); font-size: 0.7rem; user-select: none; flex-shrink: 0;
     }
 
-    /* push all pages down to account for lang-bar (36px fixed) */
+    /* lang-bar is 36px fixed at top */
     #page-login { padding-top: calc(2rem + 36px); }
     #header { top: 36px; }
-    #page-student, #page-admin { padding-top: calc(0.5rem + 36px); }
+    /* inner pages: sticky header handles scroll, no extra padding-top needed */
 
     /* Mobile : drapeaux seulement, pas de texte */
     @media (max-width: 600px) {
@@ -588,8 +610,8 @@
       .lang-btn .flag { font-size: 1.25rem; }
       #lang-bar { gap: 0.1rem; }
       #page-login { padding-top: calc(1.5rem + 36px); }
-      #page-student, #page-admin { padding-top: calc(0.3rem + 36px); }
-      #page-profile, #page-add-student { padding-top: calc(0.3rem + 36px); }
+      #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
+      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.5rem 0.8rem 80px; }
     }
 
     /* ══════════════════════════════════════
@@ -628,8 +650,7 @@
        PROFILE PAGE
     ══════════════════════════════════════ */
     #page-profile {
-      display: none; padding: 2.5rem 2rem; max-width: 540px; margin: 0 auto;
-      padding-top: calc(2.5rem + 36px); padding-bottom: 80px;
+      display: none; padding: 0.8rem 1.2rem 80px; max-width: 540px; margin: 0 auto; padding-top: 0.8rem;
     }
     .profile-avatar-wrap {
       display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem;
@@ -713,7 +734,7 @@
        ADD STUDENT PAGE (Admin)
     ══════════════════════════════════════ */
     #page-add-student {
-      display: none; padding: 0.5rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
+      display: none; padding: 0.8rem 1.2rem 80px; max-width: 540px; margin: 0 auto; padding-top: 0.8rem;
     }
     .add-student-form { display: flex; flex-direction: column; gap: 1rem; }
     .add-student-form .form-group { margin-bottom: 0; }
@@ -741,7 +762,7 @@
        EXERCISE PAGES
     ══════════════════════════════════════ */
     #page-exercises, #page-admin-exercises {
-      display: none; padding: 0.5rem 1.2rem 80px; max-width: 700px; margin: 0 auto;
+      display: none; padding: 0.8rem 1.2rem 80px; max-width: 700px; margin: 0 auto; padding-top: 0.8rem;
     }
 
     /* Student exercise card */
@@ -1093,29 +1114,6 @@
   <div class="page-title" id="admin-ex-title">📊 Exercices</div>
   <div class="page-subtitle" id="admin-ex-sub">🌸 Suivi des exercices</div>
 
-  <!-- Assign exercise form -->
-  <div class="assign-ex-form">
-    <div class="assign-ex-title" id="assign-ex-label">➕ Assigner un exercice</div>
-    <div class="form-group">
-      <label id="aex-lstu">Élève</label>
-      <select id="aex-student" style="width:100%;padding:0.75rem 1rem;background:var(--bg-soft);border:1.5px solid rgba(232,75,122,0.2);border-radius:10px;color:var(--ink);font-size:0.92rem;font-family:'DM Sans',sans-serif;outline:none;">
-        <option value="">— Sélectionner —</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label id="aex-ltitle">Titre de l'exercice</label>
-      <input type="text" id="aex-title" placeholder="N3 - Cours 1 - Test grammaire"/>
-    </div>
-    <div class="form-group">
-      <label id="aex-lurl">Lien Google Form</label>
-      <input type="url" id="aex-url" placeholder="https://forms.gle/..."/>
-    </div>
-    <div class="assign-msg" id="assign-msg"></div>
-    <button class="btn-assign" id="btn-assign" onclick="doAssignExercise()">
-      ➕ <span id="assign-btn-label">Assigner</span>
-    </button>
-  </div>
-
   <!-- Progress accordion -->
   <div class="ex-accordion">
     <div class="ex-section" id="ex-inprogress-section">
@@ -1366,6 +1364,13 @@ async function selectStudent(id, name, familyName) {
   }
 }
 
+function translateCourseT(raw) {
+  const r = (raw || "").toLowerCase().trim();
+  if (r.includes("gram") || r.includes("文法") || r.includes("ng") && r.includes("ph")) return { label: t("courseTypeGrammar"), icon: "📖" };
+  if (r.includes("vocab") || r.includes("語彙") || r.includes("t") && r.includes("v")) return { label: t("courseTypeVocab"), icon: "📝" };
+  return { label: raw || t("courseTypeOther"), icon: "📌" };
+}
+
 function renderContentManage(studentId, name, familyName, unlocked) {
   const panel = document.getElementById("admin-content-panel");
 
@@ -1380,59 +1385,82 @@ function renderContentManage(studentId, name, familyName, unlocked) {
     return;
   }
 
-  // Group by level, then by courseN
+  // Group: Level → CourseT → CourseN → items
   const LEVELS = ["N5","N4","N3","N2","N1"];
   const byLevel = {};
   LEVELS.forEach(l => byLevel[l] = {});
 
   allContent.forEach(c => {
-    const lvl = c.level || "?";
-    if (!byLevel[lvl]) byLevel[lvl] = {};
-    const cn = c.courseN || "?";
-    if (!byLevel[lvl][cn]) byLevel[lvl][cn] = [];
-    byLevel[lvl][cn].push(c);
+    const lvl = (c.level  || "?").trim();
+    const ct  = (c.courseT || "autre").trim();
+    const cn  = String(c.courseN || "?").trim();
+    if (!byLevel[lvl])       byLevel[lvl] = {};
+    if (!byLevel[lvl][ct])   byLevel[lvl][ct] = {};
+    if (!byLevel[lvl][ct][cn]) byLevel[lvl][ct][cn] = [];
+    byLevel[lvl][ct][cn].push(c);
   });
 
   const levelRows = LEVELS.map(lvl => {
-    const courses = byLevel[lvl];
-    const courseKeys = Object.keys(courses).sort((a,b) => Number(a)-Number(b));
-    if (courseKeys.length === 0) return ""; // skip empty levels
+    const ctMap  = byLevel[lvl];
+    const ctKeys = Object.keys(ctMap);
+    if (ctKeys.length === 0) return "";
 
-    const totalItems = courseKeys.reduce((n,k) => n + courses[k].length, 0);
-    const unlockedInLevel = courseKeys.reduce((n,k) =>
-      n + courses[k].filter(c => unlocked.has(String(c.id))).length, 0);
+    const totalInLevel    = ctKeys.reduce((n,ct) => n + Object.values(ctMap[ct]).flat().length, 0);
+    const unlockedInLevel = ctKeys.reduce((n,ct) =>
+      n + Object.values(ctMap[ct]).flat().filter(c => unlocked.has(String(c.id))).length, 0);
 
-    const courseRows = courseKeys.map(cn => {
-      const items = courses[cn];
-      const unlockedInCourse = items.filter(c => unlocked.has(String(c.id))).length;
-      const contentItems = items.map(c => {
-        const isUnlocked = unlocked.has(String(c.id));
-        const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
-        return `
-          <div class="content-manage-item">
-            <div class="unlock-status ${isUnlocked ? 'on' : 'off'}"></div>
-            <div class="content-manage-info">
-              <div class="content-manage-title">${c.title}</div>
-              <div class="content-manage-meta">
-                <span class="card-type ${typeClass}" style="font-size:0.5rem;padding:0.1rem 0.35rem">${(c.type||'').toUpperCase()}</span>
+    const ctRows = ctKeys.map(ct => {
+      const cnMap  = ctMap[ct];
+      const cnKeys = Object.keys(cnMap).sort((a,b) => Number(a)-Number(b));
+      const totalInCT    = cnKeys.reduce((n,k) => n + cnMap[k].length, 0);
+      const unlockedInCT = cnKeys.reduce((n,k) =>
+        n + cnMap[k].filter(c => unlocked.has(String(c.id))).length, 0);
+      const { label: ctLabel, icon: ctIcon } = translateCourseT(ct);
+      const safeCtId = ct.replace(/[^a-zA-Z0-9]/g, "_");
+
+      const cnRows = cnKeys.map(cn => {
+        const items = cnMap[cn];
+        const unlockedInCN = items.filter(c => unlocked.has(String(c.id))).length;
+        const contentItems = items.map(c => {
+          const isUnlocked = unlocked.has(String(c.id));
+          const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
+          return `
+            <div class="content-manage-item">
+              <div class="unlock-status ${isUnlocked ? "on" : "off"}"></div>
+              <div class="content-manage-info">
+                <div class="content-manage-title">${c.title}</div>
+                <div class="content-manage-meta">
+                  <span class="card-type ${typeClass}" style="font-size:0.5rem;padding:0.1rem 0.35rem">${(c.type||"").toUpperCase()}</span>
+                </div>
               </div>
+              <button class="btn-unlock ${isUnlocked ? "unlocked" : "locked"}"
+                id="btn-c-${c.id}"
+                onclick="toggleContent(${studentId}, ${c.id}, ${isUnlocked})">
+                ${isUnlocked ? t("btnLock") : t("btnUnlock")}
+              </button>
+            </div>`;
+        }).join("");
+
+        return `
+          <div class="course-row" id="course-${lvl}-${safeCtId}-${cn}">
+            <div class="course-header" onclick="toggleCourse('${lvl}','${safeCtId}','${cn}')">
+              <span class="course-label">${t("lessonLabel")} ${cn}</span>
+              <span class="course-unlocked-count">${unlockedInCN}/${items.length} 🌸</span>
+              <span class="course-arrow">▼</span>
             </div>
-            <button class="btn-unlock ${isUnlocked ? 'unlocked' : 'locked'}"
-              id="btn-c-${c.id}"
-              onclick="toggleContent(${studentId}, ${c.id}, ${isUnlocked})">
-              ${isUnlocked ? t('btnLock') : t('btnUnlock')}
-            </button>
+            <div class="course-contents">${contentItems}</div>
           </div>`;
       }).join("");
 
       return `
-        <div class="course-row" id="course-${lvl}-${cn}">
-          <div class="course-header" onclick="toggleCourse('${lvl}','${cn}')">
-            <span class="course-label">${t('lessonLabel')} ${cn}</span>
-            <span class="course-unlocked-count">${unlockedInCourse}/${items.length} 🌸</span>
-            <span class="course-arrow">▼</span>
+        <div class="coursetype-row" id="ct-${lvl}-${safeCtId}">
+          <div class="coursetype-header" onclick="toggleCourseT('${lvl}','${safeCtId}')">
+            <span class="coursetype-icon">${ctIcon}</span>
+            <span class="coursetype-label">${ctLabel}</span>
+            <span class="coursetype-count">${unlockedInCT}/${totalInCT} 🌸</span>
+            <span class="coursetype-arrow">▼</span>
           </div>
-          <div class="course-contents">${contentItems}</div>
+          <div class="coursetype-courses">${cnRows}</div>
         </div>`;
     }).join("");
 
@@ -1440,11 +1468,11 @@ function renderContentManage(studentId, name, familyName, unlocked) {
       <div class="level-row has-content" id="level-row-${lvl}">
         <div class="level-header" onclick="toggleLevel('${lvl}')">
           <span class="level-badge">${lvl}</span>
-          <span class="level-label">${totalItems} contenu${totalItems>1?'s':''}</span>
-          <span class="level-count">${unlockedInLevel}/${totalItems} débloqué${unlockedInLevel>1?'s':''}</span>
+          <span class="level-label">${t("contentCount", totalInLevel)}</span>
+          <span class="level-count">${unlockedInLevel}/${totalInLevel} 🔓</span>
           <span class="level-arrow">▼</span>
         </div>
-        <div class="level-courses">${courseRows}</div>
+        <div class="level-courses">${ctRows}</div>
       </div>`;
   }).join("");
 
@@ -1457,14 +1485,17 @@ function renderContentManage(studentId, name, familyName, unlocked) {
     <div class="level-accordion">${levelRows}</div>`;
 }
 
+
 function toggleLevel(lvl) {
   const row = document.getElementById("level-row-" + lvl);
   if (row) row.classList.toggle("open");
 }
 
-function toggleCourse(lvl, cn) {
-  const row = document.getElementById("course-" + lvl + "-" + cn);
-  if (row) row.classList.toggle("open");
+function toggleCourseT(lvl, ctId) {
+  document.getElementById("ct-" + lvl + "-" + ctId)?.classList.toggle("open");
+}
+function toggleCourse(lvl, ctId, cn) {
+  document.getElementById("course-" + lvl + "-" + ctId + "-" + cn)?.classList.toggle("open");
 }
 
 async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
