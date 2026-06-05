@@ -596,7 +596,7 @@
       .login-box { padding: 2rem 1.5rem; }
       #page-login { padding-top: 2rem; }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
-      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.4rem 0.8rem 80px; }
+      #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.3rem 0.8rem 80px; }
       #header { padding: 0.75rem 1rem; }
     }
 
@@ -967,14 +967,6 @@
     </div>
   </div>
 
-</div>
-
-
-<!-- ══ BOTTOM NAV ══ -->
-<div id="bottom-nav">
-  <!-- filled dynamically based on role -->
-</div>
-
 <!-- ══ PROFILE PAGE ══ -->
 <div id="page-profile">
   <div class="profile-avatar-wrap">
@@ -1049,6 +1041,7 @@
   </div>
 </div>
 
+
 <!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
 <div id="page-add-student">
   <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
@@ -1086,6 +1079,7 @@
 
 
 
+
 <!-- ══ STUDENT EXERCISES PAGE ══ -->
 <div id="page-exercises">
   <div class="page-title" id="ex-page-title">📝 Exercices</div>
@@ -1094,6 +1088,7 @@
     <div class="loading"><div class="spinner"></div></div>
   </div>
 </div>
+
 
 <!-- ══ ADMIN EXERCISES PAGE ══ -->
 <div id="page-admin-exercises">
@@ -1126,6 +1121,16 @@
     </div>
   </div>
 </div>
+
+
+</div>
+
+
+<!-- ══ BOTTOM NAV ══ -->
+<div id="bottom-nav">
+  <!-- filled dynamically based on role -->
+</div>
+
 
 <div id="toast"></div>
 
@@ -1410,8 +1415,27 @@ function renderContentManage(studentId, name, familyName, unlocked) {
         const items = cnMap[cn];
         const unlockedInCN = items.filter(c => unlocked.has(String(c.id))).length;
         const contentItems = items.map(c => {
+          const isForm     = (c.type||"").toLowerCase() === "form";
           const isUnlocked = unlocked.has(String(c.id));
           const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
+          if (isForm) {
+            const safeUrl   = (c.driveLink||"").replace(/'/g, "%27");
+            const safeTitle = c.title.replace(/'/g, "%27");
+            return `
+              <div class="content-manage-item">
+                <div class="unlock-status" style="background:rgba(103,58,183,0.5);box-shadow:0 0 6px rgba(103,58,183,0.4)"></div>
+                <div class="content-manage-info">
+                  <div class="content-manage-title">${c.title}</div>
+                  <div class="content-manage-meta">
+                    <span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span>
+                  </div>
+                </div>
+                <button class="btn-assign-content" id="btn-assign-${c.id}"
+                  onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||'')}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
+                  ➕ Assigner
+                </button>
+              </div>`;
+          }
           return `
             <div class="content-manage-item">
               <div class="unlock-status ${isUnlocked ? "on" : "off"}"></div>
