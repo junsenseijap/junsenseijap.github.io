@@ -870,6 +870,18 @@
     }
     .assign-msg.success { background: rgba(74,138,85,0.12); color: #4a8a55; }
     .assign-msg.error   { background: var(--pink-pale); color: var(--pink); }
+
+    /* ══ INNER PAGES PADDING — PERMANENT ══ */
+    #page-profile, #page-add-student,
+    #page-exercises, #page-admin-exercises {
+      padding-top: 0.5rem !important;
+    }
+    @media (max-width: 600px) {
+      #page-profile, #page-add-student,
+      #page-exercises, #page-admin-exercises {
+        padding-top: 0.3rem !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -967,14 +979,6 @@
     </div>
   </div>
 
-</div>
-
-
-<!-- ══ BOTTOM NAV ══ -->
-<div id="bottom-nav">
-  <!-- filled dynamically based on role -->
-</div>
-
 <!-- ══ PROFILE PAGE ══ -->
 <div id="page-profile">
   <div class="profile-avatar-wrap">
@@ -1049,6 +1053,7 @@
   </div>
 </div>
 
+
 <!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
 <div id="page-add-student">
   <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
@@ -1086,6 +1091,7 @@
 
 
 
+
 <!-- ══ STUDENT EXERCISES PAGE ══ -->
 <div id="page-exercises">
   <div class="page-title" id="ex-page-title">📝 Exercices</div>
@@ -1094,6 +1100,7 @@
     <div class="loading"><div class="spinner"></div></div>
   </div>
 </div>
+
 
 <!-- ══ ADMIN EXERCISES PAGE ══ -->
 <div id="page-admin-exercises">
@@ -1126,6 +1133,16 @@
     </div>
   </div>
 </div>
+
+
+</div>
+
+
+<!-- ══ BOTTOM NAV ══ -->
+<div id="bottom-nav">
+  <!-- filled dynamically based on role -->
+</div>
+
 
 <div id="toast"></div>
 
@@ -1410,8 +1427,25 @@ function renderContentManage(studentId, name, familyName, unlocked) {
         const items = cnMap[cn];
         const unlockedInCN = items.filter(c => unlocked.has(String(c.id))).length;
         const contentItems = items.map(c => {
+          const isForm     = (c.type||"").toLowerCase() === "form";
           const isUnlocked = unlocked.has(String(c.id));
           const typeClass  = "type-" + (c.type||"pdf").toLowerCase();
+          if (isForm) {
+            return `
+              <div class="content-manage-item">
+                <div class="unlock-status" style="background:rgba(103,58,183,0.5);box-shadow:0 0 6px rgba(103,58,183,0.4)"></div>
+                <div class="content-manage-info">
+                  <div class="content-manage-title">${c.title}</div>
+                  <div class="content-manage-meta">
+                    <span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span>
+                  </div>
+                </div>
+                <button class="btn-assign-content" id="btn-assign-${c.id}"
+                  onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||"")}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
+                  +
+                </button>
+              </div>`;
+          }
           return `
             <div class="content-manage-item">
               <div class="unlock-status ${isUnlocked ? "on" : "off"}"></div>
@@ -1809,56 +1843,79 @@ async function loadAdminExercises() {
   const comBody = document.getElementById("ex-completed-body");
   inBody.innerHTML  = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
   comBody.innerHTML = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
-
   try {
-    const pin = getStoredPin() || window._adminPin || "";
-    const data = await api({
-      action: "getExercisesAdmin",
-      adminId: currentUserGlobal.id,
-      pin: pin
-    });
-    if (!data.success) { inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
+    const [exData, scoresResp] = await Promise.all([
+      api({ action:"getExercisesAdmin", adminId:currentUserGlobal.id, pin:getStoredPin() }),
+      api({ action:"getScoresAdmin",    adminId:currentUserGlobal.id, pin:getStoredPin() })
+    ]);
+    if (!exData.success) { inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
 
-    // Group by student, compute progress
+    // Build scores map
+    const scoresMap = {};
+    (scoresResp.scores||[]).forEach(s => { scoresMap[s.studentId+"_"+s.exerciseId] = s; });
+
     const studentMap = {};
     allStudents.forEach(s => { studentMap[String(s.id)] = s; });
 
+    // Group by student
     const byStudent = {};
-    (data.exercises || []).forEach(ex => {
+    (exData.exercises||[]).forEach(ex => {
       const sid = String(ex.studentId);
-      if (!byStudent[sid]) byStudent[sid] = { total: 0, done: 0, exercises: [] };
+      if (!byStudent[sid]) byStudent[sid] = { total:0, done:0, exercises:[] };
       byStudent[sid].total++;
-      if (ex.status === "done") byStudent[sid].done++;
+      if (ex.status==="done") byStudent[sid].done++;
       byStudent[sid].exercises.push(ex);
     });
 
-    const inProgressRows = [], completedRows = [];
-    Object.entries(byStudent).forEach(([sid, data]) => {
-      const stu = studentMap[sid] || { name: "ID " + sid, familyName: "" };
-      const isComplete = data.done === data.total;
-      const latestDate = data.exercises.map(e => e.assignedDate).sort().reverse()[0] || "—";
-      const exTitles = data.exercises.map(e => e.title).join(" · ");
-      const row = `
-        <div class="ex-admin-row">
+    const inProgressRows=[], completedRows=[];
+    Object.entries(byStudent).forEach(([sid, stuData]) => {
+      const stu = studentMap[sid] || { name:"ID "+sid, familyName:"" };
+      const isComplete = stuData.done === stuData.total;
+      const rowId = "ex-row-"+sid;
+
+      // Detail rows — clean display
+      const detailItems = stuData.exercises.map(ex => {
+        const sc = scoresMap[sid+"_"+ex.id];
+        let badge = "";
+        if (ex.status==="done" && sc && sc.maxScore>0) {
+          const pct = sc.score/sc.maxScore;
+          badge = `<span class="ex-score-badge ${pct>=0.7?"good":"medium"}">${sc.score}/${sc.maxScore}</span>`;
+        } else if (ex.status==="done") {
+          badge = `<span class="ex-score-badge good">✅</span>`;
+        } else {
+          badge = `<span class="ex-score-badge pending">⏳</span>`;
+        }
+        return `<div class="ex-detail-item">
+          <span class="ex-detail-title">${ex.title}</span>
+          ${badge}
+        </div>`;
+      }).join("");
+
+      // Clean row — no long date string
+      const row = `<div>
+        <div class="ex-admin-row" style="cursor:pointer" onclick="toggleExRow('${rowId}')">
           <div class="ex-admin-avatar">${(stu.name||"?")[0]}</div>
           <div class="ex-admin-info">
-            <div class="ex-admin-name">${stu.name} ${stu.familyName || ""}</div>
-            <div class="ex-admin-detail" title="${exTitles}">📅 ${latestDate} · ${exTitles}</div>
+            <div class="ex-admin-name">${stu.name} ${stu.familyName||""}</div>
+            <div class="ex-admin-detail">${stuData.done}/${stuData.total} exercice(s)</div>
           </div>
-          <span class="ex-progress-badge ${isComplete ? 'complete' : 'partial'}">${data.done}/${data.total}</span>
-        </div>`;
+          <span class="ex-progress-badge ${isComplete?"complete":"partial"}">${stuData.done}/${stuData.total}</span>
+          <button class="ex-expand-btn">▼</button>
+        </div>
+        <div class="ex-detail-row" id="${rowId}">${detailItems}</div>
+      </div>`;
+
       if (isComplete) completedRows.push(row);
-      else            inProgressRows.push(row);
+      else inProgressRows.push(row);
     });
 
     document.getElementById("ex-inprogress-count").textContent = inProgressRows.length;
     document.getElementById("ex-completed-count").textContent  = completedRows.length;
-
-    inBody.innerHTML  = inProgressRows.length  ? inProgressRows.join("")  : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneInProgress")}</div>`;
-    comBody.innerHTML = completedRows.length ? completedRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
-
-  } catch {
-    inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
+    inBody.innerHTML  = inProgressRows.length ? inProgressRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneInProgress")}</div>`;
+    comBody.innerHTML = completedRows.length  ? completedRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
+  } catch(err) {
+    console.error(err);
+    inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
   }
 }
 
