@@ -870,79 +870,35 @@
     }
     .assign-msg.success { background: rgba(74,138,85,0.12); color: #4a8a55; }
     .assign-msg.error   { background: var(--pink-pale); color: var(--pink); }
-/* ══ STUDENT HOME STATS ══ */
-    .stats-card {
-      background: var(--bg-card); border: 1.5px solid rgba(232,75,122,0.12);
-      border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;
-      box-shadow: 0 2px 10px rgba(232,75,122,0.06);
+    /* PERMANENT PADDING */
+    #page-profile,#page-add-student,
+    #page-exercises,#page-admin-exercises{padding-top:0.5rem !important;}
+    @media(max-width:600px){
+      #page-profile,#page-add-student,
+      #page-exercises,#page-admin-exercises{padding-top:0.3rem !important;}
     }
-    .stats-card-title {
-      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--pink); font-weight: 600; margin-bottom: 0.8rem;
-    }
-    .level-progress-row {
-      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.55rem;
-    }
-    .level-progress-row:last-child { margin-bottom: 0; }
-    .level-prog-badge {
-      font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.55rem;
-      border-radius: 99px; flex-shrink: 0;
-      background: linear-gradient(135deg, var(--pink), var(--pink-mid));
-      color: white; min-width: 28px; text-align: center;
-    }
-    .level-prog-bar-wrap {
-      flex: 1; height: 6px; background: rgba(232,75,122,0.1);
-      border-radius: 99px; overflow: hidden;
-    }
-    .level-prog-bar {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, var(--pink), var(--pink-mid));
-      transition: width 0.6s ease;
-    }
-    .level-prog-text { font-size: 0.7rem; color: var(--gray); flex-shrink: 0; }
-
-    .avg-display {
-      text-align: center; padding: 0.5rem 0;
-    }
-    .avg-number {
-      font-family: 'Zen Antique Soft', serif;
-      font-size: 2.2rem; color: var(--pink); font-weight: 400; line-height: 1;
-    }
-    .avg-label { font-size: 0.7rem; color: var(--gray); margin-top: 0.2rem; }
-    .avg-level-rows { margin-top: 0.8rem; }
-    .avg-level-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.4rem 0; border-top: 1px solid rgba(232,75,122,0.08);
-      font-size: 0.82rem;
-    }
-    .avg-level-name { color: var(--ink2); font-weight: 500; }
-    .avg-level-score { color: var(--pink); font-weight: 600; }
-    .avg-level-count { font-size: 0.65rem; color: var(--gray); }
-
-    .recent-content-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .recent-content-item {
-      display: flex; align-items: center; gap: 0.8rem;
-      padding: 0.55rem 0.8rem; background: var(--bg-soft);
-      border-radius: 10px; border: 1px solid rgba(232,75,122,0.1);
-    }
-    .recent-content-info { flex: 1; min-width: 0; }
-    .recent-content-title { font-size: 0.85rem; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .recent-content-meta  { font-size: 0.65rem; color: var(--gray); }
-    .btn-consult {
-      padding: 0.3rem 0.7rem; border-radius: 8px; flex-shrink: 0;
-      background: var(--pink-pale); border: 1px solid rgba(232,75,122,0.25);
-      color: var(--pink); font-size: 0.65rem; font-weight: 600;
-      cursor: pointer; text-decoration: none; font-family: 'DM Sans', sans-serif;
-      white-space: nowrap;
-    }
-
-/* ══ PERMANENT PADDING FIX ══ */
-    #page-profile, #page-add-student,
-    #page-exercises, #page-admin-exercises { padding-top: 0.5rem !important; }
-    @media (max-width:600px) {
-      #page-profile, #page-add-student,
-      #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
-    }
+    /* STATS CARD */
+    .stats-card{background:var(--bg-card);border:1.5px solid rgba(232,75,122,0.12);border-radius:14px;padding:1rem 1.2rem;margin-bottom:0.8rem;box-shadow:0 2px 10px rgba(232,75,122,0.06);}
+    .stats-card-title{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);font-weight:600;margin-bottom:0.8rem;}
+    .level-progress-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.55rem;}
+    .level-prog-badge{font-size:0.68rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:99px;flex-shrink:0;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;min-width:28px;text-align:center;}
+    .level-prog-bar-wrap{flex:1;height:6px;background:rgba(232,75,122,0.1);border-radius:99px;overflow:hidden;}
+    .level-prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pink),var(--pink-mid));}
+    .level-prog-text{font-size:0.7rem;color:var(--gray);flex-shrink:0;}
+    .avg-display{text-align:center;padding:0.5rem 0;}
+    .avg-number{font-family:'Zen Antique Soft',serif;font-size:2.2rem;color:var(--pink);font-weight:400;line-height:1;}
+    .avg-label{font-size:0.7rem;color:var(--gray);margin-top:0.2rem;}
+    .avg-level-rows{margin-top:0.8rem;}
+    .avg-level-row{display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-top:1px solid rgba(232,75,122,0.08);font-size:0.82rem;}
+    .avg-level-name{color:var(--ink2);font-weight:500;}
+    .avg-level-score{color:var(--pink);font-weight:600;}
+    .avg-level-count{font-size:0.65rem;color:var(--gray);}
+    .recent-content-list{display:flex;flex-direction:column;gap:0.5rem;}
+    .recent-content-item{display:flex;align-items:center;gap:0.8rem;padding:0.55rem 0.8rem;background:var(--bg-soft);border-radius:10px;border:1px solid rgba(232,75,122,0.1);}
+    .recent-content-info{flex:1;min-width:0;}
+    .recent-content-title{font-size:0.85rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .recent-content-meta{font-size:0.65rem;color:var(--gray);}
+    .btn-consult{padding:0.3rem 0.7rem;border-radius:8px;flex-shrink:0;background:var(--pink-pale);border:1px solid rgba(232,75,122,0.25);color:var(--pink);font-size:0.65rem;font-weight:600;cursor:pointer;text-decoration:none;font-family:'DM Sans',sans-serif;white-space:nowrap;}
     /* ADMIN DASHBOARD */
     .dash-stat-row{display:flex;align-items:center;gap:1rem;padding:0.9rem 1.2rem;background:var(--bg-card);border:1.5px solid rgba(232,75,122,0.12);border-radius:12px;margin-bottom:0.7rem;}
     .dash-stat-icon{font-size:1.4rem;flex-shrink:0;}
@@ -1028,10 +984,10 @@
   <!-- ══ STUDENT DASHBOARD ══ -->
   <div id="page-student">
     <div class="page-title" id="student-greeting">こんにちは</div>
-    <div class="page-subtitle">🌸 Nội dung đã mở khoá · Unlocked Content</div>
-    <div id="content-grid-wrap">
-      <div id="initial-loading" class="loading"><div class="spinner"></div>Đang tải nội dung...</div>
-    </div>
+    <div class="page-subtitle" id="student-subtitle">🌸 Tableau de bord</div>
+    <div class="stats-card"><div class="stats-card-title" id="progress-card-title">📚 Contenu débloqué</div><div id="student-progress-levels"><div class="loading"><div class="spinner"></div></div></div></div>
+    <div class="stats-card"><div class="stats-card-title" id="avg-card-title">📊 Moyenne générale</div><div id="student-avg-content"><div class="loading"><div class="spinner"></div></div></div></div>
+    <div class="stats-card"><div class="stats-card-title" id="recent-card-title">🕐 Derniers contenus</div><div id="student-recent-content"><div class="loading"><div class="spinner"></div></div></div></div>
   </div>
 
   <!-- ══ ADMIN DASHBOARD ══ -->
@@ -1073,9 +1029,9 @@
   <div class="profile-card" style="margin-bottom:1rem">
     <div class="profile-card-header">🌐 Langue · Language · Ngôn ngữ</div>
     <div style="display:flex;gap:0.6rem;padding:1rem 1.2rem">
-      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.18s">🇻🇳</button>
-      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.18s">🇬🇧</button>
-      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.18s">🇫🇷</button>
+      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center">🇻🇳</button>
+      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center">🇬🇧</button>
+      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;display:flex;align-items:center;justify-content:center">🇫🇷</button>
     </div>
   </div>
 
@@ -1169,41 +1125,52 @@
 <div id="page-exercises">
   <div class="page-title" id="ex-page-title">📝 Exercices</div>
   <div class="page-subtitle" id="ex-page-sub">🌸 Mes exercices</div>
-
-  <!-- En cours -->
   <div class="ex-section open" id="ex-stu-inprogress-section" style="margin-bottom:0.8rem">
     <div class="ex-section-header" onclick="toggleExSection('ex-stu-inprogress')">
-      <span class="ex-section-icon">⏳</span>
-      <span class="ex-section-label" id="ex-stu-inprogress-label">En cours</span>
+      <span class="ex-section-icon">⏳</span><span class="ex-section-label">En cours</span>
       <span class="ex-section-count inprogress" id="ex-stu-inprogress-count">0</span>
       <span class="ex-section-arrow">▲</span>
     </div>
-    <div class="ex-section-body open" id="ex-stu-inprogress-body">
-      <div class="loading" style="padding:1rem"><div class="spinner"></div></div>
-    </div>
+    <div class="ex-section-body open" id="ex-stu-inprogress-body"><div class="loading" style="padding:1rem"><div class="spinner"></div></div></div>
   </div>
-
-  <!-- Terminés -->
   <div class="ex-section" id="ex-stu-completed-section">
     <div class="ex-section-header" onclick="toggleExSection('ex-stu-completed')">
-      <span class="ex-section-icon">✅</span>
-      <span class="ex-section-label" id="ex-stu-completed-label">Terminés</span>
+      <span class="ex-section-icon">✅</span><span class="ex-section-label">Terminés</span>
       <span class="ex-section-count completed" id="ex-stu-completed-count">0</span>
       <span class="ex-section-arrow">▼</span>
     </div>
-    <div class="ex-section-body" id="ex-stu-completed-body">
-      <div class="loading" style="padding:1rem"><div class="spinner"></div></div>
-    </div>
+    <div class="ex-section-body" id="ex-stu-completed-body"><div class="loading" style="padding:1rem"><div class="spinner"></div></div></div>
   </div>
 </div>
-
-
 <!-- ══ ADMIN EXERCISES PAGE ══ -->
 <div id="page-admin-exercises">
   <div class="page-title" id="admin-ex-title">📊 Exercices</div>
   <div class="page-subtitle" id="admin-ex-sub">🌸 Suivi des exercices</div>
-  <div id="admin-ex-list">
-    <div class="loading" style="padding:2rem"><div class="spinner"></div></div>
+
+  <!-- Progress accordion -->
+  <div class="ex-accordion">
+    <div class="ex-section" id="ex-inprogress-section">
+      <div class="ex-section-header" onclick="toggleExSection('inprogress')">
+        <span class="ex-section-icon">⏳</span>
+        <span class="ex-section-label" id="ex-inprogress-label">En cours</span>
+        <span class="ex-section-count inprogress" id="ex-inprogress-count">0</span>
+        <span class="ex-section-arrow">▼</span>
+      </div>
+      <div class="ex-section-body" id="ex-inprogress-body">
+        <div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>
+      </div>
+    </div>
+    <div class="ex-section" id="ex-completed-section">
+      <div class="ex-section-header" onclick="toggleExSection('completed')">
+        <span class="ex-section-icon">✅</span>
+        <span class="ex-section-label" id="ex-completed-label">Terminés</span>
+        <span class="ex-section-count completed" id="ex-completed-count">0</span>
+        <span class="ex-section-arrow">▼</span>
+      </div>
+      <div class="ex-section-body" id="ex-completed-body">
+        <div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1213,12 +1180,8 @@
 
   <!-- ══ ADMIN STATS DASHBOARD ══ -->
   <div id="page-admin-dashboard" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto">
-    <div class="page-title">📊 Tableau de bord</div>
-    <div class="page-subtitle">🌸 Vue d'ensemble</div>
-    <div class="dash-stat-row">
-      <span class="dash-stat-icon">👥</span>
-      <div><div class="dash-stat-label">Élèves actifs</div><div class="dash-stat-value" id="dash-student-count">—</div></div>
-    </div>
+    <div class="page-title">📊 Tableau de bord</div><div class="page-subtitle">🌸 Vue d'ensemble</div>
+    <div class="dash-stat-row"><span class="dash-stat-icon">👥</span><div><div class="dash-stat-label">Élèves actifs</div><div class="dash-stat-value" id="dash-student-count">—</div></div></div>
     <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);font-weight:600;margin:0.8rem 0 0.5rem">📊 Moyennes de la classe</div>
     <div id="dash-avg-content"><div class="loading"><div class="spinner"></div></div></div>
   </div>
@@ -1338,131 +1301,60 @@ function doLogout() {
 }
 
 async function loadStudentContent(user) {
-  // Load all data in parallel
   try {
-    const [contentData, scoresData, statsData] = await Promise.all([
-      api({ action:"getMyContent",    studentId: user.id }),
-      api({ action:"getMyScores",     studentId: user.id }),
-      api({ action:"getStudentStats", studentId: user.id }).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
+    const [cd,sd,td] = await Promise.all([
+      api({action:"getMyContent",    studentId:user.id}),
+      api({action:"getMyScores",     studentId:user.id}),
+      api({action:"getStudentStats", studentId:user.id}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
     ]);
-
-    const content = contentData.content || [];
-    const scores  = scoresData.scores   || [];
-    const stats   = statsData;
-
-    // ── Progression par niveau ──
-    const levelMap = {};
-    content.forEach(c => {
-      const lvl = c.level || "?";
-      if (!levelMap[lvl]) levelMap[lvl] = 0;
-      levelMap[lvl]++;
-    });
-
-    const LEVELS = ["N5","N4","N3","N2","N1"];
-    const progWrap = document.getElementById("student-progress-levels");
-    if (progWrap) {
-      if (content.length === 0) {
-        progWrap.innerHTML = `<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">${t("emptyContent")}</div>`;
-      } else {
-        // Get total content per level from allContent (we need to fetch it separately)
-        // For now show just unlocked counts
-        progWrap.innerHTML = LEVELS
-          .filter(l => levelMap[l])
-          .map(l => `
-            <div class="level-progress-row">
-              <span class="level-prog-badge">${l}</span>
-              <div class="level-prog-bar-wrap">
-                <div class="level-prog-bar" style="width:100%"></div>
-              </div>
-              <span class="level-prog-text">${levelMap[l]} 🌸</span>
-            </div>`).join("") || `<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("emptyContent")}</div>`;
+    const content=cd.content||[];
+    const pw=document.getElementById("student-progress-levels");
+    if(pw){
+      const lm={};content.forEach(c=>{const l=c.level||"?";lm[l]=(lm[l]||0)+1;});
+      const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]).map(l=>`
+        <div class="level-progress-row">
+          <span class="level-prog-badge">${l}</span>
+          <div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:100%"></div></div>
+          <span class="level-prog-text">${lm[l]} 🌸</span>
+        </div>`).join("");
+      pw.innerHTML=rows||`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("emptyContent")}</div>`;
+    }
+    const aw=document.getElementById("student-avg-content");
+    if(aw){
+      if(!td||!td.success||!td.totalScored){
+        aw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">${t("exEmpty")}</div>`;
+      }else{
+        const lrows=["N5","N4","N3","N2","N1"].filter(l=>td.avgByLevel[l]).map(l=>{
+          const d=td.avgByLevel[l];
+          return`<div class="avg-level-row"><span class="avg-level-name">${l}</span><span class="avg-level-score">${d.avg.toFixed(1)}/10</span><span class="avg-level-count">(${d.count} ex.)</span></div>`;
+        }).join("");
+        aw.innerHTML=`<div class="avg-display"><div class="avg-number">${td.globalAvg.toFixed(1)}<span style="font-size:1rem;color:var(--gray)"> / 10</span></div><div class="avg-label">${td.totalScored} exercice(s) noté(s)</div></div>${lrows?'<div class="avg-level-rows">'+lrows+'</div>':""}`;
       }
     }
-
-    // ── Moyenne générale par niveau ──
-    const avgWrap = document.getElementById("student-avg-content");
-    if (avgWrap) {
-      if (!stats.success || stats.totalScored === 0) {
-        avgWrap.innerHTML = `<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">${t("exEmpty")}</div>`;
-      } else {
-        const LEVELS = ["N5","N4","N3","N2","N1"];
-        const levelRows = LEVELS
-          .filter(l => stats.avgByLevel[l])
-          .map(l => {
-            const d = stats.avgByLevel[l];
-            return `<div class="avg-level-row">
-              <span class="avg-level-name">${l}</span>
-              <span class="avg-level-score">${d.avg.toFixed(1)} / 10</span>
-              <span class="avg-level-count">(${d.count} ex.)</span>
-            </div>`;
-          }).join("");
-        avgWrap.innerHTML = `
-          <div class="avg-display">
-            <div class="avg-number">${stats.globalAvg.toFixed(1)}<span style="font-size:1rem;color:var(--gray)"> / 10</span></div>
-            <div class="avg-label">${stats.totalScored} exercice(s) noté(s)</div>
-          </div>
-          ${levelRows ? '<div class="avg-level-rows">' + levelRows + '</div>' : ''}`;
-      }
-    }
-
-    // ── 3 derniers contenus débloqués ──
-    const recentWrap = document.getElementById("student-recent-content");
-    if (recentWrap) {
-      const recent = [...content].sort((a,b) => {
-        const da = a.unlockedDate ? new Date(a.unlockedDate) : new Date(0);
-        const db = b.unlockedDate ? new Date(b.unlockedDate) : new Date(0);
-        return db - da;
-      }).slice(0, 3);
-
-      if (recent.length === 0) {
-        recentWrap.innerHTML = `<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">${t("emptyContent")}</div>`;
-      } else {
-        recentWrap.innerHTML = `<div class="recent-content-list">${recent.map(c => {
-          const isForm = (c.type||"").toLowerCase() === "form";
-          const url = isForm && c.driveLink
-            ? c.driveLink + (c.driveLink.includes("?")?"&":"?") + FORM_ENTRY_ID + "=" + user.id
-            : c.driveLink;
-          const typeClass = "type-" + (c.type||"pdf").toLowerCase();
-          return `<div class="recent-content-item">
-            <span class="card-type ${typeClass}" style="font-size:0.55rem;padding:0.12rem 0.4rem;flex-shrink:0">${(c.type||"").toUpperCase()}</span>
-            <div class="recent-content-info">
-              <div class="recent-content-title">${c.title}</div>
-              <div class="recent-content-meta">${c.level||""} · ${t("lessonLabel")} ${c.courseN||""}</div>
-            </div>
-            <a class="btn-consult" href="${url}" target="_blank" rel="noopener">${t("consultBtn")}</a>
+    const rw=document.getElementById("student-recent-content");
+    if(rw){
+      if(!content.length){rw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">${t("emptyContent")}</div>`;}
+      else{
+        const recent=[...content].sort((a,b)=>new Date(String(b.unlockedDate||0))-new Date(String(a.unlockedDate||0))).slice(0,3);
+        rw.innerHTML='<div class="recent-content-list">'+recent.map(c=>{
+          const isF=(c.type||"").toLowerCase()==="form";
+          const url=isF&&c.driveLink?c.driveLink+(c.driveLink.includes("?")?"&":"?")+FORM_ENTRY_ID+"="+user.id:c.driveLink;
+          const tc="type-"+(c.type||"pdf").toLowerCase();
+          return`<div class="recent-content-item">
+            <span class="card-type ${tc}" style="font-size:0.55rem;padding:0.12rem 0.4rem;flex-shrink:0">${(c.type||"").toUpperCase()}</span>
+            <div class="recent-content-info"><div class="recent-content-title">${c.title}</div><div class="recent-content-meta">${c.level||""} · ${t("lessonLabel")} ${c.courseN||""}</div></div>
+            <a class="btn-consult" href="${url}" target="_blank" rel="noopener">Consulter</a>
           </div>`;
-        }).join("")}</div>`;
+        }).join("")+'</div>';
       }
     }
-
-  } catch(e) {
+  }catch(e){
     console.error(e);
-    const pw=document.getElementById("student-progress-levels"); if(pw) pw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
-    const aw=document.getElementById("student-avg-content"); if(aw) aw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
-    const rw=document.getElementById("student-recent-content"); if(rw) rw.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
+    ["student-progress-levels","student-avg-content","student-recent-content"].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.innerHTML=`<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">${t("errConn")}</div>`;
+    });
   }
 }
-
-function renderContentCard(c) {
-  const typeClass = "type-" + (c.type || "pdf").toLowerCase();
-  const typeLabel = (c.type || "").toUpperCase();
-  const meta = [c.level, c.courseN ? t("lessonLabel") + " " + c.courseN : ""].filter(Boolean).join(" · ");
-  const date = c.unlockedDate ? "🌸 " + (currentLang === "fr" ? "Débloqué le" : currentLang === "ja" ? "解除日" : currentLang === "en" ? "Unlocked" : "Mở khoá") + ": " + c.unlockedDate : "";
-  return `
-    <div class="content-card">
-      <span class="card-type ${typeClass}">${typeLabel}</span>
-      <div class="card-title">${c.title || "Nội dung"}</div>
-      <div class="card-meta">
-        <span>${meta}</span><br>
-        <span style="color:var(--pink);opacity:0.65;font-size:0.7rem;">${date}</span>
-      </div>
-      <a class="btn-view" href="${c.driveLink}" target="_blank" rel="noopener">${t('viewBtn')}</a>
-    </div>`;
-}
-
-let adminUser = null, allContent = [], selectedStudentId = null, studentAccessMap = {};
-
-let allStudents = [];
 
 async function loadAdminPanel(user) {
   adminUser = user;
@@ -1793,14 +1685,14 @@ function switchTab(tab) {
   document.getElementById("page-profile").style.display         = tab === "profile"                 ? "block" : "none";
   document.getElementById("page-add-student").style.display     = (isAdmin  && tab === "add")       ? "block" : "none";
   document.getElementById("page-exercises").style.display       = (!isAdmin && tab === "exercises") ? "block" : "none";
-  document.getElementById("page-admin-exercises").style.display = (isAdmin&&tab==="exercises")?"block":"none";
-  const _d=document.getElementById("page-admin-dashboard"); if(_d) _d.style.display=(isAdmin&&tab==="dashboard")?"block":"none";
+  document.getElementById("page-admin-exercises").style.display=(isAdmin&&tab==="exercises")?"block":"none";
+  const _d=document.getElementById("page-admin-dashboard");if(_d)_d.style.display=(isAdmin&&tab==="dashboard")?"block":"none";
 
   // Load on demand
   if (tab === "exercises") {
     if (isAdmin) loadAdminExercises();
     else         loadStudentExercises();
-  } else if (tab==="dashboard"&&isAdmin) { loadAdminDashboard(); }
+  }else if(tab==="dashboard"&&isAdmin){loadAdminDashboard();}
 }
 
 // ══════════════════════════════════════════════
@@ -1829,22 +1721,18 @@ function togglePin(inputId) {
 }
 
 async function doChangePin() {
-  const newPin = document.getElementById("pin-new").value.trim();
-  const msg = document.getElementById("pin-msg");
-  const btn = document.getElementById("btn-save-pin");
-  const show = (txt,cls) => { msg.textContent=txt; msg.className="pin-msg "+cls; msg.style.display="block"; };
-  if (!newPin)           return show(t("pinErrEmpty"),"error");
-  if (newPin.length < 4) return show(t("pinErrLen"),  "error");
-  btn.disabled=true; btn.textContent="...";
-  try {
-    const data = await api({ action:"changePin", userId:currentUserGlobal.id, newPin });
-    if (data.success) {
-      show(t("pinSuccess"),"success");
-      if (currentUserGlobal.role==="Admin") window._adminPin=newPin;
-      const pn=document.getElementById("pin-new"); if(pn) pn.value="";
-    } else { show(data.message||t("pinErrWrong"),"error"); }
-  } catch { show(t("pinErrConn"),"error"); }
-  btn.disabled=false; btn.textContent="🔐 "+t("pinSaveBtn");
+  const newPin=document.getElementById("pin-new").value.trim();
+  const msg=document.getElementById("pin-msg"),btn=document.getElementById("btn-save-pin");
+  const show=(txt,cls)=>{msg.textContent=txt;msg.className="pin-msg "+cls;msg.style.display="block";};
+  if(!newPin)return show(t("pinErrEmpty"),"error");
+  if(newPin.length<4)return show(t("pinErrLen"),"error");
+  btn.disabled=true;btn.textContent="...";
+  try{
+    const data=await api({action:"changePin",userId:currentUserGlobal.id,newPin});
+    if(data.success){show(t("pinSuccess"),"success");if(currentUserGlobal.role==="Admin")window._adminPin=newPin;const pn=document.getElementById("pin-new");if(pn)pn.value="";}
+    else show(data.message||t("pinErrWrong"),"error");
+  }catch{show(t("pinErrConn"),"error");}
+  btn.disabled=false;btn.textContent="🔐 "+t("pinSaveBtn");
 }
 async function doAddStudent() {
   const name    = document.getElementById("as-name").value.trim();
@@ -1924,26 +1812,24 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title) {
 // EXERCISES — STUDENT
 // ══════════════════════════════════════════════
 async function loadStudentExercises() {
-  const inBody=document.getElementById("ex-stu-inprogress-body");
-  const comBody=document.getElementById("ex-stu-completed-body");
-  if(!inBody||!comBody) return;
-  try {
-    const [exData,scData]=await Promise.all([
+  const inB=document.getElementById("ex-stu-inprogress-body");
+  const comB=document.getElementById("ex-stu-completed-body");
+  if(!inB||!comB)return;
+  try{
+    const [ed,sd]=await Promise.all([
       api({action:"getMyExercises",studentId:currentUserGlobal.id}),
       api({action:"getMyScores",   studentId:currentUserGlobal.id})
     ]);
-    const exercises=exData.exercises||[];
-    const scMap={};(scData.scores||[]).forEach(s=>{scMap[String(s.exerciseId)]=s;});
-    const inP=exercises.filter(ex=>ex.status!=="done");
-    const done=exercises.filter(ex=>ex.status==="done");
+    const exs=ed.exercises||[];
+    const sm={};(sd.scores||[]).forEach(s=>{sm[String(s.exerciseId)]=s;});
+    const inP=exs.filter(ex=>ex.status!=="done");
+    const done=exs.filter(ex=>ex.status==="done");
     document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
     document.getElementById("ex-stu-completed-count").textContent=done.length;
-    // Smart title: use title if meaningful, else level
     const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
-    if(!inP.length){
-      inBody.innerHTML=`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`;
-    }else{
-      inBody.innerHTML=inP.map(ex=>`
+    inB.innerHTML=!inP.length
+      ?`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`
+      :inP.map(ex=>`
         <div class="ex-card" id="ex-card-${ex.id}">
           <div class="ex-card-info">
             <div class="ex-card-title">${gt(ex)}</div>
@@ -1954,14 +1840,12 @@ async function loadStudentExercises() {
             <button class="btn-ex-done" id="btn-done-${ex.id}" onclick="markExerciseDone(${ex.id})">${t("exMarkDone")}</button>
           </div>
         </div>`).join("");
-    }
-    if(!done.length){
-      comBody.innerHTML=`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
-    }else{
-      comBody.innerHTML=done.map(ex=>{
-        const sc=scMap[String(ex.id)];
+    comB.innerHTML=!done.length
+      ?`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`
+      :done.map(ex=>{
+        const sc=sm[String(ex.id)];
         const sl=sc&&sc.maxScore>0?`<div class="ex-score-line ${sc.score/sc.maxScore>=0.7?"good":"medium"}">🎯 ${sc.score}/${sc.maxScore} pts</div>`:"";
-        return `<div class="ex-card done">
+        return`<div class="ex-card done">
           <div class="ex-card-info">
             <div class="ex-card-title">${gt(ex)}</div>
             <div class="ex-card-meta">${ex.level?ex.level+" · ":""}📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
@@ -1970,13 +1854,8 @@ async function loadStudentExercises() {
           <span class="ex-status-badge done">✅ ${t("exDone")}</span>
         </div>`;
       }).join("");
-    }
-  }catch(e){
-    console.error(e);
-    if(inBody) inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
-  }
+  }catch(e){console.error(e);if(inB)inB.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;}
 }
-
 
 async function markExerciseDone(exId) {
   const btn = document.getElementById("btn-done-" + exId);
@@ -2004,88 +1883,52 @@ async function markExerciseDone(exId) {
 // EXERCISES — ADMIN
 // ══════════════════════════════════════════════
 async function loadAdminExercises() {
-  const wrap = document.getElementById("admin-ex-list");
-  if (!wrap) return;
-  wrap.innerHTML = '<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
-
-  try {
-    const [exData, scoresResp] = await Promise.all([
-      api({ action:"getExercisesAdmin", adminId:currentUserGlobal.id, pin:getStoredPin() }),
-      api({ action:"getScoresAdmin",    adminId:currentUserGlobal.id, pin:getStoredPin() })
+  const wrap=document.getElementById("admin-ex-list");
+  if(!wrap)return;
+  wrap.innerHTML='<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
+  try{
+    const [ed,sr]=await Promise.all([
+      api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()}),
+      api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()})
     ]);
-    if (!exData.success) { wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
-
-    const scoresMap = {};
-    (scoresResp.scores||[]).forEach(s => { scoresMap[s.studentId+"_"+s.exerciseId] = s; });
-
-    const studentMap = {};
-    allStudents.forEach(s => { studentMap[String(s.id)] = s; });
-
-    // Group by student
-    const byStudent = {};
-    (exData.exercises||[]).forEach(ex => {
-      const sid = String(ex.studentId);
-      if (!byStudent[sid]) byStudent[sid] = { total:0, done:0, exercises:[], lastDate:"" };
-      byStudent[sid].total++;
-      if (ex.status==="done") byStudent[sid].done++;
-      if (ex.assignedDate > byStudent[sid].lastDate) byStudent[sid].lastDate = ex.assignedDate;
-      byStudent[sid].exercises.push(ex);
+    if(!ed.success){wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;return;}
+    const scM={};(sr.scores||[]).forEach(s=>{scM[s.studentId+"_"+s.exerciseId]=s;});
+    const stuMap={};allStudents.forEach(s=>{stuMap[String(s.id)]=s;});
+    const byS={};
+    (ed.exercises||[]).forEach(ex=>{
+      const sid=String(ex.studentId);
+      if(!byS[sid])byS[sid]={total:0,done:0,exercises:[],lastDate:""};
+      byS[sid].total++;if(ex.status==="done")byS[sid].done++;
+      if((ex.assignedDate||"")>byS[sid].lastDate)byS[sid].lastDate=ex.assignedDate||"";
+      byS[sid].exercises.push(ex);
     });
-
-    // Sort: in-progress first (by lastDate desc), then completed (by lastDate desc)
-    const entries = Object.entries(byStudent);
-    entries.sort(([,a],[,b]) => {
-      const aComplete = a.done === a.total;
-      const bComplete = b.done === b.total;
-      if (aComplete !== bComplete) return aComplete ? 1 : -1;
+    const entries=Object.entries(byS).sort(([,a],[,b])=>{
+      const ac=a.done===a.total,bc=b.done===b.total;
+      if(ac!==bc)return ac?1:-1;
       return b.lastDate.localeCompare(a.lastDate);
     });
-
-    if (entries.length === 0) {
-      wrap.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--gray)">${t("exNoneInProgress")}</div>`;
-      return;
-    }
-
-    wrap.innerHTML = entries.map(([sid, stuData]) => {
-      const stu = studentMap[sid] || { name:"ID "+sid, familyName:"" };
-      const isComplete = stuData.done === stuData.total;
-      const rowId = "ex-row-"+sid;
-
-      const detailItems = stuData.exercises.map(ex => {
-        const sc = scoresMap[sid+"_"+ex.id];
-        let badge = "";
-        if (ex.status==="done" && sc && sc.maxScore>0) {
-          const pct = sc.score/sc.maxScore;
-          badge = `<span class="ex-score-badge ${pct>=0.7?"good":"medium"}">${sc.score}/${sc.maxScore}</span>`;
-        } else if (ex.status==="done") {
-          badge = `<span class="ex-score-badge good">✅</span>`;
-        } else {
-          badge = `<span class="ex-score-badge pending">⏳</span>`;
-        }
-        return `<div class="ex-detail-item">
-          <span class="ex-detail-title">${(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice")}</span>
-          ${badge}
-        </div>`;
+    if(!entries.length){wrap.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--gray)">${t("exNoneInProgress")}</div>`;return;}
+    const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
+    wrap.innerHTML=entries.map(([sid,sd])=>{
+      const stu=stuMap[sid]||{name:"ID "+sid,familyName:""};
+      const isC=sd.done===sd.total;
+      const rid="ex-row-"+sid;
+      const details=sd.exercises.map(ex=>{
+        const sc=scM[sid+"_"+ex.id];
+        const badge=sc&&sc.maxScore>0?`<span class="ex-score-badge ${sc.score/sc.maxScore>=0.7?"good":"medium"}">${sc.score}/${sc.maxScore}</span>`:ex.status==="done"?'<span class="ex-score-badge good">✅</span>':'<span class="ex-score-badge pending">⏳</span>';
+        return`<div class="ex-detail-item"><span class="ex-detail-title">${gt(ex)}</span>${badge}</div>`;
       }).join("");
-
-      return `<div style="margin-bottom:0.6rem">
-        <div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);box-shadow:0 2px 8px rgba(232,75,122,0.06)" onclick="toggleExRow('${rowId}')">
+      return`<div style="margin-bottom:0.6rem">
+        <div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card)" onclick="toggleExRow('${rid}')">
           <div class="ex-admin-avatar">${(stu.name||"?")[0]}</div>
-          <div class="ex-admin-info">
-            <div class="ex-admin-name">${stu.name} ${stu.familyName||""}</div>
-            <div class="ex-admin-detail">${stuData.done}/${stuData.total} exercice(s)</div>
-          </div>
-          <span class="ex-progress-badge ${isComplete?"complete":"partial"}">${stuData.done}/${stuData.total}</span>
+          <div class="ex-admin-info"><div class="ex-admin-name">${stu.name} ${stu.familyName||""}</div><div class="ex-admin-detail">${sd.done}/${sd.total} exercice(s)</div></div>
+          <span class="ex-progress-badge ${isC?"complete":"partial"}">${sd.done}/${sd.total}</span>
           <button class="ex-expand-btn">▼</button>
         </div>
-        <div class="ex-detail-row" id="${rowId}">${detailItems}</div>
+        <div class="ex-detail-row" id="${rid}">${details}</div>
       </div>`;
     }).join("");
-
-  } catch(err) {
-    console.error(err);
-    wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
-  }
+  }catch(e){console.error(e);wrap.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;}
 }
 
 async function doAssignExercise() {
@@ -2121,8 +1964,14 @@ async function doAssignExercise() {
   btn.disabled = false;
 }
 
-function toggleExSection(type) {
-  document.getElementById("ex-" + type + "-section")?.classList.toggle("open");
+function toggleExSection(id) {
+  const section=document.getElementById(id+"-section");
+  if(!section)return;
+  section.classList.toggle("open");
+  const body=document.getElementById(id+"-body");
+  if(body)body.classList.toggle("open");
+  const arrow=section.querySelector(".ex-section-arrow");
+  if(arrow)arrow.textContent=section.classList.contains("open")?"▲":"▼";
 }
 
 function applyNavLang() {
@@ -2497,28 +2346,19 @@ function applyLang() {
 const _origShowError = window.showError;
 
 
-function toggleExRow(rowId) {
-  const row = document.getElementById(rowId);
-  if (!row) return;
-  row.classList.toggle('open');
-  const btn = row.previousElementSibling?.querySelector('.ex-expand-btn');
-  if (btn) btn.textContent = row.classList.contains('open') ? '▲' : '▼';
-}
-
-
 async function loadAdminDashboard() {
   const aw=document.getElementById("dash-avg-content");
   const sc2=document.getElementById("dash-student-count");
-  if(sc2) sc2.textContent=allStudents.length;
-  if(!aw) return;
+  if(sc2)sc2.textContent=allStudents.length;
+  if(!aw)return;
   aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
     const [sr,er]=await Promise.all([
-      api({action:"getScoresAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()}),
+      api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
       api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
     ]);
     const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
-    const sm={};allStudents.forEach(s=>{sm[String(s.id)]=s;});
+    const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
     const LEVELS=["N5","N4","N3","N2","N1"],bl={};
     (sr.scores||[]).forEach(sc=>{
       if(!sc.maxScore)return;
@@ -2532,16 +2372,14 @@ async function loadAdminDashboard() {
       const se=Object.entries(bl[lvl]);
       const la=se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length;
       const rid="dash-lvl-"+lvl;
-      const rows=se.map(([sid,d])=>{const stu=sm[sid]||{name:"ID "+sid,familyName:""};return{name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt};})
+      const rows=se.map(([sid,d])=>{const stu=sm2[sid]||{name:"ID "+sid,familyName:""};return{name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt};})
         .sort((a,b)=>b.avg-a.avg)
         .map(s=>`<div class="dash-avg-student-row"><span class="dash-avg-student-name">${s.name}</span><span class="dash-avg-student-score">${s.avg.toFixed(1)}/10</span><span class="dash-avg-student-count">(${s.cnt})</span></div>`)
         .join("");
       return`<div class="dash-avg-level-row" id="${rid}">
         <div class="dash-avg-level-header" onclick="document.getElementById('${rid}').classList.toggle('open')">
-          <span class="dash-avg-level-badge">${lvl}</span>
-          <span class="dash-avg-level-label">${se.length} élève(s)</span>
-          <span class="dash-avg-level-score">${la.toFixed(1)}/10</span>
-          <span class="dash-avg-level-arrow">▼</span>
+          <span class="dash-avg-level-badge">${lvl}</span><span class="dash-avg-level-label">${se.length} élève(s)</span>
+          <span class="dash-avg-level-score">${la.toFixed(1)}/10</span><span class="dash-avg-level-arrow">▼</span>
         </div>
         <div class="dash-avg-student-list">${rows}</div>
       </div>`;
