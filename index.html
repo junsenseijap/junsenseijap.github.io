@@ -566,52 +566,17 @@
     /* ══════════════════════════════════════
        LANGUAGE BAR
     ══════════════════════════════════════ */
-    #lang-bar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-      background: rgba(250,250,250,0.97);
-      border-bottom: 1px solid rgba(232,75,122,0.12);
-      backdrop-filter: blur(14px);
-      display: flex; justify-content: center; align-items: center;
-      gap: 0.2rem; padding: 0.3rem 1rem;
-      height: 36px;
-      box-shadow: 0 1px 8px rgba(232,75,122,0.07);
-      white-space: nowrap; overflow: hidden;
-    }
-    .lang-btn {
-      background: transparent; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-size: 0.7rem;
-      font-weight: 500; letter-spacing: 0.08em;
-      padding: 0.22rem 0.7rem; border-radius: 99px;
-      color: var(--gray); transition: all 0.18s;
-      display: flex; align-items: center; gap: 0.3rem;
-      white-space: nowrap; line-height: 1;
-    }
-    .lang-btn .flag { font-size: 0.95rem; line-height: 1; flex-shrink: 0; }
-    .lang-btn .lang-label { display: inline; }
-    .lang-btn:hover { color: var(--pink); background: var(--pink-pale); }
-    .lang-btn.active {
-      color: var(--pink); background: var(--pink-pale);
-      border: 1.5px solid rgba(232,75,122,0.25);
-      font-weight: 600;
-    }
-    .lang-sep {
-      color: rgba(232,75,122,0.2); font-size: 0.7rem; user-select: none; flex-shrink: 0;
-    }
 
-    /* lang-bar is 36px fixed at top */
-    #page-login { padding-top: calc(2rem + 36px); }
-    #header { top: 36px; }
-    /* inner pages: sticky header handles scroll, no extra padding-top needed */
+    /* login page centered */
+    #page-login { padding-top: 3rem; }
+    #header { top: 0; }
 
-    /* Mobile : drapeaux seulement, pas de texte */
     @media (max-width: 600px) {
-      .lang-btn .lang-label { display: none; }
-      .lang-btn { padding: 0.22rem 0.55rem; gap: 0; }
-      .lang-btn .flag { font-size: 1.25rem; }
-      #lang-bar { gap: 0.1rem; }
-      #page-login { padding-top: calc(1.5rem + 36px); }
+      .login-box { padding: 2rem 1.5rem; }
+      #page-login { padding-top: 2rem; }
       #page-student, #page-admin { padding: 0.5rem 0.8rem 80px; }
       #page-profile, #page-add-student, #page-exercises, #page-admin-exercises { padding: 0.4rem 0.8rem 80px; }
+      #header { padding: 0.75rem 1rem; }
     }
 
     /* ══════════════════════════════════════
@@ -677,13 +642,13 @@
     .profile-card-header {
       background: linear-gradient(135deg, var(--pink-pale), var(--blue-pale));
       border-bottom: 1px solid rgba(232,75,122,0.1);
-      padding: 0.6rem 1.2rem;
+      padding: 0.8rem 1.2rem;
       font-size: 0.65rem; letter-spacing: 0.22em;
       text-transform: uppercase; color: var(--ink2); font-weight: 600;
     }
     .profile-field {
       display: flex; align-items: center; gap: 0.8rem;
-      padding: 0.65rem 1.2rem;
+      padding: 0.85rem 1.2rem;
       border-bottom: 1px solid rgba(44,26,34,0.05);
     }
     .profile-field:last-child { border-bottom: none; }
@@ -736,10 +701,8 @@
     #page-add-student {
       display: none; padding: 0.5rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
     }
-    .add-student-form { display: flex; flex-direction: column; gap: 0.55rem; }
+    .add-student-form { display: flex; flex-direction: column; gap: 1rem; }
     .add-student-form .form-group { margin-bottom: 0; }
-    .add-student-form .form-group input { padding: 0.6rem 0.9rem; font-size: 0.9rem; }
-    .add-student-form .form-group label { font-size: 0.62rem; margin-bottom: 0.2rem; }
     .btn-add-student {
       width: 100%; padding: 0.95rem;
       background: linear-gradient(135deg, var(--pink), var(--pink-mid));
@@ -747,7 +710,7 @@
       letter-spacing: 0.22em; text-transform: uppercase;
       font-weight: 500; cursor: pointer; border-radius: 10px;
       transition: opacity 0.2s, box-shadow 0.2s; font-family: 'DM Sans', sans-serif;
-      box-shadow: 0 4px 16px rgba(232,75,122,0.3); margin-top: 0.2rem;
+      box-shadow: 0 4px 16px rgba(232,75,122,0.3); margin-top: 0.5rem;
     }
     .btn-add-student:hover { opacity: 0.9; }
     .btn-add-student:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -890,18 +853,6 @@
 </head>
 <body>
 
-<!-- ══ LANGUAGE BAR ══ -->
-<div id="lang-bar">
-  <button class="lang-btn active" onclick="setLang('vi')" id="lang-vi"><span class="flag">🇻🇳</span><span class="lang-label"> Tiếng Việt</span></button>
-  <span class="lang-sep">|</span>
-  <button class="lang-btn" onclick="setLang('ja')" id="lang-ja"><span class="flag">🇯🇵</span><span class="lang-label"> 日本語</span></button>
-  <span class="lang-sep">|</span>
-  <button class="lang-btn" onclick="setLang('en')" id="lang-en"><span class="flag">🇬🇧</span><span class="lang-label"> English</span></button>
-  <span class="lang-sep">|</span>
-  <button class="lang-btn" onclick="setLang('fr')" id="lang-fr"><span class="flag">🇫🇷</span><span class="lang-label"> Français</span>
-  </button>
-</div>
-
 
 <!-- Pétales de sakura -->
 <div class="petals-bg">
@@ -920,7 +871,8 @@
         <span class="jp-title">ジュン先生</span>
         <div class="divider"></div>
         <span class="en-title">Jun Sensei · Học Tiếng Nhật</span>
-        <span class="tagline">Lớp tiếng Nhật tư duy &amp; tự giác</span>
+        <span class="tagline" id="login-tagline">Lớp tiếng Nhật tư duy &amp; tự giác</span>
+        <span style="font-size:0.7rem;color:var(--gray);letter-spacing:0.05em;margin-top:0.2rem;display:block">Mindful Japanese Learning</span>
       </div>
       <div class="form-group">
         <label>Số điện thoại · Téléphone · 電話番号</label>
@@ -1004,14 +956,23 @@
 
 <!-- ══ PROFILE PAGE ══ -->
 <div id="page-profile">
-  <!-- Compact user header -->
-  <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;padding:0.6rem 0.2rem">
-    <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink-soft),var(--blue-pale));border:2px solid rgba(232,75,122,0.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--pink);font-weight:700;flex-shrink:0" id="profile-avatar-letter">?</div>
-    <div>
-      <div style="font-family:'Zen Antique Soft',serif;font-size:1.1rem;color:var(--ink);font-weight:600" id="profile-fullname"></div>
-      <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray)" id="profile-role-label"></div>
+  <div class="profile-avatar-wrap">
+    <div class="profile-avatar" id="profile-avatar-letter">?</div>
+    <div class="profile-name" id="profile-fullname"></div>
+    <div class="profile-role" id="profile-role-label"></div>
+  </div>
+
+
+  <!-- Language selector card -->
+  <div class="profile-card" style="margin-bottom:1rem">
+    <div class="profile-card-header">🌐 Langue · Language · Ngôn ngữ</div>
+    <div style="display:flex;gap:0.6rem;padding:1rem 1.2rem">
+      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇻🇳<br><span style="font-size:0.62rem;letter-spacing:0.05em">Việt</span></button>
+      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇬🇧<br><span style="font-size:0.62rem;letter-spacing:0.05em">English</span></button>
+      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇫🇷<br><span style="font-size:0.62rem;letter-spacing:0.05em">Français</span></button>
     </div>
   </div>
+
   <!-- Info card (read-only) -->
   <div class="profile-card">
     <div class="profile-card-header" id="ph-info">👤 Thông tin cá nhân</div>
@@ -1057,6 +1018,10 @@
         <input type="password" id="pin-new" maxlength="6" placeholder="Nouveau PIN"/>
         <button class="pin-toggle" onclick="togglePin('pin-new')">👁</button>
       </div>
+      <div class="pin-input-wrap">
+        <input type="password" id="pin-confirm" maxlength="6" placeholder="Confirmer le nouveau PIN"/>
+        <button class="pin-toggle" onclick="togglePin('pin-confirm')">👁</button>
+      </div>
       <div class="pin-msg" id="pin-msg"></div>
       <button class="btn-save-pin" id="btn-save-pin" onclick="doChangePin()">🔐 Enregistrer</button>
     </div>
@@ -1065,9 +1030,9 @@
 
 <!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
 <div id="page-add-student">
-  <div class="page-title" id="add-student-title" style="font-size:1.4rem;margin-bottom:0.1rem">➕ Ajouter un élève</div>
-  <div class="page-subtitle" id="add-student-sub" style="margin-bottom:0.6rem">Nouveau compte étudiant</div>
-  <div class="profile-card" style="margin-top:0.5rem">
+  <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
+  <div class="page-subtitle" id="add-student-sub">Nouveau compte étudiant</div>
+  <div class="profile-card" style="margin-top:1.5rem">
     <div class="profile-card-header" id="ph-add">📋 Informations</div>
     <div class="add-student-form" style="padding:1.2rem">
       <div class="form-group">
@@ -1366,8 +1331,8 @@ async function selectStudent(id, name, familyName) {
 
 function translateCourseT(raw) {
   const r = (raw || "").toLowerCase().trim();
-  if (r.includes("gram") || r.includes("文法") || r.includes("grammaire") || r.includes("ngữ pháp")) return { label: t("courseTypeGrammar"), icon: "📖" };
-  if (r.includes("vocab") || r.includes("語彙") || r.includes("vocabulaire") || r.includes("từ vựng")) return { label: t("courseTypeVocab"), icon: "📝" };
+  if (r.includes("gram") || r.includes("grammaire") || r.includes("ng") && r.includes("ph")) return { label: t("courseTypeGrammar"), icon: "📖" };
+  if (r.includes("vocab") || r.includes("vocabulaire") || r.includes("t") && r.includes("v") && r.length < 12) return { label: t("courseTypeVocab"), icon: "📝" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
 }
 
@@ -1567,7 +1532,6 @@ function buildBottomNav(role) {
   }
   // Exercise page labels
   const exPageTitle = document.getElementById("ex-page-title"); if(exPageTitle) exPageTitle.textContent = "📝 " + t("navExercises");
-  const exPageSub   = document.getElementById("ex-page-sub");   if(exPageSub)   exPageSub.textContent   = t("exEmpty");
   const adminExT    = document.getElementById("admin-ex-title"); if(adminExT)   adminExT.textContent    = "📊 " + t("navExercises");
   const inProgLabel = document.getElementById("ex-inprogress-label"); if(inProgLabel) inProgLabel.textContent = t("exInProgress");
   const compLabel   = document.getElementById("ex-completed-label");  if(compLabel)   compLabel.textContent   = t("exCompleted");
@@ -1617,7 +1581,7 @@ function loadProfilePage(user) {
   document.getElementById("pf-phone").textContent = user.phone || "—";
   document.getElementById("pf-email").textContent = user.email || "—";
   // Clear PIN fields
-  ["pin-old","pin-new"].forEach(id => {
+  ["pin-old","pin-new","pin-confirm"].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = "";
   });
   const msg = document.getElementById("pin-msg");
@@ -1633,6 +1597,7 @@ function togglePin(inputId) {
 async function doChangePin() {
   const oldPin     = document.getElementById("pin-old").value.trim();
   const newPin     = document.getElementById("pin-new").value.trim();
+  const confirmPin = document.getElementById("pin-confirm").value.trim();
   const msg        = document.getElementById("pin-msg");
   const btn        = document.getElementById("btn-save-pin");
 
@@ -1640,8 +1605,9 @@ async function doChangePin() {
     msg.textContent = text; msg.className = "pin-msg " + type; msg.style.display = "block";
   };
 
-  if (!oldPin || !newPin) return showPinMsg(t("pinErrEmpty"), "error");
-  if (newPin.length < 4)  return showPinMsg(t("pinErrLen"),   "error");
+  if (!oldPin || !newPin || !confirmPin) return showPinMsg(t("pinErrEmpty"), "error");
+  if (newPin !== confirmPin)              return showPinMsg(t("pinErrMatch"), "error");
+  if (newPin.length < 4)                  return showPinMsg(t("pinErrLen"),   "error");
 
   btn.disabled = true; btn.textContent = "...";
   try {
@@ -1654,7 +1620,7 @@ async function doChangePin() {
       showPinMsg(t("pinSuccess"), "success");
       // Update stored pin for admin
       if (currentUserGlobal.role === "Admin") window._adminPin = newPin;
-      ["pin-old","pin-new"].forEach(id => document.getElementById(id) && (document.getElementById(id).value = ""));
+      ["pin-old","pin-new","pin-confirm"].forEach(id => document.getElementById(id).value = "");
     } else {
       showPinMsg(data.message || t("pinErrWrong"), "error");
     }
@@ -1767,17 +1733,6 @@ async function markExerciseDone(exId) {
 // EXERCISES — ADMIN
 // ══════════════════════════════════════════════
 async function loadAdminExercises() {
-  // Fill student dropdown in assign form
-  const sel = document.getElementById("aex-student");
-  if (sel.options.length <= 1 && allStudents.length > 0) {
-    allStudents.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = s.name + " " + (s.familyName || "");
-      sel.appendChild(opt);
-    });
-  }
-
   const inBody  = document.getElementById("ex-inprogress-body");
   const comBody = document.getElementById("ex-completed-body");
   inBody.innerHTML  = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
@@ -1836,7 +1791,8 @@ async function loadAdminExercises() {
 }
 
 async function doAssignExercise() {
-  const studentId = document.getElementById("aex-student").value;
+  const stuEl = document.getElementById("aex-student"); if(!stuEl) return;
+  const studentId = stuEl.value;
   const title     = document.getElementById("aex-title").value.trim();
   const formUrl   = document.getElementById("aex-url").value.trim();
   const msg       = document.getElementById("assign-msg");
@@ -1856,9 +1812,7 @@ async function doAssignExercise() {
     });
     if (data.success) {
       showMsg(t("exAssignSuccess"), "success");
-      document.getElementById("aex-student").value = "";
-      document.getElementById("aex-title").value   = "";
-      document.getElementById("aex-url").value     = "";
+      ["aex-student","aex-title","aex-url"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
       loadAdminExercises();
     } else {
       showMsg(data.message || t("exAssignErr"), "error");
@@ -1972,95 +1926,6 @@ const TRANSLATIONS = {
     exAssignErr:     "Không thể giao bài tập",
     exInProgress:    "⏳ Đang làm",
     exCompleted:     "✅ Đã hoàn thành",
-  },
-  ja: {
-    loginLabel:      "電話番号",
-    loginPlaceholder:"例: 0664146887",
-    pinLabel:        "PIN番号",
-    pinPlaceholder:  "••••",
-    loginBtn:        "入る — ログイン",
-    loginTagline:    "考えて・自立して学ぶ日本語教室",
-    loginSubtitle:   "ジュン先生 · 日本語クラス",
-    loginErrEmpty:   "電話番号とPINを入力してください",
-    loginErrWrong:   "電話番号またはPINが正しくありません",
-    loginErrConn:    "接続エラー。もう一度お試しください。",
-    logoutBtn:       "出る",
-    studentGreeting: (name) => `こんにちは、${name} さん`,
-    studentSubtitle: "🌸 解除済みコンテンツ",
-    loadingContent:  "コンテンツを読み込み中...",
-    emptyContent:    "まだコンテンツが解除されていません。<br>先生の更新をお待ちください 🌸",
-    errContent:      "コンテンツの読み込みエラー",
-    errConn:         "接続エラー",
-    viewBtn:         "開く · 表示 / ダウンロード",
-    lessonLabel:     "レッスン",
-    adminTitle:      "管理画面",
-    adminSubtitle:   "🌸 管理パネル · 学生管理",
-    studentListHeader: "学生リスト",
-    contentHeader:   "コンテンツ管理",
-    selectStudent:   "← 学生を選択してコンテンツを管理する",
-    loadingStudents: "読み込み中...",
-    errStudents:     "学生の読み込みエラー",
-    noStudents:      "学生がまだいません",
-    noContentSheet:  "CONTENTシートにコンテンツがありません",
-    unlockedCount:   (n) => `${n} 件のコンテンツが解除済み 🌸`,
-    btnUnlock:       "🔓 解除",
-    btnLock:         "🔒 ロック",
-    errToggle:       "接続エラー",
-    disabledAccount: "アカウントが無効です",
-    navHome:         "ホーム",
-    navProfile:      "プロフィール",
-    navAdd:          "追加",
-    profileInfo:     "👤 個人情報",
-    profilePinCard:  "🔐 PINを変更",
-    pflId:           "ID",
-    pflName:         "氏名",
-    pflPhone:        "電話番号",
-    pflEmail:        "メール",
-    pinOldPlaceholder: "現在のPIN",
-    pinNewPlaceholder: "新しいPIN",
-    pinConfPlaceholder:"新しいPINを確認",
-    pinSaveBtn:      "保存",
-    pinErrEmpty:     "すべての項目を入力してください",
-    pinErrMatch:     "PINが一致しません",
-    pinErrLen:       "PINは4文字以上必要です",
-    pinErrWrong:     "現在のPINが正しくありません",
-    pinErrConn:      "接続エラー",
-    pinSuccess:      "✅ PINが更新されました！",
-    addStudentTitle: "➕ 学生を追加",
-    addStudentSub:   "新規アカウント作成",
-    addInfo:         "📋 情報",
-    addLFname:       "名前",
-    addLLname:       "苗字",
-    addLPhone:       "電話番号",
-    addLEmail:       "メール",
-    addLPin:         "初期PIN",
-    addBtn:          "学生を追加",
-    addErrEmpty:     "必須項目を入力してください",
-    addErrFail:      "学生の追加に失敗しました",
-    addErrConn:      "接続エラー",
-    addSuccess:      "✅ 学生が追加されました！",
-    courseTypeGrammar: "文法",
-    courseTypeVocab:   "語彙",
-    courseTypeOther:   "その他",
-    contentCount:      (n) => `${n} コンテンツ`,
-    navExercises:    "練習",
-    exEmpty:         "まだ練習問題がありません 🌸",
-    exOpen:          "開く",
-    exDone:          "完了",
-    exMarkDone:      "✅ 完了にする",
-    exMarkedDone:    "✅ 完了としてマークしました！",
-    exNoneInProgress:"進行中の練習なし",
-    exNoneCompleted: "完了した練習なし",
-    exAssignLabel:   "➕ 練習を割り当て",
-    exAssignLStu:    "学生",
-    exAssignLTitle:  "練習タイトル",
-    exAssignLUrl:    "Google FormリンK",
-    exAssignBtn:     "割り当て",
-    exAssignErrEmpty:"学生と題名を入力してください",
-    exAssignSuccess: "✅ 練習が割り当てられました！",
-    exAssignErr:     "割り当て失敗",
-    exInProgress:    "⏳ 進行中",
-    exCompleted:     "✅ 完了済み",
   },
   en: {
     loginLabel:      "Phone number",
@@ -2246,7 +2111,7 @@ const LANG_KEY = "jun_lang";
 let currentLang = localStorage.getItem(LANG_KEY) || "vi";
 
 function t(key, ...args) {
-  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.vi;
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS['vi'];
   const val = dict[key];
   if (typeof val === "function") return val(...args);
   return val || key;
@@ -2256,14 +2121,19 @@ function setLang(lang) {
   currentLang = lang;
   localStorage.setItem(LANG_KEY, lang);
 
-  // Update active button
-  ["vi","ja","en","fr"].forEach(l => {
-    const btn = document.getElementById("lang-" + l);
-    if (btn) btn.classList.toggle("active", l === lang);
-  });
-
   // Update html lang attribute
   document.documentElement.lang = lang;
+
+  // Update profile language buttons active state
+  ["vi","en","fr"].forEach(l => {
+    const btn = document.getElementById("lang-" + l);
+    if (!btn) return;
+    const isActive = l === lang;
+    btn.style.background    = isActive ? "var(--pink-pale)" : "var(--bg-soft)";
+    btn.style.borderColor   = isActive ? "var(--pink)"      : "rgba(232,75,122,0.2)";
+    btn.style.color         = isActive ? "var(--pink)"      : "var(--ink)";
+    btn.style.fontWeight    = isActive ? "700"              : "400";
+  });
 
   // Re-render all visible text
   applyLang();
@@ -2310,6 +2180,7 @@ function applyLang() {
   const ph_pin    = document.getElementById("ph-pin");    if(ph_pin)    ph_pin.textContent    = t("profilePinCard");
   const pinOld = document.getElementById("pin-old"); if(pinOld) pinOld.placeholder = t("pinOldPlaceholder");
   const pinNew = document.getElementById("pin-new"); if(pinNew) pinNew.placeholder = t("pinNewPlaceholder");
+  const pinConf= document.getElementById("pin-confirm"); if(pinConf) pinConf.placeholder = t("pinConfPlaceholder");
   const savePinBtn = document.getElementById("btn-save-pin"); if(savePinBtn && !savePinBtn.disabled) savePinBtn.textContent = "🔐 " + t("pinSaveBtn");
   // Add student labels
   const ph_add = document.getElementById("ph-add"); if(ph_add) ph_add.textContent = t("addInfo");
@@ -2330,10 +2201,6 @@ const _origShowError = window.showError;
 (function init() {
   // Init language
   currentLang = localStorage.getItem(LANG_KEY) || "vi";
-  ["vi","ja","en","fr"].forEach(l => {
-    const btn = document.getElementById("lang-" + l);
-    if (btn) btn.classList.toggle("active", l === currentLang);
-  });
   document.documentElement.lang = currentLang;
   applyLang();
 
