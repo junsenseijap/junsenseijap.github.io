@@ -537,14 +537,13 @@
     /* ══ FORM TYPE CONTENT ══ */
     .type-form { background: rgba(103,58,183,0.15); color: #9c6fde; border: 1px solid rgba(103,58,183,0.35); }
     .btn-assign-content {
-      display: inline-block; width: 100%; padding: 0.6rem 1rem;
-      text-align: center; background: linear-gradient(135deg,rgba(103,58,183,0.15),rgba(103,58,183,0.08));
-      border: 1.5px solid rgba(103,58,183,0.4); color: #9c6fde;
-      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
-      border-radius: 8px; cursor: pointer; font-family: 'DM Sans',sans-serif;
-      font-weight: 600; transition: all 0.2s;
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(103,58,183,0.12); border: 1.5px solid rgba(103,58,183,0.4);
+      color: #9c6fde; font-size: 1.1rem; font-weight: 700; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; padding: 0;
     }
-    .btn-assign-content:hover { background: rgba(103,58,183,0.25); }
+    .btn-assign-content:hover { background: rgba(103,58,183,0.25); transform: scale(1.1); }
     .btn-assign-content:disabled { opacity: 0.45; cursor: not-allowed; }
 
     /* Score display in student exercise list */
@@ -943,6 +942,33 @@
       #page-profile, #page-add-student,
       #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
     }
+    /* PERMANENT PADDING */
+    #page-profile, #page-add-student,
+    #page-exercises, #page-admin-exercises { padding-top: 0.5rem !important; }
+    @media (max-width:600px) {
+      #page-profile, #page-add-student,
+      #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
+    }
+    /* ADMIN DASHBOARD */
+    .dash-stat-row{display:flex;align-items:center;gap:1rem;padding:0.9rem 1.2rem;background:var(--bg-card);border:1.5px solid rgba(232,75,122,0.12);border-radius:12px;margin-bottom:0.7rem;box-shadow:0 2px 8px rgba(232,75,122,0.06);}
+    .dash-stat-icon{font-size:1.4rem;flex-shrink:0;}
+    .dash-stat-label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);}
+    .dash-stat-value{font-size:1.5rem;font-weight:700;color:var(--ink);}
+    .dash-avg-level-row{border:1.5px solid rgba(232,75,122,0.12);border-radius:10px;margin-bottom:0.5rem;overflow:hidden;}
+    .dash-avg-level-header{padding:0.75rem 1rem;cursor:pointer;display:flex;align-items:center;gap:0.8rem;background:var(--bg-card);transition:background 0.15s;user-select:none;}
+    .dash-avg-level-header:hover{background:var(--pink-pale);}
+    .dash-avg-level-badge{font-size:0.68rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:99px;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;flex-shrink:0;}
+    .dash-avg-level-label{flex:1;font-size:0.88rem;color:var(--ink2);}
+    .dash-avg-level-score{font-size:0.88rem;font-weight:700;color:var(--pink);}
+    .dash-avg-level-arrow{font-size:0.7rem;color:var(--gray);transition:transform 0.2s;}
+    .dash-avg-level-row.open .dash-avg-level-arrow{transform:rotate(180deg);}
+    .dash-avg-student-list{display:none;border-top:1px solid rgba(232,75,122,0.08);}
+    .dash-avg-level-row.open .dash-avg-student-list{display:block;}
+    .dash-avg-student-row{padding:0.6rem 1rem 0.6rem 2.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid rgba(44,26,34,0.04);font-size:0.83rem;}
+    .dash-avg-student-row:last-child{border-bottom:none;}
+    .dash-avg-student-name{flex:1;color:var(--ink2);}
+    .dash-avg-student-score{font-weight:600;color:var(--pink);}
+    .dash-avg-student-count{font-size:0.65rem;color:var(--gray);}
   </style>
 </head>
 <body>
@@ -1053,9 +1079,9 @@
   <div class="profile-card" style="margin-bottom:1rem">
     <div class="profile-card-header">🌐 Langue · Language · Ngôn ngữ</div>
     <div style="display:flex;gap:0.6rem;padding:1rem 1.2rem">
-      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇻🇳<br><span style="font-size:0.62rem;letter-spacing:0.05em">Việt</span></button>
-      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇬🇧<br><span style="font-size:0.62rem;letter-spacing:0.05em">English</span></button>
-      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.6rem;border-radius:10px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.1rem;transition:all 0.18s;font-family:'DM Sans',sans-serif">🇫🇷<br><span style="font-size:0.62rem;letter-spacing:0.05em">Français</span></button>
+      <button onclick="setLang('vi')" id="lang-vi" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇻🇳</button>
+      <button onclick="setLang('en')" id="lang-en" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇬🇧</button>
+      <button onclick="setLang('fr')" id="lang-fr" style="flex:1;padding:0.4rem;border-radius:8px;border:1.5px solid rgba(232,75,122,0.2);background:var(--bg-soft);cursor:pointer;font-size:1.6rem;line-height:1;transition:all 0.18s;display:flex;align-items:center;justify-content:center">🇫🇷</button>
     </div>
   </div>
 
@@ -1097,16 +1123,8 @@
     <div class="profile-card-header" id="ph-pin">🔐 Changer le PIN</div>
     <div class="pin-form">
       <div class="pin-input-wrap">
-        <input type="password" id="pin-old" maxlength="6" placeholder="PIN actuel"/>
-        <button class="pin-toggle" onclick="togglePin('pin-old')">👁</button>
-      </div>
-      <div class="pin-input-wrap">
         <input type="password" id="pin-new" maxlength="6" placeholder="Nouveau PIN"/>
         <button class="pin-toggle" onclick="togglePin('pin-new')">👁</button>
-      </div>
-      <div class="pin-input-wrap">
-        <input type="password" id="pin-confirm" maxlength="6" placeholder="Confirmer le nouveau PIN"/>
-        <button class="pin-toggle" onclick="togglePin('pin-confirm')">👁</button>
       </div>
       <div class="pin-msg" id="pin-msg"></div>
       <button class="btn-save-pin" id="btn-save-pin" onclick="doChangePin()">🔐 Enregistrer</button>
@@ -1197,6 +1215,19 @@
 
 
 </div>
+
+
+  <!-- ══ ADMIN STATS DASHBOARD ══ -->
+  <div id="page-admin-dashboard" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto;padding-top:0.5rem !important">
+    <div class="page-title">📊 Tableau de bord</div>
+    <div class="page-subtitle">🌸 Vue d'ensemble</div>
+    <div class="dash-stat-row">
+      <span class="dash-stat-icon">👥</span>
+      <div><div class="dash-stat-label">Élèves actifs</div><div class="dash-stat-value" id="dash-student-count">—</div></div>
+    </div>
+    <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);font-weight:600;margin:0.8rem 0 0.5rem">📊 Moyennes de la classe</div>
+    <div id="dash-avg-content"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
 
 
 <!-- ══ BOTTOM NAV ══ -->
@@ -1587,8 +1618,7 @@ function renderContentManage(studentId, name, familyName, unlocked) {
                 </div>
                 <button class="btn-assign-content" id="btn-assign-${c.id}"
                   onclick="assignFormContent(${studentId}, ${c.id}, decodeURIComponent('${encodeURIComponent(c.driveLink||'')}'), decodeURIComponent('${encodeURIComponent(c.title)}'))">
-                  ➕ Assigner
-                </button>
+                  +</button>
               </div>`;
           }
           return `
@@ -1705,8 +1735,12 @@ function buildBottomNav(role) {
         <span class="nav-icon">🏠</span>
         <span class="nav-label" data-i="navHome">Accueil</span>
       </button>
-      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
+      <button class="nav-tab" id="nav-dashboard" onclick="switchTab('dashboard')">
         <span class="nav-icon">📊</span>
+        <span class="nav-label">Stats</span>
+      </button>
+      <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
+        <span class="nav-icon">📝</span>
         <span class="nav-label" data-i="navExercises">Exercices</span>
       </button>
       <button class="nav-tab" id="nav-add" onclick="switchTab('add')">
@@ -1751,7 +1785,7 @@ function switchTab(tab) {
   const isAdmin = role === "Admin";
 
   // Update active state
-  ["home","profile","add","exercises"].forEach(k => {
+  ["home","profile","add","exercises","dashboard"].forEach(k => {
     const btn = document.getElementById("nav-" + k);
     if (btn) btn.classList.toggle("active", k === tab);
   });
@@ -1762,13 +1796,14 @@ function switchTab(tab) {
   document.getElementById("page-profile").style.display         = tab === "profile"                 ? "block" : "none";
   document.getElementById("page-add-student").style.display     = (isAdmin  && tab === "add")       ? "block" : "none";
   document.getElementById("page-exercises").style.display       = (!isAdmin && tab === "exercises") ? "block" : "none";
-  document.getElementById("page-admin-exercises").style.display = (isAdmin  && tab === "exercises") ? "block" : "none";
+  document.getElementById("page-admin-exercises").style.display = (isAdmin  && tab==="exercises")  ? "block":"none";
+  const _dash=document.getElementById("page-admin-dashboard"); if(_dash) _dash.style.display=(isAdmin&&tab==="dashboard")?"block":"none";
 
   // Load on demand
   if (tab === "exercises") {
     if (isAdmin) loadAdminExercises();
     else         loadStudentExercises();
-  }
+  } else if (tab==="dashboard" && isAdmin) { loadAdminDashboard(); }
 }
 
 // ══════════════════════════════════════════════
@@ -1797,44 +1832,23 @@ function togglePin(inputId) {
 }
 
 async function doChangePin() {
-  const oldPin     = document.getElementById("pin-old").value.trim();
-  const newPin     = document.getElementById("pin-new").value.trim();
-  const confirmPin = document.getElementById("pin-confirm").value.trim();
-  const msg        = document.getElementById("pin-msg");
-  const btn        = document.getElementById("btn-save-pin");
-
-  const showPinMsg = (text, type) => {
-    msg.textContent = text; msg.className = "pin-msg " + type; msg.style.display = "block";
-  };
-
-  if (!oldPin || !newPin || !confirmPin) return showPinMsg(t("pinErrEmpty"), "error");
-  if (newPin !== confirmPin)              return showPinMsg(t("pinErrMatch"), "error");
-  if (newPin.length < 4)                  return showPinMsg(t("pinErrLen"),   "error");
-
-  btn.disabled = true; btn.textContent = "...";
+  const newPin = document.getElementById("pin-new").value.trim();
+  const msg = document.getElementById("pin-msg");
+  const btn = document.getElementById("btn-save-pin");
+  const show = (t2,c) => { msg.textContent=t2; msg.className="pin-msg "+c; msg.style.display="block"; };
+  if (!newPin)           return show(t("pinErrEmpty"),"error");
+  if (newPin.length < 4) return show(t("pinErrLen"),  "error");
+  btn.disabled=true; btn.textContent="...";
   try {
-    const data = await api({
-      action: "changePin",
-      userId: currentUserGlobal.id,
-      oldPin, newPin
-    });
+    const data = await api({ action:"changePin", userId:currentUserGlobal.id, newPin });
     if (data.success) {
-      showPinMsg(t("pinSuccess"), "success");
-      // Update stored pin for admin
-      if (currentUserGlobal.role === "Admin") window._adminPin = newPin;
-      ["pin-old","pin-new","pin-confirm"].forEach(id => document.getElementById(id).value = "");
-    } else {
-      showPinMsg(data.message || t("pinErrWrong"), "error");
-    }
-  } catch {
-    showPinMsg(t("pinErrConn"), "error");
-  }
-  btn.disabled = false; btn.textContent = "🔐 " + t("pinSaveBtn");
+      show(t("pinSuccess"),"success");
+      if (currentUserGlobal.role==="Admin") window._adminPin=newPin;
+      const pn=document.getElementById("pin-new"); if(pn) pn.value="";
+    } else { show(data.message||t("pinErrWrong"),"error"); }
+  } catch { show(t("pinErrConn"),"error"); }
+  btn.disabled=false; btn.textContent="🔐 "+t("pinSaveBtn");
 }
-
-// ══════════════════════════════════════════════
-// ADD STUDENT (Admin)
-// ══════════════════════════════════════════════
 async function doAddStudent() {
   const name    = document.getElementById("as-name").value.trim();
   const family  = document.getElementById("as-family").value.trim();
@@ -1913,73 +1927,56 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title) {
 // EXERCISES — STUDENT
 // ══════════════════════════════════════════════
 async function loadStudentExercises() {
-  const inBody  = document.getElementById("ex-stu-inprogress-body");
-  const comBody = document.getElementById("ex-stu-completed-body");
-  if (!inBody || !comBody) return;
-
+  const inBody=document.getElementById("ex-stu-inprogress-body");
+  const comBody=document.getElementById("ex-stu-completed-body");
+  if(!inBody||!comBody) return;
   try {
-    const [exData, scoresData] = await Promise.all([
-      api({ action:"getMyExercises", studentId: currentUserGlobal.id }),
-      api({ action:"getMyScores",    studentId: currentUserGlobal.id })
+    const [exData,scData]=await Promise.all([
+      api({action:"getMyExercises",studentId:currentUserGlobal.id}),
+      api({action:"getMyScores",   studentId:currentUserGlobal.id})
     ]);
-
-    const exercises = exData.exercises || [];
-    const scoresMap = {};
-    (scoresData.scores||[]).forEach(s => { scoresMap[String(s.exerciseId)] = s; });
-
-    const inProgress = exercises.filter(ex => ex.status !== "done");
-    const completed  = exercises.filter(ex => ex.status === "done");
-
-    document.getElementById("ex-stu-inprogress-count").textContent = inProgress.length;
-    document.getElementById("ex-stu-completed-count").textContent  = completed.length;
-
-    // En cours
-    if (inProgress.length === 0) {
-      inBody.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`;
-    } else {
-      inBody.innerHTML = inProgress.map(ex => `
+    const exercises=exData.exercises||[];
+    const scMap={};
+    (scData.scores||[]).forEach(s=>{scMap[String(s.exerciseId)]=s;});
+    const inP=exercises.filter(ex=>ex.status!=="done");
+    const done=exercises.filter(ex=>ex.status==="done");
+    document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
+    document.getElementById("ex-stu-completed-count").textContent=done.length;
+    const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
+    if(!inP.length){
+      inBody.innerHTML=`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 ${t("exNoneInProgress")}</div>`;
+    }else{
+      inBody.innerHTML=inP.map(ex=>`
         <div class="ex-card" id="ex-card-${ex.id}">
           <div class="ex-card-info">
-            <div class="ex-card-title">${ex.title}</div>
-            <div class="ex-card-meta">📅 ${ex.assignedDate||"—"}</div>
+            <div class="ex-card-title">${gt(ex)}</div>
+            <div class="ex-card-meta">${ex.level||""} · 📅 ${ex.assignedDate||"—"}</div>
           </div>
           <div class="ex-card-actions">
-            ${ex.formUrl ? `<a class="btn-ex-open" href="${ex.formUrl}" target="_blank" rel="noopener">📋 ${t("exOpen")}</a>` : ""}
+            ${ex.formUrl?`<a class="btn-ex-open" href="${ex.formUrl}" target="_blank" rel="noopener">📋 ${t("exOpen")}</a>`:""}
             <button class="btn-ex-done" id="btn-done-${ex.id}" onclick="markExerciseDone(${ex.id})">${t("exMarkDone")}</button>
           </div>
         </div>`).join("");
     }
-
-    // Terminés
-    if (completed.length === 0) {
-      comBody.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
-    } else {
-      comBody.innerHTML = completed.map(ex => {
-        const sc = scoresMap[String(ex.id)];
-        let scoreLine = "";
-        if (sc && sc.maxScore > 0) {
-          const pct = sc.score/sc.maxScore;
-          const cls = pct >= 0.7 ? "good" : "medium";
-          scoreLine = `<div class="ex-score-line ${cls}">🎯 ${sc.score}/${sc.maxScore} pts</div>`;
-        }
-        return `
-          <div class="ex-card done">
-            <div class="ex-card-info">
-              <div class="ex-card-title">${ex.title}</div>
-              <div class="ex-card-meta">📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
-              ${scoreLine}
-            </div>
-            <span class="ex-status-badge done">✅ ${t("exDone")}</span>
-          </div>`;
+    if(!done.length){
+      comBody.innerHTML=`<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
+    }else{
+      comBody.innerHTML=done.map(ex=>{
+        const sc=scMap[String(ex.id)];
+        const sl=sc&&sc.maxScore>0?`<div class="ex-score-line ${sc.score/sc.maxScore>=0.7?"good":"medium"}">🎯 ${sc.score}/${sc.maxScore} pts</div>`:"";
+        return `<div class="ex-card done">
+          <div class="ex-card-info">
+            <div class="ex-card-title">${gt(ex)}</div>
+            <div class="ex-card-meta">${ex.level||""} · 📅 ${ex.doneDate||ex.assignedDate||"—"}</div>
+            ${sl}
+          </div>
+          <span class="ex-status-badge done">✅ ${t("exDone")}</span>
+        </div>`;
       }).join("");
     }
-
-  } catch(e) {
-    console.error(e);
-    inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
-  }
-
+  }catch(e){console.error(e);if(inBody)inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;}
 }
+
 
 async function markExerciseDone(exId) {
   const btn = document.getElementById("btn-done-" + exId);
@@ -2066,7 +2063,7 @@ async function loadAdminExercises() {
           badge = `<span class="ex-score-badge pending">⏳</span>`;
         }
         return `<div class="ex-detail-item">
-          <span class="ex-detail-title">${ex.title}</span>
+          <span class="ex-detail-title">${(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice")}</span>
           ${badge}
         </div>`;
       }).join("");
@@ -2506,6 +2503,50 @@ function toggleExRow(rowId) {
   row.classList.toggle('open');
   const btn = row.previousElementSibling?.querySelector('.ex-expand-btn');
   if (btn) btn.textContent = row.classList.contains('open') ? '▲' : '▼';
+}
+
+
+async function loadAdminDashboard() {
+  const aw=document.getElementById("dash-avg-content");
+  const sc2=document.getElementById("dash-student-count");
+  if(sc2) sc2.textContent=allStudents.length;
+  if(!aw) return;
+  aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try{
+    const [sr,er]=await Promise.all([
+      api({action:"getScoresAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()}),
+      api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
+    ]);
+    const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
+    const sm={};allStudents.forEach(s=>{sm[String(s.id)]=s;});
+    const LEVELS=["N5","N4","N3","N2","N1"],bl={};
+    (sr.scores||[]).forEach(sc=>{
+      if(!sc.maxScore)return;
+      const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
+      const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
+      bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
+    });
+    const keys=LEVELS.filter(l=>bl[l]);
+    if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">Pas encore de données</div>';return;}
+    aw.innerHTML=keys.map(lvl=>{
+      const se=Object.entries(bl[lvl]);
+      const la=se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length;
+      const rid="dash-lvl-"+lvl;
+      const rows=se.map(([sid,d])=>{const stu=sm[sid]||{name:"ID "+sid,familyName:""};return{name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt};})
+        .sort((a,b)=>b.avg-a.avg)
+        .map(s=>`<div class="dash-avg-student-row"><span class="dash-avg-student-name">${s.name}</span><span class="dash-avg-student-score">${s.avg.toFixed(1)}/10</span><span class="dash-avg-student-count">(${s.cnt})</span></div>`)
+        .join("");
+      return`<div class="dash-avg-level-row" id="${rid}">
+        <div class="dash-avg-level-header" onclick="document.getElementById('${rid}').classList.toggle('open')">
+          <span class="dash-avg-level-badge">${lvl}</span>
+          <span class="dash-avg-level-label">${se.length} élève(s)</span>
+          <span class="dash-avg-level-score">${la.toFixed(1)}/10</span>
+          <span class="dash-avg-level-arrow">▼</span>
+        </div>
+        <div class="dash-avg-student-list">${rows}</div>
+      </div>`;
+    }).join("");
+  }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">Erreur</div>';}
 }
 
 (function init() {
