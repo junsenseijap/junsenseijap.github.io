@@ -870,42 +870,6 @@
     }
     .assign-msg.success { background: rgba(74,138,85,0.12); color: #4a8a55; }
     .assign-msg.error   { background: var(--pink-pale); color: var(--pink); }
-
-    /* ══ INNER PAGES — PERMANENT FIX ══
-       These pages are INSIDE #app with sticky header.
-       Only minimal top padding needed. */
-    #page-profile    { padding-top: 0.5rem !important; }
-    #page-add-student { padding-top: 0.5rem !important; }
-    #page-exercises  { padding-top: 0.5rem !important; }
-    #page-admin-exercises { padding-top: 0.5rem !important; }
-    @media (max-width: 600px) {
-      #page-profile, #page-add-student,
-      #page-exercises, #page-admin-exercises { padding-top: 0.3rem !important; }
-    }
-
-    .ex-score-badge {
-      font-size: 0.7rem; font-weight: 700; padding: 0.18rem 0.6rem;
-      border-radius: 99px; flex-shrink: 0;
-    }
-    .ex-score-badge.good    { background: rgba(74,138,85,0.12);  color: #4a8a55; border: 1px solid rgba(74,138,85,0.3); }
-    .ex-score-badge.medium  { background: rgba(255,193,7,0.12);  color: #b8860b; border: 1px solid rgba(255,193,7,0.3); }
-    .ex-score-badge.pending { background: rgba(44,26,34,0.06);   color: var(--gray); border: 1px solid rgba(44,26,34,0.1); }
-    .ex-detail-row { display: none; border-top: 1px solid rgba(232,75,122,0.08); background: rgba(253,232,239,0.15); }
-    .ex-detail-row.open { display: block; }
-    .ex-detail-item {
-      padding: 0.55rem 1.2rem 0.55rem 3rem; display: flex; align-items: center;
-      gap: 0.7rem; border-bottom: 1px solid rgba(44,26,34,0.04); font-size: 0.82rem;
-    }
-    .ex-detail-item:last-child { border-bottom: none; }
-    .ex-detail-title { flex: 1; color: var(--ink2); }
-    .ex-expand-btn {
-      background: transparent; border: none; cursor: pointer;
-      font-size: 0.7rem; color: var(--gray); padding: 0.2rem 0.5rem;
-      border-radius: 6px; transition: all 0.15s; flex-shrink: 0;
-    }
-    .ex-score-line { font-size: 0.7rem; color: var(--gray); margin-top: 0.15rem; }
-    .ex-score-line.good   { color: #4a8a55; font-weight: 600; }
-    .ex-score-line.medium { color: #b8860b; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -1003,6 +967,14 @@
     </div>
   </div>
 
+</div>
+
+
+<!-- ══ BOTTOM NAV ══ -->
+<div id="bottom-nav">
+  <!-- filled dynamically based on role -->
+</div>
+
 <!-- ══ PROFILE PAGE ══ -->
 <div id="page-profile">
   <div class="profile-avatar-wrap">
@@ -1077,7 +1049,6 @@
   </div>
 </div>
 
-
 <!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
 <div id="page-add-student">
   <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
@@ -1115,7 +1086,6 @@
 
 
 
-
 <!-- ══ STUDENT EXERCISES PAGE ══ -->
 <div id="page-exercises">
   <div class="page-title" id="ex-page-title">📝 Exercices</div>
@@ -1124,7 +1094,6 @@
     <div class="loading"><div class="spinner"></div></div>
   </div>
 </div>
-
 
 <!-- ══ ADMIN EXERCISES PAGE ══ -->
 <div id="page-admin-exercises">
@@ -1157,16 +1126,6 @@
     </div>
   </div>
 </div>
-
-
-</div>
-
-
-<!-- ══ BOTTOM NAV ══ -->
-<div id="bottom-nav">
-  <!-- filled dynamically based on role -->
-</div>
-
 
 <div id="toast"></div>
 
@@ -1850,86 +1809,94 @@ async function loadAdminExercises() {
   const comBody = document.getElementById("ex-completed-body");
   inBody.innerHTML  = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
   comBody.innerHTML = '<div class="loading" style="padding:1.5rem"><div class="spinner"></div></div>';
+
   try {
-    const [exData, scoresResp] = await Promise.all([
-      api({ action:"getExercisesAdmin", adminId:currentUserGlobal.id, pin:getStoredPin() }),
-      api({ action:"getScoresAdmin",    adminId:currentUserGlobal.id, pin:getStoredPin() })
-    ]);
-    if (!exData.success) { inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
+    const pin = getStoredPin() || window._adminPin || "";
+    const data = await api({
+      action: "getExercisesAdmin",
+      adminId: currentUserGlobal.id,
+      pin: pin
+    });
+    if (!data.success) { inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`; return; }
 
-    const scoresMap = {};
-    (scoresResp.scores||[]).forEach(s => { scoresMap[s.studentId+"_"+s.exerciseId] = s; });
-
+    // Group by student, compute progress
     const studentMap = {};
     allStudents.forEach(s => { studentMap[String(s.id)] = s; });
 
     const byStudent = {};
-    (exData.exercises||[]).forEach(ex => {
+    (data.exercises || []).forEach(ex => {
       const sid = String(ex.studentId);
-      if (!byStudent[sid]) byStudent[sid] = { total:0, done:0, exercises:[] };
+      if (!byStudent[sid]) byStudent[sid] = { total: 0, done: 0, exercises: [] };
       byStudent[sid].total++;
-      if (ex.status==="done") byStudent[sid].done++;
+      if (ex.status === "done") byStudent[sid].done++;
       byStudent[sid].exercises.push(ex);
     });
 
-    const inProgressRows=[], completedRows=[];
-    Object.entries(byStudent).forEach(([sid, stuData]) => {
-      const stu = studentMap[sid] || { name:"ID "+sid, familyName:"" };
-      const isComplete = stuData.done === stuData.total;
-      const latestDate = stuData.exercises.map(e=>e.assignedDate).sort().reverse()[0]||"—";
-      const rowId = "ex-row-"+sid;
-
-      const detailItems = stuData.exercises.map(ex => {
-        const sc = scoresMap[sid+"_"+ex.id];
-        let badge = "";
-        if (ex.status==="done" && sc && sc.maxScore>0) {
-          const pct = sc.score/sc.maxScore;
-          badge = `<span class="ex-score-badge ${pct>=0.7?"good":"medium"}">${sc.score}/${sc.maxScore}</span>`;
-        } else if (ex.status==="done") {
-          badge = `<span class="ex-score-badge good">✅</span>`;
-        } else {
-          badge = `<span class="ex-score-badge pending">⏳</span>`;
-        }
-        return `<div class="ex-detail-item">
-          <span class="ex-detail-title">${ex.title}</span>
-          <span style="font-size:0.65rem;color:var(--gray)">${ex.assignedDate||""}</span>
-          ${badge}
-        </div>`;
-      }).join("");
-
-      const row = `<div>
-        <div class="ex-admin-row" style="cursor:pointer" onclick="toggleExRow('${rowId}')">
+    const inProgressRows = [], completedRows = [];
+    Object.entries(byStudent).forEach(([sid, data]) => {
+      const stu = studentMap[sid] || { name: "ID " + sid, familyName: "" };
+      const isComplete = data.done === data.total;
+      const latestDate = data.exercises.map(e => e.assignedDate).sort().reverse()[0] || "—";
+      const exTitles = data.exercises.map(e => e.title).join(" · ");
+      const row = `
+        <div class="ex-admin-row">
           <div class="ex-admin-avatar">${(stu.name||"?")[0]}</div>
           <div class="ex-admin-info">
-            <div class="ex-admin-name">${stu.name} ${stu.familyName||""}</div>
-            <div class="ex-admin-detail">📅 ${latestDate}</div>
+            <div class="ex-admin-name">${stu.name} ${stu.familyName || ""}</div>
+            <div class="ex-admin-detail" title="${exTitles}">📅 ${latestDate} · ${exTitles}</div>
           </div>
-          <span class="ex-progress-badge ${isComplete?"complete":"partial"}">${stuData.done}/${stuData.total}</span>
-          <button class="ex-expand-btn">▼</button>
-        </div>
-        <div class="ex-detail-row" id="${rowId}">${detailItems}</div>
-      </div>`;
-
+          <span class="ex-progress-badge ${isComplete ? 'complete' : 'partial'}">${data.done}/${data.total}</span>
+        </div>`;
       if (isComplete) completedRows.push(row);
-      else inProgressRows.push(row);
+      else            inProgressRows.push(row);
     });
 
     document.getElementById("ex-inprogress-count").textContent = inProgressRows.length;
     document.getElementById("ex-completed-count").textContent  = completedRows.length;
-    inBody.innerHTML  = inProgressRows.length ? inProgressRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneInProgress")}</div>`;
-    comBody.innerHTML = completedRows.length  ? completedRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
-  } catch(e) {
-    console.error(e);
-    inBody.innerHTML=`<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
+
+    inBody.innerHTML  = inProgressRows.length  ? inProgressRows.join("")  : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneInProgress")}</div>`;
+    comBody.innerHTML = completedRows.length ? completedRows.join("") : `<div style="padding:1.2rem;text-align:center;color:var(--gray);font-size:0.84rem">${t("exNoneCompleted")}</div>`;
+
+  } catch {
+    inBody.innerHTML = `<div style="padding:1rem;color:var(--gray)">${t("errConn")}</div>`;
   }
 }
 
-function toggleExRow(rowId) {
-  const row = document.getElementById(rowId);
-  if (!row) return;
-  row.classList.toggle("open");
-  const btn = row.previousElementSibling?.querySelector(".ex-expand-btn");
-  if (btn) btn.textContent = row.classList.contains("open") ? "▲" : "▼";
+async function doAssignExercise() {
+  const stuEl = document.getElementById("aex-student"); if(!stuEl) return;
+  const studentId = stuEl.value;
+  const title     = document.getElementById("aex-title").value.trim();
+  const formUrl   = document.getElementById("aex-url").value.trim();
+  const msg       = document.getElementById("assign-msg");
+  const btn       = document.getElementById("btn-assign");
+
+  const showMsg = (text, type) => { msg.textContent = text; msg.className = "assign-msg " + type; msg.style.display = "block"; };
+
+  if (!studentId || !title) return showMsg(t("exAssignErrEmpty"), "error");
+
+  btn.disabled = true;
+  try {
+    const data = await api({
+      action: "assignExercise",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin(),
+      studentId, title, formUrl
+    });
+    if (data.success) {
+      showMsg(t("exAssignSuccess"), "success");
+      ["aex-student","aex-title","aex-url"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
+      loadAdminExercises();
+    } else {
+      showMsg(data.message || t("exAssignErr"), "error");
+    }
+  } catch {
+    showMsg(t("errConn"), "error");
+  }
+  btn.disabled = false;
+}
+
+function toggleExSection(type) {
+  document.getElementById("ex-" + type + "-section")?.classList.toggle("open");
 }
 
 function applyNavLang() {
@@ -2029,8 +1996,8 @@ const TRANSLATIONS = {
     exAssignErrEmpty:"Vui lòng chọn học viên và điền tên bài",
     exAssignSuccess: "✅ Bài tập đã được giao!",
     exAssignErr:     "Không thể giao bài tập",
-    exInProgress:    "⏳ Đang làm",
-    exCompleted:     "✅ Đã hoàn thành",
+    exInProgress:    "Đang làm",
+    exCompleted:     "Đã hoàn thành",
   },
   en: {
     loginLabel:      "Phone number",
@@ -2118,8 +2085,8 @@ const TRANSLATIONS = {
     exAssignErrEmpty:"Please select a student and enter a title",
     exAssignSuccess: "✅ Exercise assigned!",
     exAssignErr:     "Failed to assign exercise",
-    exInProgress:    "⏳ In Progress",
-    exCompleted:     "✅ Completed",
+    exInProgress:    "In Progress",
+    exCompleted:     "Completed",
   },
   fr: {
     loginLabel:      "Numéro de téléphone",
@@ -2207,8 +2174,8 @@ const TRANSLATIONS = {
     exAssignErrEmpty:"Veuillez choisir un élève et saisir un titre",
     exAssignSuccess: "✅ Exercice assigné avec succès !",
     exAssignErr:     "Impossible d'assigner l'exercice",
-    exInProgress:    "⏳ En cours",
-    exCompleted:     "✅ Terminés",
+    exInProgress:    "En cours",
+    exCompleted:     "Terminés",
   }
 };
 
@@ -2303,6 +2270,14 @@ function applyLang() {
 // Override showError to use current lang
 const _origShowError = window.showError;
 
+function toggleExRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  row.classList.toggle("open");
+  const btn = row.previousElementSibling?.querySelector(".ex-expand-btn");
+  if (btn) btn.textContent = row.classList.contains("open") ? "▲" : "▼";
+}
+
 (function init() {
   // Init language
   currentLang = localStorage.getItem(LANG_KEY) || "vi";
@@ -2313,7 +2288,6 @@ const _origShowError = window.showError;
   const user = loadSession();
   if (user) initUser(user);
 })();
-
 </script>
 </body>
 </html>
