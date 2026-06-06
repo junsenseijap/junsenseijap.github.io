@@ -8,6 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "f8d7091e-3a44-4d3a-a68c-665c6963a808",
+        notifyButton: { enable: true, size: "medium", position: "bottom-right", showCredit: false }
+      });
+      window.OneSignal = OneSignal;
+      console.log("✅ OneSignal initialisé");
+    });
+  </script>
   <style>
     :root {
       /* ── Palette Jun Sensei — Hanami clair ── */
@@ -1255,51 +1266,22 @@ const ONESIGNAL_APP_ID = "f8d7091e-3a44-4d3a-a68c-665c6963a808";
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 
-// ── OneSignal — init et enregistrement ──
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-
-function initOneSignal() {
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: ONESIGNAL_APP_ID,
-      notifyButton: {
-        enable: true,
-        size: "medium",
-        position: "bottom-right",
-        showCredit: false,
-        prenotify: true,
-        theme: "default"
-      },
-      welcomeNotification: { disable: true }
-    });
-    // Rend OneSignal accessible globalement
-    window.OneSignal = OneSignal;
-    console.log("✅ OneSignal initialisé");
-  });
-}
+// ── OneSignal — enregistrement player ID ──
 
 async function registerOneSignalPlayer(userId) {
   try {
-    await new Promise(resolve => {
-      window.OneSignalDeferred.push(async function(OneSignal) {
-        // Demande permission si pas encore accordée
-        const permission = await OneSignal.Notifications.permission;
-        if (!permission) {
-          await OneSignal.Notifications.requestPermission();
-        }
-        // Récupère le player_id (subscription id)
-        const subId = await OneSignal.User.PushSubscription.id;
-        if (subId) {
-          // Envoie au GAS pour stocker dans USERS col H
-          await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
-          console.log("✅ OneSignal ID enregistré:", subId);
-        }
-        resolve();
-      });
-    });
+    const OneSignal = window.OneSignal;
+    if (!OneSignal) return;
+    // Attendre que OneSignal soit prêt
+    await new Promise(r => setTimeout(r, 2000));
+    const subId = OneSignal.User.PushSubscription.id;
+    if (subId) {
+      await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
+      console.log("✅ OneSignal ID enregistré:", subId);
+    }
   } catch(e) {
-    console.log("OneSignal:", e.message);
+    console.log("OneSignal register:", e.message);
+    // Ne bloque pas le reste de l'app
   }
 }
 
@@ -2654,8 +2636,6 @@ async function loadAdminStats() {
 
 
 (function init() {
-  // Init OneSignal
-  initOneSignal();
   // Init language
   currentLang = localStorage.getItem(LANG_KEY) || "vi";
   document.documentElement.lang = currentLang;
