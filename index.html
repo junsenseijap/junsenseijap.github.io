@@ -1784,37 +1784,73 @@ async function loadStudentExercises() {
     const done=exs.filter(ex=>ex.status==="done");
     document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
     document.getElementById("ex-stu-completed-count").textContent=done.length;
+
+    const isForm=ex=>(ex.type||"form")==="form"||!ex.type;
     const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
+
+    const typeIcon=ex=>{
+      const t=(ex.type||"").toLowerCase();
+      if(t==="pdf")    return "📄";
+      if(t==="video")  return "🎬";
+      if(t==="audio")  return "🎵";
+      if(t==="image")  return "🖼️";
+      return "📝";
+    };
+    const typeLabel=ex=>{
+      const t=(ex.type||"form").toLowerCase();
+      if(t==="pdf")    return "PDF";
+      if(t==="video")  return "Vidéo";
+      if(t==="audio")  return "Audio";
+      if(t==="image")  return "Image";
+      return "Exercice";
+    };
+
     if(!inP.length){
       inB.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
     }else{
-      inB.innerHTML=inP.map(ex=>
-        '<div class="ex-card" id="ex-card-'+ex.id+'">'+
-        '<div class="ex-card-info">'+
-        '<div class="ex-card-title">'+gt(ex)+'</div>'+
-        '<div class="ex-card-meta">'+(ex.level?ex.level+' · ':"")+' 📅 '+(ex.assignedDate||"—")+'</div>'+
-        '</div>'+
-        '<div class="ex-card-actions">'+
-        (ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">📋 '+t("exOpen")+'</a>':"")+
-        '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
-        '</div></div>'
-      ).join("");
+      inB.innerHTML=inP.map(ex=>{
+        const form=isForm(ex);
+        const icon=typeIcon(ex);
+        const lbl=typeLabel(ex);
+        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+icon+' '+lbl+'</a>':"";
+        return '<div class="ex-card" id="ex-card-'+ex.id+'">'+
+          '<div class="ex-card-info">'+
+          '<div style="display:flex;align-items:center;gap:0.4rem">'+
+          '<span class="card-type type-'+( (ex.type||"form").toLowerCase() )+'" style="font-size:0.5rem;padding:0.1rem 0.4rem;flex-shrink:0">'+lbl.toUpperCase()+'</span>'+
+          '<div class="ex-card-title">'+gt(ex)+'</div>'+
+          '</div>'+
+          '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.assignedDate||"—" )+'</div>'+
+          '</div>'+
+          '<div class="ex-card-actions">'+
+          consultBtn+
+          '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
+          '</div></div>';
+      }).join("");
     }
+
     if(!done.length){
       comB.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
     }else{
       comB.innerHTML=done.map(ex=>{
         const sc=sm[String(ex.id)];
         const pct=sc&&sc.maxScore>0?sc.score/sc.maxScore:null;
-        const sl=pct!==null?'<div class="ex-score-line '+(pct>=0.7?"good":"medium")+'">🎯 '+sc.score+'/'+sc.maxScore+' pts</div>':"";
+        const sl=pct!==null?'<div class="ex-score-line '+( pct>=0.7?"good":"medium" )+'">🎯 '+sc.score+"/"+sc.maxScore+' pts</div>':"";
+        const icon=typeIcon(ex);
+        const lbl=typeLabel(ex);
+        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+icon+' '+lbl+'</a>':"";
         return '<div class="ex-card done">'+
           '<div class="ex-card-info">'+
+          '<div style="display:flex;align-items:center;gap:0.4rem">'+
+          '<span class="card-type type-'+( (ex.type||"form").toLowerCase() )+'" style="font-size:0.5rem;padding:0.1rem 0.4rem;flex-shrink:0">'+lbl.toUpperCase()+'</span>'+
           '<div class="ex-card-title">'+gt(ex)+'</div>'+
-          '<div class="ex-card-meta">'+(ex.level?ex.level+' · ':"")+' 📅 '+(ex.doneDate||ex.assignedDate||"—")+'</div>'+
+          '</div>'+
+          '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.doneDate||ex.assignedDate||"—" )+'</div>'+
           sl+
           '</div>'+
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
+          consultBtn+
           '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
-          '</div>';
+          '</div></div>';
       }).join("");
     }
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
