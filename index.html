@@ -1351,25 +1351,32 @@ function doLogout() {
 
 async function loadStudentContent(user) {
   try{
-    const [cd,sd,td,cc]=await Promise.all([
+    const [cd,sd,td]=await Promise.all([
       api({action:"getMyContent",    studentId:user.id}),
       api({action:"getMyScores",     studentId:user.id}),
-      api({action:"getStudentStats", studentId:user.id}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0})),
-      api({action:"getContentCount"}).catch(()=>({success:false,counts:{}}))
+      api({action:"getStudentStats", studentId:user.id}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
     ]);
     const content=cd.content||[];
-    const totalCounts=(cc&&cc.success)?cc.counts:{};
+    // Fetch total count (works after Code.gs redeployment)
+    let totalCounts={};
+    try{const cc=await api({action:"getContentCount"});if(cc&&cc.success)totalCounts=cc.counts||{};}catch(e){}
     const pw=document.getElementById("student-progress-levels");
     if(pw){
-      const lm={};content.forEach(c=>{const l=c.level||"?";lm[l]=(lm[l]||0)+1;});
-      const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]||totalCounts[l]).map(l=>{
+      const lm={};content.filter(c=>(c.type||"").toLowerCase()!=="form").forEach(c=>{const l=c.level||"?";lm[l]=(lm[l]||0)+1;});
+      const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0).map(l=>{
         const unlocked=lm[l]||0;
-        const total=totalCounts[l]||unlocked;
-        const pct=total>0?Math.round((unlocked/total)*100):100;
+        const total=totalCounts[l]||0;
+        if(total>0){
+          const pct=Math.round((unlocked/total)*100);
+          return '<div class="level-progress-row">'+
+            '<span class="level-prog-badge">'+l+'</span>'+
+            '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:'+pct+'%"></div></div>'+
+            '<span class="level-prog-text">'+unlocked+'/'+total+' 🌸</span>'+
+            '</div>';
+        }
         return '<div class="level-progress-row">'+
           '<span class="level-prog-badge">'+l+'</span>'+
-          '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:'+pct+'%"></div></div>'+
-          '<span class="level-prog-text">'+unlocked+'/'+total+' 🌸</span>'+
+          '<div style="flex:1;font-size:0.82rem;color:var(--ink2);padding-left:0.5rem">'+unlocked+' 🌸 débloqué(s)</div>'+
           '</div>';
       }).join("");
       pw.innerHTML=rows||'<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("emptyContent")+'</div>';
