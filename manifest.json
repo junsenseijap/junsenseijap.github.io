@@ -1,0 +1,8 @@
+{
+  "name": "Jun Sensei",
+  "short_name": "Jun Sensei",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#E84B7A"
+}
