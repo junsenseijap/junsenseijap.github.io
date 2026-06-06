@@ -1055,7 +1055,7 @@
     <div style="display:flex;gap:0.6rem;margin-bottom:1rem">
       <div class="dash-stat-row" style="flex:1;margin-bottom:0">
         <span class="dash-stat-icon">👥</span>
-        <div><div class="dash-stat-label">Élèves actifs</div><div class="dash-stat-value" id="admin-student-count">—</div></div>
+        <div><div class="dash-stat-label" data-i="activeStudents">Élèves actifs</div><div class="dash-stat-value" id="admin-student-count">—</div></div>
       </div>
     </div>
     <div id="admin-stats-content" style="margin-bottom:1rem">
@@ -1076,7 +1076,7 @@
 
     <!-- Content panel -->
     <div class="panel" id="admin-content-panel">
-      <div class="panel-header" id="ph-content-manage">コンテンツ管理</div>
+      <div class="panel-header" id="ph-content-manage" data-i="contentHeader">コンテンツ管理</div>
       <div id="select-student-hint" style="padding:2rem;text-align:center;color:var(--gray);font-size:0.84rem;">
         ↑ Chọn một học viên để quản lý nội dung
       </div>
@@ -2396,8 +2396,21 @@ function applyLang() {
   const progressT = document.getElementById("progress-card-title"); if(progressT) progressT.textContent = t("progressTitle");
   const avgT      = document.getElementById("avg-card-title");      if(avgT)      avgT.textContent      = t("avgTitle");
   const recentT   = document.getElementById("recent-card-title");   if(recentT)   recentT.textContent   = t("recentTitle");
-  // Admin dashboard
-  const activeEl  = document.querySelector(".dash-stat-label");     if(activeEl)  activeEl.textContent  = t("activeStudents");
+  // Admin dashboard labels
+  document.querySelectorAll(".dash-stat-label").forEach(el => el.textContent = t("activeStudents"));
+  const classAvgEl = document.querySelector("[data-i='classAvg']"); if(classAvgEl) classAvgEl.textContent = t("classAvg");
+  // Admin subtitle
+  const adminSubEl2 = document.getElementById("admin-subtitle-el"); if(adminSubEl2) adminSubEl2.innerHTML = t("adminSubtitle");
+  // Admin content panel header (コンテンツ管理 hardcodé)
+  const phContent = document.getElementById("ph-content-manage"); if(phContent) phContent.textContent = t("contentHeader");
+  // Student exercises page labels
+  const exPageSub = document.getElementById("ex-page-sub"); if(exPageSub) exPageSub.textContent = "🌸 " + t("exInProgress") + " / " + t("exCompleted");
+  const adminExSub = document.getElementById("admin-ex-sub"); if(adminExSub) adminExSub.textContent = "🌸 " + t("exCompleted");
+  // Exercise section labels (hardcodés dans le HTML)
+  const inProgressLabel = document.querySelector("#ex-stu-inprogress-section .ex-section-label");
+  if(inProgressLabel) inProgressLabel.textContent = t("exInProgress");
+  const completedLabel = document.querySelector("#ex-stu-completed-section .ex-section-label");
+  if(completedLabel) completedLabel.textContent = t("exCompleted");
   // Student greeting
   if(currentUserGlobal && currentUserGlobal.role !== "Admin") {
     const greetEl = document.getElementById("student-greeting");
