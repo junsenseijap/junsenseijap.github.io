@@ -1146,17 +1146,8 @@
     </div>
   </div>
 
-  <!-- Notifications card (élèves seulement) -->
-  <div class="profile-card" id="notif-card" style="display:none">
-    <div class="profile-card-header">🔔 Notifications</div>
-    <div style="padding:1.2rem;display:flex;flex-direction:column;gap:0.8rem">
-      <div style="font-size:0.82rem;color:var(--ink2)" id="notif-status-text">Chargement...</div>
-      <button class="btn-save-pin" id="btn-notif" onclick="toggleNotifications()" style="background:linear-gradient(135deg,var(--blue),#5a9fc4)">
-        🔔 Activer les notifications
-      </button>
-      <div class="pin-msg" id="notif-msg"></div>
-    </div>
-  </div>
+  <!-- Notifications gérées par le bouton OneSignal natif (bas droite) -->
+</div>
 </div>
 
 
@@ -1272,7 +1263,7 @@ function initOneSignal() {
   window.OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      notifyButton: { enable: false },
+      notifyButton: { enable: true },
       welcomeNotification: { disable: true }
     });
     // Rend OneSignal accessible globalement
