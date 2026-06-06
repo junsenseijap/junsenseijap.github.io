@@ -2419,6 +2419,22 @@ async function loadAdminStats() {
   if (user) initUser(user);
 })();
 
+>
+
+
+function toggleLevel(lvl) {
+  const row = document.getElementById("level-row-" + lvl);
+  if (row) row.classList.toggle("open");
+}
+
+function toggleCourseT(lvl, ctId) {
+  document.getElementById("ct-" + lvl + "-" + ctId)?.classList.toggle("open");
+}
+
+function toggleCourse(lvl, ctId, cn) {
+  document.getElementById("course-" + lvl + "-" + ctId + "-" + cn)?.classList.toggle("open");
+}
+
 function renderContentManage(studentId, name, familyName, unlocked) {
   const panel = document.getElementById("admin-content-panel");
   if (!allContent || allContent.length === 0) {
@@ -2443,9 +2459,9 @@ function renderContentManage(studentId, name, familyName, unlocked) {
     const ctMap  = byLevel[lvl];
     const ctKeys = Object.keys(ctMap);
     if (!ctKeys.length) return "";
-    const totalInLevel    = ctKeys.reduce(function(n,ct){ return n+ctMap[ct].length; },0);
+    const totalInLevel    = ctKeys.reduce(function(n,ct){ return n+ctMap[ct].filter(function(c){return (c.type||'').toLowerCase()!=='form';}).length; },0);
     const unlockedInLevel = ctKeys.reduce(function(n,ct){
-      return n+ctMap[ct].filter(function(c){ return unlocked.has(String(c.id)); }).length;
+      return n+ctMap[ct].filter(function(c){ return unlocked.has(String(c.id))&&(c.type||'').toLowerCase()!=='form'; }).length;
     },0);
     const ctRows = ctKeys.map(function(ct) {
       const items = ctMap[ct].slice().sort(function(a,b){
