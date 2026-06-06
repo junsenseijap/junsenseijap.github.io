@@ -1738,7 +1738,7 @@ async function doAddStudent() {
 // ══════════════════════════════════════════════════════════════
 // ASSIGN FORM CONTENT — from admin content tree
 // ══════════════════════════════════════════════════════════════
-async function assignFormContent(studentId, contentId, formBaseUrl, title) {
+async function assignFormContent(studentId, contentId, formBaseUrl, title, sheetTab) {
   const btn = document.getElementById("btn-assign-" + contentId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
 
@@ -1754,8 +1754,7 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title) {
       pin:       getStoredPin(),
       studentId, title,
       formUrl:   personalizedUrl,
-      baseFormUrl: formBaseUrl,
-      entryId:   FORM_ENTRY_ID
+      formTab:   sheetTab || ""
     });
     if (data.success) {
       toast("✅ " + title + " assigné !", "success");
@@ -2525,7 +2524,7 @@ function renderContentManage(studentId, name, familyName, unlocked) {
             '<div class="content-manage-info"><div class="content-manage-title">'+c.title+'</div>'+
             '<div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
             '<button class="btn-assign-content" id="btn-assign-'+c.id+'"'+
-            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'))">+</button>'+
+            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'))">+</button>'+
             '</div>';
         }
         return '<div class="content-manage-item">'+
