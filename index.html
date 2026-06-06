@@ -7,6 +7,7 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <style>
     :root {
       /* ── Palette Jun Sensei — Hanami clair ── */
@@ -1247,8 +1248,46 @@
 const FORM_ENTRY_ID = "entry.8401610"; // Entry ID global pour tous les Forms
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoqxEZiuBRDMsUCFLh-n4NpugzYhKPrcoHuvSbolzVvHZFsJw/exec";
+const ONESIGNAL_APP_ID = "f8d7091e-3a44-4d3a-a68c-665c6963a808";
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
+
+// ── OneSignal — init et enregistrement ──
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+function initOneSignal() {
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      notifyButton: { enable: false },
+      welcomeNotification: { disable: true }
+    });
+  });
+}
+
+async function registerOneSignalPlayer(userId) {
+  try {
+    await new Promise(resolve => {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        // Demande permission si pas encore accordée
+        const permission = await OneSignal.Notifications.permission;
+        if (!permission) {
+          await OneSignal.Notifications.requestPermission();
+        }
+        // Récupère le player_id (subscription id)
+        const subId = await OneSignal.User.PushSubscription.id;
+        if (subId) {
+          // Envoie au GAS pour stocker dans USERS col H
+          await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
+          console.log("✅ OneSignal ID enregistré:", subId);
+        }
+        resolve();
+      });
+    });
+  } catch(e) {
+    console.log("OneSignal:", e.message);
+  }
+}
 
 function saveSession(user) {
   const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
@@ -1332,6 +1371,8 @@ function initUser(user) {
   buildBottomNav(user.role);
   loadProfilePage(user);
   currentNavTab = "home";
+  // Enregistre OneSignal pour les élèves seulement
+  if (user.role !== "Admin") registerOneSignalPlayer(user.id);
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
   else { showPage("student"); loadStudentContent(user); }
 }
@@ -2533,6 +2574,8 @@ async function loadAdminStats() {
 
 
 (function init() {
+  // Init OneSignal
+  initOneSignal();
   // Init language
   currentLang = localStorage.getItem(LANG_KEY) || "vi";
   document.documentElement.lang = currentLang;
