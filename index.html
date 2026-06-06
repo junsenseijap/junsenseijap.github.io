@@ -1263,7 +1263,14 @@ function initOneSignal() {
   window.OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      notifyButton: { enable: true },
+      notifyButton: {
+        enable: true,
+        size: "medium",
+        position: "bottom-right",
+        showCredit: false,
+        prenotify: true,
+        theme: "default"
+      },
       welcomeNotification: { disable: true }
     });
     // Rend OneSignal accessible globalement
