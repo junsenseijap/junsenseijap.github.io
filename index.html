@@ -1270,18 +1270,30 @@ const SESSION_DAYS = 90;
 
 async function registerOneSignalPlayer(userId) {
   try {
+    // Attendre que OneSignal soit initialisé (max 5 secondes)
+    let attempts = 0;
+    while (!window.OneSignal && attempts < 10) {
+      await new Promise(r => setTimeout(r, 500));
+      attempts++;
+    }
     const OneSignal = window.OneSignal;
     if (!OneSignal) return;
-    // Attendre que OneSignal soit prêt
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(r => setTimeout(r, 1000));
     const subId = OneSignal.User.PushSubscription.id;
     if (subId) {
       await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
       console.log("✅ OneSignal ID enregistré:", subId);
+    } else {
+      // S'abonner aux changements de subscription
+      OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
+        if (event.current.id) {
+          await api({ action: "saveOneSignalId", userId, oneSignalId: event.current.id });
+          console.log("✅ OneSignal ID enregistré après subscription:", event.current.id);
+        }
+      });
     }
   } catch(e) {
     console.log("OneSignal register:", e.message);
-    // Ne bloque pas le reste de l'app
   }
 }
 
@@ -1893,13 +1905,11 @@ async function loadStudentExercises() {
     document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
     document.getElementById("ex-stu-completed-count").textContent=done.length;
 
-    // Toujours ouvre En cours, et aussi Terminés s'il y en a
+    // En cours toujours ouvert, Terminés toujours fermé par défaut
     document.getElementById("ex-stu-inprogress-section").classList.add("open");
     document.getElementById("ex-stu-inprogress-body").classList.add("open");
-    if (done.length > 0) {
-      document.getElementById("ex-stu-completed-section").classList.add("open");
-      document.getElementById("ex-stu-completed-body").classList.add("open");
-    }
+    document.getElementById("ex-stu-completed-section").classList.remove("open");
+    document.getElementById("ex-stu-completed-body").classList.remove("open");
 
     const isForm=ex=>(ex.type||"form")==="form"||!ex.type;
     const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
