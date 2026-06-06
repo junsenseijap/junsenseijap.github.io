@@ -1398,7 +1398,7 @@ async function loadStudentContent(user) {
     if(rw){
       if(!content.length){rw.innerHTML='<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">'+t("emptyContent")+'</div>';}
       else{
-        const recent=[...content].sort((a,b)=>new Date(String(b.unlockedDate||0))-new Date(String(a.unlockedDate||0))).slice(0,3);
+        const recent=[...content].filter(c=>(c.type||"").toLowerCase()!=="form").sort((a,b)=>Number(b.id)-Number(a.id)).slice(0,3);
         rw.innerHTML='<div class="recent-content-list">'+recent.map(c=>{
           const isF=(c.type||"").toLowerCase()==="form";
           const url=isF&&c.driveLink?c.driveLink+(c.driveLink.includes("?")?"&":"?")+FORM_ENTRY_ID+"="+user.id:c.driveLink;
