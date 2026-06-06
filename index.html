@@ -13,7 +13,7 @@
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "f8d7091e-3a44-4d3a-a68c-665c6963a808",
-        notifyButton: { enable: true, size: "medium", position: "bottom-right", showCredit: false, prenotify: true }
+        notifyButton: { enable: true, size: 'large', position: 'bottom-right', showCredit: false }
       });
       window.OneSignal = OneSignal;
       console.log("✅ OneSignal initialisé");
@@ -1893,21 +1893,12 @@ async function loadStudentExercises() {
     document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
     document.getElementById("ex-stu-completed-count").textContent=done.length;
 
-    // Auto-ouvre la section qui a du contenu
-    const inProgSection = document.getElementById("ex-stu-inprogress-section");
-    const doneSection   = document.getElementById("ex-stu-completed-section");
-    const inProgBody    = document.getElementById("ex-stu-inprogress-body");
-    const doneBody      = document.getElementById("ex-stu-completed-body");
-    if (inP.length === 0 && done.length > 0) {
-      // Rien en cours → ouvre Terminés
-      inProgSection.classList.remove("open");
-      inProgBody.classList.remove("open");
-      doneSection.classList.add("open");
-      doneBody.classList.add("open");
-    } else {
-      // Ouvre En cours par défaut
-      inProgSection.classList.add("open");
-      inProgBody.classList.add("open");
+    // Toujours ouvre En cours, et aussi Terminés s'il y en a
+    document.getElementById("ex-stu-inprogress-section").classList.add("open");
+    document.getElementById("ex-stu-inprogress-body").classList.add("open");
+    if (done.length > 0) {
+      document.getElementById("ex-stu-completed-section").classList.add("open");
+      document.getElementById("ex-stu-completed-body").classList.add("open");
     }
 
     const isForm=ex=>(ex.type||"form")==="form"||!ex.type;
