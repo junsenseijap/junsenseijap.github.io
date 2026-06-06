@@ -1145,6 +1145,18 @@
       <button class="btn-save-pin" id="btn-save-pin" onclick="doChangePin()">🔐 Enregistrer</button>
     </div>
   </div>
+
+  <!-- Notifications card (élèves seulement) -->
+  <div class="profile-card" id="notif-card" style="display:none">
+    <div class="profile-card-header">🔔 Notifications</div>
+    <div style="padding:1.2rem;display:flex;flex-direction:column;gap:0.8rem">
+      <div style="font-size:0.82rem;color:var(--ink2)" id="notif-status-text">Chargement...</div>
+      <button class="btn-save-pin" id="btn-notif" onclick="toggleNotifications()" style="background:linear-gradient(135deg,var(--blue),#5a9fc4)">
+        🔔 Activer les notifications
+      </button>
+      <div class="pin-msg" id="notif-msg"></div>
+    </div>
+  </div>
 </div>
 
 
@@ -1709,12 +1721,76 @@ function loadProfilePage(user) {
   document.getElementById("pf-name").textContent = (user.name || "—") + " " + (user.familyName || "");
   document.getElementById("pf-phone").textContent = user.phone || "—";
   document.getElementById("pf-email").textContent = user.email || "—";
-  // Clear PIN fields
   ["pin-old","pin-new","pin-confirm"].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = "";
   });
   const msg = document.getElementById("pin-msg");
   if (msg) msg.style.display = "none";
+  // Carte notifications — seulement pour les élèves
+  const notifCard = document.getElementById("notif-card");
+  if (notifCard) {
+    if (user.role !== "Admin") {
+      notifCard.style.display = "block";
+      updateNotifStatus();
+    } else {
+      notifCard.style.display = "none";
+    }
+  }
+}
+
+async function updateNotifStatus() {
+  const statusEl = document.getElementById("notif-status-text");
+  const btnEl    = document.getElementById("btn-notif");
+  if (!statusEl || !btnEl) return;
+  try {
+    window.OneSignalDeferred.push(async function(OneSignal) {
+      const permission = OneSignal.Notifications.permission;
+      const subId      = OneSignal.User.PushSubscription.id;
+      if (permission && subId) {
+        statusEl.textContent = "✅ Notifications activées";
+        btnEl.textContent    = "🔕 Désactiver les notifications";
+        btnEl.style.background = "linear-gradient(135deg,#9a8590,#7a6570)";
+      } else {
+        statusEl.textContent = "🔕 Notifications désactivées";
+        btnEl.textContent    = "🔔 Activer les notifications";
+        btnEl.style.background = "linear-gradient(135deg,var(--blue),#5a9fc4)";
+      }
+    });
+  } catch(e) {
+    if(statusEl) statusEl.textContent = "Notifications non disponibles";
+  }
+}
+
+async function toggleNotifications() {
+  const btn    = document.getElementById("btn-notif");
+  const msgEl  = document.getElementById("notif-msg");
+  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+  try {
+    window.OneSignalDeferred.push(async function(OneSignal) {
+      const permission = OneSignal.Notifications.permission;
+      if (!permission) {
+        // Activer
+        await OneSignal.Notifications.requestPermission();
+        const subId = OneSignal.User.PushSubscription.id;
+        if (subId) {
+          await api({ action: "saveOneSignalId", userId: currentUserGlobal.id, oneSignalId: subId });
+          if(msgEl) { msgEl.textContent = "✅ Notifications activées !"; msgEl.className = "pin-msg success"; msgEl.style.display = "block"; }
+        } else {
+          if(msgEl) { msgEl.textContent = "Permission refusée par le navigateur"; msgEl.className = "pin-msg error"; msgEl.style.display = "block"; }
+        }
+      } else {
+        // Désactiver
+        await OneSignal.User.PushSubscription.optOut();
+        await api({ action: "saveOneSignalId", userId: currentUserGlobal.id, oneSignalId: "" });
+        if(msgEl) { msgEl.textContent = "🔕 Notifications désactivées"; msgEl.className = "pin-msg success"; msgEl.style.display = "block"; }
+      }
+      setTimeout(updateNotifStatus, 500);
+      if(btn) btn.disabled = false;
+    });
+  } catch(e) {
+    if(msgEl) { msgEl.textContent = "Erreur: " + e.message; msgEl.className = "pin-msg error"; msgEl.style.display = "block"; }
+    if(btn) { btn.disabled = false; }
+  }
 }
 
 function togglePin(inputId) {
