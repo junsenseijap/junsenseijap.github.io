@@ -1374,9 +1374,11 @@ async function loadStudentContent(user) {
             '<span class="level-prog-text">'+unlocked+'/'+total+' 🌸</span>'+
             '</div>';
         }
+        // total inconnu : barre à 100% avec unlocked affiché
         return '<div class="level-progress-row">'+
           '<span class="level-prog-badge">'+l+'</span>'+
-          '<div style="flex:1;font-size:0.82rem;color:var(--ink2);padding-left:0.5rem">'+unlocked+' 🌸 débloqué(s)</div>'+
+          '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:100%"></div></div>'+
+          '<span class="level-prog-text">'+unlocked+' 🌸</span>'+
           '</div>';
       }).join("");
       pw.innerHTML=rows||'<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("emptyContent")+'</div>';
