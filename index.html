@@ -2418,9 +2418,11 @@ async function loadAdminStats() {
   const user = loadSession();
   if (user) initUser(user);
 })();
-</script>
-</body>
-</htmlfunction renderContentManage(studentId, name, familyName, unlocked) {
+
+>
+
+
+function renderContentManage(studentId, name, familyName, unlocked) {
   const panel = document.getElementById("admin-content-panel");
   if (!allContent || allContent.length === 0) {
     panel.innerHTML =
@@ -2500,4 +2502,7 @@ async function loadAdminStats() {
     '<div class="level-accordion">'+levelRows+'</div>';
 }
 
->
+
+</script>
+</body>
+</html>
