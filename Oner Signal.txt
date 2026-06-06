@@ -1,0 +1,5 @@
+REST API KEY
+os_v2_app_7dlqshr2irgtvjummzogsy5ibdlhyhg5ykxeyvnpcuj3p4r2v76rkq3wpbyvb3iwq6zqg5g24ipqfujpxqz55knfvctfdtaqcvduz2y
+
+APP ID
+f8d7091e-3a44-4d3a-a68c-665c6963a808
