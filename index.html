@@ -1374,11 +1374,9 @@ async function loadStudentContent(user) {
             '<span class="level-prog-text">'+unlocked+'/'+total+' 🌸</span>'+
             '</div>';
         }
-        // total inconnu : barre à 100% avec unlocked affiché
         return '<div class="level-progress-row">'+
           '<span class="level-prog-badge">'+l+'</span>'+
-          '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:100%"></div></div>'+
-          '<span class="level-prog-text">'+unlocked+' 🌸</span>'+
+          '<div style="flex:1;font-size:0.82rem;color:var(--ink2);padding-left:0.5rem">'+unlocked+' 🌸 débloqué(s)</div>'+
           '</div>';
       }).join("");
       pw.innerHTML=rows||'<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("emptyContent")+'</div>';
@@ -1398,7 +1396,7 @@ async function loadStudentContent(user) {
     if(rw){
       if(!content.length){rw.innerHTML='<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">'+t("emptyContent")+'</div>';}
       else{
-        const recent=[...content].filter(c=>(c.type||"").toLowerCase()!=="form").sort((a,b)=>Number(b.id)-Number(a.id)).slice(0,3);
+        const recent=[...content].sort((a,b)=>new Date(String(b.unlockedDate||0))-new Date(String(a.unlockedDate||0))).slice(0,3);
         rw.innerHTML='<div class="recent-content-list">'+recent.map(c=>{
           const isF=(c.type||"").toLowerCase()==="form";
           const url=isF&&c.driveLink?c.driveLink+(c.driveLink.includes("?")?"&":"?")+FORM_ENTRY_ID+"="+user.id:c.driveLink;
@@ -1738,7 +1736,7 @@ async function doAddStudent() {
 // ══════════════════════════════════════════════════════════════
 // ASSIGN FORM CONTENT — from admin content tree
 // ══════════════════════════════════════════════════════════════
-async function assignFormContent(studentId, contentId, formBaseUrl, title, sheetTab) {
+async function assignFormContent(studentId, contentId, formBaseUrl, title) {
   const btn = document.getElementById("btn-assign-" + contentId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
 
@@ -1754,7 +1752,8 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
       pin:       getStoredPin(),
       studentId, title,
       formUrl:   personalizedUrl,
-      formTab:   sheetTab || ""
+      baseFormUrl: formBaseUrl,
+      entryId:   FORM_ENTRY_ID
     });
     if (data.success) {
       toast("✅ " + title + " assigné !", "success");
@@ -2524,7 +2523,7 @@ function renderContentManage(studentId, name, familyName, unlocked) {
             '<div class="content-manage-info"><div class="content-manage-title">'+c.title+'</div>'+
             '<div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
             '<button class="btn-assign-content" id="btn-assign-'+c.id+'"'+
-            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'))">+</button>'+
+            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'))">+</button>'+
             '</div>';
         }
         return '<div class="content-manage-item">'+
