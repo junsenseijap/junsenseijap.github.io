@@ -3559,7 +3559,25 @@ async function loadAdminStats() {
 
   showPage("login");
   const user = loadSession();
-  if (user) initUser(user);
+  if (user) {
+    // Vérifier si le compte est toujours actif avant de restaurer la session
+    if (user.role === "Admin") {
+      initUser(user);
+    } else {
+      api({ action: "checkActive", userId: user.id }).then(r => {
+        if (r && r.active) {
+          initUser(user);
+        } else {
+          clearSession();
+          showPage("login");
+          setTimeout(() => showError(t("disabledAccount")), 300);
+        }
+      }).catch(() => {
+        // En cas d'erreur réseau → on laisse entrer (évite de bloquer offline)
+        initUser(user);
+      });
+    }
+  }
 })();
 
 
