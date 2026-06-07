@@ -2602,8 +2602,8 @@ async function loadAdminExercises() {
         :"";
       const doneHtml=done.length?
         '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\''+doneId+'\',this)">'+
-        '<span>✅ '+t("exCompleted").toUpperCase()+' ('+done.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s" id="arr-'+doneId+'">▲</span></div>'+
-        '<div id="'+doneId+'">'+done.map(makeItem).join("")+'</div>'
+        '<span>✅ '+t("exCompleted").toUpperCase()+' ('+done.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-'+doneId+'">▲</span></div>'+
+        '<div id="'+doneId+'" style="display:none">'+done.map(makeItem).join("")+'</div>'
         :"";
       return '<div style="margin-bottom:0.6rem">'+
         '<div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card)" onclick="toggleExRow(\''+rid+'\')">'+
@@ -3142,6 +3142,7 @@ function applyLang() {
   // Student exercises page labels
   const exPageSub = document.getElementById("ex-page-sub"); if(exPageSub) exPageSub.textContent = "🌸 " + t("exInProgress") + " / " + t("exCompleted");
   const adminExSub = document.getElementById("admin-ex-sub"); if(adminExSub) adminExSub.textContent = "🌸 " + t("exCompleted");
+  const adminExTitle = document.getElementById("admin-ex-title"); if(adminExTitle) adminExTitle.textContent = "📝 " + t("navExercises");
   // Exercise section labels (hardcodés dans le HTML)
   const inProgressLabel = document.querySelector("#ex-stu-inprogress-section .ex-section-label");
   if(inProgressLabel) inProgressLabel.textContent = t("exInProgress");
