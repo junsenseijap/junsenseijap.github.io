@@ -1142,7 +1142,7 @@
       </div>
       <!-- Sélecteur de langue sur la page de connexion -->
       <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem;justify-content:center">
-        <button onclick="setLangLogin('vi')" id="login-lang-vi" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 22 15"><rect width="22" height="15" fill="#DA020E"/><polygon points="11,2 12.9,7.3 18.5,7.3 13.8,10.6 15.7,15.9 11,12.6 6.3,15.9 8.2,10.6 3.5,7.3 9.1,7.3" fill="#FFCD00"/></svg></button>
+        <button onclick="setLangLogin('vi')" id="login-lang-vi" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#DA020E"/><polygon points="15,3 16.9,8.8 23,8.8 18,12.3 19.9,18.1 15,14.6 10.1,18.1 12,12.3 7,8.8 13.1,8.8" fill="#FFCD00"/></svg></button>
         <button onclick="setLangLogin('en')" id="login-lang-en" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="white" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="5"/><path d="M30,0 V40 M0,20 H60" stroke="white" stroke-width="12"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="7"/></svg></button>
         <button onclick="setLangLogin('fr')" id="login-lang-fr" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 3 2"><rect width="1" height="2" fill="#002395"/><rect x="1" width="1" height="2" fill="#FFFFFF"/><rect x="2" width="1" height="2" fill="#ED2939"/></svg></button>
       </div>
@@ -1295,7 +1295,7 @@
 
   <!-- Language selector — flags only -->
     <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem">
-    <button onclick="setLang('vi')" id="lang-vi" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 22 15"><rect width="22" height="15" fill="#DA020E"/><polygon points="11,2 12.9,7.3 18.5,7.3 13.8,10.6 15.7,15.9 11,12.6 6.3,15.9 8.2,10.6 3.5,7.3 9.1,7.3" fill="#FFCD00"/></svg></button>
+    <button onclick="setLang('vi')" id="lang-vi" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#DA020E"/><polygon points="15,3 16.9,8.8 23,8.8 18,12.3 19.9,18.1 15,14.6 10.1,18.1 12,12.3 7,8.8 13.1,8.8" fill="#FFCD00"/></svg></button>
     <button onclick="setLang('en')" id="lang-en" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="white" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="5"/><path d="M30,0 V40 M0,20 H60" stroke="white" stroke-width="12"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="7"/></svg></button>
     <button onclick="setLang('fr')" id="lang-fr" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 3 2"><rect width="1" height="2" fill="#002395"/><rect x="1" width="1" height="2" fill="#FFFFFF"/><rect x="2" width="1" height="2" fill="#ED2939"/></svg></button>
   </div>
@@ -3004,6 +3004,7 @@ const TRANSLATIONS = {
     exAssignErr:       "Giao bài thất bại",
     exInProgress:      "Đang làm",
     exCompleted:       "Đã hoàn thành",
+    exTrack:           "Theo dõi bài tập",
     disabledAccount:   "Tài khoản đã bị khoá",
     notifEnabled:      "🔔 Thông báo đã được bật!",
     notifDisabled:     "🔕 Thông báo đã tắt",
@@ -3128,6 +3129,7 @@ const TRANSLATIONS = {
     exAssignErr:       "Couldn't assign the exercise",
     exInProgress:      "In progress",
     exCompleted:       "Completed",
+    exTrack:           "Exercise tracking",
     disabledAccount:   "This account is disabled",
     notifEnabled:      "🔔 Notifications enabled!",
     notifDisabled:     "🔕 Notifications disabled",
@@ -3252,6 +3254,7 @@ const TRANSLATIONS = {
     exAssignErr:       "Impossible d'assigner l'exercice",
     exInProgress:      "En cours",
     exCompleted:       "Terminés",
+    exTrack:           "Suivi des exercices",
     disabledAccount:   "Ce compte est désactivé",
     notifEnabled:      "🔔 Notifications activées !",
     notifDisabled:     "🔕 Notifications désactivées",
@@ -3390,7 +3393,7 @@ function applyLang() {
   const phContent = document.getElementById("ph-content-manage"); if(phContent) phContent.textContent = t("contentHeader");
   // Student exercises page labels
   const exPageSub = document.getElementById("ex-page-sub"); if(exPageSub) exPageSub.textContent = "🌸 " + t("exInProgress") + " / " + t("exCompleted");
-  const adminExSub = document.getElementById("admin-ex-sub"); if(adminExSub) adminExSub.textContent = "🌸 " + t("exCompleted");
+  const adminExSub = document.getElementById("admin-ex-sub"); if(adminExSub) adminExSub.textContent = "🌸 " + t("exTrack");
   const adminExTitle = document.getElementById("admin-ex-title"); if(adminExTitle) adminExTitle.textContent = "📝 " + t("navExercises");
   // Exercise section labels (hardcodés dans le HTML)
   const inProgressLabel = document.querySelector("#ex-stu-inprogress-section .ex-section-label");
@@ -3525,7 +3528,7 @@ async function loadAdminStats() {
       }).sort((a,b)=>b.avg-a.avg).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        (s.hasTests?'<canvas id="'+s.spId+'" width="70" height="26" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:70px;flex-shrink:0;font-size:0.7rem;color:var(--gray);text-align:center">—</span>')+
+        (s.hasTests?'<canvas id="'+s.spId+'" width="70" height="26" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:70px;flex-shrink:0"></span>')+
         '<span class="dash-avg-student-score">'+s.avg.toFixed(1)+'/10</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '<button class="btn-spark-admin" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')">📈</button>'+
