@@ -2366,7 +2366,7 @@ async function openStudentChart(studentId, studentName, level) {
     '<div class="levels-modal-title">📈 '+studentName+' — '+level+'</div>'+
     '<div id="scm-loading" style="text-align:center;padding:1rem;color:var(--gray)">Chargement...</div>'+
     '<div style="position:relative;height:200px;display:none" id="scm-chart-wrap"><canvas id="scm-chart" role="img" aria-label="Progression '+studentName+'"></canvas></div>'+
-    '<div id="scm-empty" style="display:none;text-align:center;color:var(--gray);padding:1rem;font-size:0.84rem">Pas encore de tests [TEST] pour cet élève</div>'+
+    '<div id="scm-empty" style="display:none;text-align:center;color:var(--gray);padding:1rem;font-size:0.84rem" id="scm-empty-msg">'+t("noTestsYet")+'</div>'+
     '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'student-chart-modal\').remove()">Fermer</button>'+
     '</div>';
   overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
@@ -3014,6 +3014,7 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Đã xoá khỏi yêu thích",
     favMax:            "Tối đa 10 nội dung yêu thích",
     lastTest:          "Bài kiểm tra cuối",
+    noTestsYet:        "Chưa có bài kiểm tra [TEST] nào cho học viên này",
     msgTitle:          "Tin nhắn từ Jun Sensei",
     msgPlaceholder:    "Viết tin nhắn cho học viên...",
     msgSend:           "Gửi tin nhắn",
@@ -3139,6 +3140,7 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Removed from favorites",
     favMax:            "Maximum 10 favorites reached",
     lastTest:          "Last test",
+    noTestsYet:        "No [TEST] tests yet for this student",
     msgTitle:          "Messages from Jun Sensei",
     msgPlaceholder:    "Write a message to the student...",
     msgSend:           "Send message",
@@ -3264,6 +3266,7 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Retiré des favoris",
     favMax:            "Maximum 10 favoris atteint",
     lastTest:          "Dernier test",
+    noTestsYet:        "Pas encore de tests [TEST] pour cet élève",
     msgTitle:          "Messages de Jun Sensei",
     msgPlaceholder:    "Écris un message pour l'élève...",
     msgSend:           "Envoyer",
