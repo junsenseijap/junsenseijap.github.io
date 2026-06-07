@@ -2070,6 +2070,7 @@ async function testNotifStudent(studentId, studentName) {
     else toast(data.message || t("errConn"), "error");
   } catch { toast(t("errConn"), "error"); }
 }
+async function toggleStudentActive(studentId, isCurrentlyActive) {
   const btn = document.getElementById("btn-active-" + studentId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
   try {
