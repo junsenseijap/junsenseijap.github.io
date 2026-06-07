@@ -1783,8 +1783,9 @@ async function loadStudentContent(user) {
         avgWrap.style.display="block";
       }
     }
+  } catch(e) {
     console.error(e);
-    ["student-progress-levels","student-avg-content","student-recent-content"].forEach(id=>{
+    ["student-progress-levels","student-recent-content"].forEach(id=>{
       const el=document.getElementById(id);if(el)el.innerHTML='<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("errConn")+'</div>';
     });
   }
