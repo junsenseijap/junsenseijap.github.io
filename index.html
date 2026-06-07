@@ -1173,14 +1173,6 @@
     <div class="header-user">
       <span class="user-name" id="header-name"></span>
       <span class="role-badge" id="header-role"></span>
-      <!-- Boîte aux lettres — élèves uniquement -->
-      <button class="btn-notif-header" id="btn-mailbox-header" onclick="scrollToMessages()" title="Messages" style="display:none;position:relative">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-        <span id="mailbox-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--pink);color:white;font-size:0.55rem;font-weight:700;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center;line-height:1">0</span>
-      </button>
       <!-- Bouton notif -->
       <button class="btn-notif-header" id="btn-notif-header" onclick="toggleNotifHeader()" title="Notifications" style="display:none">
         <svg id="notif-icon-on" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
@@ -1206,7 +1198,16 @@
 
   <!-- ══ STUDENT DASHBOARD ══ -->
   <div id="page-student">
-    <div class="page-title" id="student-greeting">こんにちは</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.1rem">
+      <div class="page-title" id="student-greeting">こんにちは</div>
+      <button id="btn-mailbox-header" onclick="scrollToMessages()" title="Messages" style="display:none;position:relative;background:none;border:none;cursor:pointer;color:var(--gray);padding:0.3rem">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span id="mailbox-badge" style="display:none;position:absolute;top:0;right:0;background:var(--pink);color:white;font-size:0.55rem;font-weight:700;width:15px;height:15px;border-radius:50%;align-items:center;justify-content:center;line-height:1">0</span>
+      </button>
+    </div>
     <div class="page-subtitle" id="student-subtitle">🌸 Tableau de bord</div>
 
     <!-- CARTE 1 : Progression + Moyenne + Mini graphique -->
@@ -1242,12 +1243,6 @@
     <div class="stats-card">
       <div class="stats-card-title" id="fav-card-title">⭐ Mes favoris</div>
       <div id="student-fav-content"><div style="color:var(--gray);font-size:0.82rem;padding:0.3rem" id="fav-empty-msg">Pas encore de favoris</div></div>
-    </div>
-
-    <!-- CARTE 4 : Messages de Jun Sensei -->
-    <div class="stats-card" id="messages-card">
-      <div class="stats-card-title" id="msg-card-title">📬 Messages</div>
-      <div id="student-messages-content"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
   </div>
@@ -2218,50 +2213,54 @@ async function sendMessage(studentId, studentName) {
 }
 
 async function loadStudentMessages(userId) {
-  const card = document.getElementById("messages-card");
-  const wrap = document.getElementById("student-messages-content");
-  if (!card || !wrap) return;
+  const mailboxBtn = document.getElementById("btn-mailbox-header");
+  if (mailboxBtn && currentUserGlobal && currentUserGlobal.role !== "Admin") {
+    mailboxBtn.style.display = "flex";
+    mailboxBtn.onclick = openMessagesModal;
+  }
   try {
     const data = await api({ action: "getMessages", studentId: userId });
-    // Afficher le bouton mailbox dans le header (élèves uniquement)
-    const mailboxBtn = document.getElementById("btn-mailbox-header");
-    if (mailboxBtn && currentUserGlobal && currentUserGlobal.role !== "Admin") {
-      mailboxBtn.style.display = "flex";
-    }
-
-    if (!data.success || !data.messages || !data.messages.length) {
-      card.style.display = "block";
-      wrap.innerHTML = '<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("msgEmpty2")+'</div>';
-      updateMailboxBadge(0);
-      return;
-    }
-    card.style.display = "block";
+    if (!data.success || !data.messages) { updateMailboxBadge(0); return; }
     const unread = data.messages.filter(m => m.read !== "YES");
     updateMailboxBadge(unread.length);
-    wrap.innerHTML = data.messages.map(m => {
-      const d = m.date ? new Date(m.date).toLocaleDateString(currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-      return '<div class="msg-item'+(m.read!=="YES"?" unread":"")+'">'+
-        '<div class="msg-date">'+d+(m.read!=="YES"?'<span class="msg-new-badge">'+t("msgNew")+'</span>':"")+'</div>'+
-        '<div class="msg-text">'+m.message.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'+
-      '</div>';
-    }).join("");
-    // Mettre à jour le titre avec compteur non lus
-    const titleEl = document.getElementById("msg-card-title");
-    if (titleEl) titleEl.textContent = "📬 " + t("msgTitle") + (unread.length?" ("+unread.length+")":"");
-    // Marquer comme lus après 2 secondes
+    window._studentMessages = data.messages;
     if (unread.length) {
       setTimeout(async () => {
         await api({ action: "markMessagesRead", studentId: userId });
-        const titleEl2 = document.getElementById("msg-card-title");
-        if (titleEl2) titleEl2.textContent = "📬 " + t("msgTitle");
-        wrap.querySelectorAll(".msg-item.unread").forEach(el => {
-          el.classList.remove("unread");
-          el.querySelector(".msg-new-badge")?.remove();
-        });
-      }, 2000);
+        updateMailboxBadge(0);
+      }, 3000);
     }
   } catch(e) { console.log("messages:", e.message); }
 }
+
+function openMessagesModal() {
+  document.getElementById("messages-modal")?.remove();
+  const messages = window._studentMessages || [];
+  const overlay = document.createElement("div");
+  overlay.id = "messages-modal";
+  overlay.className = "levels-modal-overlay";
+  const msgsHtml = messages.length
+    ? messages.map(m => {
+        const d = m.date ? new Date(m.date).toLocaleDateString(
+          currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",
+          {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}
+        ) : "";
+        return '<div class="msg-item'+(m.read!=="YES"?" unread":"")+'">'+
+          '<div class="msg-date">'+d+(m.read!=="YES"?'<span class="msg-new-badge">'+t("msgNew")+'</span>':"")+'</div>'+
+          '<div class="msg-text">'+m.message.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'+
+        '</div>';
+      }).join("")
+    : '<div style="color:var(--gray);font-size:0.84rem;padding:1rem;text-align:center">'+t("msgEmpty2")+'</div>';
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="max-height:75vh;overflow-y:auto">'+
+    '<div class="levels-modal-title">📬 '+t("msgTitle")+'</div>'+
+    msgsHtml+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'messages-modal\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
 function drawSparkline(canvasId, scores) {
   const c = document.getElementById(canvasId);
   if (!c) return;
