@@ -6,7 +6,7 @@
   <title>Jun Sensei</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
@@ -1060,7 +1060,22 @@
       font-size: 1rem; font-weight: 600; color: var(--ink);
       margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;
     }
-    /* ARBORESCENCE RECENT & FAVORIS */
+    /* Police Open Sans pour le vietnamien */
+    html.lang-vi body,
+    html.lang-vi .btn-login,
+    html.lang-vi .nav-label,
+    html.lang-vi .stats-card-title,
+    html.lang-vi .page-title,
+    html.lang-vi .page-subtitle,
+    html.lang-vi .profile-name,
+    html.lang-vi .tree-item-title,
+    html.lang-vi .msg-text,
+    html.lang-vi .ex-card-title,
+    html.lang-vi input,
+    html.lang-vi textarea,
+    html.lang-vi button {
+      font-family: 'Open Sans', sans-serif !important;
+    }
     .tree-level { margin-bottom: 0.4rem; }
     .tree-level-header { display:flex;align-items:center;gap:0.5rem;padding:0.45rem 0.6rem;cursor:pointer;border-radius:8px;user-select:none;transition:background 0.15s; }
     .tree-level-header:hover { background: var(--pink-pale); }
@@ -1158,7 +1173,15 @@
     <div class="header-user">
       <span class="user-name" id="header-name"></span>
       <span class="role-badge" id="header-role"></span>
-      <!-- Bouton notif — visible seulement pour les élèves -->
+      <!-- Boîte aux lettres — élèves uniquement -->
+      <button class="btn-notif-header" id="btn-mailbox-header" onclick="scrollToMessages()" title="Messages" style="display:none;position:relative">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span id="mailbox-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--pink);color:white;font-size:0.55rem;font-weight:700;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center;line-height:1">0</span>
+      </button>
+      <!-- Bouton notif -->
       <button class="btn-notif-header" id="btn-notif-header" onclick="toggleNotifHeader()" title="Notifications" style="display:none">
         <svg id="notif-icon-on" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -2131,7 +2154,27 @@ async function doChangePin() {
 }
 
 
-// ══ MESSAGES ══
+function scrollToMessages() {
+  // Aller à l'onglet accueil d'abord
+  if (currentNavTab !== "home") switchTab("home");
+  setTimeout(() => {
+    const card = document.getElementById("messages-card");
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 200);
+}
+
+function updateMailboxBadge(count) {
+  const btn   = document.getElementById("btn-mailbox-header");
+  const badge = document.getElementById("mailbox-badge");
+  if (!btn) return;
+  if (count > 0) {
+    if (badge) { badge.textContent = count > 9 ? "9+" : count; badge.style.display = "flex"; }
+    btn.classList.add("active");
+  } else {
+    if (badge) badge.style.display = "none";
+    btn.classList.remove("active");
+  }
+}
 function openMessageModal(studentId, studentName) {
   document.getElementById("message-modal")?.remove();
   const overlay = document.createElement("div");
@@ -2180,13 +2223,21 @@ async function loadStudentMessages(userId) {
   if (!card || !wrap) return;
   try {
     const data = await api({ action: "getMessages", studentId: userId });
+    // Afficher le bouton mailbox dans le header (élèves uniquement)
+    const mailboxBtn = document.getElementById("btn-mailbox-header");
+    if (mailboxBtn && currentUserGlobal && currentUserGlobal.role !== "Admin") {
+      mailboxBtn.style.display = "flex";
+    }
+
     if (!data.success || !data.messages || !data.messages.length) {
       card.style.display = "block";
       wrap.innerHTML = '<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("msgEmpty2")+'</div>';
+      updateMailboxBadge(0);
       return;
     }
     card.style.display = "block";
     const unread = data.messages.filter(m => m.read !== "YES");
+    updateMailboxBadge(unread.length);
     wrap.innerHTML = data.messages.map(m => {
       const d = m.date ? new Date(m.date).toLocaleDateString(currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
       return '<div class="msg-item'+(m.read!=="YES"?" unread":"")+'">'+
@@ -2378,9 +2429,9 @@ async function loadAdminManage() {
           '<div class="manage-stu-email">'+(s.email||"")+'</div>'+
           '<div class="manage-stu-levels">'+levels+'</div>'+
         '</div>'+
+        '<button class="btn-manage-stu" style="background:rgba(232,75,122,0.1);border-color:rgba(232,75,122,0.3);color:var(--pink);margin-right:0.2rem" onclick="openMessageModal('+s.id+',\''+s.name+' '+(s.familyName||"")+'\')" title="Message">✉️</button>'+
         '<button class="btn-manage-levels" onclick="openLevelsModal('+s.id+',\''+s.name+'\',\''+( s.levels||"" )+'\')" title="Niveaux">LEVEL</button>'+
-        '<button class="btn-manage-stu" style="background:rgba(123,175,212,0.15);border-color:rgba(123,175,212,0.4);color:#3a7aaa;margin-right:0.3rem" onclick="testNotifStudent('+s.id+',\''+s.name+'\')" title="Test notif">🔔</button>'+
-        '<button class="btn-manage-stu" style="background:rgba(232,75,122,0.1);border-color:rgba(232,75,122,0.3);color:var(--pink);margin-right:0.3rem" onclick="openMessageModal('+s.id+',\''+s.name+' '+(s.familyName||"")+'\')" title="Envoyer un message">✉️</button>'+
+        '<button class="btn-manage-stu" style="background:rgba(123,175,212,0.15);border-color:rgba(123,175,212,0.4);color:#3a7aaa;margin-left:0.2rem" onclick="testNotifStudent('+s.id+',\''+s.name+'\')" title="Test notif">🔔</button>'+
         '<button class="btn-manage-stu '+(isActive?"active":"inactive")+'" id="btn-active-'+s.id+'" onclick="toggleStudentActive('+s.id+','+isActive+')">'+
           (isActive ? "✅ Actif" : "🚫 Inactif")+
         '</button>'+
@@ -2912,7 +2963,7 @@ const TRANSLATIONS = {
     loginErrConn:      "Can't connect right now, try again!",
     logoutBtn:         "Sign out",
     // STUDENT DASHBOARD
-    studentGreeting:   (name) => `Hey, ${name}! 👋`,
+    studentGreeting:   (name) => `Hey, ${name}!`,
     studentSubtitle:   "🌸 Your content",
     progressTitle:     "📚 Progress",
     avgTitle:          "📊 Overall average",
@@ -3036,7 +3087,7 @@ const TRANSLATIONS = {
     loginErrConn:      "Pas de connexion, réessaie !",
     logoutBtn:         "出る",
     // STUDENT DASHBOARD
-    studentGreeting:   (name) => `Salut ${name} ! 👋`,
+    studentGreeting:   (name) => `Salut ${name} !`,
     studentSubtitle:   "🌸 Ton espace",
     progressTitle:     "📚 Progression",
     avgTitle:          "📊 Moyenne générale",
@@ -3149,6 +3200,7 @@ const TRANSLATIONS = {
 
 const LANG_KEY = "jun_lang";
 let currentLang = localStorage.getItem(LANG_KEY) || "vi";
+document.documentElement.classList.toggle("lang-vi", currentLang === "vi");
 
 function t(key, ...args) {
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS['vi'];
@@ -3161,7 +3213,7 @@ function setLangLogin(lang) {
   currentLang = lang;
   localStorage.setItem(LANG_KEY, lang);
   document.documentElement.lang = lang;
-  // Active state sur les boutons du login
+  document.documentElement.classList.toggle("lang-vi", lang === "vi");
   ["vi","en","fr"].forEach(l => {
     const btn = document.getElementById("login-lang-" + l);
     if (btn) btn.classList.toggle("active", l === lang);
@@ -3173,8 +3225,7 @@ function setLang(lang) {
   currentLang = lang;
   localStorage.setItem(LANG_KEY, lang);
   document.documentElement.lang = lang;
-
-  // Update profile language buttons active state
+  document.documentElement.classList.toggle("lang-vi", lang === "vi");
   ["vi","en","fr"].forEach(l => {
     const btn = document.getElementById("lang-" + l);
     if (btn) btn.classList.toggle("active", l === lang);
