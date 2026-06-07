@@ -1315,7 +1315,12 @@ async function toggleNotifHeader() {
       if (OneSignal) {
         const permission = OneSignal.Notifications.permission;
         if (!permission) {
+          // Pas encore de permission → demander
           await OneSignal.Notifications.requestPermission();
+          await new Promise(r => setTimeout(r, 1500));
+        } else {
+          // Permission déjà accordée → forcer opt-in pour récupérer un nouvel ID
+          try { await OneSignal.User.PushSubscription.optIn(); } catch(e) {}
           await new Promise(r => setTimeout(r, 1500));
         }
         const subId = OneSignal.User.PushSubscription.id;
@@ -1352,20 +1357,19 @@ async function registerOneSignalPlayer(userId) {
     if (!OneSignal) return;
     await new Promise(r => setTimeout(r, 1500));
 
-    // Essaie d'abord le Subscription ID (format UUID correct)
+    // Toujours enregistrer l'ID actuel (même si permission déjà accordée)
     const subId = OneSignal.User.PushSubscription.id;
     if (subId) {
       await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
-      console.log("✅ OneSignal Subscription ID enregistré:", subId);
-      return;
+      console.log("✅ OneSignal ID enregistré:", subId);
     }
 
-    // Écoute les changements de subscription
+    // Écoute les changements (nouveau subscribe après reset)
     OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
       const id = event.current && event.current.id;
       if (id) {
         await api({ action: "saveOneSignalId", userId, oneSignalId: id });
-        console.log("✅ OneSignal ID enregistré après changement:", id);
+        console.log("✅ OneSignal ID mis à jour:", id);
       }
     });
   } catch(e) {
@@ -1429,10 +1433,8 @@ async function doLogin() {
       // La langue choisie au login écrase le localStorage
       data.user.lang = currentLang;
       saveSession(data.user);
-      // Enregistre la langue dans le sheet (sauf admin)
-      if (data.user.role !== "Admin") {
-        api({ action: "saveUserLang", userId: data.user.id, lang: currentLang.toUpperCase() });
-      }
+      // Enregistre la langue pour TOUS (élèves et admin)
+      api({ action: "saveUserLang", userId: data.user.id, lang: currentLang.toUpperCase() });
       initUser(data.user);
     } else {
       showError(data.message || t("loginErrWrong"));
@@ -2551,8 +2553,8 @@ function setLang(lang) {
     if (btn) btn.classList.toggle("active", l === lang);
   });
 
-  // Sauvegarde en sheet si connecté et pas admin
-  if (currentUserGlobal && currentUserGlobal.role !== "Admin") {
+  // Sauvegarde en sheet pour TOUS (élèves et admin)
+  if (currentUserGlobal) {
     api({ action: "saveUserLang", userId: currentUserGlobal.id, lang: lang.toUpperCase() });
   }
 
@@ -2629,11 +2631,11 @@ function applyLang() {
   const completedLabel = document.querySelector("#ex-stu-completed-section .ex-section-label");
   if(completedLabel) completedLabel.textContent = t("exCompleted");
   // Student greeting
-  if(currentUserGlobal && currentUserGlobal.role !== "Admin") {
+  if(currentUserGlobal) {
     const greetEl = document.getElementById("student-greeting");
-    if(greetEl) greetEl.textContent = t("studentGreeting", currentUserGlobal.name || "");
+    if(greetEl && currentUserGlobal.role !== "Admin") greetEl.textContent = t("studentGreeting", currentUserGlobal.name || "");
     const subEl = document.getElementById("student-subtitle");
-    if(subEl) subEl.textContent = t("studentSubtitle");
+    if(subEl && currentUserGlobal.role !== "Admin") subEl.textContent = t("studentSubtitle");
   }
   applyNavLang();
 }
