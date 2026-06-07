@@ -3415,7 +3415,7 @@ function toggleExRow(rowId) {
 async function loadAdminDashboard() {
   const aw=document.getElementById("dash-avg-content");
   const sc2=document.getElementById("dash-student-count");
-  if(sc2)sc2.textContent=allStudents.length;
+  if(sc2)sc2.textContent=allStudents.filter(s=>String(s.active).toUpperCase()==="YES").length;
   if(!aw)return;
   aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
@@ -3465,7 +3465,7 @@ async function loadAdminDashboard() {
 async function loadAdminStats() {
   const aw=document.getElementById("admin-stats-content");
   const sc2=document.getElementById("admin-student-count");
-  if(sc2)sc2.textContent=allStudents.length;
+  if(sc2)sc2.textContent=allStudents.filter(s=>String(s.active).toUpperCase()==="YES").length;
   if(!aw)return;
   aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
