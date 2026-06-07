@@ -13,7 +13,8 @@
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "f8d7091e-3a44-4d3a-a68c-665c6963a808",
-        notifyButton: { enable: true, size: 'large', position: 'bottom-right', showCredit: false }
+        notifyButton: { enable: false },
+        welcomeNotification: { disable: true }
       });
       window.OneSignal = OneSignal;
       console.log("✅ OneSignal initialisé");
@@ -1460,18 +1461,12 @@ function initUser(user) {
   buildBottomNav(user.role);
   loadProfilePage(user);
   currentNavTab = "home";
-  // Bouton notif — seulement pour les élèves
+  // Bouton notif — pour élèves ET admin
   const notifBtn = document.getElementById("btn-notif-header");
   if (notifBtn) {
-    if (user.role !== "Admin") {
-      notifBtn.style.display = "flex";
-      // État initial selon col J (notifEnabled dans user)
-      updateNotifButton(user.notifEnabled === "YES");
-      // Enregistre OneSignal si notifs activées
-      if (user.notifEnabled === "YES") registerOneSignalPlayer(user.id);
-    } else {
-      notifBtn.style.display = "none";
-    }
+    notifBtn.style.display = "flex";
+    updateNotifButton(user.notifEnabled === "YES");
+    if (user.notifEnabled === "YES") registerOneSignalPlayer(user.id);
   }
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
   else { showPage("student"); loadStudentContent(user); }
