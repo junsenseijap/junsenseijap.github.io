@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jun Sensei — Hướng dẫn học viên</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --pink:#E84B7A;
+  --pink-light:#FDE8EF;
+  --pink-pale:#FFF0F5;
+  --dark:#2C1A22;
+  --gray:#888;
+  --white:#fff;
+}
+body{font-family:'Open Sans',sans-serif;background:#f8f0f3;color:var(--dark)}
+
+/* NAVIGATION */
+.nav-dots{position:fixed;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:100}
+.nav-dot{width:10px;height:10px;border-radius:50%;background:rgba(232,75,122,0.25);cursor:pointer;transition:all .3s;border:none}
+.nav-dot.active{background:var(--pink);transform:scale(1.3)}
+.nav-arrows{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:100}
+.nav-arrow{background:var(--pink);color:white;border:none;padding:10px 24px;border-radius:99px;cursor:pointer;font-family:'Open Sans',sans-serif;font-size:14px;font-weight:600;transition:all .2s}
+.nav-arrow:hover{background:#c93d6a;transform:scale(1.02)}
+.nav-arrow:disabled{opacity:0.3;cursor:not-allowed}
+.slide-counter{position:fixed;bottom:28px;left:50%;transform:translateX(-115px);font-size:12px;color:var(--pink);font-weight:600;z-index:100;min-width:60px;text-align:center}
+
+/* SLIDES */
+.slides{width:100%;height:100vh;overflow:hidden;position:relative}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px 20px 80px;opacity:0;pointer-events:none;transition:opacity .5s,transform .5s;transform:translateY(30px)}
+.slide.active{opacity:1;pointer-events:all;transform:translateY(0)}
+.slide.prev{opacity:0;transform:translateY(-30px)}
+
+/* SLIDE 1 — COVER */
+.cover{background:linear-gradient(135deg,#E84B7A 0%,#c93d6a 60%,#a02d54 100%);color:white;flex-direction:column;gap:0;text-align:center}
+.cover-sakura{font-size:64px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.cover-jp{font-size:42px;font-weight:300;letter-spacing:6px;margin-bottom:4px;color:rgba(255,255,255,0.9)}
+.cover-title{font-size:28px;font-weight:700;margin-bottom:8px}
+.cover-sub{font-size:14px;font-weight:400;opacity:0.8;margin-bottom:40px}
+.cover-tag{background:rgba(255,255,255,0.15);border-radius:99px;padding:6px 20px;font-size:12px;font-weight:600;letter-spacing:.1em;backdrop-filter:blur(10px)}
+.petal{position:absolute;font-size:20px;animation:fall linear infinite;opacity:0.4}
+@keyframes fall{0%{transform:translateY(-30px) rotate(0);opacity:0.4}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}
+
+/* SLIDE 2 — STRUCTURE */
+.slide-content{max-width:700px;width:100%}
+.slide-header{text-align:center;margin-bottom:32px}
+.slide-num{display:inline-block;background:var(--pink-light);color:var(--pink);font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;letter-spacing:.1em;margin-bottom:12px}
+.slide-title{font-size:28px;font-weight:700;color:var(--dark);margin-bottom:8px}
+.slide-desc{font-size:14px;color:var(--gray);font-weight:400}
+
+/* PHONE MOCKUP */
+.phone{background:white;border-radius:32px;border:3px solid rgba(232,75,122,0.15);padding:12px;box-shadow:0 20px 60px rgba(232,75,122,0.15);width:220px;flex-shrink:0}
+.phone-screen{background:#FDE8EF;border-radius:22px;overflow:hidden}
+.ph{font-size:9px}
+.ph-header{background:var(--pink);padding:8px 10px;display:flex;align-items:center;justify-content:space-between}
+.ph-logo{color:white;font-weight:600;font-size:9px}
+.ph-logo-sub{color:rgba(255,255,255,0.7);font-size:7px}
+.ph-badges{display:flex;gap:4px}
+.ph-badge{background:rgba(255,255,255,0.2);border-radius:99px;padding:1px 6px;color:white;font-size:7px}
+.ph-body{padding:8px}
+.ph-greeting{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:2px;display:flex;align-items:center;justify-content:space-between}
+.ph-sub{font-size:7px;color:var(--pink);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.ph-card{background:white;border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.ph-card-title{font-size:7px;font-weight:600;color:var(--pink);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.ph-prog{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.ph-lvl{font-size:7px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--pink);color:white}
+.ph-bar{flex:1;height:4px;background:rgba(232,75,122,0.1);border-radius:99px;overflow:hidden}
+.ph-bar-fill{height:100%;border-radius:99px;background:var(--pink)}
+.ph-avg-row{display:flex;align-items:center;gap:8px;padding-top:5px;border-top:1px solid rgba(232,75,122,0.1)}
+.ph-avg-num{font-size:18px;color:var(--pink);font-weight:300;line-height:1}
+.ph-chart{flex:1;height:30px;background:rgba(232,75,122,0.05);border-radius:6px;overflow:hidden}
+.ph-item{display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid rgba(44,26,34,0.05)}
+.ph-item:last-child{border-bottom:none}
+.ph-pill{font-size:6px;padding:1px 4px;border-radius:3px;flex-shrink:0}
+.ph-item-title{font-size:8px;color:var(--dark);flex:1}
+.ph-star{font-size:9px;opacity:0.3}
+.ph-star.on{opacity:1}
+.ph-nav{background:white;border-radius:10px;padding:5px 0;display:flex;margin-top:6px}
+.ph-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 0}
+.ph-nav-icon{font-size:11px}
+.ph-nav-label{font-size:6px;color:var(--gray)}
+.ph-nav-label.a{color:var(--pink)}
+
+/* ANNOTATIONS */
+.annotation-list{flex:1;display:flex;flex-direction:column;gap:10px;padding-left:20px}
+.ann-item{display:flex;gap:12px;align-items:flex-start;background:white;border-radius:12px;padding:12px 14px;border-left:3px solid var(--pink)}
+.ann-icon{width:32px;height:32px;border-radius:50%;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ann-title{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:3px}
+.ann-desc{font-size:11px;color:var(--gray);line-height:1.5}
+
+/* SLIDE EXERCISES */
+.ex-card{background:white;border-radius:12px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border-left:3px solid var(--pink)}
+.ex-type{font-size:9px;padding:2px 8px;border-radius:99px;flex-shrink:0;font-weight:600}
+.ex-info{flex:1}
+.ex-title{font-size:13px;color:var(--dark);font-weight:500;margin-bottom:2px}
+.ex-meta{font-size:10px;color:var(--gray)}
+.ex-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.ex-btn{font-size:9px;padding:3px 10px;border-radius:99px;border:none;cursor:pointer;font-family:'Open Sans',sans-serif;font-weight:600}
+.ex-btn.open{background:var(--pink-light);color:var(--pink)}
+.ex-btn.done{background:#eaf3de;color:#3b6d11}
+.ex-score{font-size:10px;color:var(--pink);font-weight:600}
+
+/* PROFILE SLIDE */
+.profile-card{background:white;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px}
+.profile-avatar{width:70px;height:70px;border-radius:50%;background:var(--pink);color:white;font-size:28px;font-weight:300;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.profile-name{font-size:18px;font-weight:600;color:var(--dark);margin-bottom:4px}
+.profile-role{font-size:11px;color:var(--pink);font-weight:600;letter-spacing:.1em}
+.profile-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.pf{background:var(--pink-pale);border-radius:10px;padding:10px;text-align:left}
+.pf-label{font-size:9px;color:var(--gray);margin-bottom:2px}
+.pf-value{font-size:12px;color:var(--dark);font-weight:500}
+.lang-btns{display:flex;gap:8px;margin-top:12px}
+.lang-btn{flex:1;border:1.5px solid rgba(232,75,122,0.2);border-radius:10px;padding:8px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;background:var(--pink-pale)}
+.lang-btn.active{border-color:var(--pink);background:var(--pink-light);color:var(--pink)}
+.notif-row{display:flex;align-items:center;justify-content:space-between;background:white;border-radius:10px;padding:10px 14px;border:1.5px solid rgba(232,75,122,0.15)}
+.toggle{width:38px;height:22px;border-radius:99px;background:var(--pink);position:relative}
+.toggle::after{content:'';position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:white}
+
+/* INSTALL SLIDE */
+.steps{display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto}
+.step{display:flex;gap:14px;align-items:flex-start;background:white;border-radius:12px;padding:14px 16px}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--pink);color:white;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-content{}
+.step-title{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:3px}
+.step-desc{font-size:11px;color:var(--gray);line-height:1.5}
+.step-tag{display:inline-block;background:var(--pink-light);color:var(--pink);font-size:9px;padding:2px 8px;border-radius:99px;margin-top:5px;font-weight:600}
+
+/* TIPS SLIDE */
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:600px;margin:0 auto}
+.tip{background:white;border-radius:14px;padding:16px;text-align:center}
+.tip-icon{font-size:28px;margin-bottom:8px}
+.tip-title{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:4px}
+.tip-desc{font-size:11px;color:var(--gray);line-height:1.5}
+
+/* END SLIDE */
+.end-slide{background:linear-gradient(135deg,#2C1A22 0%,#4a2035 100%);color:white;flex-direction:column;text-align:center;gap:16px}
+.end-big{font-size:48px;font-weight:300;letter-spacing:4px}
+.end-sub{font-size:16px;opacity:0.7;font-weight:300}
+.end-tag{background:rgba(232,75,122,0.3);border:1px solid rgba(232,75,122,0.5);border-radius:99px;padding:8px 24px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.9)}
+</style>
+</head>
+<body>
+
+<!-- NAV DOTS -->
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 7</div>
+<div class="nav-arrows">
+  <button class="nav-arrow" id="prevBtn" onclick="changeSlide(-1)" disabled>← Trước</button>
+  <button class="nav-arrow" id="nextBtn" onclick="changeSlide(1)">Tiếp →</button>
+</div>
+
+<!-- SLIDES -->
+<div class="slides" id="slides">
+
+<!-- SLIDE 1 : COVER -->
+<div class="slide cover active" data-slide="0">
+  <div class="petal" style="left:10%;animation-duration:6s;animation-delay:0s">🌸</div>
+  <div class="petal" style="left:25%;animation-duration:8s;animation-delay:1s">🌸</div>
+  <div class="petal" style="left:60%;animation-duration:7s;animation-delay:2s">🌸</div>
+  <div class="petal" style="left:80%;animation-duration:9s;animation-delay:0.5s">🌸</div>
+  <div class="petal" style="left:45%;animation-duration:5s;animation-delay:3s">🌸</div>
+  <div class="cover-sakura">🌸</div>
+  <div class="cover-jp">ジュン先生</div>
+  <div class="cover-title">Jun Sensei</div>
+  <div class="cover-sub">Hướng dẫn sử dụng ứng dụng dành cho học viên</div>
+  <div class="cover-tag">HƯỚNG DẪN HỌC VIÊN · 2026</div>
+</div>
+
+<!-- SLIDE 2 : TRANG CHỦ -->
+<div class="slide" data-slide="1">
+  <div class="slide-content">
+    <div class="slide-header">
+      <div class="slide-num">TRANG 01</div>
+      <div class="slide-title">Trang chủ của bạn</div>
+      <div class="slide-desc">Tất cả thông tin quan trọng ngay khi bạn đăng nhập</div>
+    </div>
+    <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;justify-content:center">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="ph-header">
+            <div><div class="ph-logo">ジュン先生</div><div class="ph-logo-sub">Jun Sensei · 日本語</div></div>
+            <div class="ph-badges"><span class="ph-badge">Lionel</span><span class="ph-badge">STUDENT</span></div>
+          </div>
+          <div class="ph-body">
+            <div class="ph-greeting">Salut Lionel ! <span style="font-size:14px;color:#888">✉</span></div>
+            <div class="ph-sub">🌸 BẢNG ĐIỀU KHIỂN</div>
+            <div class="ph-card">
+              <div class="ph-card-title">📚 Tiến độ & Điểm TB</div>
+              <div class="ph-prog"><span class="ph-lvl">N5</span><div class="ph-bar"><div class="ph-bar-fill" style="width:43%"></div></div><span style="font-size:7px;color:#888">3/7</span></div>
+              <div class="ph-avg-row">
+                <div><div class="ph-avg-num">8.7</div><div style="font-size:6px;color:#888">/10 · 4 bài</div></div>
+                <div class="ph-chart"><svg width="100%" height="100%" viewBox="0 0 80 30"><polyline points="5,25 20,20 40,13 60,8 75,5" fill="none" stroke="#E84B7A" stroke-width="1.5"/><circle cx="75" cy="5" r="2.5" fill="#E84B7A"/></svg></div>
+                <div style="text-align:center"><div style="font-size:11px;color:#E84B7A;font-weight:600">9.2</div><div style="font-size:6px;color:#888">Mới nhất</div></div>
+              </div>
+            </div>
+            <div class="ph-card">
+              <div class="ph-card-title">🕐 Nội dung mới</div>
+              <div class="ph-item"><span class="ph-pill" style="background:rgba(123,175,212,0.2);color:#185fa5">VIDEO</span><span class="ph-item-title">Ngữ pháp — Trợ từ</span><span class="ph-star on">⭐</span></div>
+              <div class="ph-item"><span class="ph-pill" style="background:rgba(232,75,122,0.12);color:#993556">PDF</span><span class="ph-item-title">Từ vựng — Gia đình</span><span class="ph-star">⭐</span></div>
+            </div>
+            <div class="ph-nav">
+              <div class="ph-nav-item"><span class="ph-nav-icon">🏠</span><span class="ph-nav-label a">Trang chủ</span></div>
+              <div class="ph-nav-item"><span class="ph-nav-icon">📝</span><span class="ph-nav-label">Bài tập</span></div>
+              <div class="ph-nav-item"><span class="ph-nav-icon">👤</span><span class="ph-nav-label">Hồ sơ</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation-list">
+        <div class="ann-item">
+          <div class="ann-icon">✉️</div>
+          <div><div class="ann-title">Hộp thư từ Jun</div><div class="ann-desc">Nhấn vào biểu tượng thư để đọc tin nhắn từ giáo viên. Số đỏ = tin nhắn chưa đọc.</div></div>
+        </div>
+        <div class="ann-item">
+          <div class="ann-icon">📈</div>
+          <div><div class="ann-title">Tiến độ & Điểm trung bình</div><div class="ann-desc">Thanh tiến độ N5, điểm TB của bạn và biểu đồ các bài kiểm tra hàng tháng [TEST].</div></div>
+        </div>
+        <div class="ann-item">
+          <div class="ann-icon">🕐</div>
+          <div><div class="ann-title">Nội dung mới nhất</div><div class="ann-desc">3 nội dung mới nhất được Jun mở khóa cho bạn. Nhấn ⭐ để thêm vào mục yêu thích.</div></div>
+        </div>
+        <div class="ann-item">
+          <div class="ann-icon">⭐</div>
+          <div><div class="ann-title">Mục yêu thích</div><div class="ann-desc">Lưu tối đa 10 nội dung yêu thích để truy cập nhanh. Nhấn ⭐ vàng để xóa.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3 : BÀI TẬP -->
+<div class="slide" data-slide="2">
+  <div class="slide-content">
+    <div class="slide-header">
+      <div class="slide-num">TRANG 02</div>
+      <div class="slide-title">Bài tập của bạn</div>
+      <div class="slide-desc">Theo dõi các bài tập đang làm và đã hoàn thành</div>
+    </div>
+    <div style="max-width:500px;margin:0 auto">
+      <div style="background:white;border-radius:14px;padding:12px 16px;margin-bottom:12px;border-left:4px solid var(--pink)">
+        <div style="font-size:11px;font-weight:700;color:var(--pink);letter-spacing:.08em;margin-bottom:8px">⏳ ĐANG LÀM (1)</div>
+        <div class="ex-card" style="margin-bottom:0">
+          <div>
+            <div style="font-size:9px;background:rgba(232,75,122,0.12);color:#993556;padding:2px 7px;border-radius:99px;display:inline-block;font-weight:600;margin-bottom:4px">BÀI TẬP</div>
+            <div class="ex-title">Bài tập ngữ pháp N5 — số 3</div>
+            <div class="ex-meta">N5 · 📅 06/06/2026</div>
+          </div>
+          <div class="ex-actions">
+            <button class="ex-btn open">📝 Làm bài</button>
+            <button class="ex-btn done">✅ Hoàn thành</button>
+          </div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:12px 16px;border-left:4px solid #ccc">
+        <div style="font-size:11px;font-weight:700;color:var(--gray);letter-spacing:.08em;margin-bottom:8px">✅ ĐÃ HOÀN THÀNH (5)</div>
+        <div class="ex-card" style="opacity:0.8">
+          <div>
+            <div style="font-size:9px;background:rgba(232,75,122,0.12);color:#993556;padding:2px 7px;border-radius:99px;display:inline-block;font-weight:600;margin-bottom:4px">BÀI TẬP</div>
+            <div class="ex-title">Bài tập ngữ pháp N5 — số 1</div>
+            <div class="ex-meta">N5 · ✅ 01/06/2026</div>
+          </div>
+          <div class="ex-actions">
+            <button class="ex-btn open">📝 Xem lại</button>
+            <span class="ex-score">🎯 3/3</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--pink-light);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--gray);margin-bottom:4px">Đang làm</div>
+          <div style="font-size:24px;color:var(--pink);font-weight:600">1</div>
+        </div>
+        <div style="background:#eaf3de;border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--gray);margin-bottom:4px">Đã hoàn thành</div>
+          <div style="font-size:24px;color:#3b6d11;font-weight:600">5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4 : HỒ SƠ -->
+<div class="slide" data-slide="3">
+  <div class="slide-content">
+    <div class="slide-header">
+      <div class="slide-num">TRANG 03</div>
+      <div class="slide-title">Hồ sơ cá nhân</div>
+      <div class="slide-desc">Quản lý tài khoản, ngôn ngữ và thông báo của bạn</div>
+    </div>
+    <div style="max-width:420px;margin:0 auto">
+      <div class="profile-card">
+        <div class="profile-avatar">L</div>
+        <div class="profile-name">Lionel Sandri</div>
+        <div class="profile-role">STUDENT</div>
+        <div class="profile-fields">
+          <div class="pf"><div class="pf-label">ID</div><div class="pf-value">#2</div></div>
+          <div class="pf"><div class="pf-label">Email</div><div class="pf-value">lionel@email.com</div></div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:14px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:600;color:var(--dark);margin-bottom:10px">🌐 Ngôn ngữ hiển thị</div>
+        <div class="lang-btns">
+          <div class="lang-btn">🇻🇳 VI</div>
+          <div class="lang-btn">🇬🇧 EN</div>
+          <div class="lang-btn">🇫🇷 FR</div>
+        </div>
+        <div style="font-size:10px;color:var(--gray);margin-top:8px">Thay đổi ngôn ngữ → tự động lưu vào hệ thống</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:14px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:600;color:var(--dark);margin-bottom:10px">🔐 Đổi mã PIN</div>
+        <div style="display:flex;gap:8px">
+          <input type="password" placeholder="Mã PIN mới" style="flex:1;border:1.5px solid rgba(232,75,122,0.2);border-radius:8px;padding:6px 10px;font-size:11px;font-family:'Open Sans',sans-serif;background:#FDE8EF"/>
+          <button style="background:var(--pink);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;font-family:'Open Sans',sans-serif;font-weight:600">Lưu</button>
+        </div>
+      </div>
+      <div class="notif-row">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--dark)">🔔 Thông báo đẩy</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px">Nhận thông báo khi có nội dung mới</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5 : THÔNG BÁO -->
+<div class="slide" data-slide="4">
+  <div class="slide-content">
+    <div class="slide-header">
+      <div class="slide-num">TRANG 04</div>
+      <div class="slide-title">Thông báo đẩy</div>
+      <div class="slide-desc">Không bỏ lỡ bất kỳ nội dung hay bài tập nào</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:0 auto">
+      <div style="background:white;border-radius:14px;padding:16px;border-top:3px solid var(--pink)">
+        <div style="font-size:22px;margin-bottom:8px">🔓</div>
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:6px">Nội dung mới</div>
+        <div style="font-size:11px;color:var(--gray);line-height:1.6">Khi Jun mở khóa một video, PDF hay audio cho bạn → bạn nhận thông báo ngay lập tức.</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px;border-top:3px solid var(--pink)">
+        <div style="font-size:22px;margin-bottom:8px">📝</div>
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:6px">Bài tập mới</div>
+        <div style="font-size:11px;color:var(--gray);line-height:1.6">Khi Jun giao bài tập cho bạn → thông báo với tên bài tập cụ thể.</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px;border-top:3px solid var(--pink)">
+        <div style="font-size:22px;margin-bottom:8px">✉️</div>
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:6px">Tin nhắn từ Jun</div>
+        <div style="font-size:11px;color:var(--gray);line-height:1.6">Khi Jun gửi lời nhắn hay lời khuyên riêng cho bạn → thông báo ngay.</div>
+      </div>
+      <div style="background:var(--pink-light);border-radius:14px;padding:16px;border-top:3px solid var(--pink)">
+        <div style="font-size:22px;margin-bottom:8px">⚠️</div>
+        <div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:6px">Lưu ý iPhone</div>
+        <div style="font-size:11px;color:var(--gray);line-height:1.6">Thông báo chỉ hoạt động khi cài ứng dụng qua Safari → "Thêm vào màn hình chính".</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6 : CÀI ĐẶT APP -->
+<div class="slide" data-slide="5">
+  <div class="slide-content">
+    <div class="slide-header">
+      <div class="slide-num">TRANG 05</div>
+      <div class="slide-title">Cài đặt ứng dụng trên iPhone</div>
+      <div class="slide-desc">Chỉ cần 4 bước đơn giản để có ứng dụng trên màn hình chính</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Mở Safari trên iPhone</div>
+          <div class="step-desc">Quan trọng: phải dùng Safari, không dùng Chrome hay Firefox để cài đặt được.</div>
+          <div class="step-tag">Safari chỉ</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Truy cập junsenseijap.github.io</div>
+          <div class="step-desc">Nhập địa chỉ trang web vào thanh địa chỉ của Safari.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Nhấn nút Chia sẻ 📤</div>
+          <div class="step-desc">Nút chia sẻ ở thanh công cụ phía dưới Safari (biểu tượng ô vuông với mũi tên hướng lên).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Chọn "Thêm vào màn hình chính"</div>
+          <div class="step-desc">Cuộn xuống trong menu chia sẻ → nhấn "Thêm vào màn hình chính" → nhấn "Thêm". Xong!</div>
+          <div class="step-tag">Ứng dụng Jun Sensei xuất hiện trên màn hình</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7 : END -->
+<div class="slide end-slide" data-slide="6">
+  <div class="petal" style="left:10%;animation-duration:6s;animation-delay:0s;font-size:24px">🌸</div>
+  <div class="petal" style="left:80%;animation-duration:8s;animation-delay:1s;font-size:18px">🌸</div>
+  <div class="petal" style="left:50%;animation-duration:7s;animation-delay:2s;font-size:20px">🌸</div>
+  <div style="font-size:56px">🌸</div>
+  <div class="end-big">頑張って！</div>
+  <div style="font-size:18px;color:rgba(255,255,255,0.8);font-weight:300">Ganbatte — Cố lên!</div>
+  <div class="end-sub">Chúc bạn học tiếng Nhật vui vẻ và hiệu quả</div>
+  <div class="end-tag">Jun Sensei · junsenseijap.github.io</div>
+</div>
+
+</div>
+
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+const dotsContainer = document.getElementById('navDots');
+const counter = document.getElementById('slideCounter');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+// Create dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', 'Slide ' + (i+1));
+  dot.onclick = () => goTo(i);
+  dotsContainer.appendChild(dot);
+});
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  slides[current].classList.add('prev');
+  setTimeout(() => slides[current].classList.remove('prev'), 500);
+  current = n;
+  slides[current].classList.add('active');
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  counter.textContent = (current + 1) + ' / ' + total;
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === total - 1;
+  nextBtn.textContent = current === total - 1 ? 'Xong ✓' : 'Tiếp →';
+}
+
+function changeSlide(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < total) goTo(next);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+});
+
+// Touch swipe
+let touchStart = 0;
+document.addEventListener('touchstart', e => touchStart = e.touches[0].clientX);
+document.addEventListener('touchend', e => {
+  const diff = touchStart - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+});
+</script>
+</body>
+</html>
