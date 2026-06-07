@@ -1302,33 +1302,40 @@ async function updateNotifButton(notifEnabled) {
 async function toggleNotifHeader() {
   const btn = document.getElementById("btn-notif-header");
   if (btn) btn.disabled = true;
+
+  // Utilise col J comme source de vérité (pas OneSignal.permission)
+  const isCurrentlyEnabled = btn && btn.classList.contains("active");
+
   try {
     const OneSignal = window.OneSignal;
-    if (!OneSignal) { toast("OneSignal non disponible", "error"); return; }
-    const permission = OneSignal.Notifications.permission;
-    if (!permission) {
-      // Activer
-      await OneSignal.Notifications.requestPermission();
-      await new Promise(r => setTimeout(r, 1500));
-      const subId = OneSignal.User.PushSubscription.id;
-      if (subId) {
-        await api({ action: "saveOneSignalId",  userId: currentUserGlobal.id, oneSignalId: subId });
-        await api({ action: "saveNotifStatus",  userId: currentUserGlobal.id, status: "YES" });
-        updateNotifButton(true);
-        toast("🔔 Notifications activées !", "success");
-      } else {
-        toast("Permission refusée", "error");
-        updateNotifButton(false);
+
+    if (!isCurrentlyEnabled) {
+      // → Activer
+      if (OneSignal) {
+        const permission = OneSignal.Notifications.permission;
+        if (!permission) {
+          await OneSignal.Notifications.requestPermission();
+          await new Promise(r => setTimeout(r, 1500));
+        }
+        const subId = OneSignal.User.PushSubscription.id;
+        if (subId) {
+          await api({ action: "saveOneSignalId", userId: currentUserGlobal.id, oneSignalId: subId });
+        }
       }
+      await api({ action: "saveNotifStatus", userId: currentUserGlobal.id, status: "YES" });
+      updateNotifButton(true);
+      toast(t("notifEnabled"), "success");
     } else {
-      // Désactiver
-      await OneSignal.User.PushSubscription.optOut();
+      // → Désactiver
+      if (OneSignal) {
+        try { await OneSignal.User.PushSubscription.optOut(); } catch(e) {}
+      }
       await api({ action: "saveNotifStatus", userId: currentUserGlobal.id, status: "NO" });
       updateNotifButton(false);
-      toast("🔕 Notifications désactivées", "success");
+      toast(t("notifDisabled"), "success");
     }
   } catch(e) {
-    toast("Erreur: " + e.message, "error");
+    toast(t("errConn"), "error");
   }
   if (btn) btn.disabled = false;
 }
@@ -2295,6 +2302,8 @@ const TRANSLATIONS = {
     exInProgress:      "Đang làm",
     exCompleted:       "Đã hoàn thành",
     disabledAccount:   "Tài khoản đã bị khoá",
+    notifEnabled:      "🔔 Thông báo đã được bật!",
+    notifDisabled:     "🔕 Thông báo đã tắt",
   },
 
   en: {
@@ -2401,6 +2410,8 @@ const TRANSLATIONS = {
     exInProgress:      "In progress",
     exCompleted:       "Completed",
     disabledAccount:   "This account is disabled",
+    notifEnabled:      "🔔 Notifications enabled!",
+    notifDisabled:     "🔕 Notifications disabled",
   },
 
   fr: {
@@ -2507,6 +2518,8 @@ const TRANSLATIONS = {
     exInProgress:      "En cours",
     exCompleted:       "Terminés",
     disabledAccount:   "Ce compte est désactivé",
+    notifEnabled:      "🔔 Notifications activées !",
+    notifDisabled:     "🔕 Notifications désactivées",
   }
 };
 
