@@ -2512,8 +2512,14 @@ async function toggleStudentActive(studentId, isCurrentlyActive) {
       adminId: currentUserGlobal.id, pin: getStoredPin(),
       studentId, active: isCurrentlyActive ? "NO" : "YES"
     });
-    if (data.success) { toast(data.message, "success"); loadAdminManage(); }
-    else { toast(data.message || t("errConn"), "error"); if (btn) btn.disabled = false; }
+    if (data.success) {
+      toast(data.message, "success");
+      // Recharger tout le panel pour mettre à jour le compteur
+      loadAdminPanel(currentUserGlobal);
+    } else {
+      toast(data.message || t("errConn"), "error");
+      if (btn) btn.disabled = false;
+    }
   } catch { toast(t("errConn"), "error"); if (btn) btn.disabled = false; }
 }
 
