@@ -2170,21 +2170,50 @@ function updateMailboxBadge(count) {
     btn.classList.remove("active");
   }
 }
-function openMessageModal(studentId, studentName) {
+async function openMessageModal(studentId, studentName) {
   document.getElementById("message-modal")?.remove();
   const overlay = document.createElement("div");
   overlay.id = "message-modal";
   overlay.className = "levels-modal-overlay";
   overlay.innerHTML =
-    '<div class="levels-modal-sheet">'+
+    '<div class="levels-modal-sheet" style="max-height:85vh;display:flex;flex-direction:column">'+
     '<div class="levels-modal-title">✉️ '+studentName+'</div>'+
-    '<textarea id="msg-textarea" placeholder="'+t("msgPlaceholder")+'" style="width:100%;min-height:120px;border:1.5px solid var(--border);border-radius:10px;padding:0.8rem;font-family:\'DM Sans\',sans-serif;font-size:0.9rem;resize:vertical;background:var(--bg-soft);color:var(--ink);box-sizing:border-box;margin-bottom:0.8rem"></textarea>'+
+    '<div id="msg-history" style="flex:1;overflow-y:auto;margin-bottom:0.8rem;min-height:60px">'+
+      '<div style="text-align:center;color:var(--gray);font-size:0.8rem;padding:0.5rem">Chargement...</div>'+
+    '</div>'+
+    '<textarea id="msg-textarea" placeholder="'+t("msgPlaceholder")+'" style="width:100%;min-height:90px;border:1.5px solid var(--border);border-radius:10px;padding:0.8rem;font-family:\'DM Sans\',sans-serif;font-size:0.9rem;resize:vertical;background:var(--bg-soft);color:var(--ink);box-sizing:border-box;margin-bottom:0.8rem"></textarea>'+
     '<button class="btn-add-student" id="btn-send-msg" onclick="sendMessage('+studentId+',\''+studentName+'\')" style="margin-bottom:0.5rem">✉️ '+t("msgSend")+'</button>'+
     '<button style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'message-modal\').remove()">'+t("cancel")+'</button>'+
     '</div>';
   overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
   document.body.appendChild(overlay);
   setTimeout(()=>document.getElementById("msg-textarea")?.focus(), 100);
+
+  // Charger l'historique
+  try {
+    const data = await api({ action:"getMessages", studentId });
+    const histDiv = document.getElementById("msg-history");
+    if (!histDiv) return;
+    if (!data.success || !data.messages || !data.messages.length) {
+      histDiv.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:0.8rem;padding:0.5rem">'+t("msgEmpty2")+'</div>';
+      return;
+    }
+    histDiv.innerHTML = data.messages.map(m => {
+      const d = m.date ? new Date(m.date).toLocaleDateString(
+        currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",
+        {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}
+      ) : "";
+      return '<div style="padding:0.6rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.06)">'+
+        '<div style="font-size:0.62rem;color:var(--gray);margin-bottom:0.2rem">'+d+'</div>'+
+        '<div style="font-size:0.84rem;color:var(--ink2);line-height:1.5;white-space:pre-wrap">'+m.message.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'+
+      '</div>';
+    }).join("");
+    // Scroll en bas pour voir le message le plus récent
+    histDiv.scrollTop = histDiv.scrollHeight;
+  } catch(e) {
+    const histDiv = document.getElementById("msg-history");
+    if (histDiv) histDiv.innerHTML = '<div style="color:var(--gray);font-size:0.8rem;padding:0.5rem">'+t("errConn")+'</div>';
+  }
 }
 
 async function sendMessage(studentId, studentName) {
@@ -2201,7 +2230,27 @@ async function sendMessage(studentId, studentName) {
     });
     if (data.success) {
       toast("✅ " + t("msgSent"), "success");
-      document.getElementById("message-modal")?.remove();
+      // Vider le textarea
+      const ta = document.getElementById("msg-textarea");
+      if (ta) ta.value = "";
+      // Recharger l'historique dans le modal
+      try {
+        const refreshed = await api({ action:"getMessages", studentId });
+        const histDiv = document.getElementById("msg-history");
+        if (histDiv && refreshed.success && refreshed.messages) {
+          histDiv.innerHTML = refreshed.messages.map(m => {
+            const d = m.date ? new Date(m.date).toLocaleDateString(
+              currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",
+              {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}
+            ) : "";
+            return '<div style="padding:0.6rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.06)">'+
+              '<div style="font-size:0.62rem;color:var(--gray);margin-bottom:0.2rem">'+d+'</div>'+
+              '<div style="font-size:0.84rem;color:var(--ink2);line-height:1.5;white-space:pre-wrap">'+m.message.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'+
+            '</div>';
+          }).join("");
+          histDiv.scrollTop = histDiv.scrollHeight;
+        }
+      } catch(e) {}
     } else {
       toast(data.message || t("errConn"), "error");
       if (btn) { btn.disabled=false; btn.textContent="✉️ "+t("msgSend"); }
