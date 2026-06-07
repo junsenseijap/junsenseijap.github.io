@@ -1084,7 +1084,8 @@
     .btn-star { background:none;border:none;cursor:pointer;font-size:1rem;padding:0 2px;line-height:1;transition:transform 0.15s;flex-shrink:0; }
     .btn-star:hover { transform:scale(1.3); }
     .btn-star.starred { color:#FFB800; }
-    .btn-star:not(.starred) { color:var(--gray);opacity:0.4; }
+    .btn-spark-admin { background:none;border:none;cursor:pointer;font-size:0.85rem;padding:0 2px;color:var(--gray);transition:color 0.15s; }
+    .btn-spark-admin:hover { color:var(--pink); }
 
     .lang-flag-btn { flex:1; padding:0.5rem; border-radius:10px; border:2px solid rgba(232,75,122,0.2); background:var(--bg-soft); cursor:pointer; font-size:0.8rem; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; transition:all 0.18s; letter-spacing:0.05em; }
     .lang-flag-btn.active { border-color:var(--pink); background:var(--pink-pale); }
@@ -1185,8 +1186,8 @@
             <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1">—</div>
             <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 10</div>
           </div>
-          <div style="flex:1;position:relative;height:65px">
-            <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels"></canvas>
+          <div style="flex:1;position:relative;height:65px;min-width:0;overflow:hidden">
+            <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="max-width:100%"></canvas>
           </div>
           <div style="text-align:center;flex-shrink:0">
             <div id="avg-last-number" style="font-size:1rem;color:var(--pink);font-weight:500;line-height:1">—</div>
@@ -1708,7 +1709,7 @@ async function loadStudentContent(user) {
         rw.innerHTML='<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">'+t("emptyContent")+'</div>';
       } else {
         // Arborescence par niveau — 3 derniers ajouts (hors form), triés par ID décroissant
-        const recent=[...content].filter(c=>(c.type||"").toLowerCase()!=="form").sort((a,b)=>Number(b.id)-Number(a.id)).slice(0,6);
+        const recent=[...content].filter(c=>(c.type||"").toLowerCase()!=="form").sort((a,b)=>Number(b.id)-Number(a.id)).slice(0,3);
         const byLevel={};
         recent.forEach(c=>{ const l=c.level||"?"; if(!byLevel[l]) byLevel[l]=[]; byLevel[l].push(c); });
         rw.innerHTML=Object.entries(byLevel).map(([lvl,items],li)=>{
@@ -2122,7 +2123,80 @@ async function doChangePin() {
 }
 
 
-// ══ FAVORIS ══
+// ══ SPARKLINE & CHART HELPERS ══
+function drawSparkline(canvasId, scores) {
+  const c = document.getElementById(canvasId);
+  if (!c) return;
+  const ctx = c.getContext("2d");
+  const w = c.width, h = c.height, p = 3;
+  ctx.clearRect(0,0,w,h);
+  if (!scores || scores.length === 0) {
+    ctx.strokeStyle = "rgba(200,200,200,0.3)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(p,h/2); ctx.lineTo(w-p,h/2); ctx.stroke();
+    ctx.setLineDash([]);
+    return;
+  }
+  if (scores.length === 1) {
+    ctx.beginPath(); ctx.arc(w/2,h/2,3,0,Math.PI*2);
+    ctx.fillStyle="#E84B7A"; ctx.fill(); return;
+  }
+  const mn=Math.min(...scores)-0.5, mx=Math.max(...scores)+0.5;
+  const px=i=>p+(i/(scores.length-1))*(w-2*p);
+  const py=v=>h-p-((v-mn)/(mx-mn))*(h-2*p);
+  ctx.beginPath();
+  scores.forEach((v,i)=>i===0?ctx.moveTo(px(i),py(v)):ctx.lineTo(px(i),py(v)));
+  ctx.strokeStyle="#E84B7A"; ctx.lineWidth=2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(px(scores.length-1),py(scores[scores.length-1]),3,0,Math.PI*2);
+  ctx.fillStyle="#E84B7A"; ctx.fill();
+}
+
+async function openStudentChart(studentId, studentName, level) {
+  // Ferme modal précédent si existant
+  document.getElementById("student-chart-modal")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "student-chart-modal";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="padding-bottom:2rem">'+
+    '<div class="levels-modal-title">📈 '+studentName+' — '+level+'</div>'+
+    '<div id="scm-loading" style="text-align:center;padding:1rem;color:var(--gray)">Chargement...</div>'+
+    '<div style="position:relative;height:200px;display:none" id="scm-chart-wrap"><canvas id="scm-chart" role="img" aria-label="Progression '+studentName+'"></canvas></div>'+
+    '<div id="scm-empty" style="display:none;text-align:center;color:var(--gray);padding:1rem;font-size:0.84rem">Pas encore de tests [TEST] pour cet élève</div>'+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'student-chart-modal\').remove()">Fermer</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+
+  try {
+    const [scData, exData] = await Promise.all([
+      api({ action:"getMyScores",    studentId }),
+      api({ action:"getMyExercises", studentId })
+    ]);
+    const tests = (exData.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]"));
+    const scMap = {};
+    (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
+    const pts = tests.filter(e=>scMap[String(e.id)]&&scMap[String(e.id)].maxScore>0).map(e=>{
+      const s=scMap[String(e.id)];
+      const d=e.assignedDate?new Date(e.assignedDate):null;
+      return { label: d?d.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"}):"—", score: Math.round((s.score/s.maxScore)*100)/10 };
+    });
+    document.getElementById("scm-loading").style.display="none";
+    if(!pts.length){
+      document.getElementById("scm-empty").style.display="block"; return;
+    }
+    const cw = document.getElementById("scm-chart-wrap");
+    cw.style.display="block";
+    new Chart(document.getElementById("scm-chart"),{
+      type:"line",
+      data:{ labels:pts.map(p=>p.label), datasets:[{ data:pts.map(p=>p.score), borderColor:"#E84B7A", backgroundColor:"rgba(232,75,122,0.08)", fill:true, tension:0.4, pointRadius:5, pointBackgroundColor:"#E84B7A", borderWidth:2 }]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{min:0,max:10,ticks:{stepSize:2,font:{size:11}},grid:{color:"rgba(128,128,128,0.08)"}}, x:{ticks:{font:{size:11}},grid:{display:false}} }}
+    });
+  } catch(e) {
+    document.getElementById("scm-loading").textContent = t("errConn");
+  }
+}
 const FAV_MAX = 10;
 function getFavKey(userId) { return "jun_favorites_" + userId; }
 function getFavs(userId) {
@@ -2442,6 +2516,7 @@ async function loadStudentExercises() {
           '<div class="ex-card-actions">'+
           consultBtn+
           '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">⭐</button>'+
           '</div></div>';
       }).join("");
     }
@@ -2468,6 +2543,7 @@ async function loadStudentExercises() {
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
           consultBtn+
           '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">⭐</button>'+
           '</div></div>';
       }).join("");
     }
@@ -3157,18 +3233,32 @@ async function loadAdminStats() {
     });
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
+
+    // Sparklines tests [TEST]
+    const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
+    const stuTestScores={};
+    (sr.scores||[]).forEach(sc=>{
+      if(!testExIds.has(String(sc.exerciseId)))return;
+      const sid=String(sc.studentId);
+      if(!stuTestScores[sid])stuTestScores[sid]=[];
+      if(sc.maxScore>0)stuTestScores[sid].push(Math.round((sc.score/sc.maxScore)*100)/10);
+    });
+
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
       const la=se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length;
-      const rid="dash-lvl-"+lvl;
+      const rid="stat-lvl-"+lvl;
       const rows=se.map(([sid,d])=>{
         const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
-        return {name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt};
+        const spId="sp2-"+lvl+"-"+sid;
+        return {name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt,sid,spId};
       }).sort((a,b)=>b.avg-a.avg).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
+        '<canvas id="'+s.spId+'" width="70" height="26" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>'+
         '<span class="dash-avg-student-score">'+s.avg.toFixed(1)+'/10</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
+        '<button class="btn-spark-admin" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')">📈</button>'+
         '</div>'
       ).join("");
       return '<div class="dash-avg-level-row" id="'+rid+'">'+
@@ -3181,6 +3271,14 @@ async function loadAdminStats() {
         '<div class="dash-avg-student-list">'+rows+'</div>'+
         '</div>';
     }).join("");
+
+    setTimeout(()=>{
+      Object.entries(bl).forEach(([lvl,stuMap])=>{
+        Object.keys(stuMap).forEach(sid=>{
+          drawSparkline("sp2-"+lvl+"-"+sid, stuTestScores[sid]||[]);
+        });
+      });
+    },50);
   }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
