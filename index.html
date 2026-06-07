@@ -984,7 +984,81 @@
     .btn-assign-content:hover{background:rgba(103,58,183,0.25);transform:scale(1.1);}
     .btn-assign-content:disabled{opacity:0.45;cursor:not-allowed;}
 
-    /* LANG BUTTONS */
+    /* ADMIN PAGE ACCORDION */
+    .admin-section-card {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(232,75,122,0.12);
+      border-radius: 14px; overflow: hidden;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 2px 10px rgba(232,75,122,0.06);
+    }
+    .admin-sec-header {
+      padding: 1rem 1.2rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.8rem;
+      background: var(--bg-card); transition: background 0.15s;
+      user-select: none;
+    }
+    .admin-sec-header:hover { background: var(--pink-pale); }
+    .admin-sec-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .admin-sec-label { flex: 1; font-size: 0.92rem; font-weight: 600; color: var(--ink2); }
+    .admin-sec-arrow { font-size: 0.7rem; color: var(--gray); transition: transform 0.2s; }
+    .admin-section-card.open .admin-sec-arrow { transform: rotate(180deg); }
+    .admin-sec-body { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
+    .admin-section-card.open .admin-sec-body { display: block; }
+
+    /* LEVEL CHECKBOXES */
+    .level-check-label {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: 0.35rem 0.7rem; border-radius: 8px;
+      border: 1.5px solid rgba(232,75,122,0.2);
+      background: var(--bg-soft); cursor: pointer;
+      font-size: 0.82rem; font-weight: 600; color: var(--ink2);
+      transition: all 0.15s;
+    }
+    .level-check-label:has(input:checked) {
+      border-color: var(--pink); background: var(--pink-pale); color: var(--pink);
+    }
+    .level-check-label input { display: none; }
+
+    /* MANAGE STUDENT ROW */
+    .manage-stu-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(44,26,34,0.05);
+    }
+    .manage-stu-row:last-child { border-bottom: none; }
+    .manage-stu-info { flex: 1; min-width: 0; }
+    .manage-stu-name { font-size: 0.88rem; color: var(--ink); font-weight: 500; }
+    .manage-stu-email { font-size: 0.68rem; color: var(--gray); }
+    .manage-stu-levels { font-size: 0.65rem; color: var(--pink); margin-top: 0.1rem; }
+    .btn-manage-stu {
+      padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.65rem; font-weight: 600; border: 1.5px solid;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s; flex-shrink: 0;
+    }
+    .btn-manage-stu.active   { background: rgba(74,138,85,0.1);  border-color: rgba(74,138,85,0.4);  color: #4a8a55; }
+    .btn-manage-stu.inactive { background: var(--pink-pale);      border-color: rgba(232,75,122,0.35); color: var(--pink); }
+    .btn-manage-levels {
+      padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.65rem; font-weight: 600;
+      background: var(--blue-pale); border: 1.5px solid var(--border-blue);
+      color: #3a7aaa; font-family: 'DM Sans', sans-serif; flex-shrink: 0;
+    }
+
+    /* MODAL NIVEAUX */
+    .levels-modal-overlay {
+      position: fixed; inset: 0; background: rgba(44,26,34,0.5);
+      z-index: 300; display: flex; align-items: flex-end; justify-content: center;
+    }
+    .levels-modal-sheet {
+      background: var(--bg-card); border-radius: 18px 18px 0 0;
+      padding: 1.5rem 1.5rem 2.5rem; width: 100%; max-width: 500px;
+      animation: fadeUp 0.25s ease both;
+    }
+    .levels-modal-title {
+      font-size: 1rem; font-weight: 600; color: var(--ink);
+      margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;
+    }
     .lang-flag-btn { flex:1; padding:0.5rem; border-radius:10px; border:2px solid rgba(232,75,122,0.2); background:var(--bg-soft); cursor:pointer; font-size:0.8rem; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; transition:all 0.18s; letter-spacing:0.05em; }
     .lang-flag-btn.active { border-color:var(--pink); background:var(--pink-pale); }
     .lang-flag-btn:hover { background:var(--pink-pale); }
@@ -1182,33 +1256,64 @@
 </div>
 
 
-<!-- ══ ADD STUDENT PAGE (Admin only) ══ -->
+<!-- ══ ADMIN PAGE ══ -->
 <div id="page-add-student">
-  <div class="page-title" id="add-student-title">➕ Ajouter un élève</div>
-  <div class="page-subtitle" id="add-student-sub">Nouveau compte étudiant</div>
-  <div class="profile-card" style="margin-top:1.5rem">
-    <div class="profile-card-header" id="ph-add">📋 Informations</div>
-    <div class="add-student-form" style="padding:1.2rem">
-      <div class="form-group">
-        <label id="asl-fname">Prénom</label>
-        <input type="text" id="as-name" placeholder="Lionel"/>
+  <div class="page-title" id="add-student-title">⚙️ Admin</div>
+  <div class="page-subtitle" id="add-student-sub">🌸 Gestion des élèves</div>
+
+  <!-- ══ SECTION: AJOUTER UN ÉLÈVE ══ -->
+  <div class="admin-section-card" id="admin-sec-add">
+    <div class="admin-sec-header" onclick="toggleAdminSec('add')">
+      <span class="admin-sec-icon">➕</span>
+      <span class="admin-sec-label" id="asl-add-title">Ajouter un élève</span>
+      <span class="admin-sec-arrow">▼</span>
+    </div>
+    <div class="admin-sec-body" id="admin-sec-body-add">
+      <div class="add-student-form" style="padding:1rem">
+        <div class="form-group">
+          <label id="asl-fname">Prénom</label>
+          <input type="text" id="as-name" placeholder="Lionel"/>
+        </div>
+        <div class="form-group">
+          <label id="asl-lname">Nom</label>
+          <input type="text" id="as-family" placeholder="Sandri"/>
+        </div>
+        <div class="form-group">
+          <label id="asl-email">Email *</label>
+          <input type="email" id="as-email" placeholder="lionel@email.com"/>
+        </div>
+        <div class="form-group">
+          <label id="asl-pin">PIN initial</label>
+          <input type="text" id="as-pin" placeholder="0000" maxlength="6"/>
+        </div>
+        <!-- Niveaux à l'ajout -->
+        <div class="form-group">
+          <label>Niveau(x)</label>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.3rem">
+            <label class="level-check-label"><input type="checkbox" name="as-level" value="N5"> N5</label>
+            <label class="level-check-label"><input type="checkbox" name="as-level" value="N4"> N4</label>
+            <label class="level-check-label"><input type="checkbox" name="as-level" value="N3"> N3</label>
+            <label class="level-check-label"><input type="checkbox" name="as-level" value="N2"> N2</label>
+            <label class="level-check-label"><input type="checkbox" name="as-level" value="N1"> N1</label>
+          </div>
+        </div>
+        <div class="add-msg" id="add-msg"></div>
+        <button class="btn-add-student" id="btn-add-student" onclick="doAddStudent()">➕ Ajouter l'élève</button>
       </div>
-      <div class="form-group">
-        <label id="asl-lname">Nom de famille</label>
-        <input type="text" id="as-family" placeholder="Sandri"/>
+    </div>
+  </div>
+
+  <!-- ══ SECTION: GÉRER LES ÉLÈVES ══ -->
+  <div class="admin-section-card" id="admin-sec-manage">
+    <div class="admin-sec-header" onclick="toggleAdminSec('manage')">
+      <span class="admin-sec-icon">👥</span>
+      <span class="admin-sec-label" id="asl-manage-title">Gérer les élèves</span>
+      <span class="admin-sec-arrow">▼</span>
+    </div>
+    <div class="admin-sec-body" id="admin-sec-body-manage">
+      <div id="admin-manage-list" style="padding:0.5rem">
+        <div class="loading"><div class="spinner"></div></div>
       </div>
-      <div class="form-group">
-        <label id="asl-email">Email *</label>
-        <input type="email" id="as-email" placeholder="lionel@email.com"/>
-      </div>
-      <div class="form-group">
-        <label id="asl-pin">PIN initial</label>
-        <input type="text" id="as-pin" placeholder="0000" maxlength="6"/>
-      </div>
-      <div class="add-msg" id="add-msg"></div>
-      <button class="btn-add-student" id="btn-add-student" onclick="doAddStudent()">
-        ➕ Ajouter l'élève
-      </button>
     </div>
   </div>
 </div>
@@ -1666,7 +1771,13 @@ async function selectStudent(id, name, familyName) {
     }
     const unlocked = new Set((studentContent.content || []).map(function(c){ return String(c.id); }));
     studentAccessMap[id] = unlocked;
-    renderContentManage(id, name, familyName, unlocked);
+    // Filtrer le contenu par niveaux de l'élève
+    const stu = allStudents.find(s => String(s.id) === String(id)) || {};
+    const stuLevels = stu.levels ? stu.levels.split(",").map(l => l.trim()).filter(Boolean) : [];
+    const filteredContent = stuLevels.length > 0
+      ? allContent.filter(c => stuLevels.includes(String(c.level || "").trim()))
+      : allContent; // Si pas de niveaux définis → tout afficher
+    renderContentManage(id, name, familyName, unlocked, filteredContent);
   } catch(e) {
     console.error("selectStudent error:", e);
     panel.innerHTML += '<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';
@@ -1745,8 +1856,8 @@ function buildBottomNav(role) {
         <span class="nav-label" data-i="navExercises">Exercices</span>
       </button>
       <button class="nav-tab" id="nav-add" onclick="switchTab('add')">
-        <span class="nav-icon">➕</span>
-        <span class="nav-label" data-i="navAdd">Ajouter</span>
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label" data-i="navAdmin">Admin</span>
       </button>
       <button class="nav-tab" id="nav-profile" onclick="switchTab('profile')">
         <span class="nav-icon">👤</span>
@@ -1906,11 +2017,109 @@ async function doChangePin() {
 }
 
 
+// ══ ADMIN PAGE ACCORDION ══
+function toggleAdminSec(sec) {
+  const card = document.getElementById("admin-sec-" + sec);
+  if (!card) return;
+  const wasOpen = card.classList.contains("open");
+  document.querySelectorAll(".admin-section-card").forEach(c => c.classList.remove("open"));
+  if (!wasOpen) {
+    card.classList.add("open");
+    if (sec === "manage") loadAdminManage();
+  }
+}
+
+async function loadAdminManage() {
+  const wrap = document.getElementById("admin-manage-list");
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const data = await api({ action: "getStudents", adminId: currentUserGlobal.id, pin: getStoredPin() });
+    if (!data.success) { wrap.innerHTML = '<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>'; return; }
+    allStudents = data.students || [];
+    if (!allStudents.length) { wrap.innerHTML = '<div style="padding:1rem;color:var(--gray)">'+t("noStudents")+'</div>'; return; }
+    wrap.innerHTML = allStudents.map(s => {
+      const isActive = String(s.active).toUpperCase() === "YES";
+      const levels   = s.levels || "—";
+      return '<div class="manage-stu-row" id="mrow-'+s.id+'">'+
+        '<div class="manage-stu-info">'+
+          '<div class="manage-stu-name">'+s.name+' '+(s.familyName||"")+'</div>'+
+          '<div class="manage-stu-email">'+(s.email||"")+'</div>'+
+          '<div class="manage-stu-levels">🎓 '+levels+'</div>'+
+        '</div>'+
+        '<button class="btn-manage-levels" onclick="openLevelsModal('+s.id+',\''+s.name+'\',\''+( s.levels||"" )+'\')">🎓</button>'+
+        '<button class="btn-manage-stu '+(isActive?"active":"inactive")+'" id="btn-active-'+s.id+'" onclick="toggleStudentActive('+s.id+','+isActive+')">'+
+          (isActive ? "✅ Actif" : "🚫 Inactif")+
+        '</button>'+
+      '</div>';
+    }).join("");
+  } catch(e) {
+    wrap.innerHTML = '<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';
+  }
+}
+
+async function toggleStudentActive(studentId, isCurrentlyActive) {
+  const btn = document.getElementById("btn-active-" + studentId);
+  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+  try {
+    const data = await api({
+      action: "setStudentActive",
+      adminId: currentUserGlobal.id, pin: getStoredPin(),
+      studentId, active: isCurrentlyActive ? "NO" : "YES"
+    });
+    if (data.success) { toast(data.message, "success"); loadAdminManage(); }
+    else { toast(data.message || t("errConn"), "error"); if (btn) btn.disabled = false; }
+  } catch { toast(t("errConn"), "error"); if (btn) btn.disabled = false; }
+}
+
+function openLevelsModal(studentId, studentName, currentLevels) {
+  const allLevels = ["N5","N4","N3","N2","N1"];
+  const checked   = currentLevels ? currentLevels.split(",").map(l => l.trim()).filter(Boolean) : [];
+  const overlay   = document.createElement("div");
+  overlay.className = "levels-modal-overlay";
+  overlay.id = "levels-modal";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet">'+
+    '<div class="levels-modal-title">🎓 '+studentName+' — Niveaux</div>'+
+    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.2rem">'+
+    allLevels.map(l =>
+      '<label class="level-check-label" style="font-size:0.9rem;padding:0.5rem 1rem">'+
+      '<input type="checkbox" name="modal-level" value="'+l+'"'+(checked.includes(l)?" checked":"")+'>'+l+
+      '</label>'
+    ).join("")+
+    '</div>'+
+    '<button class="btn-add-student" onclick="saveLevels('+studentId+')" style="margin-bottom:0.5rem">✅ Enregistrer</button>'+
+    '<button style="width:100%;padding:0.7rem;text-align:center;cursor:pointer;background:none;border:1.5px solid var(--border);border-radius:10px;color:var(--gray);font-family:\'DM Sans\',sans-serif" onclick="document.getElementById(\'levels-modal\').remove()">Annuler</button>'+
+    '</div>';
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+async function saveLevels(studentId) {
+  const checked = [...document.querySelectorAll('input[name="modal-level"]:checked')].map(i => i.value);
+  const levelsStr = checked.join(",");
+  try {
+    const data = await api({
+      action: "setStudentLevels",
+      adminId: currentUserGlobal.id, pin: getStoredPin(),
+      studentId, levels: levelsStr
+    });
+    if (data.success) {
+      toast("✅ Niveaux mis à jour", "success");
+      document.getElementById("levels-modal")?.remove();
+      loadAdminManage();
+      const sd = await api({ action: "getStudents", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (sd.success) allStudents = sd.students;
+    } else { toast(data.message || t("errConn"), "error"); }
+  } catch { toast(t("errConn"), "error"); }
+}
+
 async function doAddStudent() {
   const name    = document.getElementById("as-name").value.trim();
   const family  = document.getElementById("as-family").value.trim();
   const email   = document.getElementById("as-email").value.trim();
   const pin     = document.getElementById("as-pin").value.trim();
+  const levels  = [...document.querySelectorAll('input[name="as-level"]:checked')].map(i => i.value).join(",");
   const msg     = document.getElementById("add-msg");
   const btn     = document.getElementById("btn-add-student");
 
@@ -1926,13 +2135,12 @@ async function doAddStudent() {
       action: "addStudent",
       adminId: currentUserGlobal.id,
       pin: getStoredPin(),
-      name, family, email, studentPin: pin
+      name, family, email, studentPin: pin, levels
     });
     if (data.success) {
       showAddMsg(t("addSuccess"), "success");
-      ["as-name","as-family","as-email","as-pin"].forEach(id => {
-        document.getElementById(id).value = "";
-      });
+      ["as-name","as-family","as-email","as-pin"].forEach(id => { document.getElementById(id).value = ""; });
+      document.querySelectorAll('input[name="as-level"]').forEach(cb => cb.checked = false);
       loadAdminPanel(currentUserGlobal);
     } else {
       showAddMsg(data.message || t("addErrFail"), "error");
@@ -2258,6 +2466,7 @@ const TRANSLATIONS = {
     navHome:           "Trang chủ",
     navProfile:        "Hồ sơ",
     navAdd:            "Thêm",
+    navAdmin:          "Admin",
     navExercises:      "Bài tập",
     // PROFILE
     profileInfo:       "👤 Thông tin cá nhân",
@@ -2366,6 +2575,7 @@ const TRANSLATIONS = {
     navHome:           "Home",
     navProfile:        "Profile",
     navAdd:            "Add",
+    navAdmin:          "Admin",
     navExercises:      "Exercises",
     // PROFILE
     profileInfo:       "👤 My info",
@@ -2474,6 +2684,7 @@ const TRANSLATIONS = {
     navHome:           "Accueil",
     navProfile:        "Profil",
     navAdd:            "Ajouter",
+    navAdmin:          "Admin",
     navExercises:      "Exercices",
     // PROFILE
     profileInfo:       "👤 Mes infos",
@@ -2620,7 +2831,7 @@ function applyLang() {
   const asl_em = document.getElementById("asl-email"); if(asl_em) asl_em.textContent = t("addLEmail") + " *";
   const asl_pi = document.getElementById("asl-pin");   if(asl_pi) asl_pi.textContent = t("addLPin");
   const addBtn2 = document.getElementById("btn-add-student"); if(addBtn2 && !addBtn2.disabled) addBtn2.textContent = "➕ " + t("addBtn");
-  const addTitle = document.getElementById("add-student-title"); if(addTitle) addTitle.textContent = t("addStudentTitle");
+  const addTitle = document.getElementById("add-student-title"); if(addTitle) addTitle.textContent = "⚙️ " + t("navAdmin");
   const addSub   = document.getElementById("add-student-sub");   if(addSub)   addSub.textContent   = t("addStudentSub");
   // Student dashboard card titles
   const progressT = document.getElementById("progress-card-title"); if(progressT) progressT.textContent = t("progressTitle");
@@ -2788,9 +2999,10 @@ function toggleCourse(lvl, ctId, cn) {
   document.getElementById("course-" + lvl + "-" + ctId + "-" + cn)?.classList.toggle("open");
 }
 
-function renderContentManage(studentId, name, familyName, unlocked) {
+function renderContentManage(studentId, name, familyName, unlocked, contentList) {
   const panel = document.getElementById("admin-content-panel");
-  if (!allContent || allContent.length === 0) {
+  const content = contentList || allContent;
+  if (!content || content.length === 0) {
     panel.innerHTML =
       '<div class="panel-header">'+t("contentHeader")+'</div>'+
       '<div class="selected-student-info"><div class="selected-name">'+name+' '+familyName+'</div>'+
@@ -2801,7 +3013,7 @@ function renderContentManage(studentId, name, familyName, unlocked) {
   const LEVELS = ["N5","N4","N3","N2","N1"];
   const byLevel = {};
   LEVELS.forEach(function(l){ byLevel[l] = {}; });
-  allContent.forEach(function(c) {
+  content.forEach(function(c) {
     const lvl = (c.level||"?").trim();
     const ct  = (c.courseT||"autre").trim();
     if (!byLevel[lvl])     byLevel[lvl] = {};
