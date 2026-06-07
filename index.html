@@ -1222,9 +1222,9 @@
     </div>
 
     <!-- CARTE 4 : Messages de Jun Sensei -->
-    <div class="stats-card" id="messages-card" style="display:none">
+    <div class="stats-card" id="messages-card">
       <div class="stats-card-title" id="msg-card-title">📬 Messages</div>
-      <div id="student-messages-content"></div>
+      <div id="student-messages-content"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
   </div>
@@ -2181,7 +2181,9 @@ async function loadStudentMessages(userId) {
   try {
     const data = await api({ action: "getMessages", studentId: userId });
     if (!data.success || !data.messages || !data.messages.length) {
-      card.style.display = "none"; return;
+      card.style.display = "block";
+      wrap.innerHTML = '<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("msgEmpty2")+'</div>';
+      return;
     }
     card.style.display = "block";
     const unread = data.messages.filter(m => m.read !== "YES");
@@ -2893,6 +2895,7 @@ const TRANSLATIONS = {
     msgEmpty:          "Vui lòng nhập nội dung",
     msgNew:            "Mới",
     cancel:            "Hủy",
+    msgEmpty2:         "Chưa có tin nhắn nào",
   },
 
   en: {
@@ -3016,6 +3019,7 @@ const TRANSLATIONS = {
     msgEmpty:          "Please write a message",
     msgNew:            "New",
     cancel:            "Cancel",
+    msgEmpty2:         "No messages yet",
   },
 
   fr: {
@@ -3139,6 +3143,7 @@ const TRANSLATIONS = {
     msgEmpty:          "Écris un message d'abord",
     msgNew:            "Nouveau",
     cancel:            "Annuler",
+    msgEmpty2:         "Pas encore de messages",
   }
 };
 
