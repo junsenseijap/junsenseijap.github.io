@@ -1090,6 +1090,14 @@
     .btn-spark-admin { background:none;border:none;cursor:pointer;font-size:0.85rem;padding:0 2px;color:var(--gray);transition:color 0.15s; }
     .btn-spark-admin:hover { color:var(--pink); }
 
+    /* MESSAGES */
+    .msg-item { padding:0.8rem 0.6rem; border-bottom:1px solid rgba(44,26,34,0.06); }
+    .msg-item:last-child { border-bottom:none; }
+    .msg-item.unread { background:rgba(232,75,122,0.04); border-left:3px solid var(--pink); padding-left:0.8rem; }
+    .msg-date { font-size:0.65rem; color:var(--gray); margin-bottom:0.3rem; }
+    .msg-text { font-size:0.84rem; color:var(--ink2); line-height:1.5; white-space:pre-wrap; }
+    .msg-new-badge { font-size:0.6rem; background:var(--pink); color:white; padding:1px 5px; border-radius:99px; margin-left:0.4rem; vertical-align:middle; }
+
     .lang-flag-btn { flex:1; padding:0.5rem; border-radius:10px; border:2px solid rgba(232,75,122,0.2); background:var(--bg-soft); cursor:pointer; font-size:0.8rem; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; transition:all 0.18s; letter-spacing:0.05em; }
     .lang-flag-btn.active { border-color:var(--pink); background:var(--pink-pale); }
     .lang-flag-btn:hover { background:var(--pink-pale); }
@@ -1212,6 +1220,13 @@
       <div class="stats-card-title" id="fav-card-title">⭐ Mes favoris</div>
       <div id="student-fav-content"><div style="color:var(--gray);font-size:0.82rem;padding:0.3rem" id="fav-empty-msg">Pas encore de favoris</div></div>
     </div>
+
+    <!-- CARTE 4 : Messages de Jun Sensei -->
+    <div class="stats-card" id="messages-card" style="display:none">
+      <div class="stats-card-title" id="msg-card-title">📬 Messages</div>
+      <div id="student-messages-content"></div>
+    </div>
+
   </div>
 
   <!-- ══ ADMIN DASHBOARD ══ -->
@@ -1721,7 +1736,7 @@ async function loadStudentContent(user) {
           return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
             '<span class="tree-item-type card-type '+tc+'" style="font-size:0.55rem;padding:0.1rem 0.35rem">'+(c.type||"").toUpperCase()+'</span>'+
             '<span class="tree-item-title">'+c.title+'</span>'+
-            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">"+STAR_SVG+"</button>'+
+            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">'+STAR_SVG+'</button>'+
           '</div>';
         }).join("");
       }
@@ -1729,6 +1744,8 @@ async function loadStudentContent(user) {
 
     // Afficher les favoris
     renderFavorites(user.id);
+    // Charger les messages
+    loadStudentMessages(user.id);
 
     // Moyenne compacte + graphique tests mensuels
     const avgWrap = document.getElementById("student-avg-graph-wrap");
@@ -2114,7 +2131,84 @@ async function doChangePin() {
 }
 
 
-// ══ SPARKLINE & CHART HELPERS ══
+// ══ MESSAGES ══
+function openMessageModal(studentId, studentName) {
+  document.getElementById("message-modal")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "message-modal";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet">'+
+    '<div class="levels-modal-title">✉️ '+studentName+'</div>'+
+    '<textarea id="msg-textarea" placeholder="'+t("msgPlaceholder")+'" style="width:100%;min-height:120px;border:1.5px solid var(--border);border-radius:10px;padding:0.8rem;font-family:\'DM Sans\',sans-serif;font-size:0.9rem;resize:vertical;background:var(--bg-soft);color:var(--ink);box-sizing:border-box;margin-bottom:0.8rem"></textarea>'+
+    '<button class="btn-add-student" id="btn-send-msg" onclick="sendMessage('+studentId+',\''+studentName+'\')" style="margin-bottom:0.5rem">✉️ '+t("msgSend")+'</button>'+
+    '<button style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'message-modal\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById("msg-textarea")?.focus(), 100);
+}
+
+async function sendMessage(studentId, studentName) {
+  const textarea = document.getElementById("msg-textarea");
+  const text = textarea ? textarea.value.trim() : "";
+  if (!text) { toast(t("msgEmpty"), "error"); return; }
+  const btn = document.getElementById("btn-send-msg");
+  if (btn) { btn.disabled=true; btn.textContent="..."; }
+  try {
+    const data = await api({
+      action: "sendMessage",
+      adminId: currentUserGlobal.id, pin: getStoredPin(),
+      studentId, message: text
+    });
+    if (data.success) {
+      toast("✅ " + t("msgSent"), "success");
+      document.getElementById("message-modal")?.remove();
+    } else {
+      toast(data.message || t("errConn"), "error");
+      if (btn) { btn.disabled=false; btn.textContent="✉️ "+t("msgSend"); }
+    }
+  } catch {
+    toast(t("errConn"), "error");
+    if (btn) { btn.disabled=false; btn.textContent="✉️ "+t("msgSend"); }
+  }
+}
+
+async function loadStudentMessages(userId) {
+  const card = document.getElementById("messages-card");
+  const wrap = document.getElementById("student-messages-content");
+  if (!card || !wrap) return;
+  try {
+    const data = await api({ action: "getMessages", studentId: userId });
+    if (!data.success || !data.messages || !data.messages.length) {
+      card.style.display = "none"; return;
+    }
+    card.style.display = "block";
+    const unread = data.messages.filter(m => m.read !== "YES");
+    wrap.innerHTML = data.messages.map(m => {
+      const d = m.date ? new Date(m.date).toLocaleDateString(currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+      return '<div class="msg-item'+(m.read!=="YES"?" unread":"")+'">'+
+        '<div class="msg-date">'+d+(m.read!=="YES"?'<span class="msg-new-badge">'+t("msgNew")+'</span>':"")+'</div>'+
+        '<div class="msg-text">'+m.message.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'+
+      '</div>';
+    }).join("");
+    // Mettre à jour le titre avec compteur non lus
+    const titleEl = document.getElementById("msg-card-title");
+    if (titleEl) titleEl.textContent = "📬 " + t("msgTitle") + (unread.length?" ("+unread.length+")":"");
+    // Marquer comme lus après 2 secondes
+    if (unread.length) {
+      setTimeout(async () => {
+        await api({ action: "markMessagesRead", studentId: userId });
+        const titleEl2 = document.getElementById("msg-card-title");
+        if (titleEl2) titleEl2.textContent = "📬 " + t("msgTitle");
+        wrap.querySelectorAll(".msg-item.unread").forEach(el => {
+          el.classList.remove("unread");
+          el.querySelector(".msg-new-badge")?.remove();
+        });
+      }, 2000);
+    }
+  } catch(e) { console.log("messages:", e.message); }
+}
 function drawSparkline(canvasId, scores) {
   const c = document.getElementById(canvasId);
   if (!c) return;
@@ -2241,7 +2335,7 @@ function renderFavorites(userId) {
       '<div class="tree-item">'+
         '<span class="tree-item-title" onclick="window.open(\''+f.url+'\',\'_blank\')" style="cursor:pointer">'+f.title+'</span>'+
         '<span style="font-size:0.65rem;color:var(--gray);flex-shrink:0">'+f.level+'</span>'+
-        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">"+STAR_SVG+"</button>'+
+        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">'+STAR_SVG+'</button>'+
       '</div>'
     ).join("");
     return '<div class="tree-cat open" id="fav-cat-'+ci+'">'+
@@ -2284,6 +2378,7 @@ async function loadAdminManage() {
         '</div>'+
         '<button class="btn-manage-levels" onclick="openLevelsModal('+s.id+',\''+s.name+'\',\''+( s.levels||"" )+'\')" title="Niveaux">LEVEL</button>'+
         '<button class="btn-manage-stu" style="background:rgba(123,175,212,0.15);border-color:rgba(123,175,212,0.4);color:#3a7aaa;margin-right:0.3rem" onclick="testNotifStudent('+s.id+',\''+s.name+'\')" title="Test notif">🔔</button>'+
+        '<button class="btn-manage-stu" style="background:rgba(232,75,122,0.1);border-color:rgba(232,75,122,0.3);color:var(--pink);margin-right:0.3rem" onclick="openMessageModal('+s.id+',\''+s.name+' '+(s.familyName||"")+'\')" title="Envoyer un message">✉️</button>'+
         '<button class="btn-manage-stu '+(isActive?"active":"inactive")+'" id="btn-active-'+s.id+'" onclick="toggleStudentActive('+s.id+','+isActive+')">'+
           (isActive ? "✅ Actif" : "🚫 Inactif")+
         '</button>'+
@@ -2496,7 +2591,7 @@ async function loadStudentExercises() {
           '<div class="ex-card-actions">'+
           consultBtn+
           '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">"+STAR_SVG+"</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
           '</div></div>';
       }).join("");
     }
@@ -2523,7 +2618,7 @@ async function loadStudentExercises() {
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
           consultBtn+
           '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">"+STAR_SVG+"</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
           '</div></div>';
       }).join("");
     }
@@ -2608,14 +2703,14 @@ async function loadAdminExercises() {
         '<span>✅ '+t("exCompleted").toUpperCase()+' ('+done.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-'+doneId+'">▲</span></div>'+
         '<div id="'+doneId+'" style="display:none">'+done.map(makeItem).join("")+'</div>'
         :"";
-      return '<div style="margin-bottom:0.6rem">'+
-        '<div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card)" onclick="toggleExRow(\''+rid+'\')">'+
+      return '<div style="margin-bottom:0.6rem;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);overflow:hidden">'+
+        '<div class="ex-admin-row" style="cursor:pointer" onclick="toggleExRow(\''+rid+'\')">'+
         '<div class="ex-admin-avatar">'+(stu.name||"?")[0]+'</div>'+
         '<div class="ex-admin-info"><div class="ex-admin-name">'+stu.name+' '+(stu.familyName||"")+'</div><div class="ex-admin-detail">'+sd.done+'/'+sd.total+' '+t("navExercises").toLowerCase()+'</div></div>'+
         '<span class="ex-progress-badge '+(isC?"complete":"partial")+'">'+sd.done+'/'+sd.total+'</span>'+
         '<button class="ex-expand-btn">▼</button>'+
         '</div>'+
-        '<div class="ex-detail-row" id="'+rid+'">'+pendingHtml+doneHtml+'</div>'+
+        '<div class="ex-detail-row" id="'+rid+'" style="background:var(--bg-soft)">'+pendingHtml+doneHtml+'</div>'+
         '</div>';
     }).join("");
   }catch(e){console.error(e);wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
@@ -2791,6 +2886,13 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Đã xoá khỏi yêu thích",
     favMax:            "Tối đa 10 nội dung yêu thích",
     lastTest:          "Bài kiểm tra cuối",
+    msgTitle:          "Tin nhắn từ Jun Sensei",
+    msgPlaceholder:    "Viết tin nhắn cho học viên...",
+    msgSend:           "Gửi tin nhắn",
+    msgSent:           "Tin nhắn đã gửi!",
+    msgEmpty:          "Vui lòng nhập nội dung",
+    msgNew:            "Mới",
+    cancel:            "Hủy",
   },
 
   en: {
@@ -2907,6 +3009,13 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Removed from favorites",
     favMax:            "Maximum 10 favorites reached",
     lastTest:          "Last test",
+    msgTitle:          "Messages from Jun Sensei",
+    msgPlaceholder:    "Write a message to the student...",
+    msgSend:           "Send message",
+    msgSent:           "Message sent!",
+    msgEmpty:          "Please write a message",
+    msgNew:            "New",
+    cancel:            "Cancel",
   },
 
   fr: {
@@ -3023,6 +3132,13 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Retiré des favoris",
     favMax:            "Maximum 10 favoris atteint",
     lastTest:          "Dernier test",
+    msgTitle:          "Messages de Jun Sensei",
+    msgPlaceholder:    "Écris un message pour l'élève...",
+    msgSend:           "Envoyer",
+    msgSent:           "Message envoyé !",
+    msgEmpty:          "Écris un message d'abord",
+    msgNew:            "Nouveau",
+    cancel:            "Annuler",
   }
 };
 
