@@ -1709,29 +1709,17 @@ async function loadStudentContent(user) {
       if(!content.length){
         rw.innerHTML='<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">'+t("emptyContent")+'</div>';
       } else {
-        // Arborescence par niveau — 3 derniers ajouts (hors form), triés par ID décroissant
         const recent=[...content].filter(c=>(c.type||"").toLowerCase()!=="form").sort((a,b)=>Number(b.id)-Number(a.id)).slice(0,3);
-        const byLevel={};
-        recent.forEach(c=>{ const l=c.level||"?"; if(!byLevel[l]) byLevel[l]=[]; byLevel[l].push(c); });
-        rw.innerHTML=Object.entries(byLevel).map(([lvl,items],li)=>{
-          const itemsHtml=items.map(c=>{
-            const isF=(c.type||"").toLowerCase()==="form";
-            const url=isF&&c.driveLink?c.driveLink+(c.driveLink.includes("?")?"&":"?")+FORM_ENTRY_ID+"="+user.id:c.driveLink;
-            const tc="type-"+(c.type||"pdf").toLowerCase();
-            const favKey="jun_favorites_"+user.id;
-            return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
-              '<span class="tree-item-type card-type '+tc+'">'+(c.type||"").toUpperCase()+'</span>'+
-              '<span class="tree-item-title">'+c.title+'</span>'+
-              '<button class="btn-star'+(isFav(user.id,String(c.id))?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+t("favAdd")+'">⭐</button>'+
-            '</div>';
-          }).join("");
-          return '<div class="tree-level open" id="tree-recent-'+li+'">'+
-            '<div class="tree-level-header" onclick="this.parentElement.classList.toggle(\'open\')">'+
-              '<span class="tree-level-badge">'+lvl+'</span>'+
-              '<span class="tree-level-label">'+items.length+' '+t("contenus",items.length)+'</span>'+
-              '<span class="tree-level-arrow">▲</span>'+
-            '</div>'+
-            '<div class="tree-level-body">'+itemsHtml+'</div>'+
+        rw.innerHTML=recent.map(c=>{
+          const isF=(c.type||"").toLowerCase()==="form";
+          const url=isF&&c.driveLink?c.driveLink+(c.driveLink.includes("?")?"&":"?")+FORM_ENTRY_ID+"="+user.id:c.driveLink;
+          const tc="type-"+(c.type||"pdf").toLowerCase();
+          const lvl=c.level||"?";
+          const starred=isFav(user.id,String(c.id));
+          return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
+            '<span class="tree-item-type card-type '+tc+'" style="font-size:0.55rem;padding:0.1rem 0.35rem">'+(c.type||"").toUpperCase()+'</span>'+
+            '<span class="tree-item-title">'+c.title+'</span>'+
+            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">⭐</button>'+
           '</div>';
         }).join("");
       }
@@ -2220,57 +2208,45 @@ function toggleFav(event, userId, contentId, title, level, courseT, url) {
     saveFavs(userId, favs);
     toast(t("favAdd"), "success");
   }
-  // Mettre à jour les étoiles visibles
-  document.querySelectorAll(".btn-star").forEach(btn => {
-    if (btn.onclick && btn.getAttribute("onclick") && btn.getAttribute("onclick").includes("'"+contentId+"'")) {
-      btn.classList.toggle("starred", !btn.classList.contains("starred"));
-    }
-  });
+  // Recharger tout le contenu pour mettre à jour les étoiles
   renderFavorites(userId);
+  // Mettre à jour les étoiles dans la liste recent et exercices
+  document.querySelectorAll(".btn-star[onclick*=\"'"+contentId+"'\"]").forEach(btn => {
+    const nowStarred = isFav(userId, String(contentId));
+    btn.classList.toggle("starred", nowStarred);
+    btn.title = nowStarred ? t("favRemove") : t("favAdd");
+  });
 }
 
 function renderFavorites(userId) {
   const wrap = document.getElementById("student-fav-content");
-  const emptyMsg = document.getElementById("fav-empty-msg");
   if (!wrap) return;
   const favs = getFavs(userId);
   if (!favs.length) {
     wrap.innerHTML = '<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("favEmpty")+'</div>';
     return;
   }
-  // Arborescence niveau → catégorie → items
-  const byLevel = {};
+  // Arborescence catégorie → items (sans niveau)
+  const byCat = {};
   favs.forEach(f => {
-    const lvl = f.level || "?";
     const cat = f.courseT || t("courseTypeOther");
-    if (!byLevel[lvl]) byLevel[lvl] = {};
-    if (!byLevel[lvl][cat]) byLevel[lvl][cat] = [];
-    byLevel[lvl][cat].push(f);
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(f);
   });
-  wrap.innerHTML = Object.entries(byLevel).map(([lvl, cats], li) => {
-    const totalInLvl = Object.values(cats).reduce((n,arr)=>n+arr.length,0);
-    const catsHtml = Object.entries(cats).map(([cat, items], ci) => {
-      const itemsHtml = items.map(f =>
-        '<div class="tree-item">'+
-          '<span class="tree-item-title" onclick="window.open(\''+f.url+'\',\'_blank\')" style="cursor:pointer">'+f.title+'</span>'+
-          '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">⭐</button>'+
-        '</div>'
-      ).join("");
-      return '<div class="tree-cat open" id="fav-cat-'+li+'-'+ci+'">'+
-        '<div class="tree-cat-header" onclick="this.parentElement.classList.toggle(\'open\')">'+
-          '<span class="tree-cat-label">'+cat+'</span>'+
-          '<span class="tree-cat-arrow">▲</span>'+
-        '</div>'+
-        '<div class="tree-cat-body">'+itemsHtml+'</div>'+
-      '</div>';
-    }).join("");
-    return '<div class="tree-level open" id="fav-lvl-'+li+'">'+
-      '<div class="tree-level-header" onclick="this.parentElement.classList.toggle(\'open\')">'+
-        '<span class="tree-level-badge">'+lvl+'</span>'+
-        '<span class="tree-level-label">'+totalInLvl+' '+t("contenus",totalInLvl)+'</span>'+
-        '<span class="tree-level-arrow">▲</span>'+
+  wrap.innerHTML = Object.entries(byCat).map(([cat, items], ci) => {
+    const itemsHtml = items.map(f =>
+      '<div class="tree-item">'+
+        '<span class="tree-item-title" onclick="window.open(\''+f.url+'\',\'_blank\')" style="cursor:pointer">'+f.title+'</span>'+
+        '<span style="font-size:0.65rem;color:var(--gray);flex-shrink:0">'+f.level+'</span>'+
+        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">⭐</button>'+
+      '</div>'
+    ).join("");
+    return '<div class="tree-cat open" id="fav-cat-'+ci+'">'+
+      '<div class="tree-cat-header" onclick="this.parentElement.classList.toggle(\'open\')">'+
+        '<span class="tree-cat-label">'+cat+'</span>'+
+        '<span class="tree-cat-arrow">▲</span>'+
       '</div>'+
-      '<div class="tree-level-body">'+catsHtml+'</div>'+
+      '<div class="tree-cat-body">'+itemsHtml+'</div>'+
     '</div>';
   }).join("");
 }
@@ -2617,8 +2593,18 @@ async function loadAdminExercises() {
           ex.status==="done"?'<span class="ex-score-badge good">✅</span>':'<span class="ex-score-badge pending">⏳</span>';
         return '<div class="ex-detail-item"><span class="ex-detail-title">'+gt(ex)+'</span>'+badge+'</div>';
       };
-      const pendingHtml=pending.length?'<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.4rem 0.8rem 0.2rem;letter-spacing:0.05em">⏳ '+t("exInProgress").toUpperCase()+' ('+pending.length+')</div>'+pending.map(makeItem).join(""):"";
-      const doneHtml=done.length?'<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.4rem 0.8rem 0.2rem;letter-spacing:0.05em">✅ '+t("exCompleted").toUpperCase()+' ('+done.length+')</div>'+done.map(makeItem).join(""):"";
+      const pendingId="pend-"+sid;
+      const doneId="done-"+sid;
+      const pendingHtml=pending.length?
+        '<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\''+pendingId+'\',this)">'+
+        '<span>⏳ '+t("exInProgress").toUpperCase()+' ('+pending.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s" id="arr-'+pendingId+'">▲</span></div>'+
+        '<div id="'+pendingId+'">'+pending.map(makeItem).join("")+'</div>'
+        :"";
+      const doneHtml=done.length?
+        '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\''+doneId+'\',this)">'+
+        '<span>✅ '+t("exCompleted").toUpperCase()+' ('+done.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s" id="arr-'+doneId+'">▲</span></div>'+
+        '<div id="'+doneId+'">'+done.map(makeItem).join("")+'</div>'
+        :"";
       return '<div style="margin-bottom:0.6rem">'+
         '<div class="ex-admin-row" style="cursor:pointer;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card)" onclick="toggleExRow(\''+rid+'\')">'+
         '<div class="ex-admin-avatar">'+(stu.name||"?")[0]+'</div>'+
@@ -2759,6 +2745,7 @@ const TRANSLATIONS = {
     // ADD STUDENT
     addStudentTitle:   "➕ Thêm học viên",
     addStudentSub:     "Tạo tài khoản mới",
+    manageStudents:    "Quản lý học viên",
     addInfo:           "📋 Thông tin",
     addLFname:         "Tên",
     addLLname:         "Họ",
@@ -2874,6 +2861,7 @@ const TRANSLATIONS = {
     // ADD STUDENT
     addStudentTitle:   "➕ Add a student",
     addStudentSub:     "Create a new account",
+    manageStudents:    "Manage students",
     addInfo:           "📋 Details",
     addLFname:         "First name",
     addLLname:         "Last name",
@@ -2989,6 +2977,7 @@ const TRANSLATIONS = {
     // ADD STUDENT
     addStudentTitle:   "➕ Ajouter un élève",
     addStudentSub:     "Créer un nouveau compte",
+    manageStudents:    "Gérer les élèves",
     addInfo:           "📋 Infos",
     addLFname:         "Prénom",
     addLLname:         "Nom",
@@ -3112,7 +3101,9 @@ function applyLang() {
   const hint = document.getElementById("select-student-hint");
   if (hint) hint.textContent = t("selectStudent");
   const ddLabel = document.getElementById("dd-label");
-  if (ddLabel && ddLabel.textContent === "—") ddLabel.textContent = "— " + t("selectStudent") + " —";
+  if (ddLabel && (ddLabel.textContent === "—" || ddLabel.textContent.startsWith("—"))) {
+    ddLabel.textContent = "— " + t("selectStudent") + " —";
+  }
   const adminSubEl = document.getElementById("admin-subtitle-el");
   if (adminSubEl) adminSubEl.innerHTML = t("adminSubtitle");
   const initLoading = document.getElementById("initial-loading");
@@ -3134,9 +3125,11 @@ function applyLang() {
   const addBtn2 = document.getElementById("btn-add-student"); if(addBtn2 && !addBtn2.disabled) addBtn2.textContent = "➕ " + t("addBtn");
   const addTitle = document.getElementById("add-student-title"); if(addTitle) addTitle.textContent = "⚙️ " + t("navAdmin");
   const addSub   = document.getElementById("add-student-sub");   if(addSub)   addSub.textContent   = t("addStudentSub");
+  const aslAddTitle = document.getElementById("asl-add-title"); if(aslAddTitle) aslAddTitle.textContent = t("addStudentTitle").replace("➕ ","");
+  const aslManageTitle = document.getElementById("asl-manage-title"); if(aslManageTitle) aslManageTitle.textContent = t("manageStudents");
   // Student dashboard card titles
-  const progressT = document.getElementById("progress-card-title"); if(progressT) progressT.textContent = "📚 " + t("progressTitle");
-  const recentT   = document.getElementById("recent-card-title");   if(recentT)   recentT.textContent   = "🕐 " + t("recentTitle");
+  const progressT = document.getElementById("progress-card-title"); if(progressT) progressT.textContent = t("progressTitle");
+  const recentT   = document.getElementById("recent-card-title");   if(recentT)   recentT.textContent   = t("recentTitle");
   const favT      = document.getElementById("fav-card-title");      if(favT)      favT.textContent      = t("favTitle");
   const avgLastLbl= document.getElementById("avg-last-label");      if(avgLastLbl) avgLastLbl.textContent = t("lastTest");
   // Admin dashboard labels
@@ -3166,6 +3159,15 @@ function applyLang() {
 
 // Override showError to use current lang
 const _origShowError = window.showError;
+
+function toggleSubSection(id, headerEl) {
+  const body = document.getElementById(id);
+  if (!body) return;
+  const isOpen = body.style.display !== "none";
+  body.style.display = isOpen ? "none" : "block";
+  const arr = document.getElementById("arr-"+id);
+  if (arr) arr.style.transform = isOpen ? "rotate(180deg)" : "";
+}
 
 function toggleExRow(rowId) {
   const row = document.getElementById(rowId);
