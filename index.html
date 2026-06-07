@@ -1674,10 +1674,25 @@ function initUser(user) {
     registerOneSignalPlayer(user.id);
   }
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
-  else { showPage("student"); loadStudentContent(user); }
+  else {
+    showPage("student"); loadStudentContent(user);
+    // Vérification périodique du statut actif (toutes les 60 secondes)
+    if (window._activeCheckInterval) clearInterval(window._activeCheckInterval);
+    window._activeCheckInterval = setInterval(async () => {
+      try {
+        const r = await api({ action: "checkActive", userId: user.id });
+        if (!r.active) {
+          clearInterval(window._activeCheckInterval);
+          doLogout();
+          setTimeout(() => showError(t("disabledAccount")), 300);
+        }
+      } catch(e) {}
+    }, 60000);
+  }
 }
 
 function doLogout() {
+  if (window._activeCheckInterval) clearInterval(window._activeCheckInterval);
   clearSession(); window._adminPin = undefined; currentUserGlobal = null;
   document.getElementById("input-id").value = "";
   document.getElementById("input-pin").value = "";
@@ -2954,7 +2969,7 @@ const TRANSLATIONS = {
     pinSuccess:        "✅ Đổi PIN thành công!",
     // ADD STUDENT
     addStudentTitle:   "➕ Thêm học viên",
-    addStudentSub:     "Tạo tài khoản mới",
+    addStudentSub:     "Quản lý tài khoản học viên",
     manageStudents:    "Quản lý học viên",
     addInfo:           "📋 Thông tin",
     addLFname:         "Tên",
@@ -3078,7 +3093,7 @@ const TRANSLATIONS = {
     pinSuccess:        "✅ PIN updated!",
     // ADD STUDENT
     addStudentTitle:   "➕ Add a student",
-    addStudentSub:     "Create a new account",
+    addStudentSub:     "Account management",
     manageStudents:    "Manage students",
     addInfo:           "📋 Details",
     addLFname:         "First name",
@@ -3202,7 +3217,7 @@ const TRANSLATIONS = {
     pinSuccess:        "✅ PIN changé !",
     // ADD STUDENT
     addStudentTitle:   "➕ Ajouter un élève",
-    addStudentSub:     "Créer un nouveau compte",
+    addStudentSub:     "Gestion des comptes",
     manageStudents:    "Gérer les élèves",
     addInfo:           "📋 Infos",
     addLFname:         "Prénom",
