@@ -1304,7 +1304,6 @@ async function toggleNotifHeader() {
   const btn = document.getElementById("btn-notif-header");
   if (btn) btn.disabled = true;
 
-  // Utilise col J comme source de vérité (pas OneSignal.permission)
   const isCurrentlyEnabled = btn && btn.classList.contains("active");
 
   try {
@@ -1312,30 +1311,33 @@ async function toggleNotifHeader() {
 
     if (!isCurrentlyEnabled) {
       // → Activer
+      let subId = null;
       if (OneSignal) {
         const permission = OneSignal.Notifications.permission;
         if (!permission) {
-          // Pas encore de permission → demander
+          // Première fois → demander permission
           await OneSignal.Notifications.requestPermission();
-          await new Promise(r => setTimeout(r, 1500));
-        } else {
-          // Permission déjà accordée → forcer opt-in pour récupérer un nouvel ID
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        subId = OneSignal.User.PushSubscription.id;
+        // Si pas d'ID malgré permission → essayer optIn
+        if (!subId) {
           try { await OneSignal.User.PushSubscription.optIn(); } catch(e) {}
           await new Promise(r => setTimeout(r, 1500));
-        }
-        const subId = OneSignal.User.PushSubscription.id;
-        if (subId) {
-          await api({ action: "saveOneSignalId", userId: currentUserGlobal.id, oneSignalId: subId });
+          subId = OneSignal.User.PushSubscription.id;
         }
       }
-      await api({ action: "saveNotifStatus", userId: currentUserGlobal.id, status: "YES" });
-      updateNotifButton(true);
-      toast(t("notifEnabled"), "success");
+      if (subId) {
+        await api({ action: "saveOneSignalId", userId: currentUserGlobal.id, oneSignalId: subId });
+        await api({ action: "saveNotifStatus", userId: currentUserGlobal.id, status: "YES" });
+        updateNotifButton(true);
+        toast(t("notifEnabled"), "success");
+      } else {
+        toast(t("errConn"), "error");
+        updateNotifButton(false);
+      }
     } else {
-      // → Désactiver
-      if (OneSignal) {
-        try { await OneSignal.User.PushSubscription.optOut(); } catch(e) {}
-      }
+      // → Désactiver — on met juste col J = NO, on ne touche pas OneSignal
       await api({ action: "saveNotifStatus", userId: currentUserGlobal.id, status: "NO" });
       updateNotifButton(false);
       toast(t("notifDisabled"), "success");
@@ -1355,20 +1357,13 @@ async function registerOneSignalPlayer(userId) {
     }
     const OneSignal = window.OneSignal;
     if (!OneSignal) return;
-    await new Promise(r => setTimeout(r, 1500));
-
-    // Toujours enregistrer l'ID actuel (même si permission déjà accordée)
-    const subId = OneSignal.User.PushSubscription.id;
-    if (subId) {
-      await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
-      console.log("✅ OneSignal ID enregistré:", subId);
-    }
-
-    // Écoute les changements (nouveau subscribe après reset)
+    // Écoute les changements de subscription (nouveau appareil, renouvellement)
     OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
       const id = event.current && event.current.id;
       if (id) {
         await api({ action: "saveOneSignalId", userId, oneSignalId: id });
+        updateNotifButton(true);
+        await api({ action: "saveNotifStatus", userId, status: "YES" });
         console.log("✅ OneSignal ID mis à jour:", id);
       }
     });
@@ -1463,12 +1458,28 @@ function initUser(user) {
   buildBottomNav(user.role);
   loadProfilePage(user);
   currentNavTab = "home";
-  // Bouton notif — pour élèves ET admin
+  // Bouton notif — pour élèves ET admin, état basé sur OneSignal de CET appareil
   const notifBtn = document.getElementById("btn-notif-header");
   if (notifBtn) {
     notifBtn.style.display = "flex";
-    updateNotifButton(user.notifEnabled === "YES");
-    if (user.notifEnabled === "YES") registerOneSignalPlayer(user.id);
+    updateNotifButton(false); // barré par défaut, mis à jour après init OneSignal
+    // Vérifie l'état réel après init OneSignal
+    setTimeout(async () => {
+      try {
+        const OneSignal = window.OneSignal;
+        if (!OneSignal) return;
+        const subId = OneSignal.User.PushSubscription.id;
+        const isSubscribed = !!subId;
+        updateNotifButton(isSubscribed);
+        // Si subscribed, enregistre l'ID et met col J à YES
+        if (isSubscribed) {
+          await api({ action: "saveOneSignalId", userId: user.id, oneSignalId: subId });
+          await api({ action: "saveNotifStatus", userId: user.id, status: "YES" });
+        }
+      } catch(e) { console.log("OneSignal state check:", e.message); }
+    }, 2000);
+    // Écoute les changements de subscription
+    registerOneSignalPlayer(user.id);
   }
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
   else { showPage("student"); loadStudentContent(user); }
