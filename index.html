@@ -3502,14 +3502,15 @@ async function loadAdminStats() {
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
 
-    // Sparklines tests [TEST]
-    const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
+    // Sparklines tests [TEST] — indexé par sid_lvl
+    const testExMap={};(er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{testExMap[String(e.id)]=e.level||"?";});
     const stuTestScores={};
     (sr.scores||[]).forEach(sc=>{
-      if(!testExIds.has(String(sc.exerciseId)))return;
-      const sid=String(sc.studentId);
-      if(!stuTestScores[sid])stuTestScores[sid]=[];
-      if(sc.maxScore>0)stuTestScores[sid].push(Math.round((sc.score/sc.maxScore)*100)/10);
+      const lvlEx=testExMap[String(sc.exerciseId)];
+      if(!lvlEx)return; // pas un [TEST]
+      const key=String(sc.studentId)+"_"+lvlEx;
+      if(!stuTestScores[key])stuTestScores[key]=[];
+      if(sc.maxScore>0)stuTestScores[key].push(Math.round((sc.score/sc.maxScore)*100)/10);
     });
 
     aw.innerHTML=keys.map(lvl=>{
@@ -3519,11 +3520,12 @@ async function loadAdminStats() {
       const rows=se.map(([sid,d])=>{
         const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
         const spId="sp2-"+lvl+"-"+sid;
-        return {name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt,sid,spId};
+        const hasTests=(stuTestScores[sid+"_"+lvl]||[]).length>0;
+        return {name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt,sid,spId,hasTests};
       }).sort((a,b)=>b.avg-a.avg).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        '<canvas id="'+s.spId+'" width="70" height="26" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>'+
+        (s.hasTests?'<canvas id="'+s.spId+'" width="70" height="26" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:70px;flex-shrink:0;font-size:0.7rem;color:var(--gray);text-align:center">—</span>')+
         '<span class="dash-avg-student-score">'+s.avg.toFixed(1)+'/10</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '<button class="btn-spark-admin" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')">📈</button>'+
@@ -3543,7 +3545,8 @@ async function loadAdminStats() {
     setTimeout(()=>{
       Object.entries(bl).forEach(([lvl,stuMap])=>{
         Object.keys(stuMap).forEach(sid=>{
-          drawSparkline("sp2-"+lvl+"-"+sid, stuTestScores[sid]||[]);
+          const scores=stuTestScores[sid+"_"+lvl]||[];
+          if(scores.length>0) drawSparkline("sp2-"+lvl+"-"+sid, scores);
         });
       });
     },50);
