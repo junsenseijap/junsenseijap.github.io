@@ -999,20 +999,25 @@
         <span class="cherry-icon">🌸</span>
         <span class="jp-title">ジュン先生</span>
         <div class="divider"></div>
-        <span class="en-title">Jun Sensei · Học Tiếng Nhật</span>
-        <span class="tagline" id="login-tagline">Lớp tiếng Nhật tư duy &amp; tự giác</span>
-        <span style="font-size:0.7rem;color:var(--gray);letter-spacing:0.05em;margin-top:0.2rem;display:block">Mindful Japanese Learning</span>
+        <span class="en-title" id="login-subtitle-el">Jun Sensei · Học Tiếng Nhật</span>
+        <span class="tagline" id="login-tagline">Apprends le japonais à ton rythme 🌸</span>
+      </div>
+      <!-- Sélecteur de langue sur la page de connexion -->
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem;justify-content:center">
+        <button onclick="setLangLogin('vi')" id="login-lang-vi" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 22 15"><rect width="22" height="15" fill="#DA020E"/><polygon points="11,2 12.9,7.3 18.5,7.3 13.8,10.6 15.7,15.9 11,12.6 6.3,15.9 8.2,10.6 3.5,7.3 9.1,7.3" fill="#FFCD00"/></svg></button>
+        <button onclick="setLangLogin('en')" id="login-lang-en" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="white" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="5"/><path d="M30,0 V40 M0,20 H60" stroke="white" stroke-width="12"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="7"/></svg></button>
+        <button onclick="setLangLogin('fr')" id="login-lang-fr" class="lang-flag-btn"><svg width="22" height="15" viewBox="0 0 3 2"><rect width="1" height="2" fill="#002395"/><rect x="1" width="1" height="2" fill="#FFFFFF"/><rect x="2" width="1" height="2" fill="#ED2939"/></svg></button>
       </div>
       <div class="form-group">
-        <label>Số điện thoại · Téléphone · 電話番号</label>
-        <input type="tel" id="input-id" placeholder="Ex: 0664146887" autocomplete="tel"/>
+        <label id="login-email-label">Email</label>
+        <input type="email" id="input-id" placeholder="prenom@email.com" autocomplete="email"/>
       </div>
       <div class="form-group">
         <label>PIN</label>
         <input type="password" id="input-pin" placeholder="••••" maxlength="6" autocomplete="off"/>
       </div>
       <button class="btn-login" id="btn-login" onclick="doLogin()">
-        入る — Đăng nhập
+        入る — Se connecter
       </button>
       <div class="login-error" id="login-error"></div>
     </div>
@@ -1129,13 +1134,6 @@
       </div>
     </div>
     <div class="profile-field">
-      <span class="profile-field-icon">📱</span>
-      <div class="profile-field-content">
-        <div class="profile-field-label" id="pfl-phone">Téléphone</div>
-        <div class="profile-field-value" id="pf-phone">—</div>
-      </div>
-    </div>
-    <div class="profile-field">
       <span class="profile-field-icon">✉️</span>
       <div class="profile-field-content">
         <div class="profile-field-label" id="pfl-email">Email</div>
@@ -1177,11 +1175,7 @@
         <input type="text" id="as-family" placeholder="Sandri"/>
       </div>
       <div class="form-group">
-        <label id="asl-phone">Téléphone</label>
-        <input type="tel" id="as-phone" placeholder="0664146887"/>
-      </div>
-      <div class="form-group">
-        <label id="asl-email">Email</label>
+        <label id="asl-email">Email *</label>
         <input type="email" id="as-email" placeholder="lionel@email.com"/>
       </div>
       <div class="form-group">
@@ -1270,7 +1264,6 @@ const SESSION_DAYS = 90;
 
 async function registerOneSignalPlayer(userId) {
   try {
-    // Attendre que OneSignal soit initialisé (max 5 secondes)
     let attempts = 0;
     while (!window.OneSignal && attempts < 10) {
       await new Promise(r => setTimeout(r, 500));
@@ -1278,20 +1271,24 @@ async function registerOneSignalPlayer(userId) {
     }
     const OneSignal = window.OneSignal;
     if (!OneSignal) return;
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1500));
+
+    // Essaie d'abord le Subscription ID (format UUID correct)
     const subId = OneSignal.User.PushSubscription.id;
     if (subId) {
       await api({ action: "saveOneSignalId", userId, oneSignalId: subId });
-      console.log("✅ OneSignal ID enregistré:", subId);
-    } else {
-      // S'abonner aux changements de subscription
-      OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
-        if (event.current.id) {
-          await api({ action: "saveOneSignalId", userId, oneSignalId: event.current.id });
-          console.log("✅ OneSignal ID enregistré après subscription:", event.current.id);
-        }
-      });
+      console.log("✅ OneSignal Subscription ID enregistré:", subId);
+      return;
     }
+
+    // Écoute les changements de subscription
+    OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
+      const id = event.current && event.current.id;
+      if (id) {
+        await api({ action: "saveOneSignalId", userId, oneSignalId: id });
+        console.log("✅ OneSignal ID enregistré après changement:", id);
+      }
+    });
   } catch(e) {
     console.log("OneSignal register:", e.message);
   }
@@ -1339,18 +1336,24 @@ function showPage(name) {
 }
 
 async function doLogin() {
-  const phone = document.getElementById("input-id").value.trim();
+  const email = document.getElementById("input-id").value.trim();
   const pin   = document.getElementById("input-pin").value.trim();
   const err   = document.getElementById("login-error");
   const btn   = document.getElementById("btn-login");
-  if (!phone || !pin) { showError(t("loginErrEmpty")); return; }
+  if (!email || !pin) { showError(t("loginErrEmpty")); return; }
   btn.textContent = "..."; btn.disabled = true;
   err.style.display = "none";
   try {
-    const data = await api({ action: "login", phone, pin });
+    const data = await api({ action: "login", email, pin });
     if (data.success) {
       if (data.user.role === "Admin") { window._adminPin = pin; data.user._pin = pin; }
+      // La langue choisie au login écrase le localStorage
+      data.user.lang = currentLang;
       saveSession(data.user);
+      // Enregistre la langue dans le sheet (sauf admin)
+      if (data.user.role !== "Admin") {
+        api({ action: "saveUserLang", userId: data.user.id, lang: currentLang.toUpperCase() });
+      }
       initUser(data.user);
     } else {
       showError(data.message || t("loginErrWrong"));
@@ -1713,25 +1716,18 @@ function loadProfilePage(user) {
   document.getElementById("profile-avatar-letter").textContent = (user.name || "?")[0].toUpperCase();
   document.getElementById("profile-fullname").textContent = (user.name || "") + " " + (user.familyName || "");
   document.getElementById("profile-role-label").textContent = user.role;
-  document.getElementById("pf-id").textContent   = user.id || "—";
-  document.getElementById("pf-name").textContent = (user.name || "—") + " " + (user.familyName || "");
-  document.getElementById("pf-phone").textContent = user.phone || "—";
+  document.getElementById("pf-id").textContent    = user.id || "—";
+  document.getElementById("pf-name").textContent  = (user.name || "—") + " " + (user.familyName || "");
   document.getElementById("pf-email").textContent = user.email || "—";
-  ["pin-old","pin-new","pin-confirm"].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = "";
+  // Langue active dans le profil
+  ["vi","en","fr"].forEach(l => {
+    const btn = document.getElementById("lang-" + l);
+    if (btn) btn.classList.toggle("active", l === currentLang);
   });
   const msg = document.getElementById("pin-msg");
   if (msg) msg.style.display = "none";
-  // Carte notifications — seulement pour les élèves
-  const notifCard = document.getElementById("notif-card");
-  if (notifCard) {
-    if (user.role !== "Admin") {
-      notifCard.style.display = "block";
-      updateNotifStatus();
-    } else {
-      notifCard.style.display = "none";
-    }
-  }
+  const pinNew = document.getElementById("pin-new");
+  if (pinNew) pinNew.value = "";
 }
 
 async function updateNotifStatus() {
@@ -1816,7 +1812,6 @@ async function doChangePin() {
 async function doAddStudent() {
   const name    = document.getElementById("as-name").value.trim();
   const family  = document.getElementById("as-family").value.trim();
-  const phone   = document.getElementById("as-phone").value.trim();
   const email   = document.getElementById("as-email").value.trim();
   const pin     = document.getElementById("as-pin").value.trim();
   const msg     = document.getElementById("add-msg");
@@ -1826,7 +1821,7 @@ async function doAddStudent() {
     msg.textContent = text; msg.className = "add-msg " + type; msg.style.display = "block";
   };
 
-  if (!name || !family || !phone || !pin) return showAddMsg(t("addErrEmpty"), "error");
+  if (!name || !family || !email || !pin) return showAddMsg(t("addErrEmpty"), "error");
 
   btn.disabled = true; btn.textContent = "...";
   try {
@@ -1834,14 +1829,13 @@ async function doAddStudent() {
       action: "addStudent",
       adminId: currentUserGlobal.id,
       pin: getStoredPin(),
-      name, family, phone, email, studentPin: pin
+      name, family, email, studentPin: pin
     });
     if (data.success) {
       showAddMsg(t("addSuccess"), "success");
-      ["as-name","as-family","as-phone","as-email","as-pin"].forEach(id => {
+      ["as-name","as-family","as-email","as-pin"].forEach(id => {
         document.getElementById(id).value = "";
       });
-      // Refresh student list in background
       loadAdminPanel(currentUserGlobal);
     } else {
       showAddMsg(data.message || t("addErrFail"), "error");
@@ -2117,8 +2111,8 @@ function applyNavLang() {
 const TRANSLATIONS = {
   vi: {
     // LOGIN
-    loginLabel:        "Số điện thoại",
-    loginPlaceholder:  "VD: 0664146887",
+    loginLabel:        "Email",
+    loginPlaceholder:  "ten@email.com",
     pinLabel:          "Mã PIN",
     pinPlaceholder:    "••••",
     loginBtn:          "入る — Đăng nhập",
@@ -2223,8 +2217,8 @@ const TRANSLATIONS = {
 
   en: {
     // LOGIN
-    loginLabel:        "Phone number",
-    loginPlaceholder:  "e.g. 0664146887",
+    loginLabel:        "Email",
+    loginPlaceholder:  "name@email.com",
     pinLabel:          "PIN",
     pinPlaceholder:    "••••",
     loginBtn:          "入る — Sign in",
@@ -2329,8 +2323,8 @@ const TRANSLATIONS = {
 
   fr: {
     // LOGIN
-    loginLabel:        "Numéro de téléphone",
-    loginPlaceholder:  "Ex : 0664146887",
+    loginLabel:        "Email",
+    loginPlaceholder:  "prenom@email.com",
     pinLabel:          "Code PIN",
     pinPlaceholder:    "••••",
     loginBtn:          "入る — Se connecter",
@@ -2444,40 +2438,54 @@ function t(key, ...args) {
   return val || key;
 }
 
+function setLangLogin(lang) {
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+  document.documentElement.lang = lang;
+  // Active state sur les boutons du login
+  ["vi","en","fr"].forEach(l => {
+    const btn = document.getElementById("login-lang-" + l);
+    if (btn) btn.classList.toggle("active", l === lang);
+  });
+  applyLang();
+}
+
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem(LANG_KEY, lang);
-
-  // Update html lang attribute
   document.documentElement.lang = lang;
 
   // Update profile language buttons active state
   ["vi","en","fr"].forEach(l => {
     const btn = document.getElementById("lang-" + l);
-    if (!btn) return;
-    btn.classList.toggle("active", l === lang);
+    if (btn) btn.classList.toggle("active", l === lang);
   });
 
-  // Re-render all visible text
+  // Sauvegarde en sheet si connecté et pas admin
+  if (currentUserGlobal && currentUserGlobal.role !== "Admin") {
+    api({ action: "saveUserLang", userId: currentUserGlobal.id, lang: lang.toUpperCase() });
+  }
+
   applyLang();
 }
 
 function applyLang() {
   // Login page
-  const labelEl = document.querySelector('#page-login .form-group:first-of-type label');
-  if (labelEl) labelEl.textContent = t("loginLabel");
-  const phoneInput = document.getElementById("input-id");
-  if (phoneInput) phoneInput.placeholder = t("loginPlaceholder");
-  const pinLabel = document.querySelector('#page-login .form-group:last-of-type label');
-  if (pinLabel) pinLabel.textContent = t("pinLabel");
-  const pinInput = document.getElementById("input-pin");
-  if (pinInput) pinInput.placeholder = t("pinPlaceholder");
+  const emailLoginLabel = document.getElementById("login-email-label");
+  if (emailLoginLabel) emailLoginLabel.textContent = t("loginLabel");
+  const emailInput = document.getElementById("input-id");
+  if (emailInput) emailInput.placeholder = t("loginPlaceholder");
   const loginBtn = document.getElementById("btn-login");
   if (loginBtn && !loginBtn.disabled) loginBtn.textContent = t("loginBtn");
   const tagline = document.querySelector(".login-logo .tagline");
   if (tagline) tagline.textContent = t("loginTagline");
   const enTitle = document.querySelector(".login-logo .en-title");
   if (enTitle) enTitle.textContent = t("loginSubtitle");
+  // Active state boutons langue login
+  ["vi","en","fr"].forEach(l => {
+    const btn = document.getElementById("login-lang-" + l);
+    if (btn) btn.classList.toggle("active", l === currentLang);
+  });
 
   // Student page
   const sub = document.querySelector("#page-student .page-subtitle");
@@ -2497,7 +2505,6 @@ function applyLang() {
   // Profile labels
   const pfl_id    = document.getElementById("pfl-id");    if(pfl_id)    pfl_id.textContent    = t("pflId");
   const pfl_name  = document.getElementById("pfl-name");  if(pfl_name)  pfl_name.textContent  = t("pflName");
-  const pfl_phone = document.getElementById("pfl-phone"); if(pfl_phone) pfl_phone.textContent = t("pflPhone");
   const pfl_email = document.getElementById("pfl-email"); if(pfl_email) pfl_email.textContent = t("pflEmail");
   const ph_info   = document.getElementById("ph-info");   if(ph_info)   ph_info.textContent   = t("profileInfo");
   const ph_pin    = document.getElementById("ph-pin");    if(ph_pin)    ph_pin.textContent    = t("profilePinCard");
@@ -2507,8 +2514,7 @@ function applyLang() {
   const ph_add = document.getElementById("ph-add"); if(ph_add) ph_add.textContent = t("addInfo");
   const asl_fn = document.getElementById("asl-fname"); if(asl_fn) asl_fn.textContent = t("addLFname");
   const asl_ln = document.getElementById("asl-lname"); if(asl_ln) asl_ln.textContent = t("addLLname");
-  const asl_ph = document.getElementById("asl-phone"); if(asl_ph) asl_ph.textContent = t("addLPhone");
-  const asl_em = document.getElementById("asl-email"); if(asl_em) asl_em.textContent = t("addLEmail");
+  const asl_em = document.getElementById("asl-email"); if(asl_em) asl_em.textContent = t("addLEmail") + " *";
   const asl_pi = document.getElementById("asl-pin");   if(asl_pi) asl_pi.textContent = t("addLPin");
   const addBtn2 = document.getElementById("btn-add-student"); if(addBtn2 && !addBtn2.disabled) addBtn2.textContent = "➕ " + t("addBtn");
   const addTitle = document.getElementById("add-student-title"); if(addTitle) addTitle.textContent = t("addStudentTitle");
