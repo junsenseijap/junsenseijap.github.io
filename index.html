@@ -2377,7 +2377,7 @@ async function openStudentChart(studentId, studentName, level) {
       api({ action:"getMyScores",    studentId }),
       api({ action:"getMyExercises", studentId })
     ]);
-    const tests = (exData.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]"));
+    const tests = (exData.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")&&(!level||e.level===level));
     const scMap = {};
     (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
     const pts = tests.filter(e=>scMap[String(e.id)]&&scMap[String(e.id)].maxScore>0).map(e=>{
