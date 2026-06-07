@@ -2045,9 +2045,10 @@ async function loadAdminManage() {
         '<div class="manage-stu-info">'+
           '<div class="manage-stu-name">'+s.name+' '+(s.familyName||"")+'</div>'+
           '<div class="manage-stu-email">'+(s.email||"")+'</div>'+
-          '<div class="manage-stu-levels">🎓 '+levels+'</div>'+
+          '<div class="manage-stu-levels">'+levels+'</div>'+
         '</div>'+
-        '<button class="btn-manage-levels" onclick="openLevelsModal('+s.id+',\''+s.name+'\',\''+( s.levels||"" )+'\')">🎓</button>'+
+        '<button class="btn-manage-levels" onclick="openLevelsModal('+s.id+',\''+s.name+'\',\''+( s.levels||"" )+'\')" title="Niveaux">LEVEL</button>'+
+        '<button class="btn-manage-stu" style="background:rgba(123,175,212,0.15);border-color:rgba(123,175,212,0.4);color:#3a7aaa;margin-right:0.3rem" onclick="testNotifStudent('+s.id+',\''+s.name+'\')" title="Test notif">🔔</button>'+
         '<button class="btn-manage-stu '+(isActive?"active":"inactive")+'" id="btn-active-'+s.id+'" onclick="toggleStudentActive('+s.id+','+isActive+')">'+
           (isActive ? "✅ Actif" : "🚫 Inactif")+
         '</button>'+
@@ -2058,7 +2059,17 @@ async function loadAdminManage() {
   }
 }
 
-async function toggleStudentActive(studentId, isCurrentlyActive) {
+async function testNotifStudent(studentId, studentName) {
+  try {
+    const data = await api({
+      action: "testNotifStudent",
+      adminId: currentUserGlobal.id, pin: getStoredPin(),
+      studentId
+    });
+    if (data.success) toast("🔔 " + data.message, "success");
+    else toast(data.message || t("errConn"), "error");
+  } catch { toast(t("errConn"), "error"); }
+}
   const btn = document.getElementById("btn-active-" + studentId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
   try {
