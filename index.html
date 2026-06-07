@@ -1081,10 +1081,12 @@
     .tree-cat.open .tree-cat-arrow { transform:rotate(180deg); }
     .tree-cat-body { display:none;padding-left:0.8rem; }
     .tree-cat.open .tree-cat-body { display:block; }
-    .btn-star { background:none;border:none;cursor:pointer;font-size:1rem;padding:0 2px;line-height:1;transition:transform 0.15s;flex-shrink:0;color:rgba(150,130,140,0.35); }
-    .btn-star:hover { transform:scale(1.3); color:rgba(150,130,140,0.6); }
-    .btn-star.starred { color:#FFB800; }
-    .btn-star.starred:hover { color:#FFA500; transform:scale(1.3); }
+    .btn-star { background:none;border:none;cursor:pointer;font-size:1rem;padding:0 2px;line-height:1;transition:transform 0.15s;flex-shrink:0; }
+    .btn-star:hover { transform:scale(1.3); }
+    .btn-star svg { transition:all 0.15s; }
+    .btn-star:not(.starred) svg { fill:none; stroke:#ccc; }
+    .btn-star.starred svg { fill:#FFB800; stroke:#FFB800; }
+    .btn-star:hover svg { stroke:#FFB800; }
     .btn-spark-admin { background:none;border:none;cursor:pointer;font-size:0.85rem;padding:0 2px;color:var(--gray);transition:color 0.15s; }
     .btn-spark-admin:hover { color:var(--pink); }
 
@@ -1719,7 +1721,7 @@ async function loadStudentContent(user) {
           return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
             '<span class="tree-item-type card-type '+tc+'" style="font-size:0.55rem;padding:0.1rem 0.35rem">'+(c.type||"").toUpperCase()+'</span>'+
             '<span class="tree-item-title">'+c.title+'</span>'+
-            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">⭐</button>'+
+            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">"+STAR_SVG+"</button>'+
           '</div>';
         }).join("");
       }
@@ -2187,6 +2189,7 @@ async function openStudentChart(studentId, studentName, level) {
   }
 }
 const FAV_MAX = 10;
+const STAR_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 function getFavKey(userId) { return "jun_favorites_" + userId; }
 function getFavs(userId) {
   try { return JSON.parse(localStorage.getItem(getFavKey(userId)) || "[]"); } catch { return []; }
@@ -2238,7 +2241,7 @@ function renderFavorites(userId) {
       '<div class="tree-item">'+
         '<span class="tree-item-title" onclick="window.open(\''+f.url+'\',\'_blank\')" style="cursor:pointer">'+f.title+'</span>'+
         '<span style="font-size:0.65rem;color:var(--gray);flex-shrink:0">'+f.level+'</span>'+
-        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">⭐</button>'+
+        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">"+STAR_SVG+"</button>'+
       '</div>'
     ).join("");
     return '<div class="tree-cat open" id="fav-cat-'+ci+'">'+
@@ -2493,7 +2496,7 @@ async function loadStudentExercises() {
           '<div class="ex-card-actions">'+
           consultBtn+
           '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">⭐</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">"+STAR_SVG+"</button>'+
           '</div></div>';
       }).join("");
     }
@@ -2520,7 +2523,7 @@ async function loadStudentExercises() {
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
           consultBtn+
           '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">⭐</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">"+STAR_SVG+"</button>'+
           '</div></div>';
       }).join("");
     }
