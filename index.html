@@ -255,6 +255,15 @@
     }
     .btn-logout:hover { border-color: var(--pink); color: var(--pink); }
 
+    .btn-notif-header {
+      background: transparent; border: 1.5px solid var(--border);
+      color: var(--gray); padding: 0.38rem 0.55rem;
+      border-radius: 8px; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center;
+    }
+    .btn-notif-header:hover { border-color: var(--pink); color: var(--pink); }
+    .btn-notif-header.active { border-color: var(--pink); color: var(--pink); }
+
     /* ══════════════════════════════════════
        MAIN PAGES
     ══════════════════════════════════════ */
@@ -1035,6 +1044,19 @@
     <div class="header-user">
       <span class="user-name" id="header-name"></span>
       <span class="role-badge" id="header-role"></span>
+      <!-- Bouton notif — visible seulement pour les élèves -->
+      <button class="btn-notif-header" id="btn-notif-header" onclick="toggleNotifHeader()" title="Notifications" style="display:none">
+        <svg id="notif-icon-on" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          <circle cx="18" cy="5" r="4" fill="var(--pink)" stroke="none"/>
+        </svg>
+        <svg id="notif-icon-off" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      </button>
       <button class="btn-logout" onclick="doLogout()" title="Logout">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -1260,7 +1282,56 @@ const ONESIGNAL_APP_ID = "f8d7091e-3a44-4d3a-a68c-665c6963a808";
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 
-// ── OneSignal — enregistrement player ID ──
+// ── BOUTON NOTIF HEADER ──
+async function updateNotifButton(notifEnabled) {
+  const btn    = document.getElementById("btn-notif-header");
+  const iconOn = document.getElementById("notif-icon-on");
+  const iconOff= document.getElementById("notif-icon-off");
+  if (!btn) return;
+  if (notifEnabled) {
+    btn.classList.add("active");
+    if (iconOn)  iconOn.style.display  = "block";
+    if (iconOff) iconOff.style.display = "none";
+  } else {
+    btn.classList.remove("active");
+    if (iconOn)  iconOn.style.display  = "none";
+    if (iconOff) iconOff.style.display = "block";
+  }
+}
+
+async function toggleNotifHeader() {
+  const btn = document.getElementById("btn-notif-header");
+  if (btn) btn.disabled = true;
+  try {
+    const OneSignal = window.OneSignal;
+    if (!OneSignal) { toast("OneSignal non disponible", "error"); return; }
+    const permission = OneSignal.Notifications.permission;
+    if (!permission) {
+      // Activer
+      await OneSignal.Notifications.requestPermission();
+      await new Promise(r => setTimeout(r, 1500));
+      const subId = OneSignal.User.PushSubscription.id;
+      if (subId) {
+        await api({ action: "saveOneSignalId",  userId: currentUserGlobal.id, oneSignalId: subId });
+        await api({ action: "saveNotifStatus",  userId: currentUserGlobal.id, status: "YES" });
+        updateNotifButton(true);
+        toast("🔔 Notifications activées !", "success");
+      } else {
+        toast("Permission refusée", "error");
+        updateNotifButton(false);
+      }
+    } else {
+      // Désactiver
+      await OneSignal.User.PushSubscription.optOut();
+      await api({ action: "saveNotifStatus", userId: currentUserGlobal.id, status: "NO" });
+      updateNotifButton(false);
+      toast("🔕 Notifications désactivées", "success");
+    }
+  } catch(e) {
+    toast("Erreur: " + e.message, "error");
+  }
+  if (btn) btn.disabled = false;
+}
 
 async function registerOneSignalPlayer(userId) {
   try {
@@ -1382,8 +1453,19 @@ function initUser(user) {
   buildBottomNav(user.role);
   loadProfilePage(user);
   currentNavTab = "home";
-  // Enregistre OneSignal pour les élèves seulement
-  if (user.role !== "Admin") registerOneSignalPlayer(user.id);
+  // Bouton notif — seulement pour les élèves
+  const notifBtn = document.getElementById("btn-notif-header");
+  if (notifBtn) {
+    if (user.role !== "Admin") {
+      notifBtn.style.display = "flex";
+      // État initial selon col J (notifEnabled dans user)
+      updateNotifButton(user.notifEnabled === "YES");
+      // Enregistre OneSignal si notifs activées
+      if (user.notifEnabled === "YES") registerOneSignalPlayer(user.id);
+    } else {
+      notifBtn.style.display = "none";
+    }
+  }
   if (user.role === "Admin") { showPage("admin"); loadAdminPanel(user); }
   else { showPage("student"); loadStudentContent(user); }
 }
