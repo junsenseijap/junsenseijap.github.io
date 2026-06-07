@@ -1837,18 +1837,20 @@ async function loadAdminPanel(user) {
       return;
     }
     allStudents = studentsData.students || [];
+    const activeStudents = allStudents.filter(s => String(s.active).toUpperCase() === "YES");
 
-  // Update student count
+  // Update student count — actifs uniquement
   const cnt = document.getElementById("admin-student-count");
-  if(cnt) cnt.textContent = allStudents.length;
+  if(cnt) cnt.textContent = activeStudents.length;
 
   // Load class averages
   loadAdminStats();
-    if (allStudents.length === 0) {
+    if (activeStudents.length === 0) {
       ddList.innerHTML = '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</div>';
       return;
     }
-    ddList.innerHTML = allStudents.map(s => `
+    // Dropdown — actifs uniquement
+    ddList.innerHTML = activeStudents.map(s => `
       <div class="dd-student-item" onclick="selectStudentFromDD(${s.id}, '${s.name}', '${s.familyName || ''}')" id="dd-stu-${s.id}">
         <div class="dd-avatar">${(s.name || "?")[0]}</div>
         ${s.name} ${s.familyName || ""}
@@ -2471,9 +2473,9 @@ async function loadAdminManage() {
     wrap.innerHTML = allStudents.map(s => {
       const isActive = String(s.active).toUpperCase() === "YES";
       const levels   = s.levels || "—";
-      return '<div class="manage-stu-row" id="mrow-'+s.id+'">'+
+      return '<div class="manage-stu-row" id="mrow-'+s.id+'" style="'+(isActive?"":'opacity:0.5')+'">'+
         '<div class="manage-stu-info">'+
-          '<div class="manage-stu-name">'+s.name+' '+(s.familyName||"")+'</div>'+
+          '<div class="manage-stu-name">'+s.name+' '+(s.familyName||"")+(isActive?'':'  <span style="font-size:0.6rem;background:#eee;color:#888;padding:1px 6px;border-radius:99px;margin-left:4px">inactif</span>')+'</div>'+
           '<div class="manage-stu-email">'+(s.email||"")+'</div>'+
           '<div class="manage-stu-levels">'+levels+'</div>'+
         '</div>'+
@@ -2764,9 +2766,12 @@ async function loadAdminExercises() {
     if(!ed.success){wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';return;}
     const scM={};(sr.scores||[]).forEach(s=>{scM[String(s.studentId)+"_"+String(s.exerciseId)]=s;});
     const stuMap={};allStudents.forEach(s=>{stuMap[String(s.id)]=s;});
+    // Actifs uniquement dans les exercices
+    const activeIds=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
     const byS={};
     (ed.exercises||[]).forEach(ex=>{
       const sid=String(ex.studentId);
+      if(!activeIds.has(sid))return; // ignorer les inactifs
       if(!byS[sid])byS[sid]={total:0,done:0,exercises:[],lastDate:""};
       byS[sid].total++;if(ex.status==="done")byS[sid].done++;
       if((ex.assignedDate||"")>byS[sid].lastDate)byS[sid].lastDate=ex.assignedDate||"";
@@ -3464,9 +3469,11 @@ async function loadAdminStats() {
     ]);
     const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
+    const activeIdsS=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
     const LEVELS=["N5","N4","N3","N2","N1"],bl={};
     (sr.scores||[]).forEach(sc=>{
       if(!sc.maxScore)return;
+      if(!activeIdsS.has(String(sc.studentId)))return; // ignorer inactifs
       const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
       const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
       bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
