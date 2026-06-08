@@ -1216,17 +1216,26 @@
       <div id="student-progress-levels"><div class="loading"><div class="spinner"></div></div></div>
       <div id="student-avg-graph-wrap" style="display:none">
         <div style="border-top:1px solid rgba(232,75,122,0.1);margin:0.8rem 0"></div>
+        <!-- Labels au-dessus -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:0.65rem;color:var(--gray)" id="avg-gen-label">Moyenne générale</span>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:0.6rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 5px;border-radius:4px;font-weight:600">[TEST]</span>
+            <span style="font-size:0.65rem;color:var(--gray)" id="avg-test-label">Progression mensuelle</span>
+          </div>
+          <span style="font-size:0.65rem;color:var(--gray)" id="avg-last-label-top">Dernier [TEST]</span>
+        </div>
         <div style="display:flex;align-items:center;gap:1rem">
           <div style="text-align:center;flex-shrink:0">
             <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1">—</div>
-            <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 10</div>
+            <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 20</div>
           </div>
           <div style="flex:1;position:relative;height:65px;min-width:0;overflow:hidden">
             <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="max-width:100%"></canvas>
           </div>
           <div style="text-align:center;flex-shrink:0">
             <div id="avg-last-number" style="font-size:1rem;color:var(--pink);font-weight:500;line-height:1">—</div>
-            <div id="avg-last-label" style="font-size:0.62rem;color:var(--gray);margin-top:2px">Dernier</div>
+            <div id="avg-last-label" style="font-size:0.62rem;color:var(--gray);margin-top:2px">%</div>
           </div>
         </div>
       </div>
@@ -1788,8 +1797,8 @@ async function loadStudentContent(user) {
     const avgLastLbl = document.getElementById("avg-last-label");
     if(avgWrap) {
       if(td && td.success && td.totalScored) {
-        if(avgBig) avgBig.textContent = td.globalAvg.toFixed(1);
-        if(avgLbl) avgLbl.textContent = "/ 10 · "+t("basedOn",td.totalScored);
+        if(avgBig) avgBig.textContent = (td.globalAvg * 2).toFixed(1);
+        if(avgLbl) avgLbl.textContent = "/ 20 · "+t("basedOn",td.totalScored);
         avgWrap.style.display = "block";
         // Récupère les scores des tests [TEST]
         try {
@@ -3014,6 +3023,11 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Đã xoá khỏi yêu thích",
     favMax:            "Tối đa 10 nội dung yêu thích",
     lastTest:          "Bài kiểm tra cuối",
+    avgGenLabel:       "Điểm trung bình",
+    avgTestLabel:      "Tiến độ hàng tháng",
+    avgLastLabel:      "Bài kiểm tra cuối",
+    testProgLabel:     "Tiến độ [TEST] · %",
+    avgColLabel:       "Điểm TB · /20",
     noTestsYet:        "Chưa có bài kiểm tra [TEST] nào cho học viên này",
     msgTitle:          "Tin nhắn từ Jun Sensei",
     msgPlaceholder:    "Viết tin nhắn cho học viên...",
@@ -3140,6 +3154,11 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Removed from favorites",
     favMax:            "Maximum 10 favorites reached",
     lastTest:          "Last test",
+    avgGenLabel:       "Overall average",
+    avgTestLabel:      "Monthly progress",
+    avgLastLabel:      "Last [TEST]",
+    testProgLabel:     "[TEST] progress · %",
+    avgColLabel:       "Average · /20",
     noTestsYet:        "No [TEST] tests yet for this student",
     msgTitle:          "Messages from Jun Sensei",
     msgPlaceholder:    "Write a message to the student...",
@@ -3266,6 +3285,11 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Retiré des favoris",
     favMax:            "Maximum 10 favoris atteint",
     lastTest:          "Dernier test",
+    avgGenLabel:       "Moyenne générale",
+    avgTestLabel:      "Progression mensuelle",
+    avgLastLabel:      "Dernier [TEST]",
+    testProgLabel:     "Progression [TEST] · %",
+    avgColLabel:       "Moyenne · /20",
     noTestsYet:        "Pas encore de tests [TEST] pour cet élève",
     msgTitle:          "Messages de Jun Sensei",
     msgPlaceholder:    "Écris un message pour l'élève...",
@@ -3386,7 +3410,10 @@ function applyLang() {
   const progressT = document.getElementById("progress-card-title"); if(progressT) progressT.textContent = t("progressTitle");
   const recentT   = document.getElementById("recent-card-title");   if(recentT)   recentT.textContent   = t("recentTitle");
   const favT      = document.getElementById("fav-card-title");      if(favT)      favT.textContent      = t("favTitle");
-  const avgLastLbl= document.getElementById("avg-last-label");      if(avgLastLbl) avgLastLbl.textContent = t("lastTest");
+  const avgGenLbl = document.getElementById("avg-gen-label"); if(avgGenLbl) avgGenLbl.textContent = t("avgGenLabel");
+  const avgTestLbl = document.getElementById("avg-test-label"); if(avgTestLbl) avgTestLbl.textContent = t("avgTestLabel");
+  const avgLastLblTop = document.getElementById("avg-last-label-top"); if(avgLastLblTop) avgLastLblTop.textContent = t("avgLastLabel");
+  const avgLastLbl = document.getElementById("avg-last-label"); if(avgLastLbl) avgLastLbl.textContent = "%";
   // Admin dashboard labels
   document.querySelectorAll(".dash-stat-label").forEach(el => el.textContent = t("activeStudents"));
   const classAvgEl = document.querySelector("[data-i='classAvg']"); if(classAvgEl) classAvgEl.textContent = t("classAvg");
@@ -3457,15 +3484,20 @@ async function loadAdminDashboard() {
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
-      const la=se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length;
+      const la=(se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length*2).toFixed(1);
       const rid="dash-lvl-"+lvl;
+      const colHeader='<div style="display:flex;align-items:center;padding:3px 14px 3px 2.5rem;background:var(--bg-soft);border-bottom:1px solid rgba(232,75,122,0.08)">'+
+        '<span style="flex:1"></span>'+
+        '<span style="font-size:0.6rem;color:var(--gray)">'+t("avgColLabel")+'</span>'+
+        '</div>';
       const rows=se.map(([sid,d])=>{
         const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
-        return {name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt};
-      }).sort((a,b)=>b.avg-a.avg).map(s=>
+        const avg20=(d.sum/d.cnt*2).toFixed(1);
+        return {name:stu.name+" "+(stu.familyName||""),avg20,cnt:d.cnt};
+      }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        '<span class="dash-avg-student-score">'+s.avg.toFixed(1)+'/10</span>'+
+        '<span class="dash-avg-student-score">'+s.avg20+'/20</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
@@ -3473,9 +3505,10 @@ async function loadAdminDashboard() {
         '<div class="dash-avg-level-header" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'open\')">'+
         '<span class="dash-avg-level-badge">'+lvl+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
-        '<span class="dash-avg-level-score">'+la.toFixed(1)+'/10</span>'+
+        '<span class="dash-avg-level-score">'+la+'/20</span>'+
         '<span class="dash-avg-level-arrow">▼</span>'+
         '</div>'+
+        colHeader+
         '<div class="dash-avg-student-list">'+rows+'</div>'+
         '</div>';
     }).join("");
@@ -3521,29 +3554,45 @@ async function loadAdminStats() {
 
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
-      const la=se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length;
+      const la=(se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length*2).toFixed(1);
       const rid="stat-lvl-"+lvl;
+      const colHeader='<div style="display:flex;align-items:center;padding:3px 14px 3px 2.5rem;background:var(--bg-soft);border-bottom:1px solid rgba(232,75,122,0.08)">'+
+        '<span style="flex:1"></span>'+
+        '<div style="display:flex;align-items:center;gap:3px;min-width:100px;justify-content:center">'+
+        '<span style="font-size:0.55rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 4px;border-radius:3px;font-weight:700">[TEST]</span>'+
+        '<span style="font-size:0.6rem;color:var(--gray)">%</span>'+
+        '</div>'+
+        '<span style="width:1px;height:10px;background:rgba(44,26,34,0.08);margin:0 4px"></span>'+
+        '<span style="font-size:0.6rem;color:var(--gray);min-width:60px;text-align:center">'+t("avgColLabel")+'</span>'+
+        '</div>';
       const rows=se.map(([sid,d])=>{
         const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
         const spId="sp2-"+lvl+"-"+sid;
-        const hasTests=(stuTestScores[sid+"_"+lvl]||[]).length>0;
-        return {name:stu.name+" "+(stu.familyName||""),avg:d.sum/d.cnt,cnt:d.cnt,sid,spId,hasTests};
-      }).sort((a,b)=>b.avg-a.avg).map(s=>
+        const testScores=stuTestScores[sid+"_"+lvl]||[];
+        const hasTests=testScores.length>0;
+        const lastPct=hasTests?testScores[testScores.length-1]:null;
+        const avg20=(d.sum/d.cnt*2).toFixed(1);
+        return {name:stu.name+" "+(stu.familyName||""),avg20,cnt:d.cnt,sid,spId,hasTests,lastPct};
+      }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        (s.hasTests?'<canvas id="'+s.spId+'" width="70" height="26" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:70px;flex-shrink:0"></span>')+
-        '<span class="dash-avg-student-score">'+s.avg.toFixed(1)+'/10</span>'+
+        '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
+        (s.hasTests?'<canvas id="'+s.spId+'" width="55" height="20" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:55px"></span>')+
+        '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(s.lastPct!==null?s.lastPct+'%':'—')+'</span>'+
+        '</div>'+
+        '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
+        '<span class="dash-avg-student-score">'+s.avg20+'/20</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
-        '<button class="btn-spark-admin" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')">📈</button>'+
         '</div>'
       ).join("");
       return '<div class="dash-avg-level-row" id="'+rid+'">'+
         '<div class="dash-avg-level-header" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'open\')">'+
         '<span class="dash-avg-level-badge">'+lvl+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
-        '<span class="dash-avg-level-score">'+la.toFixed(1)+'/10</span>'+
+        '<span class="dash-avg-level-score">'+la+'/20</span>'+
         '<span class="dash-avg-level-arrow">▼</span>'+
         '</div>'+
+        colHeader+
         '<div class="dash-avg-student-list">'+rows+'</div>'+
         '</div>';
     }).join("");
