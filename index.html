@@ -2367,12 +2367,14 @@ async function openMyScoresModal() {
   overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
   document.body.appendChild(overlay);
   try {
-    const [scData,exData] = await Promise.all([
-      api({action:"getMyScores",studentId:currentUserGlobal.id}),
-      api({action:"getMyExercises",studentId:currentUserGlobal.id})
+    const [scRes, exRes] = await Promise.all([
+      api({action:"getMyScores",    studentId: String(currentUserGlobal.id)}),
+      api({action:"getMyExercises", studentId: String(currentUserGlobal.id)})
     ]);
-    renderScoresList("scores-modal-body", scData, exData, null);
+    console.log("scores:", scRes, "exercises:", exRes);
+    renderScoresList("scores-modal-body", scRes, exRes, null);
   } catch(e) {
+    console.error(e);
     const b=document.getElementById("scores-modal-body");
     if(b) b.innerHTML='<div style="color:var(--gray);padding:1rem">'+t("errConn")+'</div>';
   }
@@ -2406,8 +2408,9 @@ async function openStudentScoresModal(studentId, studentName, level) {
 function renderScoresList(bodyId, scData, exData, filterLevel) {
   const scMap={};
   (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
+  // Tous les exercices qui ont un score — sans filtre de statut
   const exercises=(exData.exercises||[])
-    .filter(e=>e.status==="done"&&scMap[String(e.id)]&&scMap[String(e.id)].maxScore>0
+    .filter(e=>scMap[String(e.id)]&&scMap[String(e.id)].maxScore>0
       &&!e.title.includes("[TEST]")
       &&(!filterLevel||e.level===filterLevel))
     .sort((a,b)=>new Date(b.doneDate||b.assignedDate)-new Date(a.doneDate||a.assignedDate));
@@ -2427,17 +2430,18 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
     return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.05)">'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:0.84rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div>'+
-        '<div style="font-size:0.65rem;color:var(--gray)">'+(e.level||"")+'</div>'+
+        '<div style="font-size:0.65rem;color:var(--gray)">'+(e.level||"")+(e.doneDate?' · ✅ '+e.doneDate:'')+'</div>'+
       '</div>'+
-      '<span style="font-size:0.8rem;font-weight:600;color:'+color+'">'+score20+'/20</span>'+
-      '<span style="font-size:0.75rem;color:var(--gray)">('+sc.score+'/'+sc.maxScore+')</span>'+
-      '<span>✅</span>'+
+      '<div style="text-align:right;flex-shrink:0">'+
+        '<div style="font-size:0.9rem;font-weight:600;color:'+color+'">'+score20+'/20</div>'+
+        '<div style="font-size:0.65rem;color:var(--gray)">('+sc.score+'/'+sc.maxScore+')</div>'+
+      '</div>'+
     '</div>';
   }).join("");
   const avg20=totalCnt>0?(totalSum/totalCnt).toFixed(1):"—";
   body.innerHTML=rows+
-    '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0.4rem;border-top:2px solid rgba(232,75,122,0.15);margin-top:0.5rem">'+
-      '<span style="font-size:0.8rem;font-weight:600;color:var(--ink2)">'+t("avgGenLabel")+'</span>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0.4rem;border-top:2px solid rgba(232,75,122,0.15);margin-top:0.5rem;background:var(--bg-soft);border-radius:0 0 10px 10px">'+
+      '<span style="font-size:0.8rem;font-weight:600;color:var(--ink2)">'+t("avgGenLabel")+' ('+totalCnt+')</span>'+
       '<span style="font-size:1.1rem;font-weight:600;color:var(--pink)">'+avg20+'/20</span>'+
     '</div>';
 }
@@ -2756,14 +2760,30 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
       level:     level || ""
     });
     if (data.success) {
-      toast("✅ " + title + " assigné !", "success");
+      toast("✅ " + title + " " + t("formSent") + " !", "success");
+      // Mettre à jour le badge "Envoyé" sans recharger toute la page
+      if (window._assignedContentIds) window._assignedContentIds.add(String(contentId));
+      if (btn) {
+        btn.textContent = "✓";
+        btn.disabled = false;
+        btn.style.background = "rgba(74,138,85,0.15)";
+        btn.style.borderColor = "rgba(74,138,85,0.4)";
+        btn.style.color = "#4a8a55";
+        btn.title = t("formSent") + " — " + t("clickToResend");
+        // Mettre à jour le badge dans le titre
+        const titleEl = btn.closest(".content-manage-item")?.querySelector(".content-manage-title");
+        if (titleEl && !titleEl.querySelector(".sent-badge")) {
+          titleEl.insertAdjacentHTML("beforeend", '<span class="sent-badge" style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>');
+        }
+      }
+      return;
     } else {
       toast(data.message || t("exAssignErr"), "error");
     }
   } catch {
     toast(t("errConn"), "error");
   }
-  if (btn) { btn.disabled = false; btn.textContent = "➕ Assigner"; }
+  if (btn) { btn.disabled = false; btn.textContent = "+"; }
 }
 
 // ══════════════════════════════════════════════
@@ -3138,6 +3158,7 @@ const TRANSLATIONS = {
     myScoresTitle:     "Kết quả bài tập của tôi",
     noScoresYet:       "Chưa có bài tập nào được chấm điểm",
     formSent:          "Đã gửi",
+    clickToResend:     "Nhấn để gửi lại",
     msgTitle:          "Tin nhắn từ Jun Sensei",
     msgPlaceholder:    "Viết tin nhắn cho học viên...",
     msgSend:           "Gửi tin nhắn",
@@ -3272,6 +3293,7 @@ const TRANSLATIONS = {
     myScoresTitle:     "My exercise results",
     noScoresYet:       "No graded exercises yet",
     formSent:          "Sent",
+    clickToResend:     "Click to resend",
     msgTitle:          "Messages from Jun Sensei",
     msgPlaceholder:    "Write a message to the student...",
     msgSend:           "Send message",
@@ -3406,6 +3428,7 @@ const TRANSLATIONS = {
     myScoresTitle:     "Mes résultats exercices",
     noScoresYet:       "Pas encore d'exercices notés",
     formSent:          "Envoyé",
+    clickToResend:     "Cliquer pour renvoyer",
     msgTitle:          "Messages de Jun Sensei",
     msgPlaceholder:    "Écris un message pour l'élève...",
     msgSend:           "Envoyer",
@@ -3811,14 +3834,19 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         const typeClass  = "type-"+(c.type||"pdf").toLowerCase();
         if (isForm) {
           const alreadySent = window._assignedContentIds && window._assignedContentIds.has(String(c.id));
+          const btnStyle = alreadySent
+            ? 'background:rgba(74,138,85,0.15);border-color:rgba(74,138,85,0.4);color:#4a8a55'
+            : '';
+          const btnText = alreadySent ? '✓' : '+';
+          const btnTitle = alreadySent ? t("formSent") : '';
           return '<div class="content-manage-item">'+
             '<div class="unlock-status" style="background:rgba(103,58,183,0.5)"></div>'+
             '<div class="content-manage-info"><div class="content-manage-title">'+c.title+
-            (alreadySent?'<span style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
+            (alreadySent?'<span class="sent-badge" style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
             '</div>'+
             '<div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
-            '<button class="btn-assign-content" id="btn-assign-'+c.id+'"'+
-            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.level||"")+'\'))">+</button>'+
+            '<button class="btn-assign-content" id="btn-assign-'+c.id+'" style="'+btnStyle+'" title="'+btnTitle+'"'+
+            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.level||"")+'\'))">'+btnText+'</button>'+
             '</div>';
         }
         return '<div class="content-manage-item">'+
