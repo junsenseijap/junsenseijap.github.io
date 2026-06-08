@@ -1216,25 +1216,33 @@
       <div id="student-progress-levels"><div class="loading"><div class="spinner"></div></div></div>
       <div id="student-avg-graph-wrap" style="display:none">
         <div style="border-top:1px solid rgba(232,75,122,0.1);margin:0.8rem 0"></div>
-        <!-- Labels au-dessus -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:0.65rem;color:var(--gray)" id="avg-gen-label">Moyenne générale</span>
-          <div style="display:flex;align-items:center;gap:4px">
+        <!-- Labels au-dessus centrés -->
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px;padding:0 2px">
+          <div style="text-align:center;flex-shrink:0;min-width:80px">
+            <span style="font-size:0.65rem;color:var(--gray)" id="avg-gen-label">Moyenne exercices</span>
+          </div>
+          <div style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px">
             <span style="font-size:0.6rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 5px;border-radius:4px;font-weight:600">[TEST]</span>
             <span style="font-size:0.65rem;color:var(--gray)" id="avg-test-label">Progression mensuelle</span>
           </div>
-          <span style="font-size:0.65rem;color:var(--gray)" id="avg-last-label-top">Dernier [TEST]</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:1rem">
-          <div style="text-align:center;flex-shrink:0">
-            <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1">—</div>
-            <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 20</div>
+          <div style="text-align:center;flex-shrink:0;min-width:60px">
+            <span style="font-size:0.65rem;color:var(--gray)" id="avg-last-label-top">Dernier [TEST]</span>
           </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.8rem">
+          <!-- Score /20 cliquable -->
+          <div style="text-align:center;flex-shrink:0;min-width:80px" onclick="openMyScoresModal()" style="cursor:pointer">
+            <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" onclick="openMyScoresModal()">—</div>
+            <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 20</div>
+            <div id="avg-big-count" style="font-size:0.6rem;color:var(--gray);margin-top:1px"></div>
+          </div>
+          <!-- Graphique [TEST] -->
           <div style="flex:1;position:relative;height:65px;min-width:0;overflow:hidden">
             <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="max-width:100%"></canvas>
           </div>
-          <div style="text-align:center;flex-shrink:0">
-            <div id="avg-last-number" style="font-size:1rem;color:var(--pink);font-weight:500;line-height:1">—</div>
+          <!-- Dernier [TEST] -->
+          <div style="text-align:center;flex-shrink:0;min-width:60px">
+            <div id="avg-last-number" style="font-size:1.2rem;color:var(--pink);font-weight:500;line-height:1">—</div>
             <div id="avg-last-label" style="font-size:0.62rem;color:var(--gray);margin-top:2px">%</div>
           </div>
         </div>
@@ -1798,7 +1806,9 @@ async function loadStudentContent(user) {
     if(avgWrap) {
       if(td && td.success && td.totalScored) {
         if(avgBig) avgBig.textContent = (td.globalAvg * 2).toFixed(1);
-        if(avgLbl) avgLbl.textContent = "/ 20 · "+t("basedOn",td.totalScored);
+        if(avgLbl) avgLbl.textContent = "/ 20";
+        const avgCount = document.getElementById("avg-big-count");
+        if(avgCount) avgCount.textContent = t("basedOn", td.totalScored);
         avgWrap.style.display = "block";
         // Récupère les scores des tests [TEST]
         try {
@@ -1916,9 +1926,10 @@ async function selectStudent(id, name, familyName) {
     '<div class="loading"><div class="spinner"></div>'+t("loadingStudents")+'</div>';
   try {
     const pin = getStoredPin();
-    const [studentContent, allContentData] = await Promise.all([
+    const [studentContent, allContentData, exData] = await Promise.all([
       api({ action: "getMyContent", studentId: id }),
-      api({ action: "getAllContent", adminId: adminUser.id, pin: pin })
+      api({ action: "getAllContent", adminId: adminUser.id, pin: pin }),
+      api({ action: "getMyExercises", studentId: id })
     ]);
     if (allContentData && allContentData.success) {
       allContent = (allContentData.content || []).filter(function(c){
@@ -1927,14 +1938,18 @@ async function selectStudent(id, name, familyName) {
     } else {
       console.error("getAllContent failed:", allContentData);
     }
+    // Tracker les forms déjà assignés à cet élève (par Content_ID)
+    const assignedContentIds = new Set(
+      (exData.exercises||[]).map(e => String(e.contentId)).filter(Boolean)
+    );
+    window._assignedContentIds = assignedContentIds;
     const unlocked = new Set((studentContent.content || []).map(function(c){ return String(c.id); }));
     studentAccessMap[id] = unlocked;
-    // Filtrer le contenu par niveaux de l'élève
     const stu = allStudents.find(s => String(s.id) === String(id)) || {};
     const stuLevels = stu.levels ? stu.levels.split(",").map(l => l.trim()).filter(Boolean) : [];
     const filteredContent = stuLevels.length > 0
       ? allContent.filter(c => stuLevels.includes(String(c.level || "").trim()))
-      : allContent; // Si pas de niveaux définis → tout afficher
+      : allContent;
     renderContentManage(id, name, familyName, unlocked, filteredContent);
   } catch(e) {
     console.error("selectStudent error:", e);
@@ -2334,6 +2349,97 @@ function openMessagesModal() {
     '</div>';
   overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
   document.body.appendChild(overlay);
+}
+
+// ══ MODAL RÉSULTATS SCORES ══
+async function openMyScoresModal() {
+  if (!currentUserGlobal) return;
+  document.getElementById("scores-modal")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "scores-modal";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="max-height:80vh;display:flex;flex-direction:column">'+
+    '<div class="levels-modal-title">📝 '+t("myScoresTitle")+'</div>'+
+    '<div id="scores-modal-body" style="flex:1;overflow-y:auto"><div class="loading"><div class="spinner"></div></div></div>'+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'scores-modal\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  try {
+    const [scData,exData] = await Promise.all([
+      api({action:"getMyScores",studentId:currentUserGlobal.id}),
+      api({action:"getMyExercises",studentId:currentUserGlobal.id})
+    ]);
+    renderScoresList("scores-modal-body", scData, exData, null);
+  } catch(e) {
+    const b=document.getElementById("scores-modal-body");
+    if(b) b.innerHTML='<div style="color:var(--gray);padding:1rem">'+t("errConn")+'</div>';
+  }
+}
+
+async function openStudentScoresModal(studentId, studentName, level) {
+  document.getElementById("scores-modal-admin")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "scores-modal-admin";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="max-height:80vh;display:flex;flex-direction:column">'+
+    '<div class="levels-modal-title">📝 '+studentName+(level?' — '+level:'')+'</div>'+
+    '<div id="scores-admin-body" style="flex:1;overflow-y:auto"><div class="loading"><div class="spinner"></div></div></div>'+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'scores-modal-admin\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  try {
+    const [scData,exData] = await Promise.all([
+      api({action:"getMyScores",studentId}),
+      api({action:"getMyExercises",studentId})
+    ]);
+    renderScoresList("scores-admin-body", scData, exData, level);
+  } catch(e) {
+    const b=document.getElementById("scores-admin-body");
+    if(b) b.innerHTML='<div style="color:var(--gray);padding:1rem">'+t("errConn")+'</div>';
+  }
+}
+
+function renderScoresList(bodyId, scData, exData, filterLevel) {
+  const scMap={};
+  (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
+  const exercises=(exData.exercises||[])
+    .filter(e=>e.status==="done"&&scMap[String(e.id)]&&scMap[String(e.id)].maxScore>0
+      &&!e.title.includes("[TEST]")
+      &&(!filterLevel||e.level===filterLevel))
+    .sort((a,b)=>new Date(b.doneDate||b.assignedDate)-new Date(a.doneDate||a.assignedDate));
+  const body=document.getElementById(bodyId);
+  if(!body)return;
+  if(!exercises.length){
+    body.innerHTML='<div style="text-align:center;color:var(--gray);padding:1rem;font-size:0.84rem">'+t("noScoresYet")+'</div>';
+    return;
+  }
+  let totalSum=0,totalCnt=0;
+  const rows=exercises.map(e=>{
+    const sc=scMap[String(e.id)];
+    const pct=sc.score/sc.maxScore;
+    const score20=(pct*20).toFixed(1);
+    totalSum+=pct*20; totalCnt++;
+    const color=pct>=0.7?"#3b6d11":pct>=0.5?"#854f0b":"#c0392b";
+    return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.05)">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:0.84rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div>'+
+        '<div style="font-size:0.65rem;color:var(--gray)">'+(e.level||"")+'</div>'+
+      '</div>'+
+      '<span style="font-size:0.8rem;font-weight:600;color:'+color+'">'+score20+'/20</span>'+
+      '<span style="font-size:0.75rem;color:var(--gray)">('+sc.score+'/'+sc.maxScore+')</span>'+
+      '<span>✅</span>'+
+    '</div>';
+  }).join("");
+  const avg20=totalCnt>0?(totalSum/totalCnt).toFixed(1):"—";
+  body.innerHTML=rows+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0.4rem;border-top:2px solid rgba(232,75,122,0.15);margin-top:0.5rem">'+
+      '<span style="font-size:0.8rem;font-weight:600;color:var(--ink2)">'+t("avgGenLabel")+'</span>'+
+      '<span style="font-size:1.1rem;font-weight:600;color:var(--pink)">'+avg20+'/20</span>'+
+    '</div>';
 }
 
 function drawSparkline(canvasId, scores) {
@@ -2915,7 +3021,7 @@ const TRANSLATIONS = {
     pinLabel:          "Mã PIN",
     pinPlaceholder:    "••••",
     loginBtn:          "入る — Đăng nhập",
-    loginTagline:      "Học tiếng Nhật theo cách của bạn 🌸",
+    loginTagline:      "Lớp Tiếng Nhật Tư Duy & Tự Giác 🌸",
     loginSubtitle:     "Jun Sensei · Tiếng Nhật",
     loginErrEmpty:     "Bạn chưa nhập số điện thoại hoặc PIN",
     loginErrWrong:     "Số điện thoại hoặc PIN không đúng rồi",
@@ -3023,12 +3129,15 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Đã xoá khỏi yêu thích",
     favMax:            "Tối đa 10 nội dung yêu thích",
     lastTest:          "Bài kiểm tra cuối",
-    avgGenLabel:       "Điểm trung bình",
+    avgGenLabel:       "Trung bình bài tập",
     avgTestLabel:      "Tiến độ hàng tháng",
     avgLastLabel:      "Bài kiểm tra cuối",
     testProgLabel:     "Tiến độ [TEST] · %",
-    avgColLabel:       "Điểm TB · /20",
+    avgColLabel:       "Moy. bài tập",
     noTestsYet:        "Chưa có bài kiểm tra [TEST] nào cho học viên này",
+    myScoresTitle:     "Kết quả bài tập của tôi",
+    noScoresYet:       "Chưa có bài tập nào được chấm điểm",
+    formSent:          "Đã gửi",
     msgTitle:          "Tin nhắn từ Jun Sensei",
     msgPlaceholder:    "Viết tin nhắn cho học viên...",
     msgSend:           "Gửi tin nhắn",
@@ -3046,7 +3155,7 @@ const TRANSLATIONS = {
     pinLabel:          "PIN",
     pinPlaceholder:    "••••",
     loginBtn:          "入る — Sign in",
-    loginTagline:      "Learn Japanese at your own pace 🌸",
+    loginTagline:      "Mindful & Self-Directed Japanese Class 🌸",
     loginSubtitle:     "Jun Sensei · Japanese Class",
     loginErrEmpty:     "Please enter your phone number and PIN",
     loginErrWrong:     "Wrong phone number or PIN",
@@ -3154,12 +3263,15 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Removed from favorites",
     favMax:            "Maximum 10 favorites reached",
     lastTest:          "Last test",
-    avgGenLabel:       "Overall average",
+    avgGenLabel:       "Exercise average",
     avgTestLabel:      "Monthly progress",
     avgLastLabel:      "Last [TEST]",
     testProgLabel:     "[TEST] progress · %",
-    avgColLabel:       "Average · /20",
+    avgColLabel:       "Exercise avg.",
     noTestsYet:        "No [TEST] tests yet for this student",
+    myScoresTitle:     "My exercise results",
+    noScoresYet:       "No graded exercises yet",
+    formSent:          "Sent",
     msgTitle:          "Messages from Jun Sensei",
     msgPlaceholder:    "Write a message to the student...",
     msgSend:           "Send message",
@@ -3177,7 +3289,7 @@ const TRANSLATIONS = {
     pinLabel:          "Code PIN",
     pinPlaceholder:    "••••",
     loginBtn:          "入る — Se connecter",
-    loginTagline:      "Apprends le japonais à ton rythme 🌸",
+    loginTagline:      "Cours de Japonais Réfléchi & Autonome 🌸",
     loginSubtitle:     "Jun Sensei · Cours de japonais",
     loginErrEmpty:     "T'as oublié de mettre ton téléphone ou ton PIN",
     loginErrWrong:     "Le numéro ou le PIN est pas bon",
@@ -3285,12 +3397,15 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Retiré des favoris",
     favMax:            "Maximum 10 favoris atteint",
     lastTest:          "Dernier test",
-    avgGenLabel:       "Moyenne générale",
+    avgGenLabel:       "Moyenne exercices",
     avgTestLabel:      "Progression mensuelle",
     avgLastLabel:      "Dernier [TEST]",
     testProgLabel:     "Progression [TEST] · %",
-    avgColLabel:       "Moyenne · /20",
+    avgColLabel:       "Moy. exercices",
     noTestsYet:        "Pas encore de tests [TEST] pour cet élève",
+    myScoresTitle:     "Mes résultats exercices",
+    noScoresYet:       "Pas encore d'exercices notés",
+    formSent:          "Envoyé",
     msgTitle:          "Messages de Jun Sensei",
     msgPlaceholder:    "Écris un message pour l'élève...",
     msgSend:           "Envoyer",
@@ -3497,7 +3612,7 @@ async function loadAdminDashboard() {
       }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        '<span class="dash-avg-student-score">'+s.avg20+'/20</span>'+
+        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/20</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
@@ -3581,7 +3696,7 @@ async function loadAdminStats() {
         '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(s.lastPct!==null?s.lastPct+'%':'—')+'</span>'+
         '</div>'+
         '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
-        '<span class="dash-avg-student-score">'+s.avg20+'/20</span>'+
+        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/20</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
@@ -3695,9 +3810,12 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         const isUnlocked = unlocked.has(String(c.id));
         const typeClass  = "type-"+(c.type||"pdf").toLowerCase();
         if (isForm) {
+          const alreadySent = window._assignedContentIds && window._assignedContentIds.has(String(c.id));
           return '<div class="content-manage-item">'+
             '<div class="unlock-status" style="background:rgba(103,58,183,0.5)"></div>'+
-            '<div class="content-manage-info"><div class="content-manage-title">'+c.title+'</div>'+
+            '<div class="content-manage-info"><div class="content-manage-title">'+c.title+
+            (alreadySent?'<span style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
+            '</div>'+
             '<div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
             '<button class="btn-assign-content" id="btn-assign-'+c.id+'"'+
             ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.level||"")+'\'))">+</button>'+
