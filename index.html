@@ -1987,9 +1987,16 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
     const data = await api({ action, adminId: adminUser.id, pin: getStoredPin(), studentId, contentId });
     if (data.success) {
       toast(data.message, "success");
-      const accessData = await api({ action: "getMyContent", studentId });
+      const [accessData, exData2] = await Promise.all([
+        api({ action: "getMyContent", studentId }),
+        api({ action: "getMyExercises", studentId })
+      ]);
       const unlocked = new Set((accessData.content || []).map(c => String(c.id)));
       studentAccessMap[studentId] = unlocked;
+      // Mettre à jour _assignedContentIds pour que le tick ✓ persiste après reload
+      window._assignedContentIds = new Set(
+        (exData2.exercises || []).map(e => String(e.contentId)).filter(Boolean)
+      );
       const stu = allStudents.find(s => String(s.id) === String(studentId)) || {};
       renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
     } else {
@@ -3666,12 +3673,15 @@ async function loadAdminStats() {
       api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
     ]);
     const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
+    // Index des exercices [TEST] — exclus de la moyenne exercices
+    const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
     const activeIdsS=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
     const LEVELS=["N5","N4","N3","N2","N1"],bl={};
     (sr.scores||[]).forEach(sc=>{
       if(!sc.maxScore)return;
       if(!activeIdsS.has(String(sc.studentId)))return; // ignorer inactifs
+      if(testExIds.has(String(sc.exerciseId)))return;  // ignorer [TEST]
       const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
       const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
       bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
