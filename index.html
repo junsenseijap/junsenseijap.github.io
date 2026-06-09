@@ -1805,7 +1805,7 @@ async function loadStudentContent(user) {
     const avgLastLbl = document.getElementById("avg-last-label");
     if(avgWrap) {
       if(td && td.success && td.totalScored) {
-        if(avgBig) avgBig.textContent = (td.globalAvg * 2).toFixed(1);
+        if(avgBig) avgBig.textContent = td.globalAvg.toFixed(1);
         if(avgLbl) avgLbl.textContent = "/ 20";
         const avgCount = document.getElementById("avg-big-count");
         if(avgCount) avgCount.textContent = t("basedOn", td.totalScored);
@@ -3630,7 +3630,9 @@ async function loadAdminDashboard() {
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
-      const la=(se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length*2).toFixed(1);
+      const lvlSum=se.reduce((s,[,d])=>s+d.sum,0);
+      const lvlCnt=se.reduce((s,[,d])=>s+d.cnt,0);
+      const la=(lvlCnt>0?lvlSum/lvlCnt:0).toFixed(1);
       const rid="dash-lvl-"+lvl;
       const colHeader='<div style="display:flex;align-items:center;padding:3px 14px 3px 2.5rem;background:var(--bg-soft);border-bottom:1px solid rgba(232,75,122,0.08)">'+
         '<span style="flex:1"></span>'+
@@ -3638,7 +3640,7 @@ async function loadAdminDashboard() {
         '</div>';
       const rows=se.map(([sid,d])=>{
         const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
-        const avg20=(d.sum/d.cnt*2).toFixed(1);
+        const avg20=(d.sum/d.cnt).toFixed(1);
         return {name:stu.name+" "+(stu.familyName||""),avg20,cnt:d.cnt};
       }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
         '<div class="dash-avg-student-row">'+
@@ -3685,7 +3687,7 @@ async function loadAdminStats() {
       if(testExIds.has(String(sc.exerciseId)))return;  // ignorer [TEST]
       const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
       const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
-      bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
+      bl[l][sid].sum+=(sc.score/sc.maxScore)*20;bl[l][sid].cnt++;
     });
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
@@ -3703,7 +3705,9 @@ async function loadAdminStats() {
 
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
-      const la=(se.reduce((s,[,d])=>s+d.sum/d.cnt,0)/se.length*2).toFixed(1);
+      const lvlSum=se.reduce((s,[,d])=>s+d.sum,0);
+      const lvlCnt=se.reduce((s,[,d])=>s+d.cnt,0);
+      const la=(lvlCnt>0?lvlSum/lvlCnt:0).toFixed(1);
       const rid="stat-lvl-"+lvl;
       const colHeader='<div style="display:flex;align-items:center;padding:3px 14px 3px 2.5rem;background:var(--bg-soft);border-bottom:1px solid rgba(232,75,122,0.08)">'+
         '<span style="flex:1"></span>'+
@@ -3720,7 +3724,7 @@ async function loadAdminStats() {
         const testScores=stuTestScores[sid+"_"+lvl]||[];
         const hasTests=testScores.length>0;
         const lastPct=hasTests?testScores[testScores.length-1]:null;
-        const avg20=(d.sum/d.cnt*2).toFixed(1);
+        const avg20=(d.sum/d.cnt).toFixed(1);
         return {name:stu.name+" "+(stu.familyName||""),avg20,cnt:d.cnt,sid,spId,hasTests,lastPct};
       }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
         '<div class="dash-avg-student-row">'+
