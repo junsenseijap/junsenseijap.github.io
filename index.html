@@ -2764,7 +2764,8 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
       studentId, title,
       formUrl:   personalizedUrl,
       formTab:   sheetTab || "",
-      level:     level || ""
+      level:     level || "",
+      contentId: contentId || ""
     });
     if (data.success) {
       toast("✅ " + title + " " + t("formSent") + " !", "success");
