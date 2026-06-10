@@ -1312,7 +1312,7 @@
           </div>
           <!-- Graphique [TEST] -->
           <div style="flex:1;position:relative;height:65px;min-width:0;overflow:hidden">
-            <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="max-width:100%"></canvas>
+            <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="max-width:100%;cursor:pointer" onclick="openStudentChartSelf()"></canvas>
           </div>
           <!-- Dernier [TEST] -->
           <div style="text-align:center;flex-shrink:0;min-width:60px">
@@ -2592,6 +2592,13 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
     '</div>';
 }
 
+// ── OUVRE LE GRAND CHART POUR L'ÉTUDIANT CONNECTÉ ──
+function openStudentChartSelf() {
+  if (!currentUserGlobal) return;
+  // Récupère le niveau principal de l'étudiant (premier niveau actif ou null)
+  openStudentChart(currentUserGlobal.id, currentUserGlobal.name || "", null);
+}
+
 // ── CATÉGORIES [TEST] ──
 const TEST_CATS = {
   GR: { label: "Grammar",    color: "#E84B7A" },
@@ -2630,24 +2637,29 @@ function drawSparkline(canvasId, scoresByCat) {
   }
 
   // Nouveau format : { GR:[{x,y},...], VO:[...], ... }
-  const allY = Object.values(scoresByCat).flat().map(p=>p.y);
-  if (!allY.length) {
+  const allPtsFlat = Object.values(scoresByCat).flat();
+  if (!allPtsFlat.length) {
     ctx.strokeStyle="rgba(200,200,200,0.3)"; ctx.lineWidth=1; ctx.setLineDash([2,2]);
     ctx.beginPath(); ctx.moveTo(p,h/2); ctx.lineTo(w-p,h/2); ctx.stroke(); ctx.setLineDash([]); return;
   }
-  // Axe fixe 0-100
-  const pyF = v => h - p - (v/100)*(h-2*p);
+  // Axe X = index temporel trié, axe Y = 0-100
+  const allTs = [...new Set(allPtsFlat.map(pt=>pt.x))].sort((a,b)=>a-b);
+  const pyF = v => h - p - (v / 100) * (h - 2*p);
+  const pxF = i => allTs.length > 1 ? p + (i / (allTs.length-1)) * (w - 2*p) : w/2;
   Object.entries(scoresByCat).forEach(([cat, pts]) => {
     if (!pts.length) return;
     const color = TEST_CATS[cat]?.color || "#E84B7A";
-    const allX = Object.values(scoresByCat).flat().map(p=>p.x);
-    const mnX=Math.min(...allX), mxX=Math.max(...allX);
-    const pxF = x => p + ((x-mnX)/(mxX-mnX||1))*(w-2*p);
+    // Mapper chaque point sur l'index dans allTs
+    const indexed = pts.map(pt=>({ i: allTs.indexOf(pt.x), y: pt.y })).sort((a,b)=>a.i-b.i);
+    if (indexed.length === 1) {
+      ctx.beginPath(); ctx.arc(pxF(indexed[0].i), pyF(indexed[0].y), 2, 0, Math.PI*2);
+      ctx.fillStyle=color; ctx.fill(); return;
+    }
     ctx.beginPath();
-    pts.forEach((pt,i)=>i===0?ctx.moveTo(pxF(pt.x),pyF(pt.y)):ctx.lineTo(pxF(pt.x),pyF(pt.y)));
+    indexed.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.i),pyF(pt.y)):ctx.lineTo(pxF(pt.i),pyF(pt.y)));
     ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.stroke();
-    const last=pts[pts.length-1];
-    ctx.beginPath(); ctx.arc(pxF(last.x),pyF(last.y),2.5,0,Math.PI*2);
+    const last=indexed[indexed.length-1];
+    ctx.beginPath(); ctx.arc(pxF(last.i),pyF(last.y),2,0,Math.PI*2);
     ctx.fillStyle=color; ctx.fill();
   });
 }
