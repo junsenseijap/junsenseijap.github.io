@@ -49,6 +49,80 @@
       --shadow-pink:  rgba(232,75,122,0.18);
     }
 
+    /* ══ DARK MODE ══ */
+    body.dark-mode {
+      --pink:         #E84B7A;
+      --pink-mid:     #F07099;
+      --pink-soft:    rgba(232,75,122,0.25);
+      --pink-pale:    rgba(232,75,122,0.12);
+      --pink-glow:    rgba(232,75,122,0.25);
+      --blue:         #7BAFD4;
+      --blue-pale:    rgba(123,175,212,0.15);
+      --blue-soft:    rgba(123,175,212,0.12);
+      --peach:        rgba(251,213,197,0.15);
+      --sage:         #6a9e6c;
+      --gold:         #C89B3C;
+      --gold-lt:      #E0B86A;
+      --bg:           #1a1118;
+      --bg-card:      #231720;
+      --bg-soft:      #2a1d26;
+      --border:       rgba(232,75,122,0.22);
+      --border-blue:  rgba(123,175,212,0.18);
+      --ink:          #f0e8ec;
+      --ink2:         #cdbec5;
+      --gray:         #8a7880;
+      --shadow:       rgba(0,0,0,0.4);
+      --shadow-pink:  rgba(232,75,122,0.2);
+    }
+    body.dark-mode::before {
+      background:
+        radial-gradient(ellipse 60% 40% at 5% 0%, rgba(232,75,122,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 98% 5%, rgba(123,175,212,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 50% at 50% 110%, rgba(232,75,122,0.05) 0%, transparent 60%);
+    }
+    body.dark-mode .petal {
+      background: radial-gradient(ellipse at 40% 35%, rgba(232,75,122,0.5), rgba(232,75,122,0.1));
+    }
+    body, body * { transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease; }
+
+    /* ══ DARK MODE TOGGLE SWITCH ══ */
+    .dark-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid rgba(44,26,34,0.05);
+    }
+    .dark-toggle-left { display: flex; align-items: center; gap: 0.7rem; }
+    .dark-toggle-icon { font-size: 1rem; opacity: 0.7; }
+    .dark-toggle-label { font-size: 0.92rem; color: var(--ink2); }
+    .toggle-switch {
+      position: relative; width: 44px; height: 24px; cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: rgba(44,26,34,0.15);
+      border-radius: 99px;
+      border: 1.5px solid rgba(232,75,122,0.2);
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute; left: 2px; top: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--gray);
+      transition: transform 0.25s, background 0.25s;
+    }
+    .toggle-switch input:checked + .toggle-track {
+      background: rgba(232,75,122,0.2);
+      border-color: var(--pink);
+    }
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(20px);
+      background: var(--pink);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -1343,6 +1417,21 @@
     </div>
   </div>
 
+  <!-- Dark mode card -->
+  <div class="profile-card">
+    <div class="profile-card-header" id="ph-display">🎨 Affichage</div>
+    <div class="dark-toggle-row">
+      <div class="dark-toggle-left">
+        <span class="dark-toggle-icon" id="dark-toggle-icon">🌙</span>
+        <span class="dark-toggle-label" id="dark-toggle-label">Mode sombre</span>
+      </div>
+      <label class="toggle-switch" aria-label="Mode sombre">
+        <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)"/>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
   <!-- PIN change card -->
   <div class="profile-card">
     <div class="profile-card-header" id="ph-pin">🔐 Changer le PIN</div>
@@ -1491,6 +1580,38 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoq
 const ONESIGNAL_APP_ID = "f8d7091e-3a44-4d3a-a68c-665c6963a808";
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
+const DARK_KEY = "jun_dark_mode";
+
+// ── DARK MODE ──
+function initDarkMode() {
+  const saved = localStorage.getItem(DARK_KEY);
+  const isDark = saved === "1";
+  document.body.classList.toggle("dark-mode", isDark);
+  const toggle = document.getElementById("dark-mode-toggle");
+  if (toggle) toggle.checked = isDark;
+}
+
+function toggleDarkMode(enabled) {
+  document.body.classList.toggle("dark-mode", enabled);
+  localStorage.setItem(DARK_KEY, enabled ? "1" : "0");
+  applyDarkModeLabel();
+}
+
+function applyDarkModeLabel() {
+  const isDark = document.body.classList.contains("dark-mode");
+  const icon  = document.getElementById("dark-toggle-icon");
+  const label = document.getElementById("dark-toggle-label");
+  const header = document.getElementById("ph-display");
+  if (icon)  icon.textContent  = isDark ? "☀️" : "🌙";
+  if (label) label.textContent = t("darkModeLabel");
+  if (header) header.textContent = "🎨 " + t("displayCard");
+}
+
+// Init au chargement
+document.addEventListener("DOMContentLoaded", () => {
+  initDarkMode();
+  applyDarkModeLabel();
+});
 
 // ── BOUTON NOTIF HEADER ──
 async function updateNotifButton(notifEnabled) {
@@ -3175,6 +3296,8 @@ const TRANSLATIONS = {
     msgNew:            "Mới",
     cancel:            "Hủy",
     msgEmpty2:         "Chưa có tin nhắn nào",
+    darkModeLabel:     "Chế độ tối",
+    displayCard:       "Hiển thị",
   },
 
   en: {
@@ -3310,6 +3433,8 @@ const TRANSLATIONS = {
     msgNew:            "New",
     cancel:            "Cancel",
     msgEmpty2:         "No messages yet",
+    darkModeLabel:     "Dark mode",
+    displayCard:       "Display",
   },
 
   fr: {
@@ -3445,6 +3570,8 @@ const TRANSLATIONS = {
     msgNew:            "Nouveau",
     cancel:            "Annuler",
     msgEmpty2:         "Pas encore de messages",
+    darkModeLabel:     "Mode sombre",
+    displayCard:       "Affichage",
   }
 };
 
@@ -3497,6 +3624,7 @@ function setLang(lang) {
 }
 
 function applyLang() {
+  applyDarkModeLabel();
   // Login page
   const emailLoginLabel = document.getElementById("login-email-label");
   if (emailLoginLabel) emailLoginLabel.textContent = t("loginLabel");
