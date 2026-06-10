@@ -2607,7 +2607,7 @@ const TEST_CATS = {
   RE: { label: "Reading",    color: "#3DAA6E" }
 };
 function getTestCat(title) {
-  const m = title && title.match(/\[([A-Z]{2})\]/);
+  const m = title && title.match(/\[(GR|VO|LI|RE)\]/);
   return (m && TEST_CATS[m[1]]) ? m[1] : null;
 }
 
