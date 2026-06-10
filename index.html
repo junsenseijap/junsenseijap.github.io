@@ -2611,39 +2611,41 @@ function getTestCat(title) {
   return (m && TEST_CATS[m[1]]) ? m[1] : null;
 }
 
-// ── SPARKLINE — tableau [{pct, cat}] ──
+// ── SPARKLINE — tableau [{pct, cat, ts}] → 4 lignes sur axe X commun ──
 function drawSparkline(canvasId, scores) {
   const c = document.getElementById(canvasId);
   if (!c) return;
   const ctx = c.getContext("2d");
-  const w = c.width, h = c.height, p = 3;
+  const w = c.width, h = c.height, p = 2;
   ctx.clearRect(0, 0, w, h);
   if (!scores || scores.length === 0) {
     ctx.strokeStyle="rgba(200,200,200,0.3)"; ctx.lineWidth=1; ctx.setLineDash([2,2]);
     ctx.beginPath(); ctx.moveTo(p,h/2); ctx.lineTo(w-p,h/2); ctx.stroke(); ctx.setLineDash([]); return;
   }
-  const vals = scores.map(s=>typeof s==="object"?s.pct:s);
-  if (vals.length === 1) {
-    const color = (scores[0].cat && TEST_CATS[scores[0].cat]) ? TEST_CATS[scores[0].cat].color : "#E84B7A";
-    ctx.beginPath(); ctx.arc(w/2,h/2,3,0,Math.PI*2);
-    ctx.fillStyle=color; ctx.fill(); return;
-  }
-  const mn=Math.min(...vals)-0.5, mx=Math.max(...vals)+0.5;
-  const px=i=>p+(i/(vals.length-1))*(w-2*p);
-  const py=v=>h-p-((v-mn)/(mx-mn||1))*(h-2*p);
-  // Tracer en segments colorés par catégorie
-  for (let i=0; i<vals.length-1; i++) {
-    const cat = scores[i].cat;
-    const color = (cat && TEST_CATS[cat]) ? TEST_CATS[cat].color : "#E84B7A";
-    ctx.beginPath(); ctx.moveTo(px(i),py(vals[i])); ctx.lineTo(px(i+1),py(vals[i+1]));
-    ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.stroke();
-  }
-  // Points colorés
-  vals.forEach((v,i)=>{
-    const cat = scores[i].cat;
-    const color = (cat && TEST_CATS[cat]) ? TEST_CATS[cat].color : "#E84B7A";
-    ctx.beginPath(); ctx.arc(px(i),py(v),i===vals.length-1?2.5:1.5,0,Math.PI*2);
-    ctx.fillStyle=color; ctx.fill();
+  // Axe X : timestamps uniques triés
+  const allTs = [...new Set(scores.map(s=>s.ts))].sort((a,b)=>a-b);
+  const pxF = ts => allTs.length > 1 ? p + (allTs.indexOf(ts)/(allTs.length-1))*(w-2*p) : w/2;
+  const pyF = v  => h - p - (v/100)*(h-2*p);
+  // Grouper par catégorie
+  const byCat = {};
+  scores.forEach(s => {
+    const cat = (s.cat && TEST_CATS[s.cat]) ? s.cat : "__";
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(s);
+  });
+  // Tracer une ligne indépendante par catégorie
+  Object.entries(byCat).forEach(([cat, pts]) => {
+    const color = TEST_CATS[cat] ? TEST_CATS[cat].color : "#E84B7A";
+    if (pts.length === 1) {
+      ctx.beginPath(); ctx.arc(pxF(pts[0].ts), pyF(pts[0].pct), 2, 0, Math.PI*2);
+      ctx.fillStyle = color; ctx.fill(); return;
+    }
+    ctx.beginPath();
+    pts.forEach((pt,j) => j===0 ? ctx.moveTo(pxF(pt.ts),pyF(pt.pct)) : ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+    const last = pts[pts.length-1];
+    ctx.beginPath(); ctx.arc(pxF(last.ts), pyF(last.pct), 2, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
   });
 }
 
@@ -3923,9 +3925,9 @@ async function loadAdminStats() {
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
 
-    // Sparklines [TEST] — indexé par sid_lvl, tableau de {pct, cat} trié par date
+    // Sparklines [TEST] — indexé par sid_lvl, tableau de {pct, cat, ts} trié par date
     const testExMap={};(er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{
-      testExMap[String(e.id)]={level:e.level||"?", cat:getTestCat(e.title)};
+      testExMap[String(e.id)]={level:e.level||"?", cat:getTestCat(e.title), date:e.assignedDate||""};
     });
     const stuTestScores={};
     (sr.scores||[]).forEach(sc=>{
@@ -3933,8 +3935,13 @@ async function loadAdminStats() {
       if(!ex)return;
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]=[];
-      if(sc.maxScore>0)stuTestScores[key].push({pct:Math.round((sc.score/sc.maxScore)*100), cat:ex.cat||null});
+      if(sc.maxScore>0){
+        const ts = ex.date ? new Date(ex.date).getTime() : 0;
+        stuTestScores[key].push({pct:Math.round((sc.score/sc.maxScore)*100), cat:ex.cat||null, ts});
+      }
     });
+    // Trier par date
+    Object.values(stuTestScores).forEach(arr=>arr.sort((a,b)=>a.ts-b.ts));
 
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
