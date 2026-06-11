@@ -4021,13 +4021,18 @@ async function loadAdminStats() {
 
     // Dessiner les sparklines après que le DOM soit peint
     setTimeout(()=>{
+      console.log("=== SPARKLINE DEBUG ===");
+      console.log("bl keys:", JSON.stringify(Object.keys(bl)));
+      console.log("stuTestScores keys:", JSON.stringify(Object.keys(stuTestScores)));
       Object.entries(bl).forEach(([lvl,stuMap])=>{
         Object.keys(stuMap).forEach(sid=>{
-          const data=stuTestScores[sid+"_"+lvl]||{GR:[],VO:[],LI:[],RE:[]};
-          if(!Object.values(data).some(a=>a.length>0))return;
+          const key=sid+"_"+lvl;
+          const data=stuTestScores[key]||{GR:[],VO:[],LI:[],RE:[]};
+          const hasData=Object.values(data).some(a=>a.length>0);
           const wrapId="spark-wrap-sp2-"+lvl+"-"+sid;
           const wrap=document.getElementById(wrapId);
-          if(wrap) drawSparkline(wrapId, data);
+          console.log("sid="+sid+" lvl="+lvl+" key="+key+" hasData="+hasData+" wrap="+(wrap?"FOUND":"NULL"));
+          if(wrap && hasData) drawSparkline(wrapId, data);
         });
       });
     },500);
