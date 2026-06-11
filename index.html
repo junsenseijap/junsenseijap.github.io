@@ -3963,8 +3963,9 @@ async function loadAdminStats() {
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       if(sc.maxScore>0){
-        const ts = ex.date ? new Date(ex.date+"T12:00:00Z").getTime() : 0;
-        if(ts) stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
+        const raw = ex.date ? ex.date.replace(/-/g,"/") : "";
+        const ts  = raw ? new Date(raw).getTime() : Date.now();
+        stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
       }
     });
     Object.values(stuTestScores).forEach(byCat=>
