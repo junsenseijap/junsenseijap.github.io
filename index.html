@@ -1947,6 +1947,16 @@ async function loadStudentContent(user) {
             byCat[cat].push({label:d?d.toLocaleDateString(locale,{month:"short"}):"—",x:d?d.getTime():0,y:Math.round((sc.score/sc.maxScore)*100)});
           });
           Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.x-b.x));
+          // Agréger par mois
+          Object.keys(byCat).forEach(k=>{
+            const byMonth={};
+            byCat[k].forEach(pt=>{
+              const key=new Date(pt.x).toISOString().slice(0,7);
+              if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,x:pt.x,label:pt.label};}
+              byMonth[key].sum+=pt.y; byMonth[key].cnt++;
+            });
+            byCat[k]=Object.values(byMonth).map(v=>({x:v.x,y:Math.round(v.sum/v.cnt),label:v.label})).sort((a,b)=>a.x-b.x);
+          });
           const allPts=Object.values(byCat).flat();
           if(allPts.length > 0) {
             const lastPt=allPts.reduce((a,b)=>b.x>a.x?b:a,allPts[0]);
@@ -2595,8 +2605,11 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
 // ── OUVRE LE GRAND CHART POUR L'ÉTUDIANT CONNECTÉ ──
 function openStudentChartSelf() {
   if (!currentUserGlobal) return;
-  // Récupère le niveau principal de l'étudiant (premier niveau actif ou null)
-  openStudentChart(currentUserGlobal.id, currentUserGlobal.name || "", null);
+  const fullName = (currentUserGlobal.name||"") + (currentUserGlobal.familyName?" "+currentUserGlobal.familyName:"");
+  // Récupère le premier niveau actif depuis les barres de progression
+  const levelBadge = document.querySelector(".student-level-badge");
+  const level = levelBadge ? levelBadge.textContent.trim() : "";
+  openStudentChart(currentUserGlobal.id, fullName, level || null);
 }
 
 // ── CATÉGORIES [TEST] ──
@@ -2611,37 +2624,51 @@ function getTestCat(title) {
   return (m && TEST_CATS[m[1]]) ? m[1] : null;
 }
 
-// ── SPARKLINE ADMIN — Chart.js, même logique que le graph étudiant ──
-const _sparkCharts = {}; // garder les instances pour destroy
-function drawSparkline(canvasId, byCat) {
-  const c = document.getElementById(canvasId);
-  if (!c || !window.Chart) return;
-  // Détruire l'instance précédente si elle existe
-  if (_sparkCharts[canvasId]) { try { _sparkCharts[canvasId].destroy(); } catch(e){} }
+// ── SPARKLINE ADMIN — Chart.js créé dynamiquement après rendu DOM ──
+const _sparkCharts = {};
+function drawSparkline(wrapId, byCat) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap || !window.Chart) return;
+  // Détruire l'ancien chart si existant
+  if (_sparkCharts[wrapId]) { try { _sparkCharts[wrapId].destroy(); } catch(e){} delete _sparkCharts[wrapId]; }
+  wrap.innerHTML = "";
   const allPts = Object.values(byCat).flat();
   if (!allPts.length) return;
-  const allTs = [...new Set(allPts.map(p=>p.ts))].sort((a,b)=>a-b);
+
+  // Agréger par mois (YYYY-MM) pour chaque catégorie
+  const aggByCat = {};
+  Object.entries(byCat).forEach(([cat, pts]) => {
+    const byMonth = {};
+    pts.forEach(pt => {
+      const key = new Date(pt.ts).toISOString().slice(0,7); // "2026-01"
+      if (!byMonth[key]) byMonth[key] = { sum:0, cnt:0, ts: pt.ts };
+      byMonth[key].sum += pt.pct; byMonth[key].cnt++;
+    });
+    aggByCat[cat] = Object.entries(byMonth)
+      .sort(([a],[b])=>a.localeCompare(b))
+      .map(([,v])=>({ ts: v.ts, pct: Math.round(v.sum/v.cnt) }));
+  });
+
+  const allTs = [...new Set(Object.values(aggByCat).flat().map(p=>p.ts))].sort((a,b)=>a-b);
   const labels = allTs.map(ts=>new Date(ts).toLocaleDateString("fr-FR",{month:"short"}));
   const datasets = Object.entries(TEST_CATS).map(([k,v])=>({
-    data: allTs.map(ts=>{ const pt=(byCat[k]||[]).find(p=>p.ts===ts); return pt?pt.pct:null; }),
-    borderColor: v.color,
-    pointBackgroundColor: v.color,
-    borderWidth: 1.5,
-    tension: 0.35,
-    pointRadius: 2,
-    spanGaps: true
+    data: allTs.map(ts=>{ const pt=(aggByCat[k]||[]).find(p=>p.ts===ts); return pt?pt.pct:null; }),
+    borderColor: v.color, pointBackgroundColor: v.color,
+    borderWidth: 1.5, tension: 0.35, pointRadius: 2, spanGaps: true
   }));
-  _sparkCharts[canvasId] = new Chart(c, {
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 70; canvas.height = 24;
+  canvas.style.cssText = "cursor:pointer;display:block";
+  wrap.appendChild(canvas);
+
+  _sparkCharts[wrapId] = new Chart(canvas, {
     type: "line",
     data: { labels, datasets },
     options: {
-      responsive: false,
-      animation: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      scales: {
-        y: { min:0, max:100, display:false },
-        x: { display:false }
-      }
+      responsive: false, animation: false,
+      plugins: { legend:{display:false}, tooltip:{enabled:false} },
+      scales: { y:{min:0,max:100,display:false}, x:{display:false} }
     }
   });
 }
@@ -2694,8 +2721,17 @@ async function openStudentChart(studentId, studentName, level) {
         byCat[cat].push({ label, x: ts, y: Math.round((sc.score/sc.maxScore)*100) });
       });
 
-    // Trier par date
-    Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.x-b.x));
+    // Trier par date + agréger par mois
+    Object.keys(byCat).forEach(k=>{
+      byCat[k].sort((a,b)=>a.x-b.x);
+      const byMonth={};
+      byCat[k].forEach(pt=>{
+        const key=new Date(pt.x).toISOString().slice(0,7);
+        if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,x:pt.x,label:pt.label};}
+        byMonth[key].sum+=pt.y; byMonth[key].cnt++;
+      });
+      byCat[k]=Object.values(byMonth).map(v=>({x:v.x,y:Math.round(v.sum/v.cnt),label:v.label})).sort((a,b)=>a.x-b.x);
+    });
 
     document.getElementById("scm-loading").style.display="none";
     const hasData = Object.values(byCat).some(a=>a.length>0);
@@ -3970,7 +4006,7 @@ async function loadAdminStats() {
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
         '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
-        (s.hasTests?'<canvas id="'+s.spId+'" width="70" height="24" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:70px"></span>')+
+        (s.hasTests?'<div id="spark-wrap-'+s.spId+'" style="width:70px;height:24px;flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></div>':'<span style="width:70px;display:inline-block"></span>')+
         '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(s.lastPct!==null?s.lastPct+'%':'—')+'</span>'+
         '</div>'+
         '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
@@ -3994,7 +4030,8 @@ async function loadAdminStats() {
       Object.entries(bl).forEach(([lvl,stuMap])=>{
         Object.keys(stuMap).forEach(sid=>{
           const data=stuTestScores[sid+"_"+lvl]||{GR:[],VO:[],LI:[],RE:[]};
-          if(Object.values(data).some(a=>a.length>0)) drawSparkline("sp2-"+lvl+"-"+sid, data);
+          if(Object.values(data).some(a=>a.length>0))
+            drawSparkline("spark-wrap-sp2-"+lvl+"-"+sid, data);
         });
       });
     },200);
