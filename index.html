@@ -3206,7 +3206,10 @@ async function loadAdminExercises() {
         const badge=sc&&sc.maxScore>0?
           '<span class="ex-score-badge '+(sc.score/sc.maxScore>=0.7?"good":"medium")+'">🎯 '+sc.score+'/'+sc.maxScore+'</span>':
           ex.status==="done"?'<span class="ex-score-badge good">✅</span>':'<span class="ex-score-badge pending">⏳</span>';
-        return '<div class="ex-detail-item"><span class="ex-detail-title">'+gt(ex)+'</span>'+badge+'</div>';
+        const title=ex.formUrl
+          ?'<span class="ex-detail-title" onclick="window.open(\''+ex.formUrl+'\',\'_blank\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+gt(ex)+'</span>'
+          :'<span class="ex-detail-title">'+gt(ex)+'</span>';
+        return '<div class="ex-detail-item">'+title+badge+'</div>';
       };
       const pendingId="pend-"+sid;
       const doneId="done-"+sid;
@@ -4135,7 +4138,8 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
           const btnTitle = alreadySent ? t("formSent") : '';
           return '<div class="content-manage-item">'+
             '<div class="unlock-status" style="background:rgba(103,58,183,0.5)"></div>'+
-            '<div class="content-manage-info"><div class="content-manage-title">'+c.title+
+            '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
+            '<div class="content-manage-title">'+(c.driveLink?'<span style="text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+c.title+'</span>':c.title)+
             (alreadySent?'<span class="sent-badge" style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
             '</div>'+
             '<div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
@@ -4145,7 +4149,8 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         }
         return '<div class="content-manage-item">'+
           '<div class="unlock-status '+(isUnlocked?"on":"off")+'"></div>'+
-          '<div class="content-manage-info"><div class="content-manage-title">'+c.title+'</div>'+
+          '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
+          '<div class="content-manage-title">'+(c.driveLink?'<span style="text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+c.title+'</span>':c.title)+'</div>'+
           '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type||"").toUpperCase()+'</span></div></div>'+
           '<button class="btn-unlock '+(isUnlocked?"unlocked":"locked")+'" id="btn-c-'+c.id+'"'+
           ' onclick="toggleContent('+studentId+','+c.id+','+isUnlocked+')">'+
