@@ -1311,8 +1311,8 @@
             <div id="avg-big-count" style="font-size:0.6rem;color:var(--gray);margin-top:1px"></div>
           </div>
           <!-- Graphique [TEST] -->
-          <div style="flex:1;position:relative;height:65px;min-width:0;overflow:hidden">
-            <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="max-width:100%;cursor:pointer" onclick="openStudentChartSelf()"></canvas>
+          <div style="flex:1;position:relative;height:65px;min-width:0;max-width:220px;overflow:hidden">
+            <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="width:100%;height:100%;cursor:pointer" onclick="openStudentChartSelf()"></canvas>
           </div>
           <!-- Dernier [TEST] -->
           <div style="text-align:center;flex-shrink:0;min-width:60px">
@@ -1577,7 +1577,6 @@
 const FORM_ENTRY_ID = "entry.8401610"; // Entry ID global pour tous les Forms
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoqxEZiuBRDMsUCFLh-n4NpugzYhKPrcoHuvSbolzVvHZFsJw/exec";
-const ONESIGNAL_APP_ID = "f8d7091e-3a44-4d3a-a68c-665c6963a808";
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 const DARK_KEY = "jun_dark_mode";
