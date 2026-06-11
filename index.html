@@ -1292,30 +1292,30 @@
         <div style="border-top:1px solid rgba(232,75,122,0.1);margin:0.8rem 0"></div>
         <!-- Labels au-dessus centrés -->
         <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px;padding:0 2px">
-          <div style="text-align:center;flex-shrink:0;min-width:80px">
+          <div style="flex:1;text-align:center">
             <span style="font-size:0.65rem;color:var(--gray)" id="avg-gen-label">Moyenne exercices</span>
           </div>
-          <div style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px">
+          <div style="flex:2;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px">
             <span style="font-size:0.6rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 5px;border-radius:4px;font-weight:600">[TEST]</span>
             <span style="font-size:0.65rem;color:var(--gray)" id="avg-test-label">Progression mensuelle</span>
           </div>
-          <div style="text-align:center;flex-shrink:0;min-width:60px">
+          <div style="flex:1;text-align:center">
             <span style="font-size:0.65rem;color:var(--gray)" id="avg-last-label-top">Dernier [TEST]</span>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:0.8rem">
+        <div style="display:flex;align-items:center;gap:0.5rem">
           <!-- Score /20 cliquable -->
-          <div style="text-align:center;flex-shrink:0;min-width:80px" onclick="openMyScoresModal()" style="cursor:pointer">
-            <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" onclick="openMyScoresModal()">—</div>
+          <div style="flex:1;text-align:center" onclick="openMyScoresModal()">
+            <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">—</div>
             <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 20</div>
             <div id="avg-big-count" style="font-size:0.6rem;color:var(--gray);margin-top:1px"></div>
           </div>
           <!-- Graphique [TEST] -->
-          <div style="flex:1;position:relative;height:65px;min-width:0;max-width:220px;overflow:hidden">
+          <div style="flex:2;position:relative;height:65px;min-width:0;overflow:hidden">
             <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" style="width:100%;height:100%;cursor:pointer" onclick="openStudentChartSelf()"></canvas>
           </div>
           <!-- Dernier [TEST] -->
-          <div style="text-align:center;flex-shrink:0;min-width:60px">
+          <div style="flex:1;text-align:center">
             <div id="avg-last-number" style="font-size:1.2rem;color:var(--pink);font-weight:500;line-height:1">—</div>
             <div id="avg-last-label" style="font-size:0.62rem;color:var(--gray);margin-top:2px">%</div>
           </div>
@@ -2605,10 +2605,9 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
 function openStudentChartSelf() {
   if (!currentUserGlobal) return;
   const fullName = (currentUserGlobal.name||"") + (currentUserGlobal.familyName?" "+currentUserGlobal.familyName:"");
-  // Lire le premier niveau visible dans la page étudiant
-  const badge = document.querySelector("#student-progress-levels .level-badge, #student-content-panel .level-badge");
+  const badge = document.querySelector("#student-progress-levels .level-badge, #student-content-panel .level-badge, .level-accordion .level-badge");
   const level = badge ? badge.textContent.trim() : "";
-  openStudentChart(currentUserGlobal.id, fullName, level || null);
+  openStudentChart(currentUserGlobal.id, fullName, level);
 }
 
 // ── CATÉGORIES [TEST] ──
@@ -2680,7 +2679,7 @@ async function openStudentChart(studentId, studentName, level) {
 
   overlay.innerHTML =
     '<div class="levels-modal-sheet" style="padding-bottom:2rem">'+
-    '<div class="levels-modal-title">📈 '+studentName+' — '+level+'</div>'+
+    '<div class="levels-modal-title">📈 '+studentName+(level?' — '+level:'')+'</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:0.6rem 1rem;margin-bottom:0.8rem">'+legendHtml+'</div>'+
     '<div id="scm-loading" style="text-align:center;padding:1rem;color:var(--gray)">Chargement...</div>'+
     '<div style="position:relative;height:220px;display:none" id="scm-chart-wrap"><canvas id="scm-chart" role="img" aria-label="Progression '+studentName+'"></canvas></div>'+
