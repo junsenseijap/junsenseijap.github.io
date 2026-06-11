@@ -3206,10 +3206,15 @@ async function loadAdminExercises() {
         const badge=sc&&sc.maxScore>0?
           '<span class="ex-score-badge '+(sc.score/sc.maxScore>=0.7?"good":"medium")+'">🎯 '+sc.score+'/'+sc.maxScore+'</span>':
           ex.status==="done"?'<span class="ex-score-badge good">✅</span>':'<span class="ex-score-badge pending">⏳</span>';
+        const tp=(ex.type||"form").toLowerCase();
+        const typeColor=tp==="pdf"?"rgba(232,75,122,0.15)":tp==="video"?"rgba(52,120,200,0.15)":tp==="audio"?"rgba(80,180,120,0.15)":"rgba(103,58,183,0.15)";
+        const typeTextColor=tp==="pdf"?"#E84B7A":tp==="video"?"#3A8FC7":tp==="audio"?"#3DAA6E":"#7B5EA7";
+        const typeLabel=tp==="pdf"?"PDF":tp==="video"?"VIDEO":tp==="audio"?"AUDIO":"FORM";
+        const typeBadge='<span style="font-size:0.48rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;background:'+typeColor+';color:'+typeTextColor+';flex-shrink:0;letter-spacing:0.04em">'+typeLabel+'</span>';
         const title=ex.formUrl
           ?'<span class="ex-detail-title" onclick="window.open(\''+ex.formUrl+'\',\'_blank\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+gt(ex)+'</span>'
           :'<span class="ex-detail-title">'+gt(ex)+'</span>';
-        return '<div class="ex-detail-item">'+title+badge+'</div>';
+        return '<div class="ex-detail-item">'+title+typeBadge+badge+'</div>';
       };
       const pendingId="pend-"+sid;
       const doneId="done-"+sid;
