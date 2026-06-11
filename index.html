@@ -2622,29 +2622,41 @@ function drawSparkline(canvasId, scores) {
     ctx.strokeStyle="rgba(200,200,200,0.3)"; ctx.lineWidth=1; ctx.setLineDash([2,2]);
     ctx.beginPath(); ctx.moveTo(p,h/2); ctx.lineTo(w-p,h/2); ctx.stroke(); ctx.setLineDash([]); return;
   }
-  // Axe X : timestamps uniques triés
-  const allTs = [...new Set(scores.map(s=>s.ts))].sort((a,b)=>a-b);
-  const pxF = ts => allTs.length > 1 ? p + (allTs.indexOf(ts)/(allTs.length-1))*(w-2*p) : w/2;
-  const pyF = v  => h - p - (v/100)*(h-2*p);
+
   // Grouper par catégorie
   const byCat = {};
-  scores.forEach(s => {
+  scores.forEach((s,i) => {
     const cat = (s.cat && TEST_CATS[s.cat]) ? s.cat : "__";
     if (!byCat[cat]) byCat[cat] = [];
-    byCat[cat].push(s);
+    byCat[cat].push({...s, idx: i});
   });
+
+  // Axe X : timestamps uniques triés — si tous identiques ou 0, utiliser l'index
+  const allTs = [...new Set(scores.map(s=>s.ts||0))].sort((a,b)=>a-b);
+  const useIndex = allTs.length <= 1; // fallback sur index si dates identiques
+  const totalPts = scores.length;
+  const pxF = (ts, idx) => {
+    if (useIndex) return totalPts > 1 ? p + (idx/(totalPts-1))*(w-2*p) : w/2;
+    const pos = allTs.indexOf(ts);
+    return allTs.length > 1 ? p + (pos/(allTs.length-1))*(w-2*p) : w/2;
+  };
+  const pyF = v => h - p - (v/100)*(h-2*p);
+
   // Tracer une ligne indépendante par catégorie
   Object.entries(byCat).forEach(([cat, pts]) => {
     const color = TEST_CATS[cat] ? TEST_CATS[cat].color : "#E84B7A";
     if (pts.length === 1) {
-      ctx.beginPath(); ctx.arc(pxF(pts[0].ts), pyF(pts[0].pct), 2, 0, Math.PI*2);
+      ctx.beginPath(); ctx.arc(pxF(pts[0].ts||0, pts[0].idx), pyF(pts[0].pct), 2, 0, Math.PI*2);
       ctx.fillStyle = color; ctx.fill(); return;
     }
     ctx.beginPath();
-    pts.forEach((pt,j) => j===0 ? ctx.moveTo(pxF(pt.ts),pyF(pt.pct)) : ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
+    pts.forEach((pt,j) => {
+      const x = pxF(pt.ts||0, pt.idx), y = pyF(pt.pct);
+      j===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
     const last = pts[pts.length-1];
-    ctx.beginPath(); ctx.arc(pxF(last.ts), pyF(last.pct), 2, 0, Math.PI*2);
+    ctx.beginPath(); ctx.arc(pxF(last.ts||0, last.idx), pyF(last.pct), 2, 0, Math.PI*2);
     ctx.fillStyle = color; ctx.fill();
   });
 }
@@ -3970,7 +3982,7 @@ async function loadAdminStats() {
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
         '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
-        (s.hasTests?'<canvas id="'+s.spId+'" width="55" height="20" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:55px"></span>')+
+        (s.hasTests?'<canvas id="'+s.spId+'" width="70" height="24" style="flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></canvas>':'<span style="width:70px"></span>')+
         '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(s.lastPct!==null?s.lastPct+'%':'—')+'</span>'+
         '</div>'+
         '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
@@ -3997,7 +4009,7 @@ async function loadAdminStats() {
           if(scores.length>0) drawSparkline("sp2-"+lvl+"-"+sid, scores);
         });
       });
-    },50);
+    },200);
   }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
