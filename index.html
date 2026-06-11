@@ -1845,9 +1845,9 @@ function doLogout() {
 async function loadStudentContent(user) {
   try{
     const [cd,sd,td]=await Promise.all([
-      api({action:"getMyContent",    studentId:user.id}),
-      api({action:"getMyScores",     studentId:user.id}),
-      api({action:"getStudentStats", studentId:user.id}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
+      api({action:"getMyContent", studentId:user.id, pin:getStoredPin()}),
+      api({action:"getMyScores", studentId:user.id, pin:getStoredPin()}),
+      api({action:"getStudentStats", studentId:user.id, pin:getStoredPin()}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
     ]);
     const content=cd.content||[];
     // Fetch total count (works after Code.gs redeployment)
@@ -1932,8 +1932,8 @@ async function loadStudentContent(user) {
         avgWrap.style.display = "block";
         // Récupère les scores des tests [TEST] — 4 catégories
         try {
-          const scData = await api({ action:"getMyScores", studentId: user.id });
-          const exData = await api({ action:"getMyExercises", studentId: user.id });
+          const scData = await api({ action:"getMyScores", studentId:user.id, pin:getStoredPin() });
+          const exData = await api({ action:"getMyExercises", studentId:user.id, pin:getStoredPin() });
           const scMap = {};
           (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)] = s; });
           const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
@@ -2075,9 +2075,9 @@ async function selectStudent(id, name, familyName) {
   try {
     const pin = getStoredPin();
     const [studentContent, allContentData, exData] = await Promise.all([
-      api({ action: "getMyContent", studentId: id }),
+      api({ action:"getMyContent", studentId:id, adminId:currentUserGlobal.id, pin:getStoredPin() }),
       api({ action: "getAllContent", adminId: adminUser.id, pin: pin }),
-      api({ action: "getMyExercises", studentId: id })
+      api({ action:"getMyExercises", studentId:id, adminId:currentUserGlobal.id, pin:getStoredPin() })
     ]);
     if (allContentData && allContentData.success) {
       allContent = (allContentData.content || []).filter(function(c){
@@ -2136,8 +2136,8 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
     if (data.success) {
       toast(data.message, "success");
       const [accessData, exData2] = await Promise.all([
-        api({ action: "getMyContent", studentId }),
-        api({ action: "getMyExercises", studentId })
+        api({ action:"getMyContent", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() }),
+        api({ action:"getMyExercises", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() })
       ]);
       const unlocked = new Set((accessData.content || []).map(c => String(c.id)));
       studentAccessMap[studentId] = unlocked;
@@ -2387,7 +2387,7 @@ async function openMessageModal(studentId, studentName) {
 
   // Charger l'historique
   try {
-    const data = await api({ action:"getMessages", studentId });
+    const data = await api({ action:"getMessages", studentId, adminId:currentUserGlobal?.id, pin:getStoredPin() });
     const histDiv = document.getElementById("msg-history");
     if (!histDiv) return;
     if (!data.success || !data.messages || !data.messages.length) {
@@ -2431,7 +2431,7 @@ async function sendMessage(studentId, studentName) {
       if (ta) ta.value = "";
       // Recharger l'historique dans le modal
       try {
-        const refreshed = await api({ action:"getMessages", studentId });
+        const refreshed = await api({ action:"getMessages", studentId, adminId:currentUserGlobal?.id, pin:getStoredPin() });
         const histDiv = document.getElementById("msg-history");
         if (histDiv && refreshed.success && refreshed.messages) {
           histDiv.innerHTML = refreshed.messages.map(m => {
@@ -2464,14 +2464,14 @@ async function loadStudentMessages(userId) {
     mailboxBtn.onclick = openMessagesModal;
   }
   try {
-    const data = await api({ action: "getMessages", studentId: userId });
+    const data = await api({ action:"getMessages", studentId:userId, pin:getStoredPin() });
     if (!data.success || !data.messages) { updateMailboxBadge(0); return; }
     const unread = data.messages.filter(m => m.read !== "YES");
     updateMailboxBadge(unread.length);
     window._studentMessages = data.messages;
     if (unread.length) {
       setTimeout(async () => {
-        await api({ action: "markMessagesRead", studentId: userId });
+        await api({ action:"markMessagesRead", studentId:userId, pin:getStoredPin() });
         updateMailboxBadge(0);
       }, 3000);
     }
@@ -2523,8 +2523,8 @@ async function openMyScoresModal() {
   document.body.appendChild(overlay);
   try {
     const [scRes, exRes] = await Promise.all([
-      api({action:"getMyScores",    studentId: String(currentUserGlobal.id)}),
-      api({action:"getMyExercises", studentId: String(currentUserGlobal.id)})
+      api({action:"getMyScores", studentId:String(currentUserGlobal.id), pin:getStoredPin()}),
+      api({action:"getMyExercises", studentId:String(currentUserGlobal.id), pin:getStoredPin()})
     ]);
     console.log("scores:", scRes, "exercises:", exRes);
     renderScoresList("scores-modal-body", scRes, exRes, null);
@@ -2550,8 +2550,8 @@ async function openStudentScoresModal(studentId, studentName, level) {
   document.body.appendChild(overlay);
   try {
     const [scData,exData] = await Promise.all([
-      api({action:"getMyScores",studentId}),
-      api({action:"getMyExercises",studentId})
+      api({action:"getMyScores", studentId, adminId:currentUserGlobal.id, pin:getStoredPin()}),
+      api({action:"getMyExercises", studentId, adminId:currentUserGlobal.id, pin:getStoredPin()})
     ]);
     renderScoresList("scores-admin-body", scData, exData, level);
   } catch(e) {
@@ -2691,8 +2691,8 @@ async function openStudentChart(studentId, studentName, level) {
 
   try {
     const [scData, exData] = await Promise.all([
-      api({ action:"getMyScores",    studentId }),
-      api({ action:"getMyExercises", studentId })
+      api({ action:"getMyScores", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() }),
+      api({ action:"getMyExercises", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() })
     ]);
     const scMap = {};
     (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
@@ -3050,8 +3050,8 @@ async function loadStudentExercises() {
   if(!inB||!comB)return;
   try{
     const [ed,sd]=await Promise.all([
-      api({action:"getMyExercises",studentId:currentUserGlobal.id}),
-      api({action:"getMyScores",   studentId:currentUserGlobal.id})
+      api({action:"getMyExercises", studentId:currentUserGlobal.id, pin:getStoredPin()}),
+      api({action:"getMyScores", studentId:currentUserGlobal.id, pin:getStoredPin()})
     ]);
     const exs=ed.exercises||[];
     const sm={};(sd.scores||[]).forEach(s=>{sm[String(s.exerciseId)]=s;});
@@ -3147,6 +3147,7 @@ async function markExerciseDone(exId) {
     const data = await api({
       action: "markExerciseDone",
       studentId: currentUserGlobal.id,
+      pin: getStoredPin(),
       exerciseId: exId
     });
     if (data.success) {
