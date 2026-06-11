@@ -2611,53 +2611,37 @@ function getTestCat(title) {
   return (m && TEST_CATS[m[1]]) ? m[1] : null;
 }
 
-// ── SPARKLINE — tableau [{pct, cat, ts}] → 4 lignes sur axe X commun ──
-function drawSparkline(canvasId, scores) {
+// ── SPARKLINE — {GR:[{ts,pct}], VO:[], LI:[], RE:[]} → 4 lignes chevauchantes ──
+function drawSparkline(canvasId, byCat) {
   const c = document.getElementById(canvasId);
   if (!c) return;
   const ctx = c.getContext("2d");
   const w = c.width, h = c.height, p = 2;
   ctx.clearRect(0, 0, w, h);
-  if (!scores || scores.length === 0) {
+  const allPts = Object.values(byCat).flat();
+  if (!allPts.length) {
     ctx.strokeStyle="rgba(200,200,200,0.3)"; ctx.lineWidth=1; ctx.setLineDash([2,2]);
     ctx.beginPath(); ctx.moveTo(p,h/2); ctx.lineTo(w-p,h/2); ctx.stroke(); ctx.setLineDash([]); return;
   }
-
-  // Grouper par catégorie
-  const byCat = {};
-  scores.forEach((s,i) => {
-    const cat = (s.cat && TEST_CATS[s.cat]) ? s.cat : "__";
-    if (!byCat[cat]) byCat[cat] = [];
-    byCat[cat].push({...s, idx: i});
-  });
-
-  // Axe X : timestamps uniques triés — si tous identiques ou 0, utiliser l'index
-  const allTs = [...new Set(scores.map(s=>s.ts||0))].sort((a,b)=>a-b);
-  const useIndex = allTs.length <= 1; // fallback sur index si dates identiques
-  const totalPts = scores.length;
-  const pxF = (ts, idx) => {
-    if (useIndex) return totalPts > 1 ? p + (idx/(totalPts-1))*(w-2*p) : w/2;
-    const pos = allTs.indexOf(ts);
-    return allTs.length > 1 ? p + (pos/(allTs.length-1))*(w-2*p) : w/2;
-  };
-  const pyF = v => h - p - (v/100)*(h-2*p);
-
-  // Tracer une ligne indépendante par catégorie
-  Object.entries(byCat).forEach(([cat, pts]) => {
-    const color = TEST_CATS[cat] ? TEST_CATS[cat].color : "#E84B7A";
-    if (pts.length === 1) {
-      ctx.beginPath(); ctx.arc(pxF(pts[0].ts||0, pts[0].idx), pyF(pts[0].pct), 2, 0, Math.PI*2);
-      ctx.fillStyle = color; ctx.fill(); return;
+  // Axe X commun = timestamps uniques triés
+  const allTs=[...new Set(allPts.map(pt=>pt.ts))].sort((a,b)=>a-b);
+  const n=allTs.length;
+  const pxF=ts=>n>1?p+(allTs.indexOf(ts)/(n-1))*(w-2*p):w/2;
+  const pyF=v=>h-p-(v/100)*(h-2*p);
+  // Tracer une ligne par catégorie sur le même axe X
+  Object.entries(byCat).forEach(([cat,pts])=>{
+    if(!pts.length)return;
+    const color=TEST_CATS[cat]?TEST_CATS[cat].color:"#E84B7A";
+    if(pts.length===1){
+      ctx.beginPath();ctx.arc(pxF(pts[0].ts),pyF(pts[0].pct),2,0,Math.PI*2);
+      ctx.fillStyle=color;ctx.fill();return;
     }
     ctx.beginPath();
-    pts.forEach((pt,j) => {
-      const x = pxF(pt.ts||0, pt.idx), y = pyF(pt.pct);
-      j===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
-    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
-    const last = pts[pts.length-1];
-    ctx.beginPath(); ctx.arc(pxF(last.ts||0, last.idx), pyF(last.pct), 2, 0, Math.PI*2);
-    ctx.fillStyle = color; ctx.fill();
+    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.ts),pyF(pt.pct)):ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
+    ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
+    const last=pts[pts.length-1];
+    ctx.beginPath();ctx.arc(pxF(last.ts),pyF(last.pct),2,0,Math.PI*2);
+    ctx.fillStyle=color;ctx.fill();
   });
 }
 
@@ -3937,23 +3921,24 @@ async function loadAdminStats() {
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
 
-    // Sparklines [TEST] — indexé par sid_lvl, tableau de {pct, cat, ts} trié par date
+    // Sparklines [TEST] — groupé par catégorie, axe X = numéro de mois
     const testExMap={};(er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{
       testExMap[String(e.id)]={level:e.level||"?", cat:getTestCat(e.title), date:e.assignedDate||""};
     });
-    const stuTestScores={};
+    const stuTestScores={}; // key = sid_lvl → {GR:[{ts,pct}], VO:[], LI:[], RE:[]}
     (sr.scores||[]).forEach(sc=>{
       const ex=testExMap[String(sc.exerciseId)];
-      if(!ex)return;
+      if(!ex||!ex.cat)return;
       const key=String(sc.studentId)+"_"+ex.level;
-      if(!stuTestScores[key])stuTestScores[key]=[];
+      if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       if(sc.maxScore>0){
-        const ts = ex.date ? new Date(ex.date).getTime() : 0;
-        stuTestScores[key].push({pct:Math.round((sc.score/sc.maxScore)*100), cat:ex.cat||null, ts});
+        const ts=ex.date?new Date(ex.date).getTime():0;
+        stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
       }
     });
-    // Trier par date
-    Object.values(stuTestScores).forEach(arr=>arr.sort((a,b)=>a.ts-b.ts));
+    Object.values(stuTestScores).forEach(byCat=>
+      Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.ts-b.ts))
+    );
 
     aw.innerHTML=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
@@ -3973,9 +3958,11 @@ async function loadAdminStats() {
       const rows=se.map(([sid,d])=>{
         const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
         const spId="sp2-"+lvl+"-"+sid;
-        const testScores=stuTestScores[sid+"_"+lvl]||[];
-        const hasTests=testScores.length>0;
-        const lastPct=hasTests?testScores[testScores.length-1].pct:null;
+        const testData=stuTestScores[sid+"_"+lvl]||{GR:[],VO:[],LI:[],RE:[]};
+        const allPts=Object.values(testData).flat();
+        const hasTests=allPts.length>0;
+        const lastPt=hasTests?allPts.reduce((a,b)=>b.ts>a.ts?b:a):null;
+        const lastPct=lastPt?lastPt.pct:null;
         const avg20=(d.sum/d.cnt).toFixed(1);
         return {name:stu.name+" "+(stu.familyName||""),avg20,cnt:d.cnt,sid,spId,hasTests,lastPct};
       }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
@@ -4005,8 +3992,8 @@ async function loadAdminStats() {
     setTimeout(()=>{
       Object.entries(bl).forEach(([lvl,stuMap])=>{
         Object.keys(stuMap).forEach(sid=>{
-          const scores=stuTestScores[sid+"_"+lvl]||[];
-          if(scores.length>0) drawSparkline("sp2-"+lvl+"-"+sid, scores);
+          const data=stuTestScores[sid+"_"+lvl]||{GR:[],VO:[],LI:[],RE:[]};
+          if(Object.values(data).some(a=>a.length>0)) drawSparkline("sp2-"+lvl+"-"+sid, data);
         });
       });
     },200);
