@@ -2611,37 +2611,38 @@ function getTestCat(title) {
   return (m && TEST_CATS[m[1]]) ? m[1] : null;
 }
 
-// ── SPARKLINE — {GR:[{ts,pct}], VO:[], LI:[], RE:[]} → 4 lignes chevauchantes ──
+// ── SPARKLINE ADMIN — Chart.js, même logique que le graph étudiant ──
+const _sparkCharts = {}; // garder les instances pour destroy
 function drawSparkline(canvasId, byCat) {
   const c = document.getElementById(canvasId);
-  if (!c) return;
-  const ctx = c.getContext("2d");
-  const w = c.width, h = c.height, p = 2;
-  ctx.clearRect(0, 0, w, h);
+  if (!c || !window.Chart) return;
+  // Détruire l'instance précédente si elle existe
+  if (_sparkCharts[canvasId]) { try { _sparkCharts[canvasId].destroy(); } catch(e){} }
   const allPts = Object.values(byCat).flat();
-  if (!allPts.length) {
-    ctx.strokeStyle="rgba(200,200,200,0.3)"; ctx.lineWidth=1; ctx.setLineDash([2,2]);
-    ctx.beginPath(); ctx.moveTo(p,h/2); ctx.lineTo(w-p,h/2); ctx.stroke(); ctx.setLineDash([]); return;
-  }
-  // Axe X commun = timestamps uniques triés
-  const allTs=[...new Set(allPts.map(pt=>pt.ts))].sort((a,b)=>a-b);
-  const n=allTs.length;
-  const pxF=ts=>n>1?p+(allTs.indexOf(ts)/(n-1))*(w-2*p):w/2;
-  const pyF=v=>h-p-(v/100)*(h-2*p);
-  // Tracer une ligne par catégorie sur le même axe X
-  Object.entries(byCat).forEach(([cat,pts])=>{
-    if(!pts.length)return;
-    const color=TEST_CATS[cat]?TEST_CATS[cat].color:"#E84B7A";
-    if(pts.length===1){
-      ctx.beginPath();ctx.arc(pxF(pts[0].ts),pyF(pts[0].pct),2,0,Math.PI*2);
-      ctx.fillStyle=color;ctx.fill();return;
+  if (!allPts.length) return;
+  const allTs = [...new Set(allPts.map(p=>p.ts))].sort((a,b)=>a-b);
+  const labels = allTs.map(ts=>new Date(ts).toLocaleDateString("fr-FR",{month:"short"}));
+  const datasets = Object.entries(TEST_CATS).map(([k,v])=>({
+    data: allTs.map(ts=>{ const pt=(byCat[k]||[]).find(p=>p.ts===ts); return pt?pt.pct:null; }),
+    borderColor: v.color,
+    pointBackgroundColor: v.color,
+    borderWidth: 1.5,
+    tension: 0.35,
+    pointRadius: 2,
+    spanGaps: true
+  }));
+  _sparkCharts[canvasId] = new Chart(c, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        y: { min:0, max:100, display:false },
+        x: { display:false }
+      }
     }
-    ctx.beginPath();
-    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.ts),pyF(pt.pct)):ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
-    ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
-    const last=pts[pts.length-1];
-    ctx.beginPath();ctx.arc(pxF(last.ts),pyF(last.pct),2,0,Math.PI*2);
-    ctx.fillStyle=color;ctx.fill();
   });
 }
 
