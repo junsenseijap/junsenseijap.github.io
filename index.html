@@ -1753,7 +1753,8 @@ async function doLogin() {
   try {
     const data = await api({ action: "login", email, pin });
     if (data.success) {
-      if (data.user.role === "Admin") { window._adminPin = pin; data.user._pin = pin; }
+      if (data.user.role === "Admin") { window._adminPin = pin; }
+      data.user._pin = pin;  // PIN sauvegardé pour tous (admin + étudiant)
       // La langue choisie au login écrase le localStorage
       data.user.lang = currentLang;
       saveSession(data.user);
