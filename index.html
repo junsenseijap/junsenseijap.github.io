@@ -2641,9 +2641,11 @@ function drawSparkline(wrapId, byCat) {
   const aggByCat={};
   Object.entries(byCat).forEach(([cat,pts])=>{
     const byMonth={};
-    pts.forEach(pt=>{
-      const key=new Date(pt.ts).toISOString().slice(0,7);
-      if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,ts:pt.ts};}
+    pts.forEach((pt,i)=>{
+      const d = pt.ts ? new Date(pt.ts) : null;
+      const key = (d && !isNaN(d)) ? d.toISOString().slice(0,7) : ("idx_"+i);
+      const ts  = (d && !isNaN(d)) ? pt.ts : i;
+      if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,ts};}
       byMonth[key].sum+=pt.pct; byMonth[key].cnt++;
     });
     aggByCat[cat]=Object.values(byMonth).sort((a,b)=>a.ts-b.ts).map(v=>({ts:v.ts,pct:Math.round(v.sum/v.cnt)}));
@@ -3961,8 +3963,8 @@ async function loadAdminStats() {
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       if(sc.maxScore>0){
-        const ts=ex.date?new Date(ex.date).getTime():0;
-        stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
+        const ts = ex.date ? new Date(ex.date+"T12:00:00Z").getTime() : 0;
+        if(ts) stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
       }
     });
     Object.values(stuTestScores).forEach(byCat=>
