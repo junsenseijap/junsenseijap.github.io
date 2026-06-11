@@ -2606,9 +2606,9 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
 function openStudentChartSelf() {
   if (!currentUserGlobal) return;
   const fullName = (currentUserGlobal.name||"") + (currentUserGlobal.familyName?" "+currentUserGlobal.familyName:"");
-  // Récupère le premier niveau actif depuis les barres de progression
-  const levelBadge = document.querySelector(".student-level-badge");
-  const level = levelBadge ? levelBadge.textContent.trim() : "";
+  // Prendre le premier niveau depuis les niveaux de l'étudiant
+  const levels = currentUserGlobal.levels ? String(currentUserGlobal.levels).split(",").map(s=>s.trim()).filter(Boolean) : [];
+  const level = levels.length ? levels[0] : "";
   openStudentChart(currentUserGlobal.id, fullName, level || null);
 }
 
@@ -3977,7 +3977,8 @@ async function loadAdminStats() {
       Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.ts-b.ts))
     );
 
-    aw.innerHTML=keys.map(lvl=>{
+    // Injecter le HTML
+    aw.innerHTML = keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
       const lvlSum=se.reduce((s,[,d])=>s+d.sum,0);
       const lvlCnt=se.reduce((s,[,d])=>s+d.cnt,0);
@@ -4014,7 +4015,7 @@ async function loadAdminStats() {
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
-      return '<div class="dash-avg-level-row" id="'+rid+'">'+
+      return '<div class="dash-avg-level-row open" id="'+rid+'">'+
         '<div class="dash-avg-level-header" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'open\')">'+
         '<span class="dash-avg-level-badge">'+lvl+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
@@ -4026,7 +4027,8 @@ async function loadAdminStats() {
         '</div>';
     }).join("");
 
-    setTimeout(()=>{
+    // Dessiner les sparklines — les rows sont visibles (open par défaut)
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
       Object.entries(bl).forEach(([lvl,stuMap])=>{
         Object.keys(stuMap).forEach(sid=>{
           const data=stuTestScores[sid+"_"+lvl]||{GR:[],VO:[],LI:[],RE:[]};
@@ -4034,7 +4036,7 @@ async function loadAdminStats() {
             drawSparkline("spark-wrap-sp2-"+lvl+"-"+sid, data);
         });
       });
-    },200);
+    }));
   }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
