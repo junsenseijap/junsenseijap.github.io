@@ -2610,7 +2610,28 @@ function openStudentChartSelf() {
   openStudentChart(currentUserGlobal.id, fullName, level);
 }
 
-// ── CATÉGORIES [TEST] ──
+// ── TOGGLE NIVEAU ADMIN — ouvre/ferme + dessine sparklines au 1er clic ──
+const _drawnLevels = new Set();
+function toggleAdminLevel(rid, lvl) {
+  const row = document.getElementById(rid);
+  if (!row) return;
+  row.classList.toggle("open");
+  // Dessiner les sparklines seulement si pas encore fait pour ce niveau
+  if (row.classList.contains("open") && !_drawnLevels.has(rid)) {
+    _drawnLevels.add(rid);
+    const stuTestScores = window._stuTestScores || {};
+    const bl = window._blKeys || {};
+    if (bl[lvl]) {
+      requestAnimationFrame(()=>{
+        Object.keys(bl[lvl]).forEach(sid=>{
+          const data = stuTestScores[sid+"_"+lvl] || {GR:[],VO:[],LI:[],RE:[]};
+          if (Object.values(data).some(a=>a.length>0))
+            drawSparkline("spark-wrap-sp2-"+lvl+"-"+sid, data);
+        });
+      });
+    }
+  }
+}
 const TEST_CATS = {
   GR: { label: "Grammar",    color: "#E84B7A" },
   VO: { label: "Vocabulary", color: "#7B5EA7" },
@@ -4017,8 +4038,8 @@ async function loadAdminStats() {
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
-      return '<div class="dash-avg-level-row open" id="'+rid+'">'+
-        '<div class="dash-avg-level-header" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'open\')">'+
+      return '<div class="dash-avg-level-row" id="'+rid+'">'+
+        '<div class="dash-avg-level-header" onclick="toggleAdminLevel(\''+rid+'\',\''+lvl+'\')">'+
         '<span class="dash-avg-level-badge">'+lvl+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
         '<span class="dash-avg-level-score">'+la+'/20</span>'+
@@ -4029,23 +4050,9 @@ async function loadAdminStats() {
         '</div>';
     }).join("");
 
-    // Dessiner les sparklines après que le DOM soit peint
-    setTimeout(()=>{
-      console.log("=== SPARKLINE DEBUG ===");
-      console.log("bl keys:", JSON.stringify(Object.keys(bl)));
-      console.log("stuTestScores keys:", JSON.stringify(Object.keys(stuTestScores)));
-      Object.entries(bl).forEach(([lvl,stuMap])=>{
-        Object.keys(stuMap).forEach(sid=>{
-          const key=sid+"_"+lvl;
-          const data=stuTestScores[key]||{GR:[],VO:[],LI:[],RE:[]};
-          const hasData=Object.values(data).some(a=>a.length>0);
-          const wrapId="spark-wrap-sp2-"+lvl+"-"+sid;
-          const wrap=document.getElementById(wrapId);
-          console.log("sid="+sid+" lvl="+lvl+" key="+key+" hasData="+hasData+" wrap="+(wrap?"FOUND":"NULL"));
-          if(wrap && hasData) drawSparkline(wrapId, data);
-        });
-      });
-    },500);
+    // Stocker stuTestScores globalement pour le dessin au clic
+    window._stuTestScores = stuTestScores;
+    window._blKeys = bl;
   }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
