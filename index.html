@@ -1432,44 +1432,6 @@
     </div>
   </div>
 
-  <div class="profile-card" id="notif-push-card" style="display:none">
-    <div class="profile-card-header" id="notif-card-header">🔔 Notifications push</div>
-    <div style="padding:0.75rem 1rem 0">
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-title">Titre</div>
-      <input id="notif-title" type="text" maxlength="60" placeholder="Ex: 🔔 Rappel"
-        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem"/>
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-msg">Message</div>
-      <input id="notif-message" type="text" maxlength="120" placeholder="Ex: N'oublie pas !"
-        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none"/>
-    </div>
-    <div style="padding:0.75rem 1rem 0">
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-target">Joueur cible</div>
-      <select id="notif-student-select"
-        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem">
-        <option value="">— Choisir un élève —</option>
-      </select>
-      <button onclick="sendPushToOne()" id="notif-btn-one"
-        style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem">
-        <span>✉️</span><span id="notif-btn-one-lbl">Envoyer à ce joueur</span>
-      </button>
-    </div>
-    <div style="margin:0.9rem 1rem;height:1px;background:var(--border);opacity:0.5"></div>
-    <div style="padding:0 1rem 0.75rem">
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.5rem" id="notif-lbl-levels">Niveaux</div>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.65rem">
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N5" checked> N5</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N4" checked> N4</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N3" checked> N3</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N2" checked> N2</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N1" checked> N1</label>
-      </div>
-      <button onclick="sendPushToAll()" id="notif-btn-all"
-        style="width:100%;padding:0.7rem;border:none;border-radius:10px;background:var(--pink);color:white;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem">
-        <span>📣</span><span id="notif-btn-all-lbl">Envoyer à tous</span>
-      </button>
-    </div>
-  </div>
-
   <!-- PIN change card -->
   <div class="profile-card">
     <div class="profile-card-header" id="ph-pin">🔐 Changer le PIN</div>
@@ -1535,16 +1497,41 @@
   </div>
 
   <!-- ══ SECTION: GÉRER LES ÉLÈVES ══ -->
-  <div class="admin-section-card" id="admin-sec-manage">
-    <div class="admin-sec-header" onclick="toggleAdminSec('manage')">
-      <span class="admin-sec-icon">👥</span>
-      <span class="admin-sec-label" id="asl-manage-title">Gérer les élèves</span>
+  <div class="admin-section-card" id="admin-sec-notif">
+    <div class="admin-sec-header" onclick="toggleAdminSec('notif')">
+      <span class="admin-sec-icon">🔔</span>
+      <span class="admin-sec-label" id="asl-notif-title">Notifications</span>
       <span class="admin-sec-arrow">▼</span>
     </div>
-    <div class="admin-sec-body" id="admin-sec-body-manage">
-      <div id="admin-manage-list" style="padding:0.5rem">
-        <div class="loading"><div class="spinner"></div></div>
+    <div class="admin-sec-body" id="admin-sec-body-notif" style="padding:0.75rem 1rem">
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-title">Titre</div>
+      <input id="notif-title" type="text" maxlength="60" placeholder="Ex: 🔔 Rappel"
+        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem"/>
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-msg">Message</div>
+      <input id="notif-message" type="text" maxlength="120" placeholder="Ex: N'oublie pas !"
+        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.75rem"/>
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-target">Joueur cible</div>
+      <select id="notif-student-select"
+        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem">
+        <option value="">— Choisir un élève —</option>
+      </select>
+      <button onclick="sendPushToOne()" id="notif-btn-one"
+        style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.75rem">
+        <span>✉️</span><span id="notif-btn-one-lbl">Envoyer</span>
+      </button>
+      <div style="height:1px;background:var(--border);opacity:0.5;margin-bottom:0.75rem"></div>
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.5rem" id="notif-lbl-levels">Niveaux</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.65rem">
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N5" checked> N5</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N4" checked> N4</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N3" checked> N3</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N2" checked> N2</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N1" checked> N1</label>
       </div>
+      <button onclick="sendPushToAll()" id="notif-btn-all"
+        style="width:100%;padding:0.7rem;border:none;border-radius:10px;background:var(--pink);color:white;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+        <span>📣</span><span id="notif-btn-all-lbl">Envoyer à tous</span>
+      </button>
     </div>
   </div>
 </div>
@@ -2059,6 +2046,7 @@ async function loadAdminPanel(user) {
     }
     allStudents = studentsData.students || [];
     const activeStudents = allStudents.filter(s => String(s.active).toUpperCase() === "YES");
+    initNotifPushCard(currentUserGlobal);
 
   // Update student count — actifs uniquement
   const cnt = document.getElementById("admin-student-count");
@@ -2652,19 +2640,15 @@ function openStudentChartSelf() {
 
 // ── NOTIFICATIONS PUSH ADMIN ──
 function initNotifPushCard(user) {
-  const card = document.getElementById("notif-push-card");
-  if (!card) return;
-  if (user.role !== "Admin") { card.style.display="none"; return; }
-  card.style.display = "block";
-  // Traduire les labels
+  if (!user || user.role !== "Admin") return;
   const set = (id, key) => { const el=document.getElementById(id); if(el) el.textContent=t(key); };
-  set("notif-card-header",  "notifPushCard");
-  set("notif-lbl-title",    "notifLblTitle");
-  set("notif-lbl-msg",      "notifLblMsg");
-  set("notif-lbl-target",   "notifLblTarget");
-  set("notif-lbl-levels",   "notifLblLevels");
-  set("notif-btn-one-lbl",  "notifBtnOne");
-  set("notif-btn-all-lbl",  "notifBtnAll");
+  set("asl-notif-title",  "notifPushCard");
+  set("notif-lbl-title",  "notifLblTitle");
+  set("notif-lbl-msg",    "notifLblMsg");
+  set("notif-lbl-target", "notifLblTarget");
+  set("notif-lbl-levels", "notifLblLevels");
+  set("notif-btn-one-lbl","notifBtnOne");
+  set("notif-btn-all-lbl","notifBtnAll");
   const ti = document.getElementById("notif-title");
   if(ti) ti.placeholder = t("notifPlaceholderTitle");
   const mi = document.getElementById("notif-message");
@@ -3553,7 +3537,7 @@ const TRANSLATIONS = {
     notifLblMsg:       "Nội dung",
     notifLblTarget:    "Học viên",
     notifLblLevels:    "Cấp độ",
-    notifBtnOne:       "Gửi cho học viên này",
+    notifBtnOne:       "Gửi",
     notifBtnAll:       "Gửi cho tất cả",
     notifErrMsg:       "Vui lòng nhập nội dung",
     notifErrStudent:   "Vui lòng chọn học viên",
@@ -3705,7 +3689,7 @@ const TRANSLATIONS = {
     notifLblMsg:       "Message",
     notifLblTarget:    "Target player",
     notifLblLevels:    "Levels",
-    notifBtnOne:       "Send to this player",
+    notifBtnOne:       "Send",
     notifBtnAll:       "Send to all",
     notifErrMsg:       "Please enter a message",
     notifErrStudent:   "Please select a student",
@@ -3857,7 +3841,7 @@ const TRANSLATIONS = {
     notifLblMsg:       "Message",
     notifLblTarget:    "Joueur cible",
     notifLblLevels:    "Niveaux",
-    notifBtnOne:       "Envoyer à ce joueur",
+    notifBtnOne:       "Envoyer",
     notifBtnAll:       "Envoyer à tous",
     notifErrMsg:       "Message requis",
     notifErrStudent:   "Choisir un élève",
