@@ -1432,6 +1432,44 @@
     </div>
   </div>
 
+  <div class="profile-card" id="notif-push-card" style="display:none">
+    <div class="profile-card-header" id="notif-card-header">🔔 Notifications push</div>
+    <div style="padding:0.75rem 1rem 0">
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-title">Titre</div>
+      <input id="notif-title" type="text" maxlength="60" placeholder="Ex: 🔔 Rappel"
+        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem"/>
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-msg">Message</div>
+      <input id="notif-message" type="text" maxlength="120" placeholder="Ex: N'oublie pas !"
+        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none"/>
+    </div>
+    <div style="padding:0.75rem 1rem 0">
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-target">Joueur cible</div>
+      <select id="notif-student-select"
+        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem">
+        <option value="">— Choisir un élève —</option>
+      </select>
+      <button onclick="sendPushToOne()" id="notif-btn-one"
+        style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+        <span>✉️</span><span id="notif-btn-one-lbl">Envoyer à ce joueur</span>
+      </button>
+    </div>
+    <div style="margin:0.9rem 1rem;height:1px;background:var(--border);opacity:0.5"></div>
+    <div style="padding:0 1rem 0.75rem">
+      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.5rem" id="notif-lbl-levels">Niveaux</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.65rem">
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N5" checked> N5</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N4" checked> N4</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N3" checked> N3</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N2" checked> N2</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N1" checked> N1</label>
+      </div>
+      <button onclick="sendPushToAll()" id="notif-btn-all"
+        style="width:100%;padding:0.7rem;border:none;border-radius:10px;background:var(--pink);color:white;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+        <span>📣</span><span id="notif-btn-all-lbl">Envoyer à tous</span>
+      </button>
+    </div>
+  </div>
+
   <!-- PIN change card -->
   <div class="profile-card">
     <div class="profile-card-header" id="ph-pin">🔐 Changer le PIN</div>
@@ -2265,6 +2303,7 @@ function loadProfilePage(user) {
   if (msg) msg.style.display = "none";
   const pinNew = document.getElementById("pin-new");
   if (pinNew) pinNew.value = "";
+  initNotifPushCard(user);
 }
 
 async function updateNotifStatus() {
@@ -2611,7 +2650,64 @@ function openStudentChartSelf() {
   openStudentChart(currentUserGlobal.id, fullName, level);
 }
 
-// ── TOGGLE NIVEAU ADMIN — ouvre/ferme + dessine sparklines au 1er clic ──
+// ── NOTIFICATIONS PUSH ADMIN ──
+function initNotifPushCard(user) {
+  const card = document.getElementById("notif-push-card");
+  if (!card) return;
+  if (user.role !== "Admin") { card.style.display="none"; return; }
+  card.style.display = "block";
+  // Traduire les labels
+  const set = (id, key) => { const el=document.getElementById(id); if(el) el.textContent=t(key); };
+  set("notif-card-header",  "notifPushCard");
+  set("notif-lbl-title",    "notifLblTitle");
+  set("notif-lbl-msg",      "notifLblMsg");
+  set("notif-lbl-target",   "notifLblTarget");
+  set("notif-lbl-levels",   "notifLblLevels");
+  set("notif-btn-one-lbl",  "notifBtnOne");
+  set("notif-btn-all-lbl",  "notifBtnAll");
+  const ti = document.getElementById("notif-title");
+  if(ti) ti.placeholder = t("notifPlaceholderTitle");
+  const mi = document.getElementById("notif-message");
+  if(mi) mi.placeholder = t("notifPlaceholderMsg");
+  // Peupler le select élèves
+  const sel = document.getElementById("notif-student-select");
+  if (sel && allStudents.length) {
+    sel.innerHTML = '<option value="">'+t("notifChooseStudent")+'</option>' +
+      allStudents.filter(s=>String(s.active).toUpperCase()==="YES")
+        .map(s=>'<option value="'+s.id+'">'+s.name+' '+s.familyName+'</option>')
+        .join("");
+  }
+}
+
+async function sendPushToOne() {
+  const title   = document.getElementById("notif-title")?.value.trim();
+  const message = document.getElementById("notif-message")?.value.trim();
+  const stuId   = document.getElementById("notif-student-select")?.value;
+  if (!message) { toast(t("notifErrMsg"), "error"); return; }
+  if (!stuId)   { toast(t("notifErrStudent"), "error"); return; }
+  const btn = document.getElementById("notif-btn-one");
+  if (btn) { btn.disabled=true; btn.style.opacity="0.6"; }
+  try {
+    const data = await api({ action:"sendPushNotif", adminId:currentUserGlobal.id, pin:getStoredPin(), studentId:stuId, title:title||"🌸 Jun Sensei", message });
+    toast(data.success ? "✅ "+t("notifSentOne") : (data.message||t("errConn")), data.success?"success":"error");
+  } catch(e) { toast(t("errConn"), "error"); }
+  if (btn) { btn.disabled=false; btn.style.opacity="1"; }
+}
+
+async function sendPushToAll() {
+  const title   = document.getElementById("notif-title")?.value.trim();
+  const message = document.getElementById("notif-message")?.value.trim();
+  const checked = [...document.querySelectorAll("input[name='notif-level']:checked")].map(c=>c.value);
+  if (!message)        { toast(t("notifErrMsg"),   "error"); return; }
+  if (!checked.length) { toast(t("notifErrLevel"), "error"); return; }
+  const btn = document.getElementById("notif-btn-all");
+  if (btn) { btn.disabled=true; btn.style.opacity="0.6"; }
+  try {
+    const data = await api({ action:"sendPushNotif", adminId:currentUserGlobal.id, pin:getStoredPin(), levels:checked.join(","), title:title||"🌸 Jun Sensei", message });
+    toast(data.success ? "✅ "+t("notifSentAll").replace("{n}", data.sent||0) : (data.message||t("errConn")), data.success?"success":"error");
+  } catch(e) { toast(t("errConn"), "error"); }
+  if (btn) { btn.disabled=false; btn.style.opacity="1"; }
+}
 const _drawnLevels = new Set();
 function toggleAdminLevel(rid, lvl) {
   const row = document.getElementById(rid);
@@ -3452,6 +3548,21 @@ const TRANSLATIONS = {
     msgEmpty:          "Vui lòng nhập nội dung",
     msgNew:            "Mới",
     cancel:            "Hủy",
+    notifPushCard:     "Thông báo đẩy",
+    notifLblTitle:     "Tiêu đề",
+    notifLblMsg:       "Nội dung",
+    notifLblTarget:    "Học viên",
+    notifLblLevels:    "Cấp độ",
+    notifBtnOne:       "Gửi cho học viên này",
+    notifBtnAll:       "Gửi cho tất cả",
+    notifErrMsg:       "Vui lòng nhập nội dung",
+    notifErrStudent:   "Vui lòng chọn học viên",
+    notifErrLevel:     "Chọn ít nhất một cấp độ",
+    notifPlaceholderTitle: "VD: 🔔 Nhắc nhở",
+    notifPlaceholderMsg:   "VD: Đừng quên làm bài nhé !",
+    notifChooseStudent:    "— Chọn học viên —",
+    notifSentOne:      "Đã gửi thông báo !",
+    notifSentAll:      "Đã gửi {n} thông báo !",
     msgEmpty2:         "Chưa có tin nhắn nào",
     darkModeLabel:     "Chế độ tối",
     displayCard:       "Hiển thị",
@@ -3589,6 +3700,21 @@ const TRANSLATIONS = {
     msgEmpty:          "Please write a message",
     msgNew:            "New",
     cancel:            "Cancel",
+    notifPushCard:     "Push notifications",
+    notifLblTitle:     "Title",
+    notifLblMsg:       "Message",
+    notifLblTarget:    "Target player",
+    notifLblLevels:    "Levels",
+    notifBtnOne:       "Send to this player",
+    notifBtnAll:       "Send to all",
+    notifErrMsg:       "Please enter a message",
+    notifErrStudent:   "Please select a student",
+    notifErrLevel:     "Select at least one level",
+    notifPlaceholderTitle: "Ex: 🔔 Reminder",
+    notifPlaceholderMsg:   "Ex: Don't forget to study !",
+    notifChooseStudent:    "— Choose a student —",
+    notifSentOne:      "Notification sent !",
+    notifSentAll:      "{n} notifications sent !",
     msgEmpty2:         "No messages yet",
     darkModeLabel:     "Dark mode",
     displayCard:       "Display",
@@ -3726,6 +3852,21 @@ const TRANSLATIONS = {
     msgEmpty:          "Écris un message d'abord",
     msgNew:            "Nouveau",
     cancel:            "Annuler",
+    notifPushCard:     "Notifications push",
+    notifLblTitle:     "Titre",
+    notifLblMsg:       "Message",
+    notifLblTarget:    "Joueur cible",
+    notifLblLevels:    "Niveaux",
+    notifBtnOne:       "Envoyer à ce joueur",
+    notifBtnAll:       "Envoyer à tous",
+    notifErrMsg:       "Message requis",
+    notifErrStudent:   "Choisir un élève",
+    notifErrLevel:     "Sélectionne au moins un niveau",
+    notifPlaceholderTitle: "Ex: 🔔 Rappel",
+    notifPlaceholderMsg:   "Ex: N'oublie pas de t'inscrire !",
+    notifChooseStudent:    "— Choisir un élève —",
+    notifSentOne:      "Notification envoyée !",
+    notifSentAll:      "{n} notifications envoyées !",
     msgEmpty2:         "Pas encore de messages",
     darkModeLabel:     "Mode sombre",
     displayCard:       "Affichage",
@@ -3782,6 +3923,7 @@ function setLang(lang) {
 
 function applyLang() {
   applyDarkModeLabel();
+  if (currentUserGlobal) initNotifPushCard(currentUserGlobal);
   // Login page
   const emailLoginLabel = document.getElementById("login-email-label");
   if (emailLoginLabel) emailLoginLabel.textContent = t("loginLabel");
