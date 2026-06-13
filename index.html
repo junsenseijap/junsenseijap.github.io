@@ -1614,7 +1614,7 @@
 <div id="toast"></div>
 
 <script>
-const FORM_ENTRY_ID = "entry.8401610"; // Entry ID global pour tous les Forms
+const FORM_ENTRY_ID = "entry.8401610"; // fallback si Entry_ID absent dans CONTENT
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoqxEZiuBRDMsUCFLh-n4NpugzYhKPrcoHuvSbolzVvHZFsJw/exec";
 const SESSION_KEY = "jun_session";
@@ -3112,12 +3112,13 @@ async function doAddStudent() {
 // ══════════════════════════════════════════════════════════════
 // ASSIGN FORM CONTENT — from admin content tree
 // ══════════════════════════════════════════════════════════════
-async function assignFormContent(studentId, contentId, formBaseUrl, title, sheetTab, level) {
+async function assignFormContent(studentId, contentId, formBaseUrl, title, sheetTab, level, entryId) {
   const btn = document.getElementById("btn-assign-" + contentId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
 
+  const entryParam = entryId ? "entry." + entryId : FORM_ENTRY_ID;
   const personalizedUrl = formBaseUrl
-    ? formBaseUrl + (formBaseUrl.includes("?") ? "&" : "?") + FORM_ENTRY_ID + "=" + studentId
+    ? formBaseUrl + (formBaseUrl.includes("?") ? "&" : "?") + entryParam + "=" + studentId
     : "";
 
   try {
@@ -4299,7 +4300,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
             '</div>'+
             '<div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
             '<button class="btn-assign-content" id="btn-assign-'+c.id+'" style="'+btnStyle+'" title="'+btnTitle+'"'+
-            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.level||"")+'\'))">'+btnText+'</button>'+
+            ' onclick="assignFormContent('+studentId+','+c.id+',decodeURIComponent(\''+encodeURIComponent(c.driveLink||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.title)+'\'),decodeURIComponent(\''+encodeURIComponent(c.sheetTab||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.level||"")+'\'),decodeURIComponent(\''+encodeURIComponent(c.entryId||"")+'\'))">'+btnText+'</button>'+
             '</div>';
         }
         return '<div class="content-manage-item">'+
