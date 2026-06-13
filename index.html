@@ -251,6 +251,7 @@
     .form-group input:focus {
       border-color: var(--pink);
       background: #fff;
+      color: #1a1118;
       box-shadow: 0 0 0 3px var(--pink-glow);
     }
     .form-group input::placeholder { color: var(--gray); opacity: 0.6; }
@@ -1884,15 +1885,15 @@ function doLogout() {
 
 async function loadStudentContent(user) {
   try{
-    const [cd,sd,td]=await Promise.all([
+    const [cd,sd,td,cc,ed]=await Promise.all([
       api({action:"getMyContent", studentId:user.id, pin:getStoredPin()}),
       api({action:"getMyScores", studentId:user.id, pin:getStoredPin()}),
-      api({action:"getStudentStats", studentId:user.id, pin:getStoredPin()}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0}))
+      api({action:"getStudentStats", studentId:user.id, pin:getStoredPin()}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0})),
+      api({action:"getContentCount"}).catch(()=>({success:false,counts:{}})),
+      api({action:"getMyExercises", studentId:user.id, pin:getStoredPin()}).catch(()=>({success:false,exercises:[]}))
     ]);
     const content=cd.content||[];
-    // Fetch total count (works after Code.gs redeployment)
-    let totalCounts={};
-    try{const cc=await api({action:"getContentCount"});if(cc&&cc.success)totalCounts=cc.counts||{};}catch(e){}
+    let totalCounts=(cc&&cc.success)?cc.counts||{}:{};
     const greet = document.getElementById("student-greeting");
     if(greet) greet.textContent = t("studentGreeting", user.name || "");
     const stuSub = document.getElementById("student-subtitle");
@@ -1972,8 +1973,8 @@ async function loadStudentContent(user) {
         avgWrap.style.display = "block";
         // Récupère les scores des tests [TEST] — 4 catégories
         try {
-          const scData = await api({ action:"getMyScores", studentId:user.id, pin:getStoredPin() });
-          const exData = await api({ action:"getMyExercises", studentId:user.id, pin:getStoredPin() });
+          const scData = sd;
+          const exData = ed;
           const scMap = {};
           (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)] = s; });
           const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
