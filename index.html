@@ -1632,26 +1632,31 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoq
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 const DARK_KEY = "jun_dark_mode";
-const CACHE_KEY = "jun_data_cache";
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_KEY       = "jun_data_cache";
+const CACHE_EX_KEY    = "jun_ex_cache";
+const CACHE_ADMIN_KEY = "jun_admin_cache";
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-// ── CACHE HELPERS ──
-function saveDataCache(data) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
-  } catch(e) {}
+function _cacheSet(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
 }
-function loadDataCache() {
+function _cacheGet(key) {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const obj = JSON.parse(raw);
-    if (Date.now() - obj.ts > CACHE_TTL) return null; // expiré
+    if (Date.now() - obj.ts > CACHE_TTL) return null;
     return obj.data;
   } catch(e) { return null; }
 }
+function _cacheDel(key) { try { localStorage.removeItem(key); } catch(e) {} }
+
+function saveDataCache(data)  { _cacheSet(CACHE_KEY, data); }
+function loadDataCache()      { return _cacheGet(CACHE_KEY); }
 function clearDataCache() {
-  try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
+  _cacheDel(CACHE_KEY);
+  _cacheDel(CACHE_EX_KEY);
+  _cacheDel(CACHE_ADMIN_KEY);
 }
 
 // ── DARK MODE ──
@@ -2084,6 +2089,27 @@ async function loadStudentContent(user) {
 async function loadAdminPanel(user) {
   adminUser = user;
   const ddList = document.getElementById("student-dd-list");
+
+  // ── Servir depuis le cache immédiatement ──
+  const cached = _cacheGet(CACHE_ADMIN_KEY);
+  if (cached && cached.students && cached.content) {
+    allStudents = cached.students;
+    allContent  = cached.content;
+    const activeStudents = allStudents.filter(s => String(s.active).toUpperCase() === "YES");
+    const cnt = document.getElementById("admin-student-count");
+    if(cnt) cnt.textContent = activeStudents.length;
+    initNotifPushCard(currentUserGlobal);
+    loadAdminStats();
+    ddList.innerHTML = activeStudents.length === 0
+      ? '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</div>'
+      : activeStudents.map(s => `
+        <div class="dd-student-item" onclick="selectStudentFromDD(${s.id}, '${s.name}', '${s.familyName || ''}')" id="dd-stu-${s.id}">
+          <div class="dd-avatar">${(s.name || "?")[0]}</div>
+          ${s.name} ${s.familyName || ""}
+        </div>`).join("");
+    return;
+  }
+
   ddList.innerHTML = '<div class="loading" style="padding:1rem"><div class="spinner"></div></div>';
   try {
     const [studentsData, contentData] = await Promise.all([
@@ -2100,6 +2126,8 @@ async function loadAdminPanel(user) {
     }
     allStudents = studentsData.students || [];
     const activeStudents = allStudents.filter(s => String(s.active).toUpperCase() === "YES");
+    // Sauvegarder dans le cache
+    _cacheSet(CACHE_ADMIN_KEY, { students: allStudents, content: allContent });
     initNotifPushCard(currentUserGlobal);
 
   // Update student count — actifs uniquement
@@ -3180,6 +3208,7 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
     });
     if (data.success) {
       toast("✅ " + title + " " + t("formSent") + " !", "success");
+      _cacheDel(CACHE_ADMIN_KEY + "_ex"); // invalider le cache exercices admin
       // Mettre à jour le badge "Envoyé" sans recharger toute la page
       if (window._assignedContentIds) window._assignedContentIds.add(String(contentId));
       if (btn) {
@@ -3229,11 +3258,26 @@ async function loadStudentExercises() {
   const inB=document.getElementById("ex-stu-inprogress-body");
   const comB=document.getElementById("ex-stu-completed-body");
   if(!inB||!comB)return;
+
+  // ── Servir depuis le cache immédiatement ──
+  const cached = _cacheGet(CACHE_EX_KEY);
+  if (cached) {
+    _renderStudentExercises(cached.ed, cached.sd, inB, comB);
+    return;
+  }
+
   try{
     const [ed,sd]=await Promise.all([
       api({action:"getMyExercises", studentId:currentUserGlobal.id, pin:getStoredPin()}),
       api({action:"getMyScores", studentId:currentUserGlobal.id, pin:getStoredPin()})
     ]);
+    _cacheSet(CACHE_EX_KEY, { ed, sd });
+    _renderStudentExercises(ed, sd, inB, comB);
+  }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
+}
+
+function _renderStudentExercises(ed, sd, inB, comB) {
+  try{
     const exs=ed.exercises||[];
     const sm={};(sd.scores||[]).forEach(s=>{sm[String(s.exerciseId)]=s;});
     const inP=exs.filter(ex=>ex.status!=="done");
@@ -3323,6 +3367,8 @@ async function loadStudentExercises() {
 
 
 async function markExerciseDone(exId) {
+  // Invalider le cache exercices quand un exercice est marqué fait
+  _cacheDel(CACHE_EX_KEY);
   const btn = document.getElementById("btn-done-" + exId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
   try {
@@ -3351,6 +3397,11 @@ async function markExerciseDone(exId) {
 async function loadAdminExercises() {
   const wrap=document.getElementById("admin-ex-list");
   if(!wrap)return;
+
+  // ── Servir depuis le cache ──
+  const cached = _cacheGet(CACHE_ADMIN_KEY + "_ex");
+  if (cached) { wrap.innerHTML = cached; return; }
+
   wrap.innerHTML='<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
   try{
     const [ed,sr]=await Promise.all([
@@ -3421,6 +3472,7 @@ async function loadAdminExercises() {
         '<div class="ex-detail-row" id="'+rid+'" style="background:var(--bg-soft)">'+pendingHtml+doneHtml+'</div>'+
         '</div>';
     }).join("");
+    _cacheSet(CACHE_ADMIN_KEY + "_ex", wrap.innerHTML);
   }catch(e){console.error(e);wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
@@ -4281,9 +4333,9 @@ function initPullToRefresh() {
   document.addEventListener("touchmove", function(e) {
     if (!_ptrStartY) return;
     var dy = e.touches[0].clientY - _ptrStartY;
-    if (dy > 100) {
+    if (dy > 150) {
       _ptrActive = true;
-      indicator.textContent = dy > 180 ? "🌸 Relâche pour actualiser" : "↓ Continue...";
+      indicator.textContent = dy > 220 ? "🌸 Relâche pour actualiser" : "↓ Continue...";
       indicator.classList.add("visible");
     } else {
       _ptrActive = false;
