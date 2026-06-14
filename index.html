@@ -3384,8 +3384,6 @@ function _renderStudentExercises(ed, sd, inB, comB) {
 
 
 async function markExerciseDone(exId) {
-  // Invalider le cache exercices quand un exercice est marqué fait
-  _cacheDel(CACHE_EX_KEY);
   const btn = document.getElementById("btn-done-" + exId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
   try {
@@ -3397,7 +3395,8 @@ async function markExerciseDone(exId) {
     });
     if (data.success) {
       toast(t("exMarkedDone"), "success");
-      loadStudentExercises();
+      _cacheDel(CACHE_EX_KEY);
+      setTimeout(() => loadStudentExercises(), 800);
     } else {
       toast(data.message || t("errToggle"), "error");
       if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
