@@ -663,10 +663,21 @@
     body.dark-mode input[type="email"],
     body.dark-mode input[type="password"] {
       color: var(--ink) !important;
+      background: var(--bg-soft) !important;
     }
     body.dark-mode textarea {
       color: var(--ink) !important;
       background: var(--bg-soft) !important;
+    }
+    /* Empêcher le fond blanc au focus en dark mode */
+    body.dark-mode .form-group input:focus,
+    body.dark-mode .pin-input-wrap input:focus,
+    body.dark-mode input[type="text"]:focus,
+    body.dark-mode input[type="email"]:focus,
+    body.dark-mode input[type="password"]:focus,
+    body.dark-mode textarea:focus {
+      background: var(--bg-card) !important;
+      color: var(--ink) !important;
     }
 
     /* ── PULL TO REFRESH ── */
@@ -3288,14 +3299,12 @@ async function loadStudentExercises() {
         const lbl=typeLabel(ex);
         const rawTitle = gt(ex);
         const {prefix, cleanTitle} = parseExTitle(rawTitle);
-        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+icon+' '+lbl+'</a>':"";
+        // Construire le label du bouton lien : type + préfixe si TEST
+        const btnLabel = prefix && prefix.startsWith("TEST") ? icon+" "+prefix : icon+" "+lbl;
+        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+btnLabel+'</a>':"";
         return '<div class="ex-card" id="ex-card-'+ex.id+'">'+
           '<div class="ex-card-info">'+
-          '<div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap">'+
-          '<span class="card-type type-'+( (ex.type||"form").toLowerCase() )+'" style="font-size:0.5rem;padding:0.1rem 0.4rem;flex-shrink:0">'+lbl.toUpperCase()+'</span>'+
-          prefixBadgeHtml(prefix)+
-          '</div>'+
-          '<div class="ex-card-title" style="margin-top:0.25rem">'+cleanTitle+'</div>'+
+          '<div class="ex-card-title">'+cleanTitle+'</div>'+
           '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.assignedDate||"—" )+'</div>'+
           '</div>'+
           '<div class="ex-card-actions">'+
@@ -3317,14 +3326,11 @@ async function loadStudentExercises() {
         const lbl=typeLabel(ex);
         const rawTitle = gt(ex);
         const {prefix, cleanTitle} = parseExTitle(rawTitle);
-        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+icon+' '+lbl+'</a>':"";
+        const btnLabel = prefix && prefix.startsWith("TEST") ? icon+" "+prefix : icon+" "+lbl;
+        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+btnLabel+'</a>':"";
         return '<div class="ex-card done">'+
           '<div class="ex-card-info">'+
-          '<div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap">'+
-          '<span class="card-type type-'+( (ex.type||"form").toLowerCase() )+'" style="font-size:0.5rem;padding:0.1rem 0.4rem;flex-shrink:0">'+lbl.toUpperCase()+'</span>'+
-          prefixBadgeHtml(prefix)+
-          '</div>'+
-          '<div class="ex-card-title" style="margin-top:0.25rem">'+cleanTitle+'</div>'+
+          '<div class="ex-card-title">'+cleanTitle+'</div>'+
           '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.doneDate||ex.assignedDate||"—" )+'</div>'+
           sl+
           '</div>'+
@@ -4289,10 +4295,12 @@ function initPullToRefresh() {
   var indicator = document.getElementById("ptr-indicator");
   if (!indicator) return;
   document.addEventListener("touchstart", function(e) {
-    if (window.scrollY === 0) _ptrStartY = e.touches[0].clientY;
+    var st = document.documentElement.scrollTop || document.body.scrollTop || 0;
+    if (st === 0) _ptrStartY = e.touches[0].clientY;
   }, { passive: true });
   document.addEventListener("touchmove", function(e) {
-    if (window.scrollY !== 0) return;
+    var st = document.documentElement.scrollTop || document.body.scrollTop || 0;
+    if (st !== 0) return;
     var dy = e.touches[0].clientY - _ptrStartY;
     if (dy > 80) {
       _ptrActive = true;
