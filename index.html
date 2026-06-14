@@ -2027,7 +2027,7 @@ async function loadStudentContent(user) {
           (exData.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{
             const cat=getTestCat(e.title); if(!cat)return;
             const sc=scMap[String(e.id)]; if(!sc||!sc.maxScore)return;
-            const d=e.assignedDate?new Date(e.assignedDate):null;
+            const d=e.assignedDate?parseDate(e.assignedDate):null;
             byCat[cat].push({label:d?d.toLocaleDateString(locale,{month:"short"}):"—",x:d?d.getTime():0,y:Math.round((sc.score/sc.maxScore)*100)});
           });
           Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.x-b.x));
@@ -2678,7 +2678,7 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
     .filter(e=>scMap[String(e.id)]&&scMap[String(e.id)].maxScore>0
       &&!e.title.includes("[TEST]")
       &&(!filterLevel||e.level===filterLevel))
-    .sort((a,b)=>new Date(b.doneDate||b.assignedDate)-new Date(a.doneDate||a.assignedDate));
+    .sort((a,b)=>parseDate(b.doneDate||b.assignedDate)-parseDate(a.doneDate||a.assignedDate));
   const body=document.getElementById(bodyId);
   if(!body)return;
   if(!exercises.length){
@@ -2795,6 +2795,17 @@ function toggleAdminLevel(rid, lvl) {
     }
   }
 }
+// ── Parse date robuste — gère "01/02/2026" (fr-FR) ET "2026-02-01" (ISO) ──
+function parseDate(str) {
+  if (!str) return null;
+  // Format ISO : "2026-02-01"
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return new Date(str);
+  // Format fr-FR : "01/02/2026"
+  const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+  return new Date(str);
+}
+
 const TEST_CATS = {
   GR: { label: "Grammar",    color: "#E84B7A" },
   VO: { label: "Vocabulary", color: "#7B5EA7" },
@@ -2891,7 +2902,7 @@ async function openStudentChart(studentId, studentName, level) {
         if (!cat) return;
         const sc = scMap[String(e.id)];
         if (!sc || !sc.maxScore) return;
-        const d = e.assignedDate ? new Date(e.assignedDate) : null;
+        const d = e.assignedDate ? parseDate(e.assignedDate) : null;
         const label = d ? d.toLocaleDateString(locale,{month:"short",year:"2-digit"}) : "—";
         const ts = d ? d.getTime() : 0;
         byCat[cat].push({ label, x: ts, y: Math.round((sc.score/sc.maxScore)*100) });
@@ -4250,8 +4261,7 @@ async function loadAdminStats() {
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       if(sc.maxScore>0){
-        const raw = ex.date ? ex.date.replace(/-/g,"/") : "";
-        const ts  = raw ? new Date(raw).getTime() : Date.now();
+        const ts  = ex.date ? (parseDate(ex.date)||new Date()).getTime() : Date.now();
         stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
       }
     });
