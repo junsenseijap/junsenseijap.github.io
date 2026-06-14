@@ -1,4 +1,4 @@
-html = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -120,23 +120,23 @@ tr:nth-child(even) td{background:var(--bg);}
 <div class="lang-bar">
   <div class="lang-logo">🌸 Jun Sensei</div>
   <div class="lang-btns">
-    <button class="lang-btn active" onclick="setLang(\'fr\')" id="btn-fr">🇫🇷 FR</button>
-    <button class="lang-btn" onclick="setLang(\'en\')" id="btn-en">🇬🇧 EN</button>
+    <button class="lang-btn active" onclick="setLang('fr')" id="btn-fr">🇫🇷 FR</button>
+    <button class="lang-btn" onclick="setLang('en')" id="btn-en">🇬🇧 EN</button>
   </div>
 </div>
 
 <div class="hero">
-  <h1 id="hero-h1">Guide — Remplir l\'onglet CONTENT</h1>
+  <h1 id="hero-h1">Guide — Remplir l'onglet CONTENT</h1>
   <p id="hero-p">Comment connecter tes cours Google Drive et tes Forms Google au système Jun Sensei.</p>
 </div>
 
 <div class="toc">
   <div class="toc-title" id="toc-label">Table des matières</div>
   <ul class="toc-list">
-    <li><a href="#s1"><span class="toc-num">1</span> <span id="toc1">Structure de l\'onglet CONTENT</span></a></li>
+    <li><a href="#s1"><span class="toc-num">1</span> <span id="toc1">Structure de l'onglet CONTENT</span></a></li>
     <li><a href="#s2"><span class="toc-num">2</span> <span id="toc2">Ajouter un PDF, Audio ou Vidéo</span></a></li>
     <li><a href="#s3"><span class="toc-num">3</span> <span id="toc3">Ajouter un exercice Google Form</span></a></li>
-    <li><a href="#s4"><span class="toc-num">4</span> <span id="toc4">Trouver l\'Entry_ID du champ Student_ID</span></a></li>
+    <li><a href="#s4"><span class="toc-num">4</span> <span id="toc4">Trouver l'Entry_ID du champ Student_ID</span></a></li>
     <li><a href="#s5"><span class="toc-num">5</span> <span id="toc5">Configurer le Sheet_Tab (Form Responses)</span></a></li>
     <li><a href="#s6"><span class="toc-num">6</span> <span id="toc6">Ajouter un Test [TEST]</span></a></li>
     <li><a href="#s7"><span class="toc-num">7</span> <span id="toc7">Vérifier que tout fonctionne</span></a></li>
@@ -150,10 +150,10 @@ tr:nth-child(even) td{background:var(--bg);}
 <div class="section" id="s1">
   <div class="section-header">
     <div class="section-num">1</div>
-    <div class="section-title" id="s1-title">Structure de l\'onglet CONTENT</div>
+    <div class="section-title" id="s1-title">Structure de l'onglet CONTENT</div>
   </div>
   <div class="section-body">
-    <p id="s1-intro">L\'onglet CONTENT est la base de données de tous tes cours. Chaque ligne = un contenu (PDF, audio, vidéo ou exercice Form).</p>
+    <p id="s1-intro">L'onglet CONTENT est la base de données de tous tes cours. Chaque ligne = un contenu (PDF, audio, vidéo ou exercice Form).</p>
     <div class="sub">
       <div class="sub-title" id="s1-col-title">Colonnes détaillées</div>
       <div class="table-wrap">
@@ -190,14 +190,14 @@ tr:nth-child(even) td{background:var(--bg);}
             <td class="col-letter">D</td>
             <td class="col-name">Course_N</td>
             <td><span class="col-type type-num">Nombre</span></td>
-            <td id="td-coursen">Numéro d\'ordre dans la catégorie. Ex: <span class="inline-code">1</span>, <span class="inline-code">2</span>, <span class="inline-code">3</span>. Détermine l\'ordre d\'affichage.</td>
+            <td id="td-coursen">Numéro d'ordre dans la catégorie. Ex: <span class="inline-code">1</span>, <span class="inline-code">2</span>, <span class="inline-code">3</span>. Détermine l'ordre d'affichage.</td>
             <td><span class="badge badge-req">Oui</span></td>
           </tr>
           <tr>
             <td class="col-letter">E</td>
             <td class="col-name">Title</td>
             <td><span class="col-type type-text">Texte</span></td>
-            <td id="td-title">Titre affiché dans l\'app. Pour les exercices : préfixe <span class="inline-code">[EXERCICE]</span>. Pour les tests : <span class="inline-code">[TEST][GR]</span>, <span class="inline-code">[TEST][VO]</span>, <span class="inline-code">[TEST][LI]</span>, <span class="inline-code">[TEST][RE]</span>.</td>
+            <td id="td-title">Titre affiché dans l'app. Pour les exercices : préfixe <span class="inline-code">[EXERCICE]</span>. Pour les tests : <span class="inline-code">[TEST][GR]</span>, <span class="inline-code">[TEST][VO]</span>, <span class="inline-code">[TEST][LI]</span>, <span class="inline-code">[TEST][RE]</span>.</td>
             <td><span class="badge badge-req">Oui</span></td>
           </tr>
           <tr>
@@ -218,7 +218,7 @@ tr:nth-child(even) td{background:var(--bg);}
             <td class="col-letter">H</td>
             <td class="col-name">Sheet_Tab</td>
             <td><span class="col-type type-text">Texte</span></td>
-            <td id="td-sheettab">Nom exact de l\'onglet de réponses dans le Spreadsheet. Ex: <span class="inline-code">Form Responses 1</span>. <strong>Uniquement pour les Forms.</strong></td>
+            <td id="td-sheettab">Nom exact de l'onglet de réponses dans le Spreadsheet. Ex: <span class="inline-code">Form Responses 1</span>. <strong>Uniquement pour les Forms.</strong></td>
             <td><span class="badge badge-opt" id="badge-opt">Form seulement</span></td>
           </tr>
           <tr>
@@ -244,8 +244,8 @@ tr:nth-child(even) td{background:var(--bg);}
     <div class="sub">
       <div class="sub-title" id="s2-drive-title">Étape 1 — Partager le fichier sur Google Drive</div>
       <div class="steps">
-        <div class="step"><div class="step-n">1</div><div class="step-content"><div class="step-t" id="s2-s1t">Ouvrir Google Drive</div><div class="step-d" id="s2-s1d">Va sur drive.google.com et navigue jusqu\'au fichier (PDF, MP3, MP4…).</div></div></div>
-        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s2-s2t">Clic droit → Partager</div><div class="step-d" id="s2-s2d">Clique droit sur le fichier → "Partager". Change l\'accès en "Toute personne ayant le lien" avec le rôle "Lecteur".</div></div></div>
+        <div class="step"><div class="step-n">1</div><div class="step-content"><div class="step-t" id="s2-s1t">Ouvrir Google Drive</div><div class="step-d" id="s2-s1d">Va sur drive.google.com et navigue jusqu'au fichier (PDF, MP3, MP4…).</div></div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s2-s2t">Clic droit → Partager</div><div class="step-d" id="s2-s2d">Clique droit sur le fichier → "Partager". Change l'accès en "Toute personne ayant le lien" avec le rôle "Lecteur".</div></div></div>
         <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s2-s3t">Copier le lien</div><div class="step-d" id="s2-s3d">Clique "Copier le lien". Le lien ressemble à :<br><span class="inline-code">https://drive.google.com/file/d/[ID_FICHIER]/view?usp=sharing</span></div></div></div>
       </div>
     </div>
@@ -257,7 +257,7 @@ tr:nth-child(even) td{background:var(--bg);}
           <tr><td class="col-letter">A — ID</td><td id="s2-td-id">Prochaine valeur disponible (ex: 42)</td></tr>
           <tr><td class="col-letter">B — Level</td><td>N5 (ou N4, N3…)</td></tr>
           <tr><td class="col-letter">C — Course_T</td><td id="s2-td-ct">Grammaire <em>(exactement le même texte que les autres cours de la catégorie)</em></td></tr>
-          <tr><td class="col-letter">D — Course_N</td><td id="s2-td-cn">Numéro d\'ordre (1, 2, 3…)</td></tr>
+          <tr><td class="col-letter">D — Course_N</td><td id="s2-td-cn">Numéro d'ordre (1, 2, 3…)</td></tr>
           <tr><td class="col-letter">E — Title</td><td id="s2-td-title">Titre en japonais ou français. Ex: <span class="inline-code">て形 — 接続形</span></td></tr>
           <tr><td class="col-letter">F — Type</td><td><span class="inline-code">pdf</span> ou <span class="inline-code">audio</span> ou <span class="inline-code">video</span></td></tr>
           <tr><td class="col-letter">G — Drive_Link</td><td id="s2-td-link">Lien copié depuis Google Drive</td></tr>
@@ -285,9 +285,9 @@ tr:nth-child(even) td{background:var(--bg);}
       <div class="sub-title" id="s3-form-title">Configurer le Form</div>
       <div class="steps">
         <div class="step"><div class="step-n">1</div><div class="step-content"><div class="step-t" id="s3-s1t">Créer le Form normalement</div><div class="step-d" id="s3-s1d">Crée ton questionnaire sur forms.google.com avec tes questions de cours.</div></div></div>
-        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s3-s2t">Ajouter la question Student_ID</div><div class="step-d" id="s3-s2d">Ajoute une nouvelle question de type <strong>"Réponse courte"</strong>. Titre : <span class="inline-code">Student_ID</span>. Valeur par défaut : aucune. Cette question sera remplie automatiquement par l\'app, donc tu peux la placer n\'importe où dans le Form.</div></div></div>
-        <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s3-s3t">Configurer les réponses dans le Spreadsheet</div><div class="step-d" id="s3-s3d">Dans le Form, clique sur l\'onglet "Réponses" en haut, puis sur l\'icône Sheets verte pour lier le Form à ton Spreadsheet Jun Sensei. Choisis "Sélectionner une feuille de calcul existante".</div></div></div>
-        <div class="step"><div class="step-n">4</div><div class="step-content"><div class="step-t" id="s3-s4t">Copier le lien du Form</div><div class="step-d" id="s3-s4d">Clique sur "Envoyer" dans le Form → onglet lien → copie l\'URL. Format : <span class="inline-code">https://docs.google.com/forms/d/[ID]/viewform</span></div></div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s3-s2t">Ajouter la question Student_ID</div><div class="step-d" id="s3-s2d">Ajoute une nouvelle question de type <strong>"Réponse courte"</strong>. Titre : <span class="inline-code">Student_ID</span>. Valeur par défaut : aucune. Cette question sera remplie automatiquement par l'app, donc tu peux la placer n'importe où dans le Form.</div></div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s3-s3t">Configurer les réponses dans le Spreadsheet</div><div class="step-d" id="s3-s3d">Dans le Form, clique sur l'onglet "Réponses" en haut, puis sur l'icône Sheets verte pour lier le Form à ton Spreadsheet Jun Sensei. Choisis "Sélectionner une feuille de calcul existante".</div></div></div>
+        <div class="step"><div class="step-n">4</div><div class="step-content"><div class="step-t" id="s3-s4t">Copier le lien du Form</div><div class="step-d" id="s3-s4d">Clique sur "Envoyer" dans le Form → onglet lien → copie l'URL. Format : <span class="inline-code">https://docs.google.com/forms/d/[ID]/viewform</span></div></div></div>
       </div>
     </div>
     <div class="sub">
@@ -298,11 +298,11 @@ tr:nth-child(even) td{background:var(--bg);}
           <tr><td class="col-letter">A — ID</td><td id="s3-td-id">Prochaine valeur disponible</td></tr>
           <tr><td class="col-letter">B — Level</td><td>N5 (ou autre)</td></tr>
           <tr><td class="col-letter">C — Course_T</td><td>Grammaire (ou autre catégorie)</td></tr>
-          <tr><td class="col-letter">D — Course_N</td><td>Numéro d\'ordre</td></tr>
+          <tr><td class="col-letter">D — Course_N</td><td>Numéro d'ordre</td></tr>
           <tr><td class="col-letter">E — Title</td><td id="s3-td-title">Préfixer avec <span class="inline-code">[EXERCICE]</span> ou <span class="inline-code">[TEST][GR]</span> etc. Ex: <span class="inline-code">[EXERCICE] て形 練習</span></td></tr>
           <tr><td class="col-letter">F — Type</td><td><span class="inline-code">form</span></td></tr>
-          <tr><td class="col-letter">G — Drive_Link</td><td id="s3-td-link">Lien du Form copié à l\'étape 4</td></tr>
-          <tr><td class="col-letter">H — Sheet_Tab</td><td id="s3-td-tab">Nom de l\'onglet réponses. Voir section 5.</td></tr>
+          <tr><td class="col-letter">G — Drive_Link</td><td id="s3-td-link">Lien du Form copié à l'étape 4</td></tr>
+          <tr><td class="col-letter">H — Sheet_Tab</td><td id="s3-td-tab">Nom de l'onglet réponses. Voir section 5.</td></tr>
           <tr><td class="col-letter">I — Entry_ID</td><td id="s3-td-entry">Numéro du champ Student_ID. Voir section 4.</td></tr>
         </table>
       </div>
@@ -314,18 +314,18 @@ tr:nth-child(even) td{background:var(--bg);}
 <div class="section" id="s4">
   <div class="section-header">
     <div class="section-num">4</div>
-    <div class="section-title" id="s4-title">Trouver l\'Entry_ID du champ Student_ID</div>
+    <div class="section-title" id="s4-title">Trouver l'Entry_ID du champ Student_ID</div>
   </div>
   <div class="section-body">
-    <p id="s4-intro">L\'Entry_ID est le numéro interne de la question "Student_ID" dans le Form. Il permet à l\'app de préremplir automatiquement l\'ID de l\'élève quand il ouvre le Form.</p>
+    <p id="s4-intro">L'Entry_ID est le numéro interne de la question "Student_ID" dans le Form. Il permet à l'app de préremplir automatiquement l'ID de l'élève quand il ouvre le Form.</p>
     <div class="sub">
       <div class="sub-title" id="s4-method-title">Méthode — Lien prérempli</div>
       <div class="steps">
         <div class="step"><div class="step-n">1</div><div class="step-content"><div class="step-t" id="s4-s1t">Ouvrir le Form en mode édition</div><div class="step-d" id="s4-s1d">Va sur forms.google.com et ouvre ton Form en mode édition (icône crayon).</div></div></div>
-        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s4-s2t">Menu ⋮ → Obtenir un lien prérempli</div><div class="step-d" id="s4-s2d">Clique sur les 3 points en haut à droite → "Obtenir un lien prérempli". Une prévisualisation du Form s\'ouvre.</div></div></div>
-        <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s4-s3t">Remplir uniquement la case Student_ID</div><div class="step-d" id="s4-s3d">Dans la prévisualisation, remplis <strong>seulement</strong> le champ "Student_ID" avec n\'importe quelle valeur (ex: <span class="inline-code">999</span>). Laisse toutes les autres questions vides.</div></div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s4-s2t">Menu ⋮ → Obtenir un lien prérempli</div><div class="step-d" id="s4-s2d">Clique sur les 3 points en haut à droite → "Obtenir un lien prérempli". Une prévisualisation du Form s'ouvre.</div></div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s4-s3t">Remplir uniquement la case Student_ID</div><div class="step-d" id="s4-s3d">Dans la prévisualisation, remplis <strong>seulement</strong> le champ "Student_ID" avec n'importe quelle valeur (ex: <span class="inline-code">999</span>). Laisse toutes les autres questions vides.</div></div></div>
         <div class="step"><div class="step-n">4</div><div class="step-content"><div class="step-t" id="s4-s4t">Cliquer "Obtenir le lien"</div><div class="step-d" id="s4-s4d">Clique sur le bouton "Obtenir le lien" en bas. Copie le lien généré.</div></div></div>
-        <div class="step"><div class="step-n">5</div><div class="step-content"><div class="step-t" id="s4-s5t">Extraire l\'Entry_ID du lien</div><div class="step-d" id="s4-s5d">Dans le lien copié, cherche la partie <span class="inline-code">entry.XXXXXXX=999</span>. Le numéro après "entry." est ton Entry_ID.</div></div></div>
+        <div class="step"><div class="step-n">5</div><div class="step-content"><div class="step-t" id="s4-s5t">Extraire l'Entry_ID du lien</div><div class="step-d" id="s4-s5d">Dans le lien copié, cherche la partie <span class="inline-code">entry.XXXXXXX=999</span>. Le numéro après "entry." est ton Entry_ID.</div></div></div>
       </div>
       <div class="callout callout-info">
         <span class="callout-icon">💡</span>
@@ -333,12 +333,12 @@ tr:nth-child(even) td{background:var(--bg);}
           <strong id="s4-ex-title">Exemple de lien prérempli :</strong>
           <div class="code-block" style="margin-top:0.5rem"><code>https://docs.google.com/forms/d/e/1FAIpQL.../viewform
 ?entry.<span style="color:#f38ba8;font-weight:700">8401610</span>=999</code></div>
-          <span id="s4-ex-desc">Ici, l\'Entry_ID est <span class="inline-code">8401610</span>. C\'est ce numéro que tu mets dans la colonne I du CONTENT.</span>
+          <span id="s4-ex-desc">Ici, l'Entry_ID est <span class="inline-code">8401610</span>. C'est ce numéro que tu mets dans la colonne I du CONTENT.</span>
         </div>
       </div>
       <div class="callout callout-warn">
         <span class="callout-icon">⚠️</span>
-        <span id="s4-warn">Chaque Form a son propre Entry_ID — il ne faut pas réutiliser le même numéro d\'un Form à l\'autre sans vérifier.</span>
+        <span id="s4-warn">Chaque Form a son propre Entry_ID — il ne faut pas réutiliser le même numéro d'un Form à l'autre sans vérifier.</span>
       </div>
     </div>
   </div>
@@ -356,18 +356,18 @@ tr:nth-child(even) td{background:var(--bg);}
       <div class="sub-title" id="s5-link-title">Lier le Form au Spreadsheet Jun Sensei</div>
       <div class="steps">
         <div class="step"><div class="step-n">1</div><div class="step-content"><div class="step-t" id="s5-s1t">Dans le Form → onglet Réponses</div><div class="step-d" id="s5-s1d">Ouvre ton Form en mode édition, clique sur "Réponses" en haut.</div></div></div>
-        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s5-s2t">Icône Sheets → Sélectionner une feuille existante</div><div class="step-d" id="s5-s2d">Clique sur l\'icône verte Google Sheets → "Sélectionner une feuille de calcul existante" → choisis ton Spreadsheet Jun Sensei.</div></div></div>
-        <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s5-s3t">Trouver le nom de l\'onglet créé</div><div class="step-d" id="s5-s3d">Dans ton Spreadsheet Jun Sensei, un nouvel onglet a été créé automatiquement. Il s\'appelle généralement <span class="inline-code">Form Responses 1</span>, <span class="inline-code">Form Responses 2</span>, etc. Le nom exact est affiché sur l\'onglet en bas.</div></div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-content"><div class="step-t" id="s5-s2t">Icône Sheets → Sélectionner une feuille existante</div><div class="step-d" id="s5-s2d">Clique sur l'icône verte Google Sheets → "Sélectionner une feuille de calcul existante" → choisis ton Spreadsheet Jun Sensei.</div></div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-content"><div class="step-t" id="s5-s3t">Trouver le nom de l'onglet créé</div><div class="step-d" id="s5-s3d">Dans ton Spreadsheet Jun Sensei, un nouvel onglet a été créé automatiquement. Il s'appelle généralement <span class="inline-code">Form Responses 1</span>, <span class="inline-code">Form Responses 2</span>, etc. Le nom exact est affiché sur l'onglet en bas.</div></div></div>
         <div class="step"><div class="step-n">4</div><div class="step-content"><div class="step-t" id="s5-s4t">Copier ce nom dans CONTENT col. H</div><div class="step-d" id="s5-s4d">Mets ce nom exactement dans la colonne H (Sheet_Tab) de la ligne correspondante dans CONTENT. Attention à la casse et aux espaces.</div></div></div>
       </div>
       <div class="callout callout-warn">
         <span class="callout-icon">⚠️</span>
-        <span id="s5-warn">Le nom doit être identique au centime près. Si l\'onglet s\'appelle "Form Responses 3" et que tu mets "form responses 3", le trigger ne trouvera pas les réponses.</span>
+        <span id="s5-warn">Le nom doit être identique au centime près. Si l'onglet s'appelle "Form Responses 3" et que tu mets "form responses 3", le trigger ne trouvera pas les réponses.</span>
       </div>
       <div class="callout callout-info">
         <span class="callout-icon">📋</span>
         <div id="s5-structure">
-          <strong>Structure des colonnes dans l\'onglet Form Responses :</strong><br/>
+          <strong>Structure des colonnes dans l'onglet Form Responses :</strong><br/>
           Col. A = Horodatage · Col. B = Score · Col. C = Student_ID · Col. D+ = Réponses aux questions<br/>
           <em>Le trigger lit automatiquement B (score) et C (student_ID).</em>
         </div>
@@ -383,7 +383,7 @@ tr:nth-child(even) td{background:var(--bg);}
     <div class="section-title" id="s6-title">Ajouter un Test [TEST]</div>
   </div>
   <div class="section-body">
-    <p id="s6-intro">Les tests [TEST] fonctionnent exactement comme les exercices Form, mais avec un préfixe spécial dans le titre. Ce préfixe permet à l\'app d\'afficher les graphiques de progression mensuelle.</p>
+    <p id="s6-intro">Les tests [TEST] fonctionnent exactement comme les exercices Form, mais avec un préfixe spécial dans le titre. Ce préfixe permet à l'app d'afficher les graphiques de progression mensuelle.</p>
     <div class="sub">
       <div class="sub-title" id="s6-prefix-title">Préfixes disponibles</div>
       <div class="table-wrap">
@@ -417,12 +417,12 @@ tr:nth-child(even) td{background:var(--bg);}
       </div>
       <div class="callout callout-tip">
         <span class="callout-icon">✅</span>
-        <span id="s6-tip">Pour avoir le graphique complet, il faut au minimum 2 tests de la même catégorie sur des mois différents. L\'app regroupe automatiquement par mois.</span>
+        <span id="s6-tip">Pour avoir le graphique complet, il faut au minimum 2 tests de la même catégorie sur des mois différents. L'app regroupe automatiquement par mois.</span>
       </div>
     </div>
     <div class="sub">
       <div class="sub-title" id="s6-score-title">Comment le score est calculé</div>
-      <p id="s6-score-desc">Le Form doit avoir une question "Score" en colonne B de l\'onglet Form Responses. Le score peut être au format :</p>
+      <p id="s6-score-desc">Le Form doit avoir une question "Score" en colonne B de l'onglet Form Responses. Le score peut être au format :</p>
       <div class="example-row"><span class="ex-val">44 / 68</span> &nbsp;→ score/maxScore (recommandé)</div>
       <div class="example-row"><span class="ex-val">44</span> &nbsp;→ score seul (le trigger calcule le max depuis les titres des questions)</div>
       <div class="callout callout-info">
@@ -444,10 +444,10 @@ tr:nth-child(even) td{background:var(--bg);}
       <div class="sub-title" id="s7-check-title">Checklist avant de partager avec un élève</div>
       <div class="steps">
         <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c1t">Colonnes A à G remplies</div><div class="step-d" id="s7-c1d">ID, Level, Course_T, Course_N, Title, Type, Drive_Link — toutes présentes et correctes.</div></div></div>
-        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c2t">Pour un Form : colonnes H et I remplies</div><div class="step-d" id="s7-c2d">Sheet_Tab = nom exact de l\'onglet Form Responses. Entry_ID = numéro extrait du lien prérempli.</div></div></div>
-        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c3t">Lien Drive accessible</div><div class="step-d" id="s7-c3d">Ouvre le lien Drive_Link dans un onglet privé pour vérifier que n\'importe qui peut y accéder sans être connecté.</div></div></div>
-        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c4t">Trigger installé</div><div class="step-d" id="s7-c4d">Dans Apps Script → Déclencheurs (icône horloge) : vérifier que <span class="inline-code">onFormSubmit</span> est présent avec le type "Lors de l\'envoi du formulaire".</div></div></div>
-        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c5t">Tester avec un élève test</div><div class="step-d" id="s7-c5d">Débloque le contenu pour un élève test depuis l\'app admin. Vérifie que le lien Form s\'ouvre avec le Student_ID prérempli dans la question correspondante.</div></div></div>
+        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c2t">Pour un Form : colonnes H et I remplies</div><div class="step-d" id="s7-c2d">Sheet_Tab = nom exact de l'onglet Form Responses. Entry_ID = numéro extrait du lien prérempli.</div></div></div>
+        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c3t">Lien Drive accessible</div><div class="step-d" id="s7-c3d">Ouvre le lien Drive_Link dans un onglet privé pour vérifier que n'importe qui peut y accéder sans être connecté.</div></div></div>
+        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c4t">Trigger installé</div><div class="step-d" id="s7-c4d">Dans Apps Script → Déclencheurs (icône horloge) : vérifier que <span class="inline-code">onFormSubmit</span> est présent avec le type "Lors de l'envoi du formulaire".</div></div></div>
+        <div class="step"><div class="step-n">✓</div><div class="step-content"><div class="step-t" id="s7-c5t">Tester avec un élève test</div><div class="step-d" id="s7-c5d">Débloque le contenu pour un élève test depuis l'app admin. Vérifie que le lien Form s'ouvre avec le Student_ID prérempli dans la question correspondante.</div></div></div>
       </div>
     </div>
     <div class="sub">
@@ -458,20 +458,20 @@ tr:nth-child(even) td{background:var(--bg);}
           <tr>
             <td id="s7-p1">Le score ne remonte pas dans SCORES</td>
             <td id="s7-c1">Sheet_Tab incorrect ou trigger non installé</td>
-            <td id="s7-f1">Vérifier le nom de l\'onglet Form Responses (copier-coller exact) et vérifier le trigger dans Apps Script.</td>
+            <td id="s7-f1">Vérifier le nom de l'onglet Form Responses (copier-coller exact) et vérifier le trigger dans Apps Script.</td>
           </tr>
           <tr>
-            <td id="s7-p2">Le Student_ID n\'est pas prérempli</td>
+            <td id="s7-p2">Le Student_ID n'est pas prérempli</td>
             <td id="s7-c2">Entry_ID incorrect dans col. I</td>
-            <td id="s7-f2">Refaire la procédure "Lien prérempli" et re-extraire l\'Entry_ID.</td>
+            <td id="s7-f2">Refaire la procédure "Lien prérempli" et re-extraire l'Entry_ID.</td>
           </tr>
           <tr>
-            <td id="s7-p3">Le contenu n\'apparaît pas dans l\'app</td>
+            <td id="s7-p3">Le contenu n'apparaît pas dans l'app</td>
             <td id="s7-c3">Title vide ou colonne F (Type) mal saisie</td>
             <td id="s7-f3">Vérifier que Title est non-vide et que Type est exactement <span class="inline-code">pdf</span>, <span class="inline-code">audio</span>, <span class="inline-code">video</span> ou <span class="inline-code">form</span> (minuscules).</td>
           </tr>
           <tr>
-            <td id="s7-p4">Le graphique [TEST] ne s\'affiche pas</td>
+            <td id="s7-p4">Le graphique [TEST] ne s'affiche pas</td>
             <td id="s7-c4">Préfixe du titre incorrect</td>
             <td id="s7-f4">Vérifier que le titre commence exactement par <span class="inline-code">[TEST][GR]</span>, <span class="inline-code">[TEST][VO]</span>, <span class="inline-code">[TEST][LI]</span> ou <span class="inline-code">[TEST][RE]</span>.</td>
           </tr>
@@ -536,7 +536,7 @@ tr:nth-child(even) td{background:var(--bg);}
     </div>
     <div class="callout callout-tip">
       <span class="callout-icon">🌸</span>
-      <span id="s8-tip">Une fois le CONTENT bien rempli, tu n\'as plus qu\'à déverrouiller les contenus depuis l\'interface admin — tout le reste (création de l\'exercice, lien prérempli, score automatique) est géré par le système.</span>
+      <span id="s8-tip">Une fois le CONTENT bien rempli, tu n'as plus qu'à déverrouiller les contenus depuis l'interface admin — tout le reste (création de l'exercice, lien prérempli, score automatique) est géré par le système.</span>
     </div>
   </div>
 </div>
@@ -544,68 +544,7 @@ tr:nth-child(even) td{background:var(--bg);}
 </div><!-- /content -->
 
 <script>
-const T = ''' + json.dumps({
-    "fr": {
-        "hero-h1": "Guide — Remplir l'onglet CONTENT",
-        "hero-p": "Comment connecter tes cours Google Drive et tes Forms Google au système Jun Sensei.",
-        "toc-label": "Table des matières",
-        "toc1": "Structure de l'onglet CONTENT",
-        "toc2": "Ajouter un PDF, Audio ou Vidéo",
-        "toc3": "Ajouter un exercice Google Form",
-        "toc4": "Trouver l'Entry_ID du champ Student_ID",
-        "toc5": "Configurer le Sheet_Tab (Form Responses)",
-        "toc6": "Ajouter un Test [TEST]",
-        "toc7": "Vérifier que tout fonctionne",
-        "toc8": "Récapitulatif rapide",
-        "s1-title": "Structure de l'onglet CONTENT",
-        "s1-intro": "L'onglet CONTENT est la base de données de tous tes cours. Chaque ligne = un contenu (PDF, audio, vidéo ou exercice Form).",
-        "s2-title": "Ajouter un PDF, Audio ou Vidéo",
-        "s3-title": "Ajouter un exercice Google Form",
-        "s3-intro": "Un Form dans Jun Sensei doit avoir une question spéciale \"Student_ID\" pour que le système sache à quel élève associer les résultats.",
-        "s4-title": "Trouver l'Entry_ID du champ Student_ID",
-        "s4-intro": "L'Entry_ID est le numéro interne de la question \"Student_ID\" dans le Form. Il permet à l'app de préremplir automatiquement l'ID de l'élève.",
-        "s4-warn": "Chaque Form a son propre Entry_ID — ne pas réutiliser le même numéro d'un Form à l'autre sans vérifier.",
-        "s5-title": "Configurer le Sheet_Tab (Form Responses)",
-        "s5-intro": "Quand un élève soumet un Form, Google Sheets enregistre la réponse dans un onglet dédié. Le système a besoin du nom exact de cet onglet.",
-        "s5-warn": "Le nom doit être identique au centime près. Attention à la casse et aux espaces.",
-        "s6-title": "Ajouter un Test [TEST]",
-        "s6-intro": "Les tests [TEST] fonctionnent comme les exercices Form mais avec un préfixe spécial qui active les graphiques de progression.",
-        "s6-tip": "Pour avoir le graphique complet, il faut au minimum 2 tests de la même catégorie sur des mois différents.",
-        "s7-title": "Vérifier que tout fonctionne",
-        "s8-title": "Récapitulatif rapide",
-        "s8-tip": "Une fois le CONTENT bien rempli, tu n'as plus qu'à déverrouiller les contenus depuis l'interface admin — tout le reste est géré automatiquement.",
-    },
-    "en": {
-        "hero-h1": "Guide — Filling the CONTENT tab",
-        "hero-p": "How to connect your Google Drive courses and Google Forms to the Jun Sensei system.",
-        "toc-label": "Table of contents",
-        "toc1": "Structure of the CONTENT tab",
-        "toc2": "Adding a PDF, Audio or Video",
-        "toc3": "Adding a Google Form exercise",
-        "toc4": "Finding the Entry_ID of the Student_ID field",
-        "toc5": "Setting up the Sheet_Tab (Form Responses)",
-        "toc6": "Adding a [TEST] test",
-        "toc7": "Verifying everything works",
-        "toc8": "Quick reference",
-        "s1-title": "Structure of the CONTENT tab",
-        "s1-intro": "The CONTENT tab is the database of all your courses. Each row = one content item (PDF, audio, video or Form exercise).",
-        "s2-title": "Adding a PDF, Audio or Video",
-        "s3-title": "Adding a Google Form exercise",
-        "s3-intro": "A Form in Jun Sensei must have a special 'Student_ID' question so the system knows which student to associate results with.",
-        "s4-title": "Finding the Entry_ID of the Student_ID field",
-        "s4-intro": "The Entry_ID is the internal number of the 'Student_ID' question in the Form. It allows the app to automatically pre-fill the student's ID.",
-        "s4-warn": "Each Form has its own Entry_ID — do not reuse the same number from one Form to another without checking.",
-        "s5-title": "Setting up the Sheet_Tab (Form Responses)",
-        "s5-intro": "When a student submits a Form, Google Sheets records the response in a dedicated tab. The system needs the exact name of this tab.",
-        "s5-warn": "The name must be exactly right. Watch out for capitalisation and spaces.",
-        "s6-title": "Adding a [TEST] test",
-        "s6-intro": "Tests [TEST] work like Form exercises but with a special prefix that activates the progress charts.",
-        "s6-tip": "For a complete chart, you need at least 2 tests of the same category on different months.",
-        "s7-title": "Verifying everything works",
-        "s8-title": "Quick reference",
-        "s8-tip": "Once CONTENT is properly filled in, you just need to unlock contents from the admin interface — everything else (exercise creation, pre-filled link, automatic score) is handled by the system.",
-    }
-}, ensure_ascii=False) + ''';
+const T = {"fr": {"hero-h1": "Guide — Remplir l'onglet CONTENT", "hero-p": "Comment connecter tes cours Google Drive et tes Forms Google au système Jun Sensei.", "toc-label": "Table des matières", "toc1": "Structure de l'onglet CONTENT", "toc2": "Ajouter un PDF, Audio ou Vidéo", "toc3": "Ajouter un exercice Google Form", "toc4": "Trouver l'Entry_ID du champ Student_ID", "toc5": "Configurer le Sheet_Tab (Form Responses)", "toc6": "Ajouter un Test [TEST]", "toc7": "Vérifier que tout fonctionne", "toc8": "Récapitulatif rapide", "s1-title": "Structure de l'onglet CONTENT", "s1-intro": "L'onglet CONTENT est la base de données de tous tes cours. Chaque ligne = un contenu (PDF, audio, vidéo ou exercice Form).", "s2-title": "Ajouter un PDF, Audio ou Vidéo", "s3-title": "Ajouter un exercice Google Form", "s3-intro": "Un Form dans Jun Sensei doit avoir une question spéciale \"Student_ID\" pour que le système sache à quel élève associer les résultats.", "s4-title": "Trouver l'Entry_ID du champ Student_ID", "s4-intro": "L'Entry_ID est le numéro interne de la question \"Student_ID\" dans le Form. Il permet à l'app de préremplir automatiquement l'ID de l'élève.", "s4-warn": "Chaque Form a son propre Entry_ID — ne pas réutiliser le même numéro d'un Form à l'autre sans vérifier.", "s5-title": "Configurer le Sheet_Tab (Form Responses)", "s5-intro": "Quand un élève soumet un Form, Google Sheets enregistre la réponse dans un onglet dédié. Le système a besoin du nom exact de cet onglet.", "s5-warn": "Le nom doit être identique au centime près. Attention à la casse et aux espaces.", "s6-title": "Ajouter un Test [TEST]", "s6-intro": "Les tests [TEST] fonctionnent comme les exercices Form mais avec un préfixe spécial qui active les graphiques de progression.", "s6-tip": "Pour avoir le graphique complet, il faut au minimum 2 tests de la même catégorie sur des mois différents.", "s7-title": "Vérifier que tout fonctionne", "s8-title": "Récapitulatif rapide", "s8-tip": "Une fois le CONTENT bien rempli, tu n'as plus qu'à déverrouiller les contenus depuis l'interface admin — tout le reste est géré automatiquement."}, "en": {"hero-h1": "Guide — Filling the CONTENT tab", "hero-p": "How to connect your Google Drive courses and Google Forms to the Jun Sensei system.", "toc-label": "Table of contents", "toc1": "Structure of the CONTENT tab", "toc2": "Adding a PDF, Audio or Video", "toc3": "Adding a Google Form exercise", "toc4": "Finding the Entry_ID of the Student_ID field", "toc5": "Setting up the Sheet_Tab (Form Responses)", "toc6": "Adding a [TEST] test", "toc7": "Verifying everything works", "toc8": "Quick reference", "s1-title": "Structure of the CONTENT tab", "s1-intro": "The CONTENT tab is the database of all your courses. Each row = one content item (PDF, audio, video or Form exercise).", "s2-title": "Adding a PDF, Audio or Video", "s3-title": "Adding a Google Form exercise", "s3-intro": "A Form in Jun Sensei must have a special 'Student_ID' question so the system knows which student to associate results with.", "s4-title": "Finding the Entry_ID of the Student_ID field", "s4-intro": "The Entry_ID is the internal number of the 'Student_ID' question in the Form. It allows the app to automatically pre-fill the student's ID.", "s4-warn": "Each Form has its own Entry_ID — do not reuse the same number from one Form to another without checking.", "s5-title": "Setting up the Sheet_Tab (Form Responses)", "s5-intro": "When a student submits a Form, Google Sheets records the response in a dedicated tab. The system needs the exact name of this tab.", "s5-warn": "The name must be exactly right. Watch out for capitalisation and spaces.", "s6-title": "Adding a [TEST] test", "s6-intro": "Tests [TEST] work like Form exercises but with a special prefix that activates the progress charts.", "s6-tip": "For a complete chart, you need at least 2 tests of the same category on different months.", "s7-title": "Verifying everything works", "s8-title": "Quick reference", "s8-tip": "Once CONTENT is properly filled in, you just need to unlock contents from the admin interface — everything else (exercise creation, pre-filled link, automatic score) is handled by the system."}};
 
 const SHARED = {
   "th-col":"Col.","th-name":"Name","th-type":"Type","th-desc":"Description","th-req":"Required",
@@ -736,4 +675,4 @@ function setLang(lang) {
 setLang("fr");
 </script>
 </body>
-</html>'''
+</html>
