@@ -2028,16 +2028,18 @@ async function loadStudentContent(user) {
             const cat=getTestCat(e.title); if(!cat)return;
             const sc=scMap[String(e.id)]; if(!sc||!sc.maxScore)return;
             const d=e.assignedDate?parseDate(e.assignedDate):null;
-            byCat[cat].push({label:d?d.toLocaleDateString(locale,{month:"short"}):"—",x:d?d.getTime():0,y:Math.round((sc.score/sc.maxScore)*100)});
+            // Normaliser au 1er du mois pour grouper correctement
+            const monthTs = d ? new Date(d.getFullYear(), d.getMonth(), 1).getTime() : 0;
+            const label = d ? d.toLocaleDateString(locale,{month:"short"}) : "—";
+            byCat[cat].push({label, x: monthTs, y:Math.round((sc.score/sc.maxScore)*100)});
           });
           Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.x-b.x));
-          // Agréger par mois
+          // Agréger par mois (même timestamp = même mois)
           Object.keys(byCat).forEach(k=>{
             const byMonth={};
             byCat[k].forEach(pt=>{
-              const key=new Date(pt.x).toISOString().slice(0,7);
-              if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,x:pt.x,label:pt.label};}
-              byMonth[key].sum+=pt.y; byMonth[key].cnt++;
+              if(!byMonth[pt.x]){byMonth[pt.x]={sum:0,cnt:0,x:pt.x,label:pt.label};}
+              byMonth[pt.x].sum+=pt.y; byMonth[pt.x].cnt++;
             });
             byCat[k]=Object.values(byMonth).map(v=>({x:v.x,y:Math.round(v.sum/v.cnt),label:v.label})).sort((a,b)=>a.x-b.x);
           });
@@ -2903,9 +2905,9 @@ async function openStudentChart(studentId, studentName, level) {
         const sc = scMap[String(e.id)];
         if (!sc || !sc.maxScore) return;
         const d = e.assignedDate ? parseDate(e.assignedDate) : null;
+        const monthTs = d ? new Date(d.getFullYear(), d.getMonth(), 1).getTime() : 0;
         const label = d ? d.toLocaleDateString(locale,{month:"short",year:"2-digit"}) : "—";
-        const ts = d ? d.getTime() : 0;
-        byCat[cat].push({ label, x: ts, y: Math.round((sc.score/sc.maxScore)*100) });
+        byCat[cat].push({ label, x: monthTs, y: Math.round((sc.score/sc.maxScore)*100) });
       });
 
     // Trier par date + agréger par mois
@@ -2913,9 +2915,8 @@ async function openStudentChart(studentId, studentName, level) {
       byCat[k].sort((a,b)=>a.x-b.x);
       const byMonth={};
       byCat[k].forEach(pt=>{
-        const key=new Date(pt.x).toISOString().slice(0,7);
-        if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,x:pt.x,label:pt.label};}
-        byMonth[key].sum+=pt.y; byMonth[key].cnt++;
+        if(!byMonth[pt.x]){byMonth[pt.x]={sum:0,cnt:0,x:pt.x,label:pt.label};}
+        byMonth[pt.x].sum+=pt.y; byMonth[pt.x].cnt++;
       });
       byCat[k]=Object.values(byMonth).map(v=>({x:v.x,y:Math.round(v.sum/v.cnt),label:v.label})).sort((a,b)=>a.x-b.x);
     });
