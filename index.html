@@ -2800,12 +2800,17 @@ function toggleAdminLevel(rid, lvl) {
 // ── Parse date robuste — gère "01/02/2026" (fr-FR) ET "2026-02-01" (ISO) ──
 function parseDate(str) {
   if (!str) return null;
-  // Format ISO : "2026-02-01"
-  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return new Date(str);
-  // Format fr-FR : "01/02/2026"
-  const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-  return new Date(str);
+  // Format ISO : "2026-01-15" ou "2026-01-15T00:00:00"
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  }
+  // Format fr-FR : "15/01/2026"
+  const mFR = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (mFR) return new Date(parseInt(mFR[3]), parseInt(mFR[2])-1, parseInt(mFR[1]));
+  // Fallback : laisser JS parser (ex: "Thu Jan 15 2026...")
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 const TEST_CATS = {
