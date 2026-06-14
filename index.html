@@ -1456,6 +1456,17 @@
   </div>
 
   <!-- Notifications gérées par le bouton OneSignal natif (bas droite) -->
+
+  <!-- Forcer la synchronisation -->
+  <div class="profile-card">
+    <div class="profile-card-header" id="ph-sync">🔄 Synchronisation</div>
+    <div style="padding:1.2rem">
+      <p style="font-size:0.8rem;color:var(--gray);margin-bottom:1rem" id="sync-desc">Vide le cache local et recharge toutes les données depuis le serveur.</p>
+      <button class="btn-save-pin" id="btn-force-sync" onclick="forceSync()" style="background:linear-gradient(135deg,#7BAFD4,#5a9ac4)">
+        🔄 <span id="sync-btn-label">Forcer la synchronisation</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 
@@ -2433,6 +2444,13 @@ async function toggleNotifications() {
     if(msgEl) { msgEl.textContent = "Erreur: " + e.message; msgEl.className = "pin-msg error"; msgEl.style.display = "block"; }
   }
   if(btn) { btn.disabled = false; }
+}
+
+function forceSync() {
+  const btn = document.getElementById("btn-force-sync");
+  if (btn) { btn.disabled = true; btn.style.opacity = "0.7"; }
+  clearDataCache();
+  setTimeout(() => location.reload(), 300);
 }
 
 function togglePin(inputId) {
@@ -3698,6 +3716,9 @@ const TRANSLATIONS = {
     msgEmpty2:         "Chưa có tin nhắn nào",
     darkModeLabel:     "Chế độ tối",
     displayCard:       "Hiển thị",
+    syncCard:          "Đồng bộ",
+    syncDesc:          "Xoá bộ nhớ đệm và tải lại tất cả dữ liệu từ máy chủ.",
+    syncBtn:           "Đồng bộ dữ liệu",
   },
 
   en: {
@@ -3850,6 +3871,9 @@ const TRANSLATIONS = {
     msgEmpty2:         "No messages yet",
     darkModeLabel:     "Dark mode",
     displayCard:       "Display",
+    syncCard:          "Sync",
+    syncDesc:          "Clear local cache and reload all data from the server.",
+    syncBtn:           "Force sync",
   },
 
   fr: {
@@ -4002,6 +4026,9 @@ const TRANSLATIONS = {
     msgEmpty2:         "Pas encore de messages",
     darkModeLabel:     "Mode sombre",
     displayCard:       "Affichage",
+    syncCard:          "Synchronisation",
+    syncDesc:          "Vide le cache local et recharge toutes les données depuis le serveur.",
+    syncBtn:           "Forcer la synchronisation",
   }
 };
 
@@ -4098,6 +4125,9 @@ function applyLang() {
   const pfl_email = document.getElementById("pfl-email"); if(pfl_email) pfl_email.textContent = t("pflEmail");
   const ph_info   = document.getElementById("ph-info");   if(ph_info)   ph_info.textContent   = t("profileInfo");
   const ph_pin    = document.getElementById("ph-pin");    if(ph_pin)    ph_pin.textContent    = t("profilePinCard");
+  const ph_sync   = document.getElementById("ph-sync");   if(ph_sync)   ph_sync.textContent   = "🔄 " + t("syncCard");
+  const syncDesc  = document.getElementById("sync-desc"); if(syncDesc)  syncDesc.textContent  = t("syncDesc");
+  const syncBtn   = document.getElementById("sync-btn-label"); if(syncBtn) syncBtn.textContent = t("syncBtn");
   const pinNew = document.getElementById("pin-new"); if(pinNew) pinNew.placeholder = t("pinNewPlaceholder");
   const savePinBtn = document.getElementById("btn-save-pin"); if(savePinBtn && !savePinBtn.disabled) savePinBtn.textContent = "🔐 " + t("pinSaveBtn");
   // Add student labels
