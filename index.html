@@ -605,7 +605,7 @@
       padding: 0.6rem 1.1rem 0.6rem 2.8rem;
       border-bottom: 1px solid rgba(44,26,34,0.03);
       display: flex; align-items: center; gap: 0.7rem;
-      background: white;
+      background: var(--bg-card);
     }
     .content-manage-item:last-child { border-bottom: none; }
 
@@ -650,22 +650,6 @@
     }
     .ex-score-line.good   { color: #4a8a55; font-weight: 600; }
     .ex-score-line.medium { color: #b8860b; font-weight: 600; }
-
-    /* ── DARK MODE INPUTS — règle universelle ── */
-    body.dark-mode input,
-    body.dark-mode input:focus,
-    body.dark-mode input:active,
-    body.dark-mode textarea,
-    body.dark-mode textarea:focus,
-    body.dark-mode select {
-      color: var(--ink) !important;
-      background: var(--bg-soft) !important;
-      -webkit-text-fill-color: var(--ink) !important;
-    }
-    body.dark-mode input:focus,
-    body.dark-mode textarea:focus {
-      background: var(--bg-card) !important;
-    }
 
     /* ── PULL TO REFRESH ── */
     #ptr-indicator {
@@ -2002,7 +1986,7 @@ async function loadStudentContent(user) {
           return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
             '<span class="tree-item-type card-type '+tc+'" style="font-size:0.55rem;padding:0.1rem 0.35rem">'+badgeLabel+'</span>'+
             '<span class="tree-item-title">'+dispTitle+'</span>'+
-            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">'+STAR_SVG+'</button>'+
+            '<button class="btn-star'+(starred?" starred":"")+ '" onclick="toggleFav(event,\''+user.id+'\',\''+c.id+'\',\''+c.title.replace(/'/g,"&#39;")+'\',\''+lvl+'\',\''+(c.courseT||"").replace(/'/g,"&#39;")+'\',\''+url+'\',\''+(c.type||"pdf")+'\')" title="'+(starred?t("favRemove"):t("favAdd"))+'">'+STAR_SVG+'</button>'+
           '</div>';
         }).join("");
       }
@@ -2954,7 +2938,7 @@ function getFavs(userId) {
 function saveFavs(userId, favs) { localStorage.setItem(getFavKey(userId), JSON.stringify(favs)); }
 function isFav(userId, contentId) { return getFavs(userId).some(f => String(f.id) === String(contentId)); }
 
-function toggleFav(event, userId, contentId, title, level, courseT, url) {
+function toggleFav(event, userId, contentId, title, level, courseT, url, type) {
   event.stopPropagation();
   const favs = getFavs(userId);
   const idx  = favs.findIndex(f => String(f.id) === String(contentId));
@@ -2964,7 +2948,7 @@ function toggleFav(event, userId, contentId, title, level, courseT, url) {
     toast(t("favRemove"), "success");
   } else {
     if (favs.length >= FAV_MAX) { toast(t("favMax"), "error"); return; }
-    favs.push({ id: contentId, title, level, courseT, url });
+    favs.push({ id: contentId, title, level, courseT, url, type: type || "pdf" });
     saveFavs(userId, favs);
     toast(t("favAdd"), "success");
   }
@@ -2986,7 +2970,6 @@ function renderFavorites(userId) {
     wrap.innerHTML = '<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("favEmpty")+'</div>';
     return;
   }
-  // Arborescence catégorie → items (sans niveau)
   const byCat = {};
   favs.forEach(f => {
     const cat = f.courseT || t("courseTypeOther");
@@ -2996,19 +2979,17 @@ function renderFavorites(userId) {
   wrap.innerHTML = Object.entries(byCat).map(([cat, items], ci) => {
     const itemsHtml = items.map(f => {
       const {prefix, cleanTitle} = parseExTitle(f.title || "");
-      const typeGuess = f.url && f.url.includes("forms.gle") ? "form"
-        : f.url && /\.(pdf)/i.test(f.url) ? "pdf"
-        : "form";
-      const tc = "type-" + typeGuess;
+      const ftype = (f.type || "pdf").toLowerCase();
+      const tc = "type-" + ftype;
       const badgeLabel = prefix
         ? (prefix.startsWith("TEST") ? prefix : "EXERCICE")
-        : (typeGuess === "pdf" ? "PDF" : typeGuess === "video" ? "VIDEO" : typeGuess === "audio" ? "AUDIO" : "FORM");
+        : ftype === "pdf" ? "PDF" : ftype === "video" ? "VIDEO" : ftype === "audio" ? "AUDIO" : "FORM";
       const dispTitle = prefix ? cleanTitle : (f.title || "");
       return '<div class="tree-item">'+
         '<span class="tree-item-type card-type '+tc+'" style="font-size:0.5rem;padding:0.1rem 0.35rem;flex-shrink:0">'+badgeLabel+'</span>'+
         '<span class="tree-item-title" onclick="window.open(\''+f.url+'\',\'_blank\')" style="cursor:pointer">'+dispTitle+'</span>'+
         '<span style="font-size:0.65rem;color:var(--gray);flex-shrink:0">'+f.level+'</span>'+
-        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\')" title="'+t("favRemove")+'">'+STAR_SVG+'</button>'+
+        '<button class="btn-star starred" onclick="toggleFav(event,\''+userId+'\',\''+f.id+'\',\''+f.title.replace(/'/g,"&#39;")+'\',\''+f.level+'\',\''+f.courseT+'\',\''+f.url+'\',\''+ftype+'\')" title="'+t("favRemove")+'">'+STAR_SVG+'</button>'+
       '</div>';
     }).join("");
     return '<div class="tree-cat open" id="fav-cat-'+ci+'">'+
@@ -3241,14 +3222,6 @@ function parseExTitle(raw) {
     .replace("[TEST]",      "TEST");
   return { prefix: tag, cleanTitle: s.slice(m[0].length) || s };
 }
-function prefixBadgeHtml(prefix) {
-  if (!prefix) return "";
-  const isTest = prefix.startsWith("TEST");
-  const bg  = isTest ? "rgba(103,58,183,0.15)" : "rgba(232,75,122,0.12)";
-  const col = isTest ? "#7B5EA7"                : "var(--pink)";
-  return '<span style="font-size:0.46rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;background:'+bg+';color:'+col+';flex-shrink:0;letter-spacing:0.05em;white-space:nowrap">'+prefix+'</span>';
-}
-
 // ══════════════════════════════════════════════
 // EXERCISES — STUDENT
 // ══════════════════════════════════════════════
@@ -3314,7 +3287,7 @@ async function loadStudentExercises() {
           '<div class="ex-card-actions">'+
           consultBtn+
           '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\',\''+(ex.type||"form")+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
           '</div></div>';
       }).join("");
     }
@@ -3341,7 +3314,7 @@ async function loadStudentExercises() {
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
           consultBtn+
           '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
+          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\',\''+(ex.type||"form")+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
           '</div></div>';
       }).join("");
     }
@@ -4299,48 +4272,36 @@ function initPullToRefresh() {
   var indicator = document.getElementById("ptr-indicator");
   if (!indicator) return;
 
-  function getScrollTop() {
-    return (document.scrollingElement || document.documentElement || document.body).scrollTop || 0;
-  }
-
   document.addEventListener("touchstart", function(e) {
     _ptrTriggered = false;
-    _ptrStartY = getScrollTop() <= 2 ? e.touches[0].clientY : 0;
+    var scrollEl = document.scrollingElement || document.documentElement;
+    _ptrStartY = (scrollEl.scrollTop <= 2) ? e.touches[0].clientY : 0;
   }, { passive: true });
 
   document.addEventListener("touchmove", function(e) {
-    if (_ptrStartY === 0) return;
-    if (getScrollTop() > 2) { _ptrStartY = 0; indicator.classList.remove("visible"); _ptrActive = false; return; }
+    if (!_ptrStartY) return;
     var dy = e.touches[0].clientY - _ptrStartY;
-    if (dy > 55) {
+    if (dy > 60) {
       _ptrActive = true;
       indicator.textContent = dy > 120 ? "🌸 Relâche pour actualiser" : "↓ Continue...";
       indicator.classList.add("visible");
     } else {
-      indicator.classList.remove("visible");
       _ptrActive = false;
+      indicator.classList.remove("visible");
     }
   }, { passive: true });
 
   document.addEventListener("touchend", function() {
     if (_ptrActive && !_ptrTriggered) {
       _ptrTriggered = true;
-      _ptrActive = false;
-      _ptrStartY = 0;
       indicator.textContent = "🌸 Actualisation...";
       clearDataCache();
-      setTimeout(function() {
-        if (currentUserGlobal) {
-          if (currentUserGlobal.role === "Admin") loadAdminPanel(currentUserGlobal);
-          else { loadStudentContent(currentUserGlobal); loadStudentExercises(); }
-        }
-        setTimeout(function() { indicator.classList.remove("visible"); }, 700);
-      }, 300);
+      setTimeout(function() { location.reload(); }, 300);
     } else {
       indicator.classList.remove("visible");
-      _ptrActive = false;
-      _ptrStartY = 0;
     }
+    _ptrActive = false;
+    _ptrStartY = 0;
   });
 }
 
