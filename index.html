@@ -651,6 +651,32 @@
     .ex-score-line.good   { color: #4a8a55; font-weight: 600; }
     .ex-score-line.medium { color: #b8860b; font-weight: 600; }
 
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group input:focus,
+    body.dark-mode .pin-input-wrap input,
+    body.dark-mode .pin-input-wrap input:focus,
+    body.dark-mode #notif-title,
+    body.dark-mode #notif-message,
+    body.dark-mode #notif-student-select,
+    body.dark-mode select,
+    body.dark-mode input[type="text"],
+    body.dark-mode input[type="email"],
+    body.dark-mode input[type="password"] {
+      color: var(--ink) !important;
+    }
+    body.dark-mode textarea {
+      color: var(--ink) !important;
+      background: var(--bg-soft) !important;
+    }
+
+    /* ── PULL TO REFRESH ── */
+    #ptr-indicator {
+      text-align: center; padding: 0.6rem; font-size: 0.82rem;
+      color: var(--pink); display: none; letter-spacing: 0.05em;
+      transition: opacity 0.2s;
+    }
+    #ptr-indicator.visible { display: block; }
+
     /* ── LOADING ── */
     .loading { text-align: center; padding: 3rem; color: var(--gray); font-size: 0.84rem; }
     .spinner {
@@ -1604,6 +1630,9 @@
     <div id="dash-avg-content"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 
+<!-- ══ PULL TO REFRESH INDICATOR ══ -->
+<div id="ptr-indicator">🌸 Relâche pour actualiser</div>
+
 <!-- ══ BOTTOM NAV ══ -->
 <div id="bottom-nav">
   <!-- filled dynamically based on role -->
@@ -1620,6 +1649,27 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoq
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 const DARK_KEY = "jun_dark_mode";
+const CACHE_KEY = "jun_data_cache";
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// ── CACHE HELPERS ──
+function saveDataCache(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch(e) {}
+}
+function loadDataCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (Date.now() - obj.ts > CACHE_TTL) return null; // expiré
+    return obj.data;
+  } catch(e) { return null; }
+}
+function clearDataCache() {
+  try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
+}
 
 // ── DARK MODE ──
 function initDarkMode() {
@@ -3160,6 +3210,31 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
 }
 
 // ══════════════════════════════════════════════
+// TITRE MOBILE — extraire préfixe [EXERCICE] / [TEST][GR] etc.
+// Retourne { prefix: "EXERCICE"|"TEST·GR"|…|null, cleanTitle: "..." }
+// ══════════════════════════════════════════════
+function parseExTitle(raw) {
+  const s = raw || "";
+  const m = s.match(/^(\[(?:EXERCICE|TEST\]\[?(?:GR|VO|LI|RE)?)\]?)\s*/i);
+  if (!m) return { prefix: null, cleanTitle: s };
+  const tag = m[1].toUpperCase()
+    .replace("[EXERCICE]",   "EXERCICE")
+    .replace("[TEST][GR]",  "TEST·GR")
+    .replace("[TEST][VO]",  "TEST·VO")
+    .replace("[TEST][LI]",  "TEST·LI")
+    .replace("[TEST][RE]",  "TEST·RE")
+    .replace("[TEST]",      "TEST");
+  return { prefix: tag, cleanTitle: s.slice(m[0].length) || s };
+}
+function prefixBadgeHtml(prefix) {
+  if (!prefix) return "";
+  const isTest = prefix.startsWith("TEST");
+  const bg  = isTest ? "rgba(103,58,183,0.15)" : "rgba(232,75,122,0.12)";
+  const col = isTest ? "#7B5EA7"                : "var(--pink)";
+  return '<span style="font-size:0.46rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;background:'+bg+';color:'+col+';flex-shrink:0;letter-spacing:0.05em;white-space:nowrap">'+prefix+'</span>';
+}
+
+// ══════════════════════════════════════════════
 // EXERCISES — STUDENT
 // ══════════════════════════════════════════════
 async function loadStudentExercises() {
@@ -3211,13 +3286,16 @@ async function loadStudentExercises() {
         const form=isForm(ex);
         const icon=typeIcon(ex);
         const lbl=typeLabel(ex);
+        const rawTitle = gt(ex);
+        const {prefix, cleanTitle} = parseExTitle(rawTitle);
         const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+icon+' '+lbl+'</a>':"";
         return '<div class="ex-card" id="ex-card-'+ex.id+'">'+
           '<div class="ex-card-info">'+
-          '<div style="display:flex;align-items:center;gap:0.4rem">'+
+          '<div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap">'+
           '<span class="card-type type-'+( (ex.type||"form").toLowerCase() )+'" style="font-size:0.5rem;padding:0.1rem 0.4rem;flex-shrink:0">'+lbl.toUpperCase()+'</span>'+
-          '<div class="ex-card-title">'+gt(ex)+'</div>'+
+          prefixBadgeHtml(prefix)+
           '</div>'+
+          '<div class="ex-card-title" style="margin-top:0.25rem">'+cleanTitle+'</div>'+
           '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.assignedDate||"—" )+'</div>'+
           '</div>'+
           '<div class="ex-card-actions">'+
@@ -3237,13 +3315,16 @@ async function loadStudentExercises() {
         const sl=pct!==null?'<div class="ex-score-line '+( pct>=0.7?"good":"medium" )+'">🎯 '+sc.score+"/"+sc.maxScore+' pts</div>':"";
         const icon=typeIcon(ex);
         const lbl=typeLabel(ex);
+        const rawTitle = gt(ex);
+        const {prefix, cleanTitle} = parseExTitle(rawTitle);
         const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+icon+' '+lbl+'</a>':"";
         return '<div class="ex-card done">'+
           '<div class="ex-card-info">'+
-          '<div style="display:flex;align-items:center;gap:0.4rem">'+
+          '<div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap">'+
           '<span class="card-type type-'+( (ex.type||"form").toLowerCase() )+'" style="font-size:0.5rem;padding:0.1rem 0.4rem;flex-shrink:0">'+lbl.toUpperCase()+'</span>'+
-          '<div class="ex-card-title">'+gt(ex)+'</div>'+
+          prefixBadgeHtml(prefix)+
           '</div>'+
+          '<div class="ex-card-title" style="margin-top:0.25rem">'+cleanTitle+'</div>'+
           '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.doneDate||ex.assignedDate||"—" )+'</div>'+
           sl+
           '</div>'+
@@ -4200,32 +4281,72 @@ async function loadAdminStats() {
 }
 
 
+// ══════════════════════════════════════════════
+// PULL TO REFRESH
+// ══════════════════════════════════════════════
+var _ptrStartY = 0, _ptrActive = false;
+function initPullToRefresh() {
+  var indicator = document.getElementById("ptr-indicator");
+  if (!indicator) return;
+  document.addEventListener("touchstart", function(e) {
+    if (window.scrollY === 0) _ptrStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener("touchmove", function(e) {
+    if (window.scrollY !== 0) return;
+    var dy = e.touches[0].clientY - _ptrStartY;
+    if (dy > 80) {
+      _ptrActive = true;
+      indicator.textContent = dy > 140 ? "🌸 Relâche pour actualiser" : "↓ Tire encore...";
+      indicator.classList.add("visible");
+    }
+  }, { passive: true });
+  document.addEventListener("touchend", function() {
+    if (_ptrActive) {
+      _ptrActive = false;
+      indicator.textContent = "🌸 Actualisation...";
+      clearDataCache();
+      setTimeout(function() {
+        if (currentUserGlobal) {
+          if (currentUserGlobal.role === "Admin") {
+            loadAdminPanel(currentUserGlobal);
+          } else {
+            loadStudentContent(currentUserGlobal);
+            loadStudentExercises();
+          }
+        }
+        indicator.classList.remove("visible");
+      }, 400);
+    }
+  });
+}
+
 (function init() {
   // Init language
   currentLang = localStorage.getItem(LANG_KEY) || "vi";
   document.documentElement.lang = currentLang;
   applyLang();
-
   showPage("login");
+  initPullToRefresh();
+
   const user = loadSession();
-  if (user) {
-    // Vérifier si le compte est toujours actif avant de restaurer la session
-    if (user.role === "Admin") {
-      initUser(user);
-    } else {
-      api({ action: "checkActive", userId: user.id }).then(r => {
-        if (r && r.active) {
-          initUser(user);
-        } else {
-          clearSession();
-          showPage("login");
-          setTimeout(() => showError(t("disabledAccount")), 300);
-        }
-      }).catch(() => {
-        // En cas d'erreur réseau → on laisse entrer (évite de bloquer offline)
-        initUser(user);
-      });
-    }
+  if (!user) return;
+
+  // Toujours initier l'app immédiatement (avec ou sans cache)
+  initUser(user);
+
+  // Pour les élèves : vérifier le compte actif en parallèle
+  if (user.role !== "Admin") {
+    api({ action: "checkActive", userId: user.id }).then(function(r) {
+      if (!r || !r.active) {
+        clearSession();
+        clearDataCache();
+        doLogout();
+        setTimeout(function() { showError(t("disabledAccount")); }, 300);
+      }
+      // Sinon : compte actif, rien à faire (initUser déjà lancé)
+    }).catch(function() {
+      // Erreur réseau → on laisse connecté (offline friendly)
+    });
   }
 })();
 
