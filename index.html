@@ -1354,11 +1354,12 @@
     <div class="page-subtitle" id="admin-subtitle-el">🌸 Admin Panel · Quản lý học viên</div>
 
     <!-- Stats rapides -->
-    <div style="display:flex;gap:0.6rem;margin-bottom:1rem">
+    <div style="display:flex;gap:0.6rem;margin-bottom:1rem;align-items:center">
       <div class="dash-stat-row" style="flex:1;margin-bottom:0">
         <span class="dash-stat-icon">👥</span>
         <div><div class="dash-stat-label" data-i="activeStudents">Élèves actifs</div><div class="dash-stat-value" id="admin-student-count">—</div></div>
       </div>
+      <button id="btn-admin-sync" onclick="forceSyncAdmin()" title="Recharger les données" style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:0.5rem 0.8rem;font-size:1.1rem;cursor:pointer;color:var(--text);flex-shrink:0">🔄</button>
     </div>
     <div id="admin-stats-content" style="margin-bottom:1rem">
       <div class="loading"><div class="spinner"></div></div>
@@ -1649,7 +1650,7 @@ const CACHE_ADMIN_KEY = "jun_admin_cache";
 
 // TTL différenciés par type de données
 const CACHE_TTL_CONTENT   = 24 * 60 * 60 * 1000; // 24h  — contenu (change rarement)
-const CACHE_TTL_ADMIN     = 60 * 60 * 1000;       // 1h   — élèves + contenu admin
+const CACHE_TTL_ADMIN     = 999 * 24 * 60 * 60 * 1000; // ∞    — élèves + contenu admin (invalidé manuellement)
 const CACHE_TTL_SCORES    = 60 * 60 * 1000;       // 1h   — scores
 const CACHE_TTL_EXERCISES = 10 * 60 * 1000;       // 10min — exercices (statut pending/done)
 const CACHE_TTL_ADMIN_EX  = 5  * 60 * 1000;       // 5min  — page exercices admin
@@ -1676,6 +1677,22 @@ function _cacheGet(key) {
   } catch(e) { return null; }
 }
 function _cacheDel(key) { try { localStorage.removeItem(key); } catch(e) {} }
+
+// Invalide uniquement le cache admin sans toucher au reste
+function invalidateAdminCache() {
+  _cacheDel(CACHE_ADMIN_KEY);
+  _cacheDel(CACHE_ADMIN_KEY + "_ex");
+}
+
+// Sync admin uniquement — recharge élèves + contenu sans reload complet
+async function forceSyncAdmin() {
+  const btn = document.getElementById("btn-admin-sync");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
+  invalidateAdminCache();
+  await loadAdminPanel(currentUserGlobal);
+  if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
+  toast("✅ Données admin rechargées", "success");
+}
 
 function saveDataCache(data)  { _cacheSet(CACHE_KEY, data); }
 function loadDataCache()      { return _cacheGet(CACHE_KEY); }
@@ -2283,6 +2300,7 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
         (exData2.exercises || []).map(e => String(e.contentId)).filter(Boolean)
       );
       const stu = allStudents.find(s => String(s.id) === String(studentId)) || {};
+      invalidateAdminCache();
       renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
     } else {
       toast(data.message || t("errToggle"), "error");
@@ -3228,6 +3246,7 @@ async function doAddStudent() {
       showAddMsg(t("addSuccess"), "success");
       ["as-name","as-family","as-email","as-pin"].forEach(id => { document.getElementById(id).value = ""; });
       document.querySelectorAll('input[name="as-level"]').forEach(cb => cb.checked = false);
+      invalidateAdminCache();
       loadAdminPanel(currentUserGlobal);
     } else {
       showAddMsg(data.message || t("addErrFail"), "error");
