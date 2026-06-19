@@ -2216,9 +2216,22 @@ function selectStudentFromDD(id, name, familyName) {
   if (el) el.classList.add("selected");
   selectStudent(id, name, familyName);
 }
+// Cache par élève : { unlocked, assignedContentIds, filteredContent }
+const _studentContentCache = {};
+
 async function selectStudent(id, name, familyName) {
   selectedStudentId = id;
   const panel = document.getElementById("admin-content-panel");
+
+  // ── Servir depuis le cache élève si disponible ──
+  if (_studentContentCache[id]) {
+    const c = _studentContentCache[id];
+    studentAccessMap[id] = c.unlocked;
+    window._assignedContentIds = c.assignedContentIds;
+    renderContentManage(id, name, familyName, c.unlocked, c.filteredContent);
+    return;
+  }
+
   panel.innerHTML =
     '<div class="panel-header">'+t("contentHeader")+'</div>'+
     '<div class="selected-student-info">'+
@@ -2252,6 +2265,10 @@ async function selectStudent(id, name, familyName) {
     const filteredContent = stuLevels.length > 0
       ? allContent.filter(c => stuLevels.includes(String(c.level || "").trim()))
       : allContent;
+
+    // ── Sauvegarder dans le cache élève ──
+    _studentContentCache[id] = { unlocked, assignedContentIds, filteredContent };
+
     renderContentManage(id, name, familyName, unlocked, filteredContent);
   } catch(e) {
     console.error("selectStudent error:", e);
@@ -2301,6 +2318,7 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
       );
       const stu = allStudents.find(s => String(s.id) === String(studentId)) || {};
       invalidateAdminCache();
+      delete _studentContentCache[studentId]; // invalider cache élève
       renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
     } else {
       toast(data.message || t("errToggle"), "error");
