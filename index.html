@@ -1645,7 +1645,8 @@ const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 const DARK_KEY = "jun_dark_mode";
 const CACHE_KEY       = "jun_data_cache";
-const CACHE_EX_KEY    = "jun_ex_cache";
+const CACHE_EX_KEY      = "jun_ex_cache";         // exercices pending (10 min)
+const CACHE_EX_DONE_KEY = "jun_ex_done_cache";    // exercices done + scores (infini)
 const CACHE_ADMIN_KEY = "jun_admin_cache";
 
 // TTL différenciés par type de données
@@ -1659,6 +1660,7 @@ const CACHE_TTL_ADMIN_EX  = 5  * 60 * 1000;       // 5min  — page exercices ad
 const CACHE_TTL_MAP = {
   [CACHE_KEY]:              CACHE_TTL_CONTENT,
   [CACHE_EX_KEY]:           CACHE_TTL_EXERCISES,
+  [CACHE_EX_DONE_KEY]:      999 * 24 * 60 * 60 * 1000, // ∞ — exercices terminés (état final)
   [CACHE_ADMIN_KEY]:        CACHE_TTL_ADMIN,
   [CACHE_ADMIN_KEY+"_ex"]:  CACHE_TTL_ADMIN_EX,
 };
@@ -1699,6 +1701,7 @@ function loadDataCache()      { return _cacheGet(CACHE_KEY); }
 function clearDataCache() {
   _cacheDel(CACHE_KEY);
   _cacheDel(CACHE_EX_KEY);
+  _cacheDel(CACHE_EX_DONE_KEY);
   _cacheDel(CACHE_ADMIN_KEY);
 }
 
@@ -3353,19 +3356,32 @@ async function loadStudentExercises() {
   const comB=document.getElementById("ex-stu-completed-body");
   if(!inB||!comB)return;
 
-  // ── Servir depuis le cache immédiatement ──
-  const cached = _cacheGet(CACHE_EX_KEY);
-  if (cached) {
-    _renderStudentExercises(cached.ed, cached.sd, inB, comB);
+  // ── Cache done (infini) + cache pending (10 min) ──
+  const cachedDone    = _cacheGet(CACHE_EX_DONE_KEY); // exercices terminés + scores
+  const cachedPending = _cacheGet(CACHE_EX_KEY);       // exercices en cours
+
+  if (cachedDone && cachedPending) {
+    // Tout est en cache → instantané
+    const ed = { exercises: [...cachedPending.exercises, ...cachedDone.exercises] };
+    _renderStudentExercises(ed, cachedDone.sd, inB, comB);
     return;
   }
 
   try{
-    const [ed,sd]=await Promise.all([
+    const [ed, sd] = await Promise.all([
       api({action:"getMyExercises", studentId:currentUserGlobal.id, pin:getStoredPin()}),
-      api({action:"getMyScores", studentId:currentUserGlobal.id, pin:getStoredPin()})
+      api({action:"getMyScores",    studentId:currentUserGlobal.id, pin:getStoredPin()})
     ]);
-    _cacheSet(CACHE_EX_KEY, { ed, sd });
+
+    // Séparer done et pending
+    const allEx   = ed.exercises || [];
+    const doneEx  = allEx.filter(e => e.status === "done");
+    const pendEx  = allEx.filter(e => e.status !== "done");
+
+    // Cache done → infini | pending → 10 min
+    _cacheSet(CACHE_EX_DONE_KEY, { exercises: doneEx, sd });
+    _cacheSet(CACHE_EX_KEY,      { exercises: pendEx });
+
     _renderStudentExercises(ed, sd, inB, comB);
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
@@ -3473,6 +3489,7 @@ async function markExerciseDone(exId) {
     if (data.success) {
       toast(t("exMarkedDone"), "success");
       _cacheDel(CACHE_EX_KEY);
+  _cacheDel(CACHE_EX_DONE_KEY);
       setTimeout(() => loadStudentExercises(), 800);
     } else {
       toast(data.message || t("errToggle"), "error");
