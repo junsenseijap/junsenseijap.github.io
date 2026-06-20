@@ -389,6 +389,7 @@
     .type-audio { background: rgba(158,196,160,0.25); color: #4a8a55; border: 1px solid rgba(158,196,160,0.6); }
     .type-video { background: var(--blue-pale);        color: #3a7aaa; border: 1px solid var(--border-blue); }
     .type-pdf   { background: var(--pink-pale);        color: var(--pink); border: 1px solid rgba(232,75,122,0.25); }
+    .type-link  { background: rgba(20,180,160,0.12);   color: #0ea891; border: 1px solid rgba(20,180,160,0.3); }
     .type-image { background: #ede8f5;                 color: #7a5aa0; border: 1px solid #c8b8e0; }
 
     .card-title {
@@ -2228,10 +2229,10 @@ async function loadStudentContent(user) {
           const lvl=c.level||"?";
           const starred=isFav(user.id,String(c.id));
           const {prefix, cleanTitle} = parseExTitle(c.title||"");
-          const typeRaw=(c.type||"pdf").toUpperCase();
+          const typeRaw=(c.type||"pdf").toLowerCase();
           const badgeLabel = prefix
             ? (prefix.startsWith("TEST") ? prefix : "EXERCICE")
-            : typeRaw;
+            : typeRaw === "link" ? "🔗 LINK" : typeRaw.toUpperCase();
           const dispTitle = prefix ? cleanTitle : (c.title||"");
           return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
             '<span class="tree-item-type card-type '+tc+'" style="font-size:0.55rem;padding:0.1rem 0.35rem">'+badgeLabel+'</span>'+
@@ -3312,7 +3313,7 @@ function renderFavorites(userId) {
       const tc = "type-" + ftype;
       const badgeLabel = prefix
         ? (prefix.startsWith("TEST") ? prefix : "EXERCICE")
-        : ftype === "pdf" ? "PDF" : ftype === "video" ? "VIDEO" : ftype === "audio" ? "AUDIO" : "FORM";
+        : ftype === "pdf" ? "PDF" : ftype === "video" ? "VIDEO" : ftype === "audio" ? "AUDIO" : ftype === "link" ? "🔗 LINK" : "FORM";
       const dispTitle = prefix ? cleanTitle : (f.title || "");
       return '<div class="tree-item">'+
         '<span class="tree-item-type card-type '+tc+'" style="font-size:0.5rem;padding:0.1rem 0.35rem;flex-shrink:0">'+badgeLabel+'</span>'+
@@ -3756,9 +3757,9 @@ async function loadAdminExercises() {
           '<span class="ex-score-badge '+(sc.score/sc.maxScore>=0.7?"good":"medium")+'">🎯 '+sc.score+'/'+sc.maxScore+'</span>':
           ex.status==="done"?'<span class="ex-score-badge good">✅</span>':'<span class="ex-score-badge pending">⏳</span>';
         const tp=(ex.type||"form").toLowerCase();
-        const typeColor=tp==="pdf"?"rgba(232,75,122,0.15)":tp==="video"?"rgba(52,120,200,0.15)":tp==="audio"?"rgba(80,180,120,0.15)":"rgba(103,58,183,0.15)";
-        const typeTextColor=tp==="pdf"?"#E84B7A":tp==="video"?"#3A8FC7":tp==="audio"?"#3DAA6E":"#7B5EA7";
-        const typeLabel=tp==="pdf"?"PDF":tp==="video"?"VIDEO":tp==="audio"?"AUDIO":"FORM";
+        const typeColor=tp==="pdf"?"rgba(232,75,122,0.15)":tp==="video"?"rgba(52,120,200,0.15)":tp==="audio"?"rgba(80,180,120,0.15)":tp==="link"?"rgba(20,180,160,0.12)":"rgba(103,58,183,0.15)";
+        const typeTextColor=tp==="pdf"?"#E84B7A":tp==="video"?"#3A8FC7":tp==="audio"?"#3DAA6E":tp==="link"?"#0ea891":"#7B5EA7";
+        const typeLabel=tp==="pdf"?"PDF":tp==="video"?"VIDEO":tp==="audio"?"AUDIO":tp==="link"?"🔗 LINK":"FORM";
         const typeBadge='<span style="font-size:0.48rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;background:'+typeColor+';color:'+typeTextColor+';flex-shrink:0;letter-spacing:0.04em">'+typeLabel+'</span>';
         const title=ex.formUrl
           ?'<span class="ex-detail-title" onclick="window.open(\''+ex.formUrl+'\',\'_blank\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+gt(ex)+'</span>'
@@ -4875,7 +4876,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
       '<div class="unlock-status '+(isUnlocked?"on":"off")+'"></div>'+
       '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
       '<div class="content-manage-title">'+c.title+'</div>'+
-      '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type||"").toUpperCase()+'</span></div></div>'+
+      '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type==="link"?"🔗 LINK":(c.type||"").toUpperCase())+'</span></div></div>'+
       '<button class="btn-unlock '+(isUnlocked?"unlocked":"locked")+'" id="btn-c-'+c.id+'"'+
       ' onclick="toggleContent('+studentId+','+c.id+','+isUnlocked+')">'+
       (isUnlocked?t("btnLock"):t("btnUnlock"))+'</button></div>';
