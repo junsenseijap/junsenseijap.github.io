@@ -4897,14 +4897,24 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     const subjMap  = byLevel[lvl];
     const subjKeys = Object.keys(subjMap).sort(function(a,b){ return (subjMap[a].order||99)-(subjMap[b].order||99); });
     if (!subjKeys.length) return "";
-    const totalInLevel    = subjKeys.reduce(function(n,s){ return n+subjMap[s].lessons.filter(function(c){ return (c.type||"").toLowerCase()!=="form"; }).length; }, 0);
-    const unlockedInLevel = subjKeys.reduce(function(n,s){ return n+subjMap[s].lessons.filter(function(c){ return unlocked.has(String(c.id))&&(c.type||"").toLowerCase()!=="form"; }).length; }, 0);
+    const totalInLevel    = subjKeys.reduce(function(n,s){
+      var d = subjMap[s];
+      return n + d.lessons.length + d.exercises.length + d.tests.length;
+    }, 0);
+    const unlockedInLevel = subjKeys.reduce(function(n,s){
+      var d = subjMap[s];
+      return n + d.lessons.filter(function(c){ return unlocked.has(String(c.id)); }).length
+               + d.exercises.filter(function(c){ return unlocked.has(String(c.id)); }).length
+               + d.tests.filter(function(c){ return unlocked.has(String(c.id)); }).length;
+    }, 0);
     const subjRows = subjKeys.map(function(subj) {
       const data   = subjMap[subj];
       const ctInfo = translateCourseT(subj);
       const safeId = subj.replace(/[^a-zA-Z0-9]/g,"_")+"_"+lvl;
-      const totalInSubj    = data.lessons.filter(function(c){ return (c.type||"").toLowerCase()!=="form"; }).length;
-      const unlockedInSubj = data.lessons.filter(function(c){ return unlocked.has(String(c.id))&&(c.type||"").toLowerCase()!=="form"; }).length;
+      const totalInSubj    = data.lessons.length + data.exercises.length + data.tests.length;
+      const unlockedInSubj = data.lessons.filter(function(c){ return unlocked.has(String(c.id)); }).length
+                           + data.exercises.filter(function(c){ return unlocked.has(String(c.id)); }).length
+                           + data.tests.filter(function(c){ return unlocked.has(String(c.id)); }).length;
       return '<div class="coursetype-row" id="ct-'+lvl+'-'+safeId+'">'+
         '<div class="coursetype-header" onclick="toggleCourseT(\''+lvl+'\',\''+safeId+'\')">'+
         '<span class="coursetype-icon">'+ctInfo.icon+'</span>'+
