@@ -1434,6 +1434,7 @@
         <div><div class="dash-stat-label" data-i="activeStudents">Élèves actifs</div><div class="dash-stat-value" id="admin-student-count">—</div></div>
       </div>
       <button id="btn-admin-sync" onclick="forceSyncAdmin()" title="Recharger les données" style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:0.5rem 0.8rem;font-size:1.1rem;cursor:pointer;color:var(--text);flex-shrink:0">🔄</button>
+      <button id="btn-toggle-sync-panel" onclick="toggleSyncPanel()" title="Mise à jour des contenus" style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:0.5rem 0.8rem;font-size:1.1rem;cursor:pointer;color:var(--text);flex-shrink:0">🗄️</button>
     </div>
     <div id="admin-stats-content" style="margin-bottom:1rem">
       <div class="loading"><div class="spinner"></div></div>
@@ -1904,6 +1905,16 @@ async function forceSyncAdmin() {
   toast("✅ Données admin rechargées", "success");
 }
 
+function toggleSyncPanel() {
+  const sp = document.getElementById("admin-sync-panel");
+  const btn = document.getElementById("btn-toggle-sync-panel");
+  if (!sp) return;
+  const isOpen = sp.style.display !== "none";
+  sp.style.display = isOpen ? "none" : "block";
+  if (btn) btn.style.background = isOpen ? "var(--bg-card)" : "rgba(232,75,122,0.12)";
+  if (btn) btn.style.borderColor = isOpen ? "var(--border)" : "var(--pink)";
+}
+
 function saveDataCache(data)  { _cacheSet(CACHE_KEY, data); }
 function loadDataCache()      { return _cacheGet(CACHE_KEY); }
 function clearDataCache() {
@@ -2344,8 +2355,7 @@ async function loadStudentContent(user) {
 
 async function loadAdminPanel(user) {
   adminUser = user;
-  const _sp = document.getElementById("admin-sync-panel");
-  if (_sp) _sp.style.display = "block";
+  // sync panel remains hidden until user clicks the 🗄️ button
   const ddList = document.getElementById("student-dd-list");
 
   // ── Servir depuis le cache immédiatement ──
@@ -3953,7 +3963,9 @@ const TRANSLATIONS = {
     syncStep3: "Bước 3 · Lấy ID các trường",
     syncStep4: "Bước 4 · Tải lại dữ liệu",
     syncRun:   "Khởi động",
-    // EXERCISES
+    subLecons:    "Bài học",
+    subExercices: "Bài tập",
+    subTests:     "Kiểm tra",
     exEmpty:           "Chưa có bài tập nào 🌸",
     exOpen:            "Mở",
     exDone:            "Hoàn thành",
@@ -4118,8 +4130,10 @@ const TRANSLATIONS = {
     syncStep3: "Step 3 · Retrieve Entry IDs",
     syncStep4: "Step 4 · Reload Data",
     syncRun:   "Run",
+    subLecons:    "Lessons",
+    subExercices: "Exercises",
+    subTests:     "Tests",
     // EXERCISES
-    exEmpty:           "No exercises yet 🌸",
     exOpen:            "Open",
     exDone:            "Done",
     exMarkDone:        "✅ Mark as done",
@@ -4283,8 +4297,10 @@ const TRANSLATIONS = {
     syncStep3: "Étape 3 · Récupérer les Entry IDs",
     syncStep4: "Étape 4 · Recharger les données",
     syncRun:   "Lancer",
+    subLecons:    "Leçons",
+    subExercices: "Exercices",
+    subTests:     "Tests",
     // EXERCISES
-    exEmpty:           "Pas d'exercices pour l'instant 🌸",
     exOpen:            "Ouvrir",
     exDone:            "Terminé",
     exMarkDone:        "✅ Marquer comme fait",
@@ -4792,12 +4808,22 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
 
   const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading"];
   const LEVELS = ["N5","N4","N3","N2","N1"];
+  // Fixed order: 1=Grammar, 2=Vocabulary, 3=Listening, 4=Reading
+  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4 };
+  function getSubjectOrderKey(ct) {
+    const ctL = (ct||"").toLowerCase();
+    if (ctL.includes("gram")) return 1;
+    if (ctL.includes("vocab")) return 2;
+    if (ctL.includes("listen") || ctL.includes("écoute")) return 3;
+    if (ctL.includes("read") || ctL.includes("lecture")) return 4;
+    return 99;
+  }
   const subjectOrder = {};
   content.forEach(function(c) {
     const ct = (c.courseT||"").trim();
     const ctL = ct.toLowerCase();
-    if (MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); }) && !(ct in subjectOrder))
-      subjectOrder[ct] = Object.keys(subjectOrder).length;
+    if ((MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); }) || ctL.includes("vocabular")) && !(ct in subjectOrder))
+      subjectOrder[ct] = getSubjectOrderKey(ct);
   });
 
   const byLevel = {};
@@ -4808,19 +4834,19 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     const ctL = ct.toLowerCase();
     const subType = (c.subType||"lesson").toLowerCase();
     if (!byLevel[lvl]) byLevel[lvl] = {};
-    const isMain = MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); });
+    const isMain = MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); }) || ctL.includes("vocabular");
     if (isMain) {
-      if (!byLevel[lvl][ct]) byLevel[lvl][ct] = { lessons:[], exercises:[], tests:[], order: subjectOrder[ct]||99 };
+      if (!byLevel[lvl][ct]) byLevel[lvl][ct] = { lessons:[], exercises:[], tests:[], order: subjectOrder[ct] || getSubjectOrderKey(ct) };
       if (subType==="exercise") byLevel[lvl][ct].exercises.push(c);
       else if (subType==="test") byLevel[lvl][ct].tests.push(c);
       else byLevel[lvl][ct].lessons.push(c);
     } else if (ctL.includes("exerc")) {
       const subj = getSubjectFromTitle(c.title);
-      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: subjectOrder[subj]||99 };
+      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: subjectOrder[subj]||getSubjectOrderKey(subj) };
       byLevel[lvl][subj].exercises.push(c);
     } else if (ctL.includes("test")) {
       const subj = getSubjectFromTitle(c.title);
-      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: subjectOrder[subj]||99 };
+      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: subjectOrder[subj]||getSubjectOrderKey(subj) };
       byLevel[lvl][subj].tests.push(c);
     }
   });
