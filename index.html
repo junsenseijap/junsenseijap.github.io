@@ -1004,6 +1004,60 @@
     /* PERMANENT PADDING */
     #page-profile,#page-add-student,
     #page-exercises,#page-admin-exercises{padding-top:0.5rem !important;}
+
+    /* Sync Drive panel */
+    .sync-step {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 0.9rem;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+    }
+    .sync-step-header {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+    .sync-step-num {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .sync-step-label {
+      font-size: 0.82rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .sync-step-status {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .sync-step.done {
+      border-color: rgba(74,138,85,0.4);
+      background: rgba(74,138,85,0.06);
+    }
+    .sync-step.done .sync-step-num { color: #4a8a55; }
+    .btn-sync-step {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-sync-step:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     @media(max-width:600px){
       #page-profile,#page-add-student,
       #page-exercises,#page-admin-exercises{padding-top:0.3rem !important;}
@@ -1384,6 +1438,62 @@
         ↑ Chọn một học viên để quản lý nội dung
       </div>
     </div>
+
+    <!-- Panneau Sync Drive -->
+    <div class="panel" id="admin-sync-panel" style="margin-top:1rem">
+      <div class="panel-header" id="ph-sync-drive">🔄 <span data-i="syncDriveTitle">Mise à jour des contenus</span></div>
+      <div style="padding:1rem;display:flex;flex-direction:column;gap:0.8rem">
+
+        <!-- Step 1 -->
+        <div class="sync-step" id="sync-step-1">
+          <div class="sync-step-header">
+            <span class="sync-step-num" id="sync-num-1">①</span>
+            <span class="sync-step-label" data-i="syncStep1">Sync Drive → Contenu</span>
+            <span class="sync-step-status" id="sync-status-1"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1)">
+            <span data-i="syncRun">Lancer</span>
+          </button>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="sync-step" id="sync-step-2">
+          <div class="sync-step-header">
+            <span class="sync-step-num" id="sync-num-2">②</span>
+            <span class="sync-step-label" data-i="syncStep2">Configurer les Formulaires</span>
+            <span class="sync-step-status" id="sync-status-2"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-2" onclick="runSyncStep(2)">
+            <span data-i="syncRun">Lancer</span>
+          </button>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="sync-step" id="sync-step-3">
+          <div class="sync-step-header">
+            <span class="sync-step-num" id="sync-num-3">③</span>
+            <span class="sync-step-label" data-i="syncStep3">Récupérer les Entry IDs</span>
+            <span class="sync-step-status" id="sync-status-3"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-3" onclick="runSyncStep(3)">
+            <span data-i="syncRun">Lancer</span>
+          </button>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="sync-step" id="sync-step-4">
+          <div class="sync-step-header">
+            <span class="sync-step-num" id="sync-num-4">④</span>
+            <span class="sync-step-label" data-i="syncStep4">Recharger les données</span>
+            <span class="sync-step-status" id="sync-status-4"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-4" onclick="runSyncStep(4)">
+            <span data-i="syncRun">Lancer</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
   </div>
 
 <!-- ══ PROFILE PAGE ══ -->
@@ -1687,6 +1797,57 @@ function invalidateAdminCache() {
 }
 
 // Sync admin uniquement — recharge élèves + contenu sans reload complet
+// ── Workflow Sync Drive → CONTENT ────────────────────────────
+async function runSyncStep(step) {
+  const btn    = document.getElementById("btn-sync-" + step);
+  const status = document.getElementById("sync-status-" + step);
+  const stepEl = document.getElementById("sync-step-" + step);
+  if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
+  if (status) status.textContent = "En cours...";
+
+  try {
+    if (step === 1) {
+      // Sync Drive → CONTENT via GAS
+      const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ " + (r.added||0) + " ajoutés";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
+    } else if (step === 2) {
+      const r = await api({ action: "setupForms", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ " + (r.configured||0) + " Forms";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
+    } else if (step === 3) {
+      const r = await api({ action: "relinkForms", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ Entry IDs OK";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
+    } else if (step === 4) {
+      clearDataCache();
+      invalidateAdminCache();
+      await loadAdminPanel(currentUserGlobal);
+      if (status) status.textContent = "✅ Rechargé";
+      if (stepEl) stepEl.classList.add("done");
+    }
+  } catch(e) {
+    if (status) status.textContent = "❌ " + e.message;
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = step < 4 ? "↻" : "✓";
+  }
+}
+
 async function forceSyncAdmin() {
   const btn = document.getElementById("btn-admin-sync");
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
@@ -2294,8 +2455,12 @@ function getStoredPin() {
 
 function translateCourseT(raw) {
   const r = (raw || "").toLowerCase().trim();
-  if (r.includes("gram") || r.includes("grammaire") || r.includes("ng") && r.includes("ph")) return { label: t("courseTypeGrammar"), icon: "📖" };
-  if (r.includes("vocab") || r.includes("vocabulaire") || r.includes("t") && r.includes("v") && r.length < 12) return { label: t("courseTypeVocab"), icon: "📝" };
+  if (r.includes("gram") || r.includes("grammaire") || r.includes("ng") && r.includes("ph")) return { label: t("courseTypeGrammar"),   icon: "📖" };
+  if (r.includes("vocab") || r.includes("vocabulaire"))  return { label: t("courseTypeVocab"),      icon: "💬" };
+  if (r.includes("listen") || r.includes("écoute"))      return { label: t("courseTypeListening"),  icon: "🔊" };
+  if (r.includes("read") || r.includes("lecture"))       return { label: t("courseTypeReading"),    icon: "👁️" };
+  if (r.includes("exerc"))                               return { label: t("courseTypeExercices"),  icon: "✏️" };
+  if (r.includes("test"))                                return { label: t("courseTypeTests"),      icon: "🎯" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
 }
 
@@ -3726,9 +3891,19 @@ const TRANSLATIONS = {
     addErrConn:        "Mất kết nối",
     addSuccess:        "✅ Đã thêm học viên thành công!",
     // COURSE TYPES
-    courseTypeGrammar: "Ngữ pháp",
-    courseTypeVocab:   "Từ vựng",
-    courseTypeOther:   "Khác",
+    courseTypeGrammar:   "Ngữ pháp",
+    courseTypeVocab:     "Từ vựng",
+    courseTypeListening: "Nghe",
+    courseTypeReading:   "Đọc",
+    courseTypeExercices: "Bài tập",
+    courseTypeTests:     "Kiểm tra",
+    courseTypeOther:     "Khác",
+    syncDriveTitle: "Cập nhật nội dung",
+    syncStep1: "Bước 1 · Đồng bộ Drive → Nội dung",
+    syncStep2: "Bước 2 · Cấu hình Biểu mẫu",
+    syncStep3: "Bước 3 · Lấy ID các trường",
+    syncStep4: "Bước 4 · Tải lại dữ liệu",
+    syncRun:   "Khởi động",
     // EXERCISES
     exEmpty:           "Chưa có bài tập nào 🌸",
     exOpen:            "Mở",
@@ -3881,9 +4056,19 @@ const TRANSLATIONS = {
     addErrConn:        "Connection error",
     addSuccess:        "✅ Student added!",
     // COURSE TYPES
-    courseTypeGrammar: "Grammar",
-    courseTypeVocab:   "Vocabulary",
-    courseTypeOther:   "Other",
+    courseTypeGrammar:   "Grammar",
+    courseTypeVocab:     "Vocabulary",
+    courseTypeListening: "Listening",
+    courseTypeReading:   "Reading",
+    courseTypeExercices: "Exercises",
+    courseTypeTests:     "Tests",
+    courseTypeOther:     "Other",
+    syncDriveTitle: "Update Content",
+    syncStep1: "Step 1 · Sync Drive → Content",
+    syncStep2: "Step 2 · Setup Forms",
+    syncStep3: "Step 3 · Retrieve Entry IDs",
+    syncStep4: "Step 4 · Reload Data",
+    syncRun:   "Run",
     // EXERCISES
     exEmpty:           "No exercises yet 🌸",
     exOpen:            "Open",
@@ -4036,9 +4221,19 @@ const TRANSLATIONS = {
     addErrConn:        "Pas de connexion",
     addSuccess:        "✅ Élève ajouté !",
     // COURSE TYPES
-    courseTypeGrammar: "Grammaire",
-    courseTypeVocab:   "Vocabulaire",
-    courseTypeOther:   "Autre",
+    courseTypeGrammar:   "Grammaire",
+    courseTypeVocab:     "Vocabulaire",
+    courseTypeListening: "Écoute",
+    courseTypeReading:   "Lecture",
+    courseTypeExercices: "Exercices",
+    courseTypeTests:     "Tests",
+    courseTypeOther:     "Autre",
+    syncDriveTitle: "Mise à jour des contenus",
+    syncStep1: "Étape 1 · Sync Drive → Contenu",
+    syncStep2: "Étape 2 · Configurer les Formulaires",
+    syncStep3: "Étape 3 · Récupérer les Entry IDs",
+    syncStep4: "Étape 4 · Recharger les données",
+    syncRun:   "Lancer",
     // EXERCISES
     exEmpty:           "Pas d'exercices pour l'instant 🌸",
     exOpen:            "Ouvrir",
@@ -4546,7 +4741,13 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   });
   const levelRows = LEVELS.map(function(lvl) {
     const ctMap  = byLevel[lvl];
-    const ctKeys = Object.keys(ctMap);
+    // Trier les courseT par leur première apparition dans CONTENT (ordre Drive)
+    const ctOrder = {};
+    content.forEach(function(c) {
+      const ct = (c.courseT||"autre").trim();
+      if (!(ct in ctOrder)) ctOrder[ct] = Object.keys(ctOrder).length;
+    });
+    const ctKeys = Object.keys(ctMap).sort(function(a,b){ return (ctOrder[a]||99)-(ctOrder[b]||99); });
     if (!ctKeys.length) return "";
     const totalInLevel    = ctKeys.reduce(function(n,ct){ return n+ctMap[ct].filter(function(c){return (c.type||'').toLowerCase()!=='form';}).length; },0);
     const unlockedInLevel = ctKeys.reduce(function(n,ct){
