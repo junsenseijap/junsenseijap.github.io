@@ -654,6 +654,36 @@
     .subsection-row.open .subsection-items { display: block; }
     .subsection-items .content-manage-item { padding-left: 4rem; }
 
+    /* Sync Drive panel */
+    .sync-step {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 0.9rem;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+    }
+    .sync-step-header { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+    .sync-step-num { font-size: 1.1rem; flex-shrink: 0; }
+    .sync-step-label { font-size: 0.82rem; color: var(--text); font-weight: 500; }
+    .sync-step-status { font-size: 0.75rem; color: var(--gray); margin-left: auto; flex-shrink: 0; }
+    .sync-step.done { border-color: rgba(74,138,85,0.4); background: rgba(74,138,85,0.06); }
+    .sync-step.done .sync-step-num { color: #4a8a55; }
+    .btn-sync-step {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-sync-step:disabled { opacity: 0.5; cursor: not-allowed; }
+
     /* ══ FORM TYPE CONTENT ══ */
     .type-form { background: rgba(103,58,183,0.15); color: #9c6fde; border: 1px solid rgba(103,58,183,0.35); }
     .btn-assign-content {
@@ -1461,7 +1491,7 @@
       </div>
     </div>
 
-    <!-- Panneau Sync Drive — admin uniquement -->
+    <!-- Panneau Sync Drive — admin uniquement, caché par défaut -->
     <div class="panel" id="admin-sync-panel" style="margin-top:1rem;display:none">
       <div class="panel-header" id="ph-sync-drive">🔄 <span data-i="syncDriveTitle">Mise à jour des contenus</span></div>
       <div style="padding:1rem;display:flex;flex-direction:column;gap:0.8rem">
@@ -1868,6 +1898,50 @@ async function runSyncStep(step) {
     btn.disabled = false;
     btn.textContent = step < 4 ? "↻" : "✓";
   }
+}
+
+async function runSyncStep(step) {
+  const btn    = document.getElementById("btn-sync-" + step);
+  const status = document.getElementById("sync-status-" + step);
+  const stepEl = document.getElementById("sync-step-" + step);
+  if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
+  if (status) status.textContent = "En cours...";
+  try {
+    if (step === 1) {
+      const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ " + (r.added||0) + " ajoutés";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
+    } else if (step === 2) {
+      const r = await api({ action: "setupForms", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ " + (r.configured||0) + " Forms";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
+    } else if (step === 3) {
+      const r = await api({ action: "relinkForms", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ Entry IDs OK";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
+    } else if (step === 4) {
+      clearDataCache();
+      invalidateAdminCache();
+      await loadAdminPanel(currentUserGlobal);
+      if (status) status.textContent = "✅ Rechargé";
+      if (stepEl) stepEl.classList.add("done");
+    }
+  } catch(e) {
+    if (status) status.textContent = "❌ " + e.message;
+  }
+  if (btn) { btn.disabled = false; btn.textContent = step < 4 ? "↻" : "✓"; }
 }
 
 async function forceSyncAdmin() {
@@ -2318,7 +2392,6 @@ async function loadStudentContent(user) {
 
 
 async function loadAdminPanel(user) {
-  // Afficher le panneau sync uniquement pour l'admin
   const syncPanel = document.getElementById("admin-sync-panel");
   if (syncPanel) syncPanel.style.display = "block";
   adminUser = user;
@@ -3929,9 +4002,6 @@ const TRANSLATIONS = {
     syncStep3: "Bước 3 · Lấy ID các trường",
     syncStep4: "Bước 4 · Tải lại dữ liệu",
     syncRun:   "Khởi động",
-    subLecons:    "Bài học",
-    subExercices: "Bài tập",
-    subTests:     "Kiểm tra",
     // EXERCISES
     exEmpty:           "Chưa có bài tập nào 🌸",
     exOpen:            "Mở",
@@ -4097,9 +4167,6 @@ const TRANSLATIONS = {
     syncStep3: "Step 3 · Retrieve Entry IDs",
     syncStep4: "Step 4 · Reload Data",
     syncRun:   "Run",
-    subLecons:    "Lessons",
-    subExercices: "Exercises",
-    subTests:     "Tests",
     // EXERCISES
     exEmpty:           "No exercises yet 🌸",
     exOpen:            "Open",
@@ -4265,9 +4332,6 @@ const TRANSLATIONS = {
     syncStep3: "Étape 3 · Récupérer les Entry IDs",
     syncStep4: "Étape 4 · Recharger les données",
     syncRun:   "Lancer",
-    subLecons:    "Leçons",
-    subExercices: "Exercices",
-    subTests:     "Tests",
     // EXERCISES
     exEmpty:           "Pas d'exercices pour l'instant 🌸",
     exOpen:            "Ouvrir",
@@ -4752,15 +4816,13 @@ function toggleSubSection(id) {
   document.getElementById(id)?.classList.toggle("open");
 }
 
-// Déduire le sujet principal depuis le titre d'un exercice/test
-// Ex: "[Exercice][GR]SPEED_U1-U5" → "Grammar"
 function getSubjectFromTitle(title) {
   const t2 = (title || "").toUpperCase();
   if (t2.includes("[GR]") || t2.includes("GRAMMAR") || t2.includes("GR_")) return "Grammar";
   if (t2.includes("[VO]") || t2.includes("VOCAB")   || t2.includes("VO_")) return "Vocabulary";
   if (t2.includes("[LI]") || t2.includes("LISTEN")  || t2.includes("LI_")) return "Listening";
   if (t2.includes("[RE]") || t2.includes("READING")  || t2.includes("RE_")) return "Reading";
-  return "Grammar"; // défaut
+  return "Grammar";
 }
 
 function toggleCourse(lvl, ctId, cn) {
@@ -4779,38 +4841,45 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return;
   }
 
-  // Sujets principaux (matières) — les autres (Exercices, Tests) sont des sub-types
-  const MAIN_SUBJECTS = ["Grammar","Vocabulary","Listening","Reading"];
+  // Sujets principaux (matières) — Exercices et Tests sont des sous-sections
+  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading"];
   const LEVELS = ["N5","N4","N3","N2","N1"];
 
-  // Construire la structure : byLevel[lvl][subject] = { lessons:[], exercises:[], tests:[] }
+  // Ordre d'apparition des sujets dans CONTENT
+  const subjectOrder = {};
+  content.forEach(function(c) {
+    const ct  = (c.courseT||"autre").trim();
+    const ctL = ct.toLowerCase();
+    const isMain = MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); });
+    if (isMain && !(ct in subjectOrder)) subjectOrder[ct] = Object.keys(subjectOrder).length;
+  });
+
+  // byLevel[lvl][subject] = { lessons:[], exercises:[], tests:[], order:N }
   const byLevel = {};
   LEVELS.forEach(function(l){ byLevel[l] = {}; });
 
-  // Ordre d'apparition des sujets dans CONTENT (= ordre Drive)
-  const subjectOrder = {};
   content.forEach(function(c) {
-    const lvl = (c.level||"?").trim();
-    const ct  = (c.courseT||"autre").trim();
-    const isMainSubject = MAIN_SUBJECTS.some(function(s){ return ct.toLowerCase().includes(s.toLowerCase()); });
-
+    const lvl  = (c.level||"?").trim();
+    const ct   = (c.courseT||"autre").trim();
+    const ctL  = ct.toLowerCase();
+    const subType = (c.subType||"lesson").toLowerCase();
     if (!byLevel[lvl]) byLevel[lvl] = {};
 
-    if (isMainSubject) {
-      // C'est une leçon (pdf/audio/video) → range dans le sujet principal
-      if (!byLevel[lvl][ct]) byLevel[lvl][ct] = { lessons:[], exercises:[], tests:[], order: Object.keys(subjectOrder).length };
-      if (!(ct in subjectOrder)) subjectOrder[ct] = Object.keys(subjectOrder).length;
-      byLevel[lvl][ct].lessons.push(c);
-    } else if (ct === "Exercices") {
-      // Exercice → trouver le sujet parent depuis le titre
-      const subj = getSubjectFromTitle(c.title) || "Grammar";
-      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: Object.keys(subjectOrder).length };
-      if (!(subj in subjectOrder)) subjectOrder[subj] = Object.keys(subjectOrder).length;
+    const isMain = MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); });
+
+    if (isMain) {
+      if (!byLevel[lvl][ct]) byLevel[lvl][ct] = { lessons:[], exercises:[], tests:[], order: subjectOrder[ct]||99 };
+      if (subType === "exercise") byLevel[lvl][ct].exercises.push(c);
+      else if (subType === "test") byLevel[lvl][ct].tests.push(c);
+      else byLevel[lvl][ct].lessons.push(c);
+    } else if (ctL.includes("exerc")) {
+      // Exercices standalone → trouver sujet depuis titre
+      const subj = getSubjectFromTitle(c.title);
+      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: subjectOrder[subj]||99 };
       byLevel[lvl][subj].exercises.push(c);
-    } else if (ct === "Tests") {
-      const subj = getSubjectFromTitle(c.title) || "Grammar";
-      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: Object.keys(subjectOrder).length };
-      if (!(subj in subjectOrder)) subjectOrder[subj] = Object.keys(subjectOrder).length;
+    } else if (ctL.includes("test")) {
+      const subj = getSubjectFromTitle(c.title);
+      if (!byLevel[lvl][subj]) byLevel[lvl][subj] = { lessons:[], exercises:[], tests:[], order: subjectOrder[subj]||99 };
       byLevel[lvl][subj].tests.push(c);
     }
   });
@@ -4858,8 +4927,8 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   }
 
   const levelRows = LEVELS.map(function(lvl) {
-    const subjMap = byLevel[lvl];
-    const subjKeys = Object.keys(subjMap).sort(function(a,b){ return (subjMap[a].order||0)-(subjMap[b].order||0); });
+    const subjMap  = byLevel[lvl];
+    const subjKeys = Object.keys(subjMap).sort(function(a,b){ return (subjMap[a].order||99)-(subjMap[b].order||99); });
     if (!subjKeys.length) return "";
 
     const totalInLevel    = subjKeys.reduce(function(n,s){ return n+subjMap[s].lessons.filter(function(c){return (c.type||'').toLowerCase()!=='form';}).length; },0);
@@ -4871,14 +4940,11 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
       const data   = subjMap[subj];
       const ctInfo = translateCourseT(subj);
       const safeId = subj.replace(/[^a-zA-Z0-9]/g,"_")+"_"+lvl;
-
       const totalInSubj    = data.lessons.filter(function(c){return (c.type||'').toLowerCase()!=='form';}).length;
       const unlockedInSubj = data.lessons.filter(function(c){ return unlocked.has(String(c.id))&&(c.type||'').toLowerCase()!=='form'; }).length;
-
-      const lessonsHtml   = makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L");
-      const exercisesHtml = makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E");
-      const testsHtml     = makeSubSection(data.tests,     "🎯", t("subTests"),     safeId+"_T");
-
+      const lessonsHtml    = makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L");
+      const exercisesHtml  = makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E");
+      const testsHtml      = makeSubSection(data.tests,     "🎯", t("subTests"),     safeId+"_T");
       return '<div class="coursetype-row" id="ct-'+lvl+'-'+safeId+'">'+
         '<div class="coursetype-header" onclick="toggleCourseT(\''+lvl+'\',\''+safeId+'\')">'+
         '<span class="coursetype-icon">'+ctInfo.icon+'</span>'+
@@ -5542,6 +5608,36 @@ JP:wght@300;400;700&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400
     .subsection-items { display: none; }
     .subsection-row.open .subsection-items { display: block; }
     .subsection-items .content-manage-item { padding-left: 4rem; }
+
+    /* Sync Drive panel */
+    .sync-step {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 0.9rem;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+    }
+    .sync-step-header { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+    .sync-step-num { font-size: 1.1rem; flex-shrink: 0; }
+    .sync-step-label { font-size: 0.82rem; color: var(--text); font-weight: 500; }
+    .sync-step-status { font-size: 0.75rem; color: var(--gray); margin-left: auto; flex-shrink: 0; }
+    .sync-step.done { border-color: rgba(74,138,85,0.4); background: rgba(74,138,85,0.06); }
+    .sync-step.done .sync-step-num { color: #4a8a55; }
+    .btn-sync-step {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-sync-step:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ══ FORM TYPE CONTENT ══ */
     .type-form { background: rgba(103,58,183,0.15); color: #9c6fde; border: 1px solid rgba(103,58,183,0.35); }
@@ -6350,7 +6446,7 @@ JP:wght@300;400;700&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400
       </div>
     </div>
 
-    <!-- Panneau Sync Drive — admin uniquement -->
+    <!-- Panneau Sync Drive — admin uniquement, caché par défaut -->
     <div class="panel" id="admin-sync-panel" style="margin-top:1rem;display:none">
       <div class="panel-header" id="ph-sync-drive">🔄 <span data-i="syncDriveTitle">Mise à jour des contenus</span></div>
       <div style="padding:1rem;display:flex;flex-direction:column;gap:0.8rem">
