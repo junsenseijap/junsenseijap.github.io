@@ -4509,14 +4509,6 @@ function applyLang() {
 // Override showError to use current lang
 const _origShowError = window.showError;
 
-function toggleSubSection(id, headerEl) {
-  const body = document.getElementById(id);
-  if (!body) return;
-  const isOpen = body.style.display !== "none";
-  body.style.display = isOpen ? "none" : "block";
-  const arr = document.getElementById("arr-"+id);
-  if (arr) arr.style.transform = isOpen ? "rotate(180deg)" : "";
-}
 
 function toggleExRow(rowId) {
   const row = document.getElementById(rowId);
@@ -4774,7 +4766,18 @@ function toggleCourseT(lvl, ctId) {
   document.getElementById("ct-" + lvl + "-" + ctId)?.classList.toggle("open");
 }
 function toggleSubSection(id) {
-  document.getElementById(id)?.classList.toggle("open");
+  const el = document.getElementById(id);
+  if (!el) return;
+  // Subsections contenu admin : toggle class "open" sur .subsection-row
+  if (el.classList.contains("subsection-row")) {
+    el.classList.toggle("open");
+    return;
+  }
+  // Exercices admin : toggle style.display
+  const isOpen = el.style.display === "block";
+  el.style.display = isOpen ? "none" : "block";
+  const arr = document.getElementById("arr-" + id);
+  if (arr) arr.style.transform = isOpen ? "rotate(180deg)" : "";
 }
 function getSubjectFromTitle(title) {
   const t2 = (title||"").toUpperCase();
