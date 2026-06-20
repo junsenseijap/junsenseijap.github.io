@@ -2498,6 +2498,7 @@ function translateCourseT(raw) {
   if (r.includes("vocab") || r.includes("vocabulaire"))  return { label: t("courseTypeVocab"),      icon: "💬" };
   if (r.includes("listen") || r.includes("écoute"))      return { label: t("courseTypeListening"),  icon: "🔊" };
   if (r.includes("read") || r.includes("lecture"))       return { label: t("courseTypeReading"),    icon: "👁️" };
+  if (r.includes("jlpt"))                                return { label: t("courseTypeJLPT"),       icon: "🏆" };
   if (r.includes("exerc"))                               return { label: t("courseTypeExercices"),  icon: "✏️" };
   if (r.includes("test"))                                return { label: t("courseTypeTests"),      icon: "🎯" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
@@ -3936,6 +3937,7 @@ const TRANSLATIONS = {
     courseTypeReading:   "Đọc",
     courseTypeExercices: "Bài tập",
     courseTypeTests:     "Kiểm tra",
+    courseTypeJLPT:      "JLPT",
     courseTypeOther:     "Khác",
     syncDriveTitle: "Cập nhật nội dung",
     syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
@@ -4108,6 +4110,7 @@ const TRANSLATIONS = {
     courseTypeReading:   "Reading",
     courseTypeExercices: "Exercises",
     courseTypeTests:     "Tests",
+    courseTypeJLPT:      "JLPT",
     courseTypeOther:     "Other",
     syncDriveTitle: "Update Content",
     syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
@@ -4280,6 +4283,7 @@ const TRANSLATIONS = {
     courseTypeReading:   "Lecture",
     courseTypeExercices: "Exercices",
     courseTypeTests:     "Tests",
+    courseTypeJLPT:      "JLPT",
     courseTypeOther:     "Autre",
     syncDriveTitle: "Mise à jour des contenus",
     syncDriveHint: "Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.",
@@ -4804,16 +4808,17 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return;
   }
 
-  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading"];
+  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt"];
   const LEVELS = ["N5","N4","N3","N2","N1"];
   // Fixed order: 1=Grammar, 2=Vocabulary, 3=Listening, 4=Reading
-  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4 };
+  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5 };
   function getSubjectOrderKey(ct) {
     const ctL = (ct||"").toLowerCase();
     if (ctL.includes("gram")) return 1;
     if (ctL.includes("vocab")) return 2;
     if (ctL.includes("listen") || ctL.includes("écoute")) return 3;
     if (ctL.includes("read") || ctL.includes("lecture")) return 4;
+    if (ctL.includes("jlpt")) return 5;
     return 99;
   }
   const subjectOrder = {};
