@@ -4923,7 +4923,11 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         '<span class="coursetype-arrow">▼</span></div>'+
         '<div class="coursetype-courses">'+
         (subj === "JLPT"
-          ? makeSubSection(data.lessons.concat(data.exercises).concat(data.tests), "🏆", "JLPT", safeId+"_J")
+          ? (function(){
+              var all = data.lessons.concat(data.exercises).concat(data.tests)
+                .slice().sort(function(a,b){ return (Number(a.courseN)||0)-(Number(b.courseN)||0); });
+              return all.map(makeItemHtml).join("");
+            })()
           : makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L")+
             makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E")+
             makeSubSection(data.tests,     "🎯", t("subTests"),     safeId+"_T")
