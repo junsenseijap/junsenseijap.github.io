@@ -4924,9 +4924,18 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         '<div class="coursetype-courses">'+
         (subj === "JLPT"
           ? (function(){
-              var all = data.lessons.concat(data.exercises).concat(data.tests)
-                .slice().sort(function(a,b){ return (Number(a.courseN)||0)-(Number(b.courseN)||0); });
-              return all.map(makeItemHtml).join("");
+              // Grouper par courseN (label du sous-dossier ex: "2017-07")
+              var groups = {};
+              var groupOrder = [];
+              data.lessons.concat(data.exercises).concat(data.tests).forEach(function(c) {
+                var key = String(c.courseN || "");
+                if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+                groups[key].push(c);
+              });
+              return groupOrder.map(function(key) {
+                var items = groups[key].slice().sort(function(a,b){ return (a.title||"") < (b.title||"") ? -1 : 1; });
+                return makeSubSection(items, "🏆", key, safeId+"_"+key.replace(/[^a-zA-Z0-9]/g,"_"));
+              }).join("");
             })()
           : makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L")+
             makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E")+
