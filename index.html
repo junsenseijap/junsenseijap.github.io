@@ -1022,7 +1022,7 @@
     .sync-step-label{font-size:0.82rem;color:var(--text);font-weight:500;}
     .sync-step-status{font-size:0.75rem;color:var(--gray);margin-left:auto;flex-shrink:0;}
     .sync-step.done{border-color:rgba(74,138,85,0.4);background:rgba(74,138,85,0.06);}
-    .btn-sync-step{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0.4rem 0.9rem;font-size:0.78rem;font-weight:600;cursor:pointer;flex-shrink:0;}
+    .btn-sync-step{background:var(--pink);color:#fff;border:none;border-radius:8px;padding:0.45rem 1rem;font-size:0.8rem;font-weight:600;cursor:pointer;flex-shrink:0;min-width:70px;}
     .btn-sync-step:disabled{opacity:0.5;cursor:not-allowed;}
 
     /* Sync Drive panel */
@@ -1069,15 +1069,16 @@
     }
     .sync-step.done .sync-step-num { color: #4a8a55; }
     .btn-sync-step {
-      background: var(--accent);
+      background: var(--pink);
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 0.4rem 0.9rem;
-      font-size: 0.78rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       flex-shrink: 0;
+      min-width: 70px;
       transition: opacity 0.2s;
     }
     .btn-sync-step:disabled {
