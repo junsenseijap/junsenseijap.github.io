@@ -4925,7 +4925,6 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         '<div class="coursetype-courses">'+
         (subj === "JLPT"
           ? (function(){
-              // Grouper par courseN (label du sous-dossier ex: "2017-07")
               var groups = {};
               var groupOrder = [];
               data.lessons.concat(data.exercises).concat(data.tests).forEach(function(c) {
@@ -4938,9 +4937,30 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
                 return makeSubSection(items, "🏆", key, safeId+"_"+key.replace(/[^a-zA-Z0-9]/g,"_"));
               }).join("");
             })()
-          : makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L")+
-            makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E")+
-            makeSubSection(data.tests,     "🎯", t("subTests"),     safeId+"_T")
+          : (function(){
+              // Grouper les leçons par courseN (ex: "U1-U5"), exercices et tests restent flat
+              var lessonGroups = {}, lessonOrder = [];
+              data.lessons.forEach(function(c) {
+                var key = String(c.courseN || "");
+                if (!lessonGroups[key]) { lessonGroups[key] = []; lessonOrder.push(key); }
+                lessonGroups[key].push(c);
+              });
+              // Trier les groupes par courseOrder
+              lessonOrder.sort(function(a,b){
+                var oa = lessonGroups[a][0] ? (lessonGroups[a][0].courseOrder||0) : 0;
+                var ob = lessonGroups[b][0] ? (lessonGroups[b][0].courseOrder||0) : 0;
+                return oa - ob;
+              });
+              var lessonsHtml = lessonOrder.length > 1
+                ? lessonOrder.map(function(key) {
+                    var items = lessonGroups[key];
+                    return makeSubSection(items, "📚", key, safeId+"_L_"+key.replace(/[^a-zA-Z0-9]/g,"_"));
+                  }).join("")
+                : makeSubSection(data.lessons, "📚", t("subLecons"), safeId+"_L");
+              return lessonsHtml +
+                makeSubSection(data.exercises, "✏️", t("subExercices"), safeId+"_E")+
+                makeSubSection(data.tests, "🎯", t("subTests"), safeId+"_T");
+            })()
         )+
         '</div></div>';
     }).join("");
