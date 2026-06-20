@@ -4922,9 +4922,12 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         '<span class="coursetype-count">'+unlockedInSubj+'/'+totalInSubj+' 🌸</span>'+
         '<span class="coursetype-arrow">▼</span></div>'+
         '<div class="coursetype-courses">'+
-        makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L")+
-        makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E")+
-        makeSubSection(data.tests,     "🎯", t("subTests"),     safeId+"_T")+
+        (subj === "JLPT"
+          ? makeSubSection(data.lessons.concat(data.exercises).concat(data.tests), "🏆", "JLPT", safeId+"_J")
+          : makeSubSection(data.lessons,   "📚", t("subLecons"),    safeId+"_L")+
+            makeSubSection(data.exercises, "✏️",  t("subExercices"), safeId+"_E")+
+            makeSubSection(data.tests,     "🎯", t("subTests"),     safeId+"_T")
+        )+
         '</div></div>';
     }).join("");
     return '<div class="level-accordion level-row has-content" id="level-row-'+lvl+'">'+
