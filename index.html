@@ -1465,76 +1465,6 @@
       </div>
     </div>
 
-    <!-- Panneau Sync Drive — admin uniquement, toujours visible -->
-    <div class="panel" id="admin-sync-panel" style="margin-top:1rem">
-      <div class="panel-header" id="ph-sync-drive">🗄️ <span data-i="syncDriveTitle">Mise à jour des contenus</span></div>
-      <div style="padding:0.5rem 0.9rem 0.3rem;font-size:0.75rem;color:var(--gray);line-height:1.4" data-i="syncDriveHint">
-        Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.
-      </div>
-      <div style="padding:0.6rem 0.9rem 1rem;display:flex;flex-direction:column;gap:0.6rem">
-
-        <!-- Step 1 -->
-        <div class="sync-step" id="sync-step-1">
-          <div class="sync-step-header">
-            <span class="sync-step-num" id="sync-num-1">①</span>
-            <div style="flex:1;min-width:0">
-              <div class="sync-step-label" data-i="syncStep1">Synchroniser les contenus</div>
-              <div class="sync-step-desc" data-i="syncDesc1">Scanne Drive et remplit le Sheet avec les nouveaux fichiers</div>
-            </div>
-            <span class="sync-step-status" id="sync-status-1"></span>
-          </div>
-          <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1)">
-            <span data-i="syncRun">Lancer</span>
-          </button>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="sync-step" id="sync-step-2">
-          <div class="sync-step-header">
-            <span class="sync-step-num" id="sync-num-2">②</span>
-            <div style="flex:1;min-width:0">
-              <div class="sync-step-label" data-i="syncStep2">Configurer les formulaires</div>
-              <div class="sync-step-desc" data-i="syncDesc2">Ajoute la question Student ID en position 1 sur tous les Forms</div>
-            </div>
-            <span class="sync-step-status" id="sync-status-2"></span>
-          </div>
-          <button class="btn-sync-step" id="btn-sync-2" onclick="runSyncStep(2)">
-            <span data-i="syncRun">Lancer</span>
-          </button>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="sync-step" id="sync-step-3">
-          <div class="sync-step-header">
-            <span class="sync-step-num" id="sync-num-3">③</span>
-            <div style="flex:1;min-width:0">
-              <div class="sync-step-label" data-i="syncStep3">Récupérer les Entry IDs</div>
-              <div class="sync-step-desc" data-i="syncDesc3">Lit les vrais IDs des champs Forms et complète le Sheet pour le pré-remplissage auto</div>
-            </div>
-            <span class="sync-step-status" id="sync-status-3"></span>
-          </div>
-          <button class="btn-sync-step" id="btn-sync-3" onclick="runSyncStep(3)">
-            <span data-i="syncRun">Lancer</span>
-          </button>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="sync-step" id="sync-step-4">
-          <div class="sync-step-header">
-            <span class="sync-step-num" id="sync-num-4">④</span>
-            <div style="flex:1;min-width:0">
-              <div class="sync-step-label" data-i="syncStep4">Recharger les données</div>
-              <div class="sync-step-desc" data-i="syncDesc4">Vide le cache et recharge tout depuis le Sheet — les élèves verront les nouveaux contenus</div>
-            </div>
-            <span class="sync-step-status" id="sync-status-4"></span>
-          </div>
-          <button class="btn-sync-step" id="btn-sync-4" onclick="runSyncStep(4)">
-            <span data-i="syncRun">Lancer</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
   </div>
 
 <!-- ══ PROFILE PAGE ══ -->
@@ -1683,42 +1613,68 @@
     </div>
   </div>
 
-  <!-- ══ SECTION: NOTIFICATIONS ══ -->
-  <div class="admin-section-card" id="admin-sec-notif">
-    <div class="admin-sec-header" onclick="toggleAdminSec('notif')">
-      <span class="admin-sec-icon">🔔</span>
-      <span class="admin-sec-label" id="asl-notif-title">Notifications</span>
+  <!-- ══ SECTION: MISE À JOUR DES CONTENUS ══ -->
+  <div class="admin-section-card" id="admin-sec-sync">
+    <div class="admin-sec-header" onclick="toggleAdminSec('sync')">
+      <span class="admin-sec-icon">🗄️</span>
+      <span class="admin-sec-label" data-i="syncDriveTitle">Mise à jour des contenus</span>
       <span class="admin-sec-arrow">▼</span>
     </div>
-    <div class="admin-sec-body" id="admin-sec-body-notif" style="padding:0.75rem 1rem">
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-title">Titre</div>
-      <input id="notif-title" type="text" maxlength="60" placeholder="Ex: 🔔 Rappel"
-        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem"/>
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-msg">Message</div>
-      <input id="notif-message" type="text" maxlength="120" placeholder="Ex: N'oublie pas !"
-        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.75rem"/>
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.35rem" id="notif-lbl-target">Joueur cible</div>
-      <select id="notif-student-select"
-        style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.65rem">
-        <option value="">— Choisir un élève —</option>
-      </select>
-      <button onclick="sendPushToOne()" id="notif-btn-one"
-        style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.75rem">
-        <span>✉️</span><span id="notif-btn-one-lbl">Envoyer</span>
-      </button>
-      <div style="height:1px;background:var(--border);opacity:0.5;margin-bottom:0.75rem"></div>
-      <div style="font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:var(--gray);text-transform:uppercase;margin-bottom:0.5rem" id="notif-lbl-levels">Niveaux</div>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.65rem">
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N5" checked> N5</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N4" checked> N4</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N3" checked> N3</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N2" checked> N2</label>
-        <label class="level-check-label"><input type="checkbox" name="notif-level" value="N1" checked> N1</label>
+    <div class="admin-sec-body" id="admin-sec-body-sync" style="padding:0.5rem 0.9rem 1rem">
+      <div style="font-size:0.75rem;color:var(--gray);line-height:1.4;margin-bottom:0.8rem" data-i="syncDriveHint">
+        Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.
       </div>
-      <button onclick="sendPushToAll()" id="notif-btn-all"
-        style="width:100%;padding:0.7rem;border:none;border-radius:10px;background:var(--pink);color:white;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem">
-        <span>📣</span><span id="notif-btn-all-lbl">Envoyer à tous</span>
-      </button>
+      <div style="display:flex;flex-direction:column;gap:0.6rem">
+
+        <div class="sync-step" id="sync-step-1">
+          <div class="sync-step-header">
+            <span class="sync-step-num">①</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep1">Synchroniser les contenus</div>
+              <div class="sync-step-desc" data-i="syncDesc1">Scanne Drive et remplit le Sheet avec les nouveaux fichiers</div>
+            </div>
+            <span class="sync-step-status" id="sync-status-1"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1)">Lancer</button>
+        </div>
+
+        <div class="sync-step" id="sync-step-2">
+          <div class="sync-step-header">
+            <span class="sync-step-num">②</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep2">Configurer les formulaires</div>
+              <div class="sync-step-desc" data-i="syncDesc2">Ajoute Student_ID en position 1 sur tous les Forms + lie au Sheet</div>
+            </div>
+            <span class="sync-step-status" id="sync-status-2"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-2" onclick="runSyncStep(2)">Lancer</button>
+        </div>
+
+        <div class="sync-step" id="sync-step-3">
+          <div class="sync-step-header">
+            <span class="sync-step-num">③</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep3">Récupérer les Entry IDs</div>
+              <div class="sync-step-desc" data-i="syncDesc3">Lit les vrais IDs des champs Forms pour le pré-remplissage auto</div>
+            </div>
+            <span class="sync-step-status" id="sync-status-3"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-3" onclick="runSyncStep(3)">Lancer</button>
+        </div>
+
+        <div class="sync-step" id="sync-step-4">
+          <div class="sync-step-header">
+            <span class="sync-step-num">④</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep4">Recharger les données</div>
+              <div class="sync-step-desc" data-i="syncDesc4">Vide le cache — les élèves verront les nouveaux contenus</div>
+            </div>
+            <span class="sync-step-status" id="sync-status-4"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-4" onclick="runSyncStep(4)">Lancer</button>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
@@ -1848,26 +1804,28 @@ async function runSyncStep(step) {
 
   try {
     if (step === 1) {
-      // Sync Drive → CONTENT via GAS
+      // Scan Drive → remplit CONTENT (sans toucher les Forms)
       const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
-        if (status) status.textContent = "✅ " + (r.added||0) + " ajoutés";
+        if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés";
         if (stepEl) stepEl.classList.add("done");
       } else {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
       }
     } else if (step === 2) {
+      // Ajoute Student_ID + lie Forms au Sheet
       const r = await api({ action: "setupForms", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
-        if (status) status.textContent = "✅ " + (r.configured||0) + " Forms";
+        if (status) status.textContent = "✅ " + (r.done || 0) + " Forms configurés";
         if (stepEl) stepEl.classList.add("done");
       } else {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
       }
     } else if (step === 3) {
-      const r = await api({ action: "relinkForms", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      // Récupère les vrais Entry IDs via toPrefilledUrl
+      const r = await api({ action: "fetchEntryIds", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
-        if (status) status.textContent = "✅ Entry IDs OK";
+        if (status) status.textContent = "✅ " + (r.done || 0) + " Entry IDs";
         if (stepEl) stepEl.classList.add("done");
       } else {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
@@ -1887,34 +1845,6 @@ async function runSyncStep(step) {
     btn.disabled = false;
     btn.textContent = step < 4 ? "↻" : "✓";
   }
-}
-
-async function runSyncStep(step) {
-  const btn=document.getElementById("btn-sync-"+step);
-  const status=document.getElementById("sync-status-"+step);
-  const stepEl=document.getElementById("sync-step-"+step);
-  if(btn){btn.disabled=true;btn.textContent="⏳";}
-  if(status)status.textContent="En cours...";
-  try{
-    if(step===1){
-      const r=await api({action:"syncDriveContent",adminId:currentUserGlobal.id,pin:getStoredPin()});
-      if(r&&r.success){if(status)status.textContent="✅ "+(r.added||0)+" ajoutés";if(stepEl)stepEl.classList.add("done");}
-      else{if(status)status.textContent="❌ "+(r&&r.message?r.message:"Erreur");}
-    }else if(step===2){
-      const r=await api({action:"setupForms",adminId:currentUserGlobal.id,pin:getStoredPin()});
-      if(r&&r.success){if(status)status.textContent="✅ "+(r.configured||0)+" Forms";if(stepEl)stepEl.classList.add("done");}
-      else{if(status)status.textContent="❌ "+(r&&r.message?r.message:"Erreur");}
-    }else if(step===3){
-      const r=await api({action:"relinkForms",adminId:currentUserGlobal.id,pin:getStoredPin()});
-      if(r&&r.success){if(status)status.textContent="✅ OK";if(stepEl)stepEl.classList.add("done");}
-      else{if(status)status.textContent="❌ "+(r&&r.message?r.message:"Erreur");}
-    }else if(step===4){
-      clearDataCache();invalidateAdminCache();
-      await loadAdminPanel(currentUserGlobal);
-      if(status)status.textContent="✅ Rechargé";if(stepEl)stepEl.classList.add("done");
-    }
-  }catch(e){if(status)status.textContent="❌ "+e.message;}
-  if(btn){btn.disabled=false;btn.textContent=step<4?"↻":"✓";}
 }
 async function forceSyncAdmin() {
   const btn = document.getElementById("btn-admin-sync");
