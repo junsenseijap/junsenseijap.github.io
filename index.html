@@ -1051,6 +1051,12 @@
       color: var(--text);
       font-weight: 500;
     }
+    .sync-step-desc {
+      font-size: 0.71rem;
+      color: var(--gray);
+      margin-top: 1px;
+      line-height: 1.35;
+    }
     .sync-step-status {
       font-size: 0.75rem;
       color: var(--gray);
@@ -1434,7 +1440,6 @@
         <div><div class="dash-stat-label" data-i="activeStudents">Élèves actifs</div><div class="dash-stat-value" id="admin-student-count">—</div></div>
       </div>
       <button id="btn-admin-sync" onclick="forceSyncAdmin()" title="Recharger les données" style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:0.5rem 0.8rem;font-size:1.1rem;cursor:pointer;color:var(--text);flex-shrink:0">🔄</button>
-      <button id="btn-toggle-sync-panel" onclick="toggleSyncPanel()" title="Mise à jour des contenus" style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:0.5rem 0.8rem;font-size:1.1rem;cursor:pointer;color:var(--text);flex-shrink:0">🗄️</button>
     </div>
     <div id="admin-stats-content" style="margin-bottom:1rem">
       <div class="loading"><div class="spinner"></div></div>
@@ -1460,16 +1465,22 @@
       </div>
     </div>
 
-    <!-- Panneau Sync Drive — admin uniquement -->
-    <div class="panel" id="admin-sync-panel" style="margin-top:1rem;display:none">
-      <div class="panel-header" id="ph-sync-drive">🔄 <span data-i="syncDriveTitle">Mise à jour des contenus</span></div>
-      <div style="padding:1rem;display:flex;flex-direction:column;gap:0.8rem">
+    <!-- Panneau Sync Drive — admin uniquement, toujours visible -->
+    <div class="panel" id="admin-sync-panel" style="margin-top:1rem">
+      <div class="panel-header" id="ph-sync-drive">🗄️ <span data-i="syncDriveTitle">Mise à jour des contenus</span></div>
+      <div style="padding:0.5rem 0.9rem 0.3rem;font-size:0.75rem;color:var(--gray);line-height:1.4" data-i="syncDriveHint">
+        Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.
+      </div>
+      <div style="padding:0.6rem 0.9rem 1rem;display:flex;flex-direction:column;gap:0.6rem">
 
         <!-- Step 1 -->
         <div class="sync-step" id="sync-step-1">
           <div class="sync-step-header">
             <span class="sync-step-num" id="sync-num-1">①</span>
-            <span class="sync-step-label" data-i="syncStep1">Sync Drive → Contenu</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep1">Synchroniser les contenus</div>
+              <div class="sync-step-desc" data-i="syncDesc1">Scanne Drive et remplit le Sheet avec les nouveaux fichiers</div>
+            </div>
             <span class="sync-step-status" id="sync-status-1"></span>
           </div>
           <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1)">
@@ -1481,7 +1492,10 @@
         <div class="sync-step" id="sync-step-2">
           <div class="sync-step-header">
             <span class="sync-step-num" id="sync-num-2">②</span>
-            <span class="sync-step-label" data-i="syncStep2">Configurer les Formulaires</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep2">Configurer les formulaires</div>
+              <div class="sync-step-desc" data-i="syncDesc2">Ajoute la question Student ID en position 1 sur tous les Forms</div>
+            </div>
             <span class="sync-step-status" id="sync-status-2"></span>
           </div>
           <button class="btn-sync-step" id="btn-sync-2" onclick="runSyncStep(2)">
@@ -1493,7 +1507,10 @@
         <div class="sync-step" id="sync-step-3">
           <div class="sync-step-header">
             <span class="sync-step-num" id="sync-num-3">③</span>
-            <span class="sync-step-label" data-i="syncStep3">Récupérer les Entry IDs</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep3">Récupérer les Entry IDs</div>
+              <div class="sync-step-desc" data-i="syncDesc3">Lit les vrais IDs des champs Forms et complète le Sheet pour le pré-remplissage auto</div>
+            </div>
             <span class="sync-step-status" id="sync-status-3"></span>
           </div>
           <button class="btn-sync-step" id="btn-sync-3" onclick="runSyncStep(3)">
@@ -1505,7 +1522,10 @@
         <div class="sync-step" id="sync-step-4">
           <div class="sync-step-header">
             <span class="sync-step-num" id="sync-num-4">④</span>
-            <span class="sync-step-label" data-i="syncStep4">Recharger les données</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep4">Recharger les données</div>
+              <div class="sync-step-desc" data-i="syncDesc4">Vide le cache et recharge tout depuis le Sheet — les élèves verront les nouveaux contenus</div>
+            </div>
             <span class="sync-step-status" id="sync-status-4"></span>
           </div>
           <button class="btn-sync-step" id="btn-sync-4" onclick="runSyncStep(4)">
@@ -1903,16 +1923,6 @@ async function forceSyncAdmin() {
   await loadAdminPanel(currentUserGlobal);
   if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
   toast("✅ Données admin rechargées", "success");
-}
-
-function toggleSyncPanel() {
-  const sp = document.getElementById("admin-sync-panel");
-  const btn = document.getElementById("btn-toggle-sync-panel");
-  if (!sp) return;
-  const isOpen = sp.style.display !== "none";
-  sp.style.display = isOpen ? "none" : "block";
-  if (btn) btn.style.background = isOpen ? "var(--bg-card)" : "rgba(232,75,122,0.12)";
-  if (btn) btn.style.borderColor = isOpen ? "var(--border)" : "var(--pink)";
 }
 
 function saveDataCache(data)  { _cacheSet(CACHE_KEY, data); }
@@ -2355,7 +2365,7 @@ async function loadStudentContent(user) {
 
 async function loadAdminPanel(user) {
   adminUser = user;
-  // sync panel remains hidden until user clicks the 🗄️ button
+  // sync panel est toujours visible dans la page admin
   const ddList = document.getElementById("student-dd-list");
 
   // ── Servir depuis le cache immédiatement ──
@@ -3958,10 +3968,15 @@ const TRANSLATIONS = {
     courseTypeTests:     "Kiểm tra",
     courseTypeOther:     "Khác",
     syncDriveTitle: "Cập nhật nội dung",
-    syncStep1: "Bước 1 · Đồng bộ Drive → Nội dung",
-    syncStep2: "Bước 2 · Cấu hình Biểu mẫu",
-    syncStep3: "Bước 3 · Lấy ID các trường",
-    syncStep4: "Bước 4 · Tải lại dữ liệu",
+    syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
+    syncStep1: "Đồng bộ nội dung",
+    syncDesc1: "Quét Drive và điền vào Sheet các file mới",
+    syncStep2: "Cấu hình biểu mẫu",
+    syncDesc2: "Thêm câu hỏi Student ID vào vị trí 1 trên tất cả các Form",
+    syncStep3: "Lấy Entry ID",
+    syncDesc3: "Đọc ID thật của các trường Form và hoàn thiện Sheet để tự điền Student ID",
+    syncStep4: "Tải lại dữ liệu",
+    syncDesc4: "Xóa cache và tải lại từ Sheet — học viên sẽ thấy nội dung mới",
     syncRun:   "Khởi động",
     subLecons:    "Bài học",
     subExercices: "Bài tập",
@@ -4125,10 +4140,15 @@ const TRANSLATIONS = {
     courseTypeTests:     "Tests",
     courseTypeOther:     "Other",
     syncDriveTitle: "Update Content",
-    syncStep1: "Step 1 · Sync Drive → Content",
-    syncStep2: "Step 2 · Setup Forms",
-    syncStep3: "Step 3 · Retrieve Entry IDs",
-    syncStep4: "Step 4 · Reload Data",
+    syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
+    syncStep1: "Sync content",
+    syncDesc1: "Scans Drive and fills the Sheet with new files",
+    syncStep2: "Configure forms",
+    syncDesc2: "Adds the Student ID question at position 1 on all Forms",
+    syncStep3: "Retrieve Entry IDs",
+    syncDesc3: "Reads real Form field IDs and completes the Sheet for auto-fill",
+    syncStep4: "Reload data",
+    syncDesc4: "Clears cache and reloads from the Sheet — students will see new content",
     syncRun:   "Run",
     subLecons:    "Lessons",
     subExercices: "Exercises",
@@ -4292,10 +4312,15 @@ const TRANSLATIONS = {
     courseTypeTests:     "Tests",
     courseTypeOther:     "Autre",
     syncDriveTitle: "Mise à jour des contenus",
-    syncStep1: "Étape 1 · Sync Drive → Contenu",
-    syncStep2: "Étape 2 · Configurer les Formulaires",
-    syncStep3: "Étape 3 · Récupérer les Entry IDs",
-    syncStep4: "Étape 4 · Recharger les données",
+    syncDriveHint: "Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.",
+    syncStep1: "Synchroniser les contenus",
+    syncDesc1: "Scanne Drive et remplit le Sheet avec les nouveaux fichiers",
+    syncStep2: "Configurer les formulaires",
+    syncDesc2: "Ajoute la question Student ID en position 1 sur tous les Forms",
+    syncStep3: "Récupérer les Entry IDs",
+    syncDesc3: "Lit les vrais IDs des champs Forms et complète le Sheet pour le pré-remplissage auto",
+    syncStep4: "Recharger les données",
+    syncDesc4: "Vide le cache et recharge tout depuis le Sheet — les élèves verront les nouveaux contenus",
     syncRun:   "Lancer",
     subLecons:    "Leçons",
     subExercices: "Exercices",
