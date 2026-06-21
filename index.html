@@ -3148,16 +3148,20 @@ function toggleAdminLevel(rid, lvl) {
   if (row.classList.contains("open") && !_drawnLevels.has(rid)) {
     _drawnLevels.add(rid);
     const stuTestScores = window._stuTestScores || {};
-    const bl = window._blKeys || {};
-    if (bl[lvl]) {
-      requestAnimationFrame(()=>{
-        Object.keys(bl[lvl]).forEach(sid=>{
-          const data = stuTestScores[sid+"_"+lvl] || {GR:[],VO:[],LI:[],RE:[]};
-          if (Object.values(data).some(a=>a.length>0))
-            drawSparkline("spark-wrap-sp2-"+lvl+"-"+sid, data);
-        });
+    requestAnimationFrame(()=>{
+      Object.entries(stuTestScores).forEach(([key, data])=>{
+        const parts = key.split("_");
+        const sid = parts[0], keyLvl = parts.slice(1).join("_");
+        if (keyLvl !== lvl) return;
+        if (Object.values(data).some(a=>a.length>0)) {
+          // Essayer les deux préfixes (sp3 nouveau, sp2 ancien)
+          const spId3 = "spark-wrap-sp3-"+lvl+"-"+sid;
+          const spId2 = "spark-wrap-sp2-"+lvl+"-"+sid;
+          if (document.getElementById(spId3)) drawSparkline(spId3, data);
+          else if (document.getElementById(spId2)) drawSparkline(spId2, data);
+        }
       });
-    }
+    });
   }
 }
 // ── Parse date robuste — gère "01/02/2026" (fr-FR) ET "2026-02-01" (ISO) ──
@@ -4759,100 +4763,155 @@ async function loadAdminStats() {
       api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
       api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
     ]);
-    const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
-    // Index exerciceId → studentId pour ne compter que les scores qui appartiennent à l'élève
-    const exOwner={};(er.exercises||[]).forEach(ex=>{exOwner[String(ex.id)]=String(ex.studentId);});
-    // Index des exercices [TEST] — exclus de la moyenne exercices
-    const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
+
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
-    const activeIdsS=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
-    const LEVELS=["N5","N4","N3","N2","N1"],bl={};
+    const activeIds=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
+    const LEVELS=["N5","N4","N3","N2","N1"];
+
+    // Index exercices
+    const elm={};     // exId → level
+    const exOwner={}; // exId → studentId
+    const testExMap={}; // exId → {level, cat, date}
+    (er.exercises||[]).forEach(ex=>{
+      elm[String(ex.id)]     = ex.level||"?";
+      exOwner[String(ex.id)] = String(ex.studentId);
+      if(ex.title&&ex.title.includes("[TEST]")){
+        testExMap[String(ex.id)]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||""};
+      }
+    });
+    const testExIds=new Set(Object.keys(testExMap));
+
+    // Calculer les niveaux de chaque étudiant depuis ses exercices
+    const stuLevels={}; // sid → Set(levels)
+    (er.exercises||[]).forEach(ex=>{
+      const sid=String(ex.studentId);
+      if(!activeIds.has(sid))return;
+      const lvl=ex.level||"?";
+      if(!stuLevels[sid])stuLevels[sid]=new Set();
+      stuLevels[sid].add(lvl);
+    });
+    // Aussi depuis allStudents.levels
+    allStudents.filter(s=>String(s.active).toUpperCase()==="YES").forEach(s=>{
+      const sid=String(s.id);
+      if(!stuLevels[sid])stuLevels[sid]=new Set();
+      if(s.levels) s.levels.split(",").map(l=>l.trim()).filter(Boolean).forEach(l=>stuLevels[sid].add(l));
+    });
+
+    // Moyenne exercices normaux par étudiant par niveau
+    const avgEx={}; // sid_lvl → {sum,cnt}
     (sr.scores||[]).forEach(sc=>{
       if(!sc.maxScore)return;
-      if(!activeIdsS.has(String(sc.studentId)))return; // ignorer inactifs
-      if(testExIds.has(String(sc.exerciseId)))return;  // ignorer [TEST]
-      // ignorer si l'exercice n'appartient pas à cet élève
+      if(!activeIds.has(String(sc.studentId)))return;
+      if(testExIds.has(String(sc.exerciseId)))return;
       if(exOwner[String(sc.exerciseId)]!==String(sc.studentId))return;
-      const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
-      const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
-      bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
+      const l=elm[String(sc.exerciseId)]||"?";
+      const key=String(sc.studentId)+"_"+l;
+      if(!avgEx[key])avgEx[key]={sum:0,cnt:0};
+      avgEx[key].sum+=(sc.score/sc.maxScore)*10;
+      avgEx[key].cnt++;
     });
-    const keys=LEVELS.filter(l=>bl[l]);
-    if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
 
-    // Sparklines [TEST] — groupé par catégorie, axe X = numéro de mois
-    const testExMap={};(er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{
-      testExMap[String(e.id)]={level:e.level||"?", cat:getTestCat(e.title), date:e.assignedDate||""};
-    });
-    const stuTestScores={}; // key = sid_lvl → {GR:[{ts,pct}], VO:[], LI:[], RE:[]}
+    // Scores tests par étudiant par niveau
+    const stuTestScores={}; // sid_lvl → {GR:[],VO:[],LI:[],RE:[]}
     (sr.scores||[]).forEach(sc=>{
       const ex=testExMap[String(sc.exerciseId)];
-      if(!ex||!ex.cat)return;
+      if(!ex||!ex.cat||!sc.maxScore)return;
+      if(!activeIds.has(String(sc.studentId)))return;
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
-      if(sc.maxScore>0){
-        const ts  = ex.date ? (parseDate(ex.date)||new Date()).getTime() : Date.now();
-        stuTestScores[key][ex.cat].push({ts, pct:Math.round((sc.score/sc.maxScore)*100)});
-      }
+      const ts=ex.date?(parseDate(ex.date)||new Date()).getTime():Date.now();
+      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100)});
     });
     Object.values(stuTestScores).forEach(byCat=>
       Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.ts-b.ts))
     );
 
-    // Injecter le HTML
-    aw.innerHTML = keys.map(lvl=>{
-      const se=Object.entries(bl[lvl]);
-      const lvlSum=se.reduce((s,[,d])=>s+d.sum,0);
-      const lvlCnt=se.reduce((s,[,d])=>s+d.cnt,0);
-      const la=(lvlCnt>0?lvlSum/lvlCnt:0).toFixed(1);
+    // Construire par niveau — inclure tous les étudiants actifs qui ont ce niveau
+    const levelHtml=LEVELS.map(lvl=>{
+      const stuInLevel=allStudents
+        .filter(s=>String(s.active).toUpperCase()==="YES" && stuLevels[String(s.id)]&&stuLevels[String(s.id)].has(lvl));
+      if(!stuInLevel.length)return "";
+
       const rid="stat-lvl-"+lvl;
-      const colHeader='<div style="display:flex;align-items:center;padding:3px 14px 3px 2.5rem;background:var(--bg-soft);border-bottom:1px solid rgba(232,75,122,0.08)">'+
+
+      // Header colonnes
+      const colHeader=
+        '<div style="display:flex;align-items:center;padding:3px 14px 3px 2.5rem;background:var(--bg-soft);border-bottom:1px solid rgba(232,75,122,0.08)">'+
         '<span style="flex:1"></span>'+
         '<div style="display:flex;align-items:center;gap:3px;min-width:100px;justify-content:center">'+
-        '<span style="font-size:0.55rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 4px;border-radius:3px;font-weight:700">[TEST]</span>'+
-        '<span style="font-size:0.6rem;color:var(--gray)">%</span>'+
+          '<span style="font-size:0.55rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 4px;border-radius:3px;font-weight:700">[TEST]</span>'+
+          '<span style="font-size:0.6rem;color:var(--gray)">%</span>'+
         '</div>'+
         '<span style="width:1px;height:10px;background:rgba(44,26,34,0.08);margin:0 4px"></span>'+
         '<span style="font-size:0.6rem;color:var(--gray);min-width:60px;text-align:center">'+t("avgColLabel")+'</span>'+
         '</div>';
-      const rows=se.map(([sid,d])=>{
-        const stu=sm2[sid]||{name:"ID "+sid,familyName:""};
-        const spId="sp2-"+lvl+"-"+sid;
-        const testData=stuTestScores[sid+"_"+lvl]||{GR:[],VO:[],LI:[],RE:[]};
+
+      const rows=stuInLevel.map(s=>{
+        const sid=String(s.id);
+        const spId="sp3-"+lvl+"-"+sid;
+        const exKey=sid+"_"+lvl;
+        const testData=stuTestScores[exKey]||{GR:[],VO:[],LI:[],RE:[]};
         const allPts=Object.values(testData).flat();
         const hasTests=allPts.length>0;
         const lastPt=hasTests?allPts.reduce((a,b)=>b.ts>a.ts?b:a):null;
         const lastPct=lastPt?lastPt.pct:null;
-        const avg20=(d.sum/d.cnt).toFixed(1);
-        return {name:stu.name+" "+(stu.familyName||""),avg20,cnt:d.cnt,sid,spId,hasTests,lastPct};
-      }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
-        '<div class="dash-avg-student-row">'+
-        '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
-        (s.hasTests?'<div id="spark-wrap-'+s.spId+'" style="width:70px;height:24px;flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" title="Voir progression"></div>':'<span style="width:70px;display:inline-block"></span>')+
-        '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(s.lastPct!==null?s.lastPct+'%':'—')+'</span>'+
-        '</div>'+
-        '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
-        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/10</span>'+
-        '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
-        '</div>'
-      ).join("");
+        const exData=avgEx[exKey];
+        const avg10=exData?(exData.sum/exData.cnt).toFixed(1):null;
+        const name=s.name+" "+(s.familyName||"");
+        return '<div class="dash-avg-student-row">'+
+          '<span class="dash-avg-student-name">'+name+'</span>'+
+          '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
+            (hasTests?'<div id="spark-wrap-'+spId+'" style="width:70px;height:24px;flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+sid+'\',\''+name+'\',\''+lvl+'\')" title="Voir progression"></div>':'<span style="width:70px;display:inline-block"></span>')+
+            '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(lastPct!==null?lastPct+'%':'—')+'</span>'+
+          '</div>'+
+          '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
+          (avg10!==null
+            ?'<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+sid+'\',\''+name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+avg10+'/10</span>'
+            :'<span class="dash-avg-student-score" style="color:var(--gray)">—/10</span>')+
+          '</div>';
+      }).join("");
+
+      const lvlExData=stuInLevel.map(s=>avgEx[String(s.id)+"_"+lvl]).filter(Boolean);
+      const lvlSum=lvlExData.reduce((a,d)=>a+d.sum,0);
+      const lvlCnt=lvlExData.reduce((a,d)=>a+d.cnt,0);
+      const la=lvlCnt>0?(lvlSum/lvlCnt).toFixed(1):"—";
+
       return '<div class="dash-avg-level-row" id="'+rid+'">'+
         '<div class="dash-avg-level-header" onclick="toggleAdminLevel(\''+rid+'\',\''+lvl+'\')">'+
-        '<span class="dash-avg-level-badge">'+lvl+'</span>'+
-        '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
-        '<span class="dash-avg-level-score">'+la+'/10</span>'+
-        '<span class="dash-avg-level-arrow">▼</span>'+
+          '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+          '<span class="dash-avg-level-label">'+t("students", stuInLevel.length)+'</span>'+
+          (la!=="—"?'<span class="dash-avg-level-score">'+la+'/10</span>':'<span class="dash-avg-level-score" style="color:var(--gray)">—</span>')+
+          '<span class="dash-avg-level-arrow">▼</span>'+
         '</div>'+
         colHeader+
         '<div class="dash-avg-student-list">'+rows+'</div>'+
         '</div>';
-    }).join("");
+    }).filter(Boolean).join("");
 
-    // Stocker stuTestScores globalement pour le dessin au clic
-    window._stuTestScores = stuTestScores;
-    window._blKeys = bl;
+    if(!levelHtml){
+      aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';
+      return;
+    }
+    aw.innerHTML=levelHtml;
+
+    // Dessiner les sparklines
+    window._stuTestScores=stuTestScores;
+    requestAnimationFrame(()=>{
+      stuInLevel_all(er,sr,stuTestScores,activeIds);
+    });
+
   }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
+}
+
+function stuInLevel_all(er,sr,stuTestScores,activeIds){
+  // Dessiner toutes les sparklines visibles
+  Object.entries(stuTestScores).forEach(([key,byCat])=>{
+    const parts=key.split("_");
+    const sid=parts[0], lvl=parts.slice(1).join("_");
+    const spId="sp3-"+lvl+"-"+sid;
+    const wrap=document.getElementById("spark-wrap-"+spId);
+    if(wrap) drawSparkline("spark-wrap-"+spId, byCat);
+  });
 }
 
 
