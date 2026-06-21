@@ -1410,8 +1410,8 @@
             <canvas id="student-test-chart" role="img" aria-label="Progression tests mensuels" width="140" height="50" style="cursor:pointer;display:block" onclick="openStudentChartSelf()"></canvas>
           </div>
           <!-- Dernier [TEST] -->
-          <div style="flex:1;text-align:center">
-            <div id="avg-last-number" style="font-size:1.2rem;color:var(--pink);font-weight:500;line-height:1">—</div>
+          <div style="flex:1;text-align:center;cursor:pointer" onclick="openTestResultsModal()" title="Voir tous mes résultats de tests">
+            <div id="avg-last-number" style="font-size:1.2rem;color:var(--pink);font-weight:500;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">—</div>
             <div id="avg-last-label" style="font-size:0.62rem;color:var(--gray);margin-top:2px">%</div>
           </div>
         </div>
@@ -2938,6 +2938,78 @@ async function openMyScoresModal() {
   }
 }
 
+// ── POPUP RÉSULTATS TESTS — cliquable depuis "Dernier test 81" ──
+async function openTestResultsModal() {
+  if (!currentUserGlobal) return;
+  document.getElementById("test-results-modal")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "test-results-modal";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="max-height:82vh;display:flex;flex-direction:column">'+
+    '<div class="levels-modal-title">🎯 '+t("myTestResults")+'</div>'+
+    '<div id="test-results-body" style="flex:1;overflow-y:auto"><div class="loading"><div class="spinner"></div></div></div>'+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'test-results-modal\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  try {
+    const [scData, exData] = await Promise.all([
+      api({action:"getMyScores",    studentId:currentUserGlobal.id, pin:getStoredPin()}),
+      api({action:"getMyExercises", studentId:currentUserGlobal.id, pin:getStoredPin()})
+    ]);
+    renderTestResultsList("test-results-body", scData, exData);
+  } catch(e) {
+    const b = document.getElementById("test-results-body");
+    if(b) b.innerHTML='<div style="color:var(--gray);padding:1rem">'+t("errConn")+'</div>';
+  }
+}
+
+function renderTestResultsList(bodyId, scData, exData) {
+  const scMap = {};
+  (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)] = s; });
+  // Seulement les [TEST] avec un score
+  const tests = (exData.exercises||[])
+    .filter(e => e.title && e.title.includes("[TEST]") && scMap[String(e.id)] && scMap[String(e.id)].maxScore > 0)
+    .sort((a,b) => parseDate(b.doneDate||b.assignedDate) - parseDate(a.doneDate||a.assignedDate));
+  const body = document.getElementById(bodyId);
+  if (!body) return;
+  if (!tests.length) {
+    body.innerHTML='<div style="text-align:center;color:var(--gray);padding:1rem;font-size:0.84rem">'+t("noScoresYet")+'</div>';
+    return;
+  }
+  // Grouper par niveau
+  const byLevel = {};
+  tests.forEach(e => {
+    const lvl = e.level || "?";
+    if (!byLevel[lvl]) byLevel[lvl] = [];
+    byLevel[lvl].push(e);
+  });
+  let html = "";
+  Object.keys(byLevel).sort().forEach(lvl => {
+    html += '<div style="font-size:0.72rem;font-weight:700;color:var(--pink);padding:0.6rem 0.4rem 0.2rem;letter-spacing:0.05em">'+lvl+'</div>';
+    byLevel[lvl].forEach(e => {
+      const sc   = scMap[String(e.id)];
+      const pct  = sc.score / sc.maxScore;
+      const pct100 = Math.round(pct * 100);
+      const color = pct >= 0.7 ? "#3b6d11" : pct >= 0.5 ? "#854f0b" : "#c0392b";
+      const {cleanTitle} = parseExTitle(e.title);
+      html +=
+        '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.05)">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:0.82rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+cleanTitle+'</div>'+
+          '<div style="font-size:0.65rem;color:var(--gray)">'+(e.doneDate?'✅ '+e.doneDate:'')+'</div>'+
+        '</div>'+
+        '<div style="text-align:right;flex-shrink:0">'+
+          '<div style="font-size:0.95rem;font-weight:700;color:'+color+'">'+pct100+'%</div>'+
+          '<div style="font-size:0.62rem;color:var(--gray)">('+sc.score+'/'+sc.maxScore+')</div>'+
+        '</div>'+
+        '</div>';
+    });
+  });
+  body.innerHTML = html;
+}
+
 async function openStudentScoresModal(studentId, studentName, level) {
   document.getElementById("scores-modal-admin")?.remove();
   const overlay = document.createElement("div");
@@ -4071,6 +4143,7 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Đã xoá khỏi yêu thích",
     favMax:            "Tối đa 10 nội dung yêu thích",
     lastTest:          "Bài kiểm tra cuối",
+    myTestResults:     "Kết quả kiểm tra của tôi",
     avgGenLabel:       "Trung bình bài tập",
     avgTestLabel:      "Tiến độ hàng tháng",
     avgLastLabel:      "Bài kiểm tra cuối",
@@ -4244,6 +4317,7 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Removed from favorites",
     favMax:            "Maximum 10 favorites reached",
     lastTest:          "Last test",
+    myTestResults:     "My test results",
     avgGenLabel:       "Exercise average",
     avgTestLabel:      "Monthly progress",
     avgLastLabel:      "Last [TEST]",
@@ -4417,6 +4491,7 @@ const TRANSLATIONS = {
     favRemove:         "🗑 Retiré des favoris",
     favMax:            "Maximum 10 favoris atteint",
     lastTest:          "Dernier test",
+    myTestResults:     "Mes résultats de tests",
     avgGenLabel:       "Moyenne exercices",
     avgTestLabel:      "Progression mensuelle",
     avgLastLabel:      "Dernier [TEST]",
@@ -4625,10 +4700,12 @@ async function loadAdminDashboard() {
       api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
     ]);
     const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
+    const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
     const LEVELS=["N5","N4","N3","N2","N1"],bl={};
     (sr.scores||[]).forEach(sc=>{
       if(!sc.maxScore)return;
+      if(testExIds.has(String(sc.exerciseId)))return; // ignorer [TEST] pour la moyenne exercices
       const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
       const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
       bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
