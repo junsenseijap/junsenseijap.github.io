@@ -3584,92 +3584,170 @@ async function loadStudentExercises() {
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
+// ── Helpers partagés exercices ──
+function _exTypeIcon(ex){
+  const tp=(ex.type||"").toLowerCase();
+  if(tp==="pdf")   return "📄";
+  if(tp==="video") return "🎬";
+  if(tp==="audio") return "🎵";
+  return "📝";
+}
+function _exTypeLabel(ex){
+  const tp=(ex.type||"form").toLowerCase();
+  if(tp==="pdf")   return "PDF";
+  if(tp==="video") return "Vidéo";
+  if(tp==="audio") return "Audio";
+  return "Exercice";
+}
+function _exGetTitle(ex){
+  return (ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
+}
+
+// ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
+function _buildExTree(exList, sm, isStudent) {
+  // Grouper : level → courseT → courseN → []
+  const tree = {};
+  exList.forEach(ex => {
+    const lvl  = ex.level   || "?";
+    const cT   = ex.courseT || "?";
+    const cN   = String(ex.courseN || "?");
+    if (!tree[lvl])       tree[lvl] = {};
+    if (!tree[lvl][cT])   tree[lvl][cT] = {};
+    if (!tree[lvl][cT][cN]) tree[lvl][cT][cN] = [];
+    tree[lvl][cT][cN].push(ex);
+  });
+
+  const LEVEL_ICONS  = { N4:"📘", N5:"📗", N3:"📙", N2:"📕", N1:"📔" };
+  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆", Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️" };
+
+  let html = "";
+  Object.keys(tree).sort().forEach(lvl => {
+    const lvlId = "extree-lvl-" + lvl + "-" + (isStudent?"s":"a") + "-" + Math.random().toString(36).slice(2,6);
+    const lvlIcon = LEVEL_ICONS[lvl] || "📘";
+    let lvlHtml = "";
+
+    Object.keys(tree[lvl]).sort().forEach(cT => {
+      const cTId = "extree-ct-" + lvlId + "-" + cT.replace(/\s/g,"_");
+      const cTIcon = COURSE_ICONS[cT] || "📂";
+      let cTHtml = "";
+
+      Object.keys(tree[lvl][cT]).sort().forEach(cN => {
+        const cNId = "extree-cn-" + cTId + "-" + cN.replace(/\s/g,"_");
+        const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
+        cTHtml +=
+          '<div style="margin-bottom:0.3rem">'+
+          '<div onclick="toggleTreeNode(\''+cNId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem;font-weight:600;color:var(--ink2)">'+
+          '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
+          '<span>🗂 '+cN+'</span>'+
+          '</div>'+
+          '<div id="'+cNId+'" style="display:none;padding-left:0.8rem">'+items+'</div>'+
+          '</div>';
+      });
+
+      lvlHtml +=
+        '<div style="margin-bottom:0.4rem">'+
+        '<div onclick="toggleTreeNode(\''+cTId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.78rem;font-weight:600;color:var(--ink)">'+
+        '<span id="arr-'+cTId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
+        '<span>'+cTIcon+' '+cT+'</span>'+
+        '</div>'+
+        '<div id="'+cTId+'" style="display:none;padding-left:0.7rem">'+cTHtml+'</div>'+
+        '</div>';
+    });
+
+    html +=
+      '<div style="margin-bottom:0.5rem;border:1px solid var(--border);border-radius:10px;overflow:hidden">'+
+      '<div onclick="toggleTreeNode(\''+lvlId+'\')" style="display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.7rem;cursor:pointer;background:var(--bg-soft);font-size:0.82rem;font-weight:700;color:var(--ink)">'+
+      '<span id="arr-'+lvlId+'" style="font-size:0.6rem;transition:transform 0.2s">▶</span>'+
+      '<span>'+lvlIcon+' '+lvl+'</span>'+
+      '</div>'+
+      '<div id="'+lvlId+'" style="display:none;padding:0.4rem 0.3rem 0.3rem">'+lvlHtml+'</div>'+
+      '</div>';
+  });
+  return html;
+}
+
+// ── Carte exercice individuelle (étudiant ou admin) ──
+function _buildExCard(ex, sm, isStudent) {
+  const icon  = _exTypeIcon(ex);
+  const lbl   = _exTypeLabel(ex);
+  const rawTitle = _exGetTitle(ex);
+  const {prefix, cleanTitle} = parseExTitle(rawTitle);
+  const btnLabel = prefix && prefix.startsWith("TEST") ? icon+" "+prefix : icon+" "+lbl;
+  const consultBtn = ex.formUrl
+    ? '<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+btnLabel+'</a>'
+    : "";
+  const sc  = sm ? sm[String(ex.id)] : null;
+  const pct = sc && sc.maxScore > 0 ? sc.score / sc.maxScore : null;
+
+  if (ex.status === "done") {
+    const sl = pct !== null
+      ? '<div class="ex-score-line '+(pct>=0.7?"good":"medium")+'">🎯 '+sc.score+"/"+sc.maxScore+' pts</div>'
+      : "";
+    if (isStudent) {
+      return '<div class="ex-card done">'+
+        '<div class="ex-card-info">'+
+        '<div class="ex-card-title">'+cleanTitle+'</div>'+
+        '<div class="ex-card-meta">📅 '+(ex.doneDate||ex.assignedDate||"—")+'</div>'+
+        sl+'</div>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
+        consultBtn+
+        '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
+        '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+rawTitle.replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+(ex.formUrl||"")+'\',\''+(ex.type||"form")+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
+        '</div></div>';
+    } else {
+      const badge = sc && sc.maxScore > 0
+        ? '<span class="ex-score-badge '+(pct>=0.7?"good":"medium")+'">🎯 '+sc.score+'/'+sc.maxScore+'</span>'
+        : '<span class="ex-score-badge good">✅</span>';
+      return '<div class="ex-detail-item">'+
+        (ex.formUrl?'<span class="ex-detail-title" onclick="window.open(\''+ex.formUrl+'\',\'_blank\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted">'+cleanTitle+'</span>':'<span class="ex-detail-title">'+cleanTitle+'</span>')+
+        badge+'</div>';
+    }
+  } else {
+    if (isStudent) {
+      return '<div class="ex-card" id="ex-card-'+ex.id+'">'+
+        '<div class="ex-card-info">'+
+        '<div class="ex-card-title">'+cleanTitle+'</div>'+
+        '<div class="ex-card-meta">📅 '+(ex.assignedDate||"—")+'</div>'+
+        '</div>'+
+        '<div class="ex-card-actions">'+
+        consultBtn+
+        '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone(\''+ex.id+'\')">'+t("exMarkDone")+'</button>'+
+        '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+rawTitle.replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+(ex.formUrl||"")+'\',\''+(ex.type||"form")+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
+        '</div></div>';
+    } else {
+      return '<div class="ex-detail-item">'+
+        (ex.formUrl?'<span class="ex-detail-title" onclick="window.open(\''+ex.formUrl+'\',\'_blank\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted">'+cleanTitle+'</span>':'<span class="ex-detail-title">'+cleanTitle+'</span>')+
+        '<span class="ex-score-badge pending">⏳</span></div>';
+    }
+  }
+}
+
+function toggleTreeNode(id) {
+  const el  = document.getElementById(id);
+  const arr = document.getElementById("arr-"+id);
+  if (!el) return;
+  const open = el.style.display !== "none";
+  el.style.display  = open ? "none" : "block";
+  if (arr) arr.style.transform = open ? "" : "rotate(90deg)";
+}
+
 function _renderStudentExercises(ed, sd, inB, comB) {
   try{
-    const exs=ed.exercises||[];
-    const sm={};(sd.scores||[]).forEach(s=>{sm[String(s.exerciseId)]=s;});
-    const inP=exs.filter(ex=>ex.status!=="done");
-    const done=exs.filter(ex=>ex.status==="done");
-    document.getElementById("ex-stu-inprogress-count").textContent=inP.length;
-    document.getElementById("ex-stu-completed-count").textContent=done.length;
+    const exs  = ed.exercises || [];
+    const sm   = {};
+    (sd.scores||[]).forEach(s => { sm[String(s.exerciseId)] = s; });
+    const inP  = exs.filter(ex => ex.status !== "done");
+    const done = exs.filter(ex => ex.status === "done");
 
-    // En cours toujours ouvert, Terminés toujours fermé par défaut
+    document.getElementById("ex-stu-inprogress-count").textContent = inP.length;
+    document.getElementById("ex-stu-completed-count").textContent  = done.length;
     document.getElementById("ex-stu-inprogress-section").classList.add("open");
     document.getElementById("ex-stu-inprogress-body").classList.add("open");
     document.getElementById("ex-stu-completed-section").classList.remove("open");
     document.getElementById("ex-stu-completed-body").classList.remove("open");
 
-    const isForm=ex=>(ex.type||"form")==="form"||!ex.type;
-    const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
-
-    const typeIcon=ex=>{
-      const t=(ex.type||"").toLowerCase();
-      if(t==="pdf")    return "📄";
-      if(t==="video")  return "🎬";
-      if(t==="audio")  return "🎵";
-      if(t==="image")  return "🖼️";
-      return "📝";
-    };
-    const typeLabel=ex=>{
-      const t=(ex.type||"form").toLowerCase();
-      if(t==="pdf")    return "PDF";
-      if(t==="video")  return "Vidéo";
-      if(t==="audio")  return "Audio";
-      if(t==="image")  return "Image";
-      return "Exercice";
-    };
-
-    if(!inP.length){
-      inB.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
-    }else{
-      inB.innerHTML=inP.map(ex=>{
-        const form=isForm(ex);
-        const icon=typeIcon(ex);
-        const lbl=typeLabel(ex);
-        const rawTitle = gt(ex);
-        const {prefix, cleanTitle} = parseExTitle(rawTitle);
-        // Construire le label du bouton lien : type + préfixe si TEST
-        const btnLabel = prefix && prefix.startsWith("TEST") ? icon+" "+prefix : icon+" "+lbl;
-        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+btnLabel+'</a>':"";
-        return '<div class="ex-card" id="ex-card-'+ex.id+'">'+
-          '<div class="ex-card-info">'+
-          '<div class="ex-card-title">'+cleanTitle+'</div>'+
-          '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.assignedDate||"—" )+'</div>'+
-          '</div>'+
-          '<div class="ex-card-actions">'+
-          consultBtn+
-          '<button class="btn-ex-done" id="btn-done-'+ex.id+'" onclick="markExerciseDone('+ex.id+')">'+t("exMarkDone")+'</button>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\',\''+(ex.type||"form")+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
-          '</div></div>';
-      }).join("");
-    }
-
-    if(!done.length){
-      comB.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
-    }else{
-      comB.innerHTML=done.map(ex=>{
-        const sc=sm[String(ex.id)];
-        const pct=sc&&sc.maxScore>0?sc.score/sc.maxScore:null;
-        const sl=pct!==null?'<div class="ex-score-line '+( pct>=0.7?"good":"medium" )+'">🎯 '+sc.score+"/"+sc.maxScore+' pts</div>':"";
-        const icon=typeIcon(ex);
-        const lbl=typeLabel(ex);
-        const rawTitle = gt(ex);
-        const {prefix, cleanTitle} = parseExTitle(rawTitle);
-        const btnLabel = prefix && prefix.startsWith("TEST") ? icon+" "+prefix : icon+" "+lbl;
-        const consultBtn=ex.formUrl?'<a class="btn-ex-open" href="'+ex.formUrl+'" target="_blank" rel="noopener">'+btnLabel+'</a>':"";
-        return '<div class="ex-card done">'+
-          '<div class="ex-card-info">'+
-          '<div class="ex-card-title">'+cleanTitle+'</div>'+
-          '<div class="ex-card-meta">'+( ex.level?ex.level+" · ":"" )+'📅 '+( ex.doneDate||ex.assignedDate||"—" )+'</div>'+
-          sl+
-          '</div>'+
-          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">'+
-          consultBtn+
-          '<span class="ex-status-badge done">✅ '+t("exDone")+'</span>'+
-          '<button class="btn-star'+(isFav(currentUserGlobal.id,String(ex.contentId||ex.id))?" starred":"")+ '" onclick="toggleFav(event,\''+currentUserGlobal.id+'\',\''+(ex.contentId||ex.id)+'\',\''+gt(ex).replace(/'/g,"&#39;")+'\',\''+(ex.level||"")+'\',\'\',\''+( ex.formUrl||"" )+'\',\''+(ex.type||"form")+'\')" title="'+t("favAdd")+'">'+STAR_SVG+'</button>'+
-          '</div></div>';
-      }).join("");
-    }
+    inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
+    comB.innerHTML = done.length ? _buildExTree(done, sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
@@ -3719,69 +3797,83 @@ async function loadAdminExercises() {
       api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()})
     ]);
     if(!ed.success){wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';return;}
-    const scM={};(sr.scores||[]).forEach(s=>{scM[String(s.studentId)+"_"+String(s.exerciseId)]=s;});
-    const stuMap={};allStudents.forEach(s=>{stuMap[String(s.id)]=s;});
-    // Actifs uniquement dans les exercices
+
+    const scM={};
+    (sr.scores||[]).forEach(s=>{ scM[String(s.studentId)+"_"+String(s.exerciseId)]=s; });
+    const stuMap={};
+    allStudents.forEach(s=>{ stuMap[String(s.id)]=s; });
+
     const activeIds=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
+
+    // Grouper par étudiant
     const byS={};
     (ed.exercises||[]).forEach(ex=>{
       const sid=String(ex.studentId);
-      if(!activeIds.has(sid))return; // ignorer les inactifs
-      if(!byS[sid])byS[sid]={total:0,done:0,exercises:[],lastDate:""};
-      byS[sid].total++;if(ex.status==="done")byS[sid].done++;
-      if((ex.assignedDate||"")>byS[sid].lastDate)byS[sid].lastDate=ex.assignedDate||"";
-      byS[sid].exercises.push(ex);
+      if(!activeIds.has(sid))return;
+      if(!byS[sid])byS[sid]={total:0,done:0,pending:[],done_list:[],lastDate:""};
+      byS[sid].total++;
+      if(ex.status==="done"){ byS[sid].done++; byS[sid].done_list.push(ex); }
+      else byS[sid].pending.push(ex);
+      if((ex.assignedDate||"")>byS[sid].lastDate) byS[sid].lastDate=ex.assignedDate||"";
     });
+
     const entries=Object.entries(byS).sort(([,a],[,b])=>{
-      const ac=a.done===a.total,bc=b.done===b.total;
+      const ac=a.done===a.total, bc=b.done===b.total;
       if(ac!==bc)return ac?1:-1;
       return b.lastDate.localeCompare(a.lastDate);
     });
-    if(!entries.length){wrap.innerHTML='<div style="padding:2rem;text-align:center;color:var(--gray)">'+t("exNoneInProgress")+'</div>';return;}
-    const gt=ex=>(ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
-    wrap.innerHTML=entries.map(([sid,sd])=>{
-      const stu=stuMap[sid]||{name:"ID "+sid,familyName:""};
-      const isC=sd.done===sd.total;
-      const rid="ex-row-"+sid;
-      const pending=sd.exercises.filter(ex=>ex.status!=="done");
-      const done=sd.exercises.filter(ex=>ex.status==="done");
-      const makeItem=ex=>{
-        const sc=scM[String(sid)+"_"+String(ex.id)];
-        const badge=sc&&sc.maxScore>0?
-          '<span class="ex-score-badge '+(sc.score/sc.maxScore>=0.7?"good":"medium")+'">🎯 '+sc.score+'/'+sc.maxScore+'</span>':
-          ex.status==="done"?'<span class="ex-score-badge good">✅</span>':'<span class="ex-score-badge pending">⏳</span>';
-        const tp=(ex.type||"form").toLowerCase();
-        const typeColor=tp==="pdf"?"rgba(232,75,122,0.15)":tp==="video"?"rgba(52,120,200,0.15)":tp==="audio"?"rgba(80,180,120,0.15)":tp==="link"?"rgba(20,180,160,0.12)":"rgba(103,58,183,0.15)";
-        const typeTextColor=tp==="pdf"?"#E84B7A":tp==="video"?"#3A8FC7":tp==="audio"?"#3DAA6E":tp==="link"?"#0ea891":"#7B5EA7";
-        const typeLabel=tp==="pdf"?"PDF":tp==="video"?"VIDEO":tp==="audio"?"AUDIO":tp==="link"?"🔗 LINK":"FORM";
-        const typeBadge='<span style="font-size:0.48rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;background:'+typeColor+';color:'+typeTextColor+';flex-shrink:0;letter-spacing:0.04em">'+typeLabel+'</span>';
-        const title=ex.formUrl
-          ?'<span class="ex-detail-title" onclick="window.open(\''+ex.formUrl+'\',\'_blank\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+gt(ex)+'</span>'
-          :'<span class="ex-detail-title">'+gt(ex)+'</span>';
-        return '<div class="ex-detail-item">'+title+typeBadge+badge+'</div>';
-      };
-      const pendingId="pend-"+sid;
-      const doneId="done-"+sid;
-      const pendingHtml=pending.length?
-        '<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\''+pendingId+'\',this)">'+
-        '<span>⏳ '+t("exInProgress").toUpperCase()+' ('+pending.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s" id="arr-'+pendingId+'">▲</span></div>'+
-        '<div id="'+pendingId+'">'+pending.map(makeItem).join("")+'</div>'
-        :"";
-      const doneHtml=done.length?
-        '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\''+doneId+'\',this)">'+
-        '<span>✅ '+t("exCompleted").toUpperCase()+' ('+done.length+')</span><span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-'+doneId+'">▲</span></div>'+
-        '<div id="'+doneId+'" style="display:none">'+done.map(makeItem).join("")+'</div>'
-        :"";
+
+    if(!entries.length){
+      wrap.innerHTML='<div style="padding:2rem;text-align:center;color:var(--gray)">'+t("exNoneInProgress")+'</div>';
+      return;
+    }
+
+    // Construire un scoresMap par exerciceId (pour _buildExTree admin)
+    // On injecte le score dans l'exercice directement pour _buildExCard
+    const enrichEx = (ex, sid) => {
+      const sc = scM[sid+"_"+String(ex.id)];
+      return sc ? {...ex, _sc: sc} : ex;
+    };
+
+    wrap.innerHTML = entries.map(([sid,sd])=>{
+      const stu   = stuMap[sid]||{name:"ID "+sid,familyName:""};
+      const isC   = sd.done===sd.total;
+      const rid   = "ex-row-"+sid;
+
+      // ScoresMap pour cet étudiant
+      const stuSm = {};
+      (sr.scores||[]).filter(s=>String(s.studentId)===sid).forEach(s=>{ stuSm[String(s.exerciseId)]=s; });
+
+      const pendingHtml = sd.pending.length
+        ? '<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'pend-'+sid+'\',this)">'+
+          '<span>⏳ '+t("exInProgress").toUpperCase()+' ('+sd.pending.length+')</span>'+
+          '<span style="font-size:0.6rem;transition:transform 0.2s" id="arr-pend-'+sid+'">▲</span></div>'+
+          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false)+'</div>'
+        : "";
+
+      const doneHtml = sd.done_list.length
+        ? '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'done-'+sid+'\',this)">'+
+          '<span>✅ '+t("exCompleted").toUpperCase()+' ('+sd.done_list.length+')</span>'+
+          '<span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-done-'+sid+'">▲</span></div>'+
+          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false)+'</div>'
+        : "";
+
       return '<div style="margin-bottom:0.6rem;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);overflow:hidden">'+
         '<div class="ex-admin-row" style="cursor:pointer" onclick="toggleExRow(\''+rid+'\')">'+
         '<div class="ex-admin-avatar">'+(stu.name||"?")[0]+'</div>'+
-        '<div class="ex-admin-info"><div class="ex-admin-name">'+stu.name+' '+(stu.familyName||"")+'</div><div class="ex-admin-detail">'+sd.done+'/'+sd.total+' '+t("navExercises").toLowerCase()+'</div></div>'+
+        '<div class="ex-admin-info">'+
+          '<div class="ex-admin-name">'+stu.name+' '+(stu.familyName||"")+'</div>'+
+          '<div class="ex-admin-detail">'+sd.done+'/'+sd.total+' '+t("navExercises").toLowerCase()+'</div>'+
+        '</div>'+
         '<span class="ex-progress-badge '+(isC?"complete":"partial")+'">'+sd.done+'/'+sd.total+'</span>'+
         '<button class="ex-expand-btn">▼</button>'+
         '</div>'+
-        '<div class="ex-detail-row" id="'+rid+'" style="background:var(--bg-soft)">'+pendingHtml+doneHtml+'</div>'+
+        '<div class="ex-detail-row" id="'+rid+'" style="background:var(--bg-soft)">'+
+          pendingHtml+doneHtml+
+        '</div>'+
         '</div>';
     }).join("");
+
     _cacheSet(CACHE_ADMIN_KEY + "_ex", wrap.innerHTML);
   }catch(e){console.error(e);wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
