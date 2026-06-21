@@ -4829,7 +4829,15 @@ async function loadAdminStats() {
     // Construire par niveau — inclure tous les étudiants actifs qui ont ce niveau
     const levelHtml=LEVELS.map(lvl=>{
       const stuInLevel=allStudents
-        .filter(s=>String(s.active).toUpperCase()==="YES" && stuLevels[String(s.id)]&&stuLevels[String(s.id)].has(lvl));
+        .filter(s=>{
+          if(String(s.active).toUpperCase()!=="YES")return false;
+          const sid=String(s.id);
+          if(!stuLevels[sid]||!stuLevels[sid].has(lvl))return false;
+          // N'afficher que si au moins 1 score (exercice ou test) dans ce niveau
+          const hasExScore = !!avgEx[sid+"_"+lvl];
+          const hasTestScore = !!(stuTestScores[sid+"_"+lvl]&&Object.values(stuTestScores[sid+"_"+lvl]).some(a=>a.length>0));
+          return hasExScore || hasTestScore;
+        });
       if(!stuInLevel.length)return "";
 
       const rid="stat-lvl-"+lvl;
