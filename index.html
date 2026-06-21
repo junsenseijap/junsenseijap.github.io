@@ -1402,7 +1402,7 @@
           <!-- Score /20 cliquable -->
           <div style="flex:1;text-align:center" onclick="openMyScoresModal()">
             <div id="avg-big-number" style="font-size:2rem;color:var(--pink);font-weight:400;line-height:1;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">—</div>
-            <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 20</div>
+            <div id="avg-big-label" style="font-size:0.65rem;color:var(--gray);margin-top:2px">/ 10</div>
             <div id="avg-big-count" style="font-size:0.6rem;color:var(--gray);margin-top:1px"></div>
           </div>
           <!-- Graphique [TEST] -->
@@ -2266,7 +2266,7 @@ async function loadStudentContent(user) {
     if(avgWrap) {
       if(td && td.success && td.totalScored) {
         if(avgBig) avgBig.textContent = td.globalAvg.toFixed(1);
-        if(avgLbl) avgLbl.textContent = "/ 20";
+        if(avgLbl) avgLbl.textContent = "/ 10";
         const avgCount = document.getElementById("avg-big-count");
         if(avgCount) avgCount.textContent = t("basedOn", td.totalScored);
         avgWrap.style.display = "block";
@@ -2985,8 +2985,8 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
   const rows=exercises.map(e=>{
     const sc=scMap[String(e.id)];
     const pct=sc.score/sc.maxScore;
-    const score20=(pct*20).toFixed(1);
-    totalSum+=pct*20; totalCnt++;
+    const score20=(pct*10).toFixed(1);
+    totalSum+=pct*10; totalCnt++;
     const color=pct>=0.7?"#3b6d11":pct>=0.5?"#854f0b":"#c0392b";
     return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.05)">'+
       '<div style="flex:1;min-width:0">'+
@@ -2994,7 +2994,7 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
         '<div style="font-size:0.65rem;color:var(--gray)">'+(e.level||"")+(e.doneDate?' · ✅ '+e.doneDate:'')+'</div>'+
       '</div>'+
       '<div style="text-align:right;flex-shrink:0">'+
-        '<div style="font-size:0.9rem;font-weight:600;color:'+color+'">'+score20+'/20</div>'+
+        '<div style="font-size:0.9rem;font-weight:600;color:'+color+'">'+score20+'/10</div>'+
         '<div style="font-size:0.65rem;color:var(--gray)">('+sc.score+'/'+sc.maxScore+')</div>'+
       '</div>'+
     '</div>';
@@ -3003,7 +3003,7 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
   body.innerHTML=rows+
     '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0.4rem;border-top:2px solid rgba(232,75,122,0.15);margin-top:0.5rem;background:var(--bg-soft);border-radius:0 0 10px 10px">'+
       '<span style="font-size:0.8rem;font-weight:600;color:var(--ink2)">'+t("avgGenLabel")+' ('+totalCnt+')</span>'+
-      '<span style="font-size:1.1rem;font-weight:600;color:var(--pink)">'+avg20+'/20</span>'+
+      '<span style="font-size:1.1rem;font-weight:600;color:var(--pink)">'+avg20+'/10</span>'+
     '</div>';
 }
 
@@ -3571,32 +3571,15 @@ async function loadStudentExercises() {
   const comB=document.getElementById("ex-stu-completed-body");
   if(!inB||!comB)return;
 
-  // ── Cache done (infini) + cache pending (10 min) ──
-  const cachedDone    = _cacheGet(CACHE_EX_DONE_KEY); // exercices terminés + scores
-  const cachedPending = _cacheGet(CACHE_EX_KEY);       // exercices en cours
-
-  if (cachedDone && cachedPending) {
-    // Tout est en cache → instantané
-    const ed = { exercises: [...cachedPending.exercises, ...cachedDone.exercises] };
-    _renderStudentExercises(ed, cachedDone.sd, inB, comB);
-    return;
-  }
-
+  // ── Pas de cache ici — toujours aller à l'API ──
+  // Le cache done/pending séparé causait des états incohérents
   try{
     const [ed, sd] = await Promise.all([
       api({action:"getMyExercises", studentId:currentUserGlobal.id, pin:getStoredPin()}),
       api({action:"getMyScores",    studentId:currentUserGlobal.id, pin:getStoredPin()})
     ]);
-
-    // Séparer done et pending
-    const allEx   = ed.exercises || [];
-    const doneEx  = allEx.filter(e => e.status === "done");
-    const pendEx  = allEx.filter(e => e.status !== "done");
-
-    // Cache done → infini | pending → 10 min
-    _cacheSet(CACHE_EX_DONE_KEY, { exercises: doneEx, sd });
-    _cacheSet(CACHE_EX_KEY,      { exercises: pendEx });
-
+    _cacheDel(CACHE_EX_KEY);
+    _cacheDel(CACHE_EX_DONE_KEY);
     _renderStudentExercises(ed, sd, inB, comB);
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
@@ -4573,7 +4556,7 @@ async function loadAdminDashboard() {
       }).sort((a,b)=>parseFloat(b.avg20)-parseFloat(a.avg20)).map(s=>
         '<div class="dash-avg-student-row">'+
         '<span class="dash-avg-student-name">'+s.name+'</span>'+
-        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/20</span>'+
+        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/10</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
@@ -4581,7 +4564,7 @@ async function loadAdminDashboard() {
         '<div class="dash-avg-level-header" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'open\')">'+
         '<span class="dash-avg-level-badge">'+lvl+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
-        '<span class="dash-avg-level-score">'+la+'/20</span>'+
+        '<span class="dash-avg-level-score">'+la+'/10</span>'+
         '<span class="dash-avg-level-arrow">▼</span>'+
         '</div>'+
         colHeader+
@@ -4619,7 +4602,7 @@ async function loadAdminStats() {
       if(exOwner[String(sc.exerciseId)]!==String(sc.studentId))return;
       const l=elm[sc.exerciseId]||"?";if(!bl[l])bl[l]={};
       const sid=String(sc.studentId);if(!bl[l][sid])bl[l][sid]={sum:0,cnt:0};
-      bl[l][sid].sum+=(sc.score/sc.maxScore)*20;bl[l][sid].cnt++;
+      bl[l][sid].sum+=(sc.score/sc.maxScore)*10;bl[l][sid].cnt++;
     });
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
@@ -4677,7 +4660,7 @@ async function loadAdminStats() {
         '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(s.lastPct!==null?s.lastPct+'%':'—')+'</span>'+
         '</div>'+
         '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
-        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/20</span>'+
+        '<span class="dash-avg-student-score" onclick="openStudentScoresModal(\''+s.sid+'\',\''+s.name+'\',\''+lvl+'\')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+s.avg20+'/10</span>'+
         '<span class="dash-avg-student-count">('+s.cnt+')</span>'+
         '</div>'
       ).join("");
@@ -4685,7 +4668,7 @@ async function loadAdminStats() {
         '<div class="dash-avg-level-header" onclick="toggleAdminLevel(\''+rid+'\',\''+lvl+'\')">'+
         '<span class="dash-avg-level-badge">'+lvl+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
-        '<span class="dash-avg-level-score">'+la+'/20</span>'+
+        '<span class="dash-avg-level-score">'+la+'/10</span>'+
         '<span class="dash-avg-level-arrow">▼</span>'+
         '</div>'+
         colHeader+
