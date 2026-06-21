@@ -1366,13 +1366,16 @@
   <div id="page-student">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.1rem">
       <div class="page-title" id="student-greeting">こんにちは</div>
-      <button id="btn-mailbox-header" onclick="scrollToMessages()" title="Messages" style="display:none;position:relative;background:none;border:none;cursor:pointer;color:var(--gray);padding:0.3rem">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-        <span id="mailbox-badge" style="display:none;position:absolute;top:0;right:0;background:var(--pink);color:white;font-size:0.55rem;font-weight:700;width:15px;height:15px;border-radius:50%;align-items:center;justify-content:center;line-height:1">0</span>
-      </button>
+      <div style="display:flex;align-items:center;gap:0.4rem">
+        <button id="btn-refresh-home" onclick="clearDataCache();_cacheDel(CACHE_EX_KEY);_cacheDel(CACHE_EX_DONE_KEY);loadStudentContent(currentUserGlobal);" title="Actualiser" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;cursor:pointer;color:var(--gray);font-size:1rem;line-height:1;transition:all 0.2s" onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'">↻</button>
+        <button id="btn-mailbox-header" onclick="scrollToMessages()" title="Messages" style="display:none;position:relative;background:none;border:none;cursor:pointer;color:var(--gray);padding:0.3rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span id="mailbox-badge" style="display:none;position:absolute;top:0;right:0;background:var(--pink);color:white;font-size:0.55rem;font-weight:700;width:15px;height:15px;border-radius:50%;align-items:center;justify-content:center;line-height:1">0</span>
+        </button>
+      </div>
     </div>
     <div class="page-subtitle" id="student-subtitle">🌸 Tableau de bord</div>
 
@@ -1725,7 +1728,10 @@
 
 <!-- ══ STUDENT EXERCISES PAGE ══ -->
 <div id="page-exercises" style="padding-top:0.5rem">
-  <div class="page-title" id="ex-page-title" style="margin-top:0">📝 Exercices</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0;margin-bottom:0.1rem">
+    <div class="page-title" id="ex-page-title" style="margin-top:0">📝 Exercices</div>
+    <button onclick="_cacheDel(CACHE_EX_KEY);_cacheDel(CACHE_EX_DONE_KEY);loadStudentExercises();" title="Actualiser" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;cursor:pointer;color:var(--gray);font-size:1rem;line-height:1;transition:all 0.2s" onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'">↻</button>
+  </div>
   <div class="page-subtitle" id="ex-page-sub">🌸 Mes exercices</div>
   <div class="ex-section open" id="ex-stu-inprogress-section" style="margin-bottom:0.8rem">
     <div class="ex-section-header" onclick="toggleExSection('ex-stu-inprogress')">
@@ -1752,7 +1758,10 @@
 </div>
 <!-- ══ ADMIN EXERCISES PAGE ══ -->
 <div id="page-admin-exercises">
-  <div class="page-title" id="admin-ex-title">📝 Exercices</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.1rem">
+    <div class="page-title" id="admin-ex-title">📝 Exercices</div>
+    <button onclick="localStorage.removeItem(CACHE_ADMIN_KEY+'_ex');loadAdminExercises();" title="Actualiser" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;cursor:pointer;color:var(--gray);font-size:1rem;line-height:1;transition:all 0.2s" onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'">↻</button>
+  </div>
   <div class="page-subtitle" id="admin-ex-sub">🌸 Suivi des exercices</div>
   <div id="admin-ex-list">
     <div class="loading" style="padding:2rem"><div class="spinner"></div></div>
@@ -3683,8 +3692,10 @@ function _renderStudentExercises(ed, sd, inB, comB) {
 
 
 async function markExerciseDone(exId) {
+  // Bloquer TOUS les boutons done pendant le traitement (anti-clic en rafale)
+  document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = true; });
   const btn = document.getElementById("btn-done-" + exId);
-  if (btn) { btn.disabled = true; btn.textContent = "..."; }
+  if (btn) btn.textContent = "...";
   try {
     const data = await api({
       action: "markExerciseDone",
@@ -3695,15 +3706,15 @@ async function markExerciseDone(exId) {
     if (data.success) {
       toast(t("exMarkedDone"), "success");
       _cacheDel(CACHE_EX_KEY);
-  _cacheDel(CACHE_EX_DONE_KEY);
-      setTimeout(() => loadStudentExercises(), 800);
+      _cacheDel(CACHE_EX_DONE_KEY);
+      await loadStudentExercises(); // await = on attend la fin avant de débloquer
     } else {
       toast(data.message || t("errToggle"), "error");
-      if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
+      document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = false; b.textContent = t("exMarkDone"); });
     }
   } catch {
     toast(t("errConn"), "error");
-    if (btn) { btn.disabled = false; btn.textContent = t("exMarkDone"); }
+    document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = false; b.textContent = t("exMarkDone"); });
   }
 }
 
