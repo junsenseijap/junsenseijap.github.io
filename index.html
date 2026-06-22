@@ -748,6 +748,9 @@
     #page-profile {
       display: none; padding: 0.5rem 1.2rem 80px; max-width: 540px; margin: 0 auto;
     }
+    #page-calendar, #page-admin-calendar {
+      display: none; padding: 0.5rem 1.2rem 80px; max-width: 700px; margin: 0 auto;
+    }
     .profile-avatar-wrap {
       display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem;
     }
@@ -1797,7 +1800,7 @@
   </div>
 
 <!-- ══ PAGE CALENDRIER ÉTUDIANT ══ -->
-<div id="page-calendar" style="display:none;padding:1rem 2rem 80px;max-width:700px;margin:0 auto">
+<div id="page-calendar">
 
   <!-- Navigation mois -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.5rem 1rem">
@@ -1828,7 +1831,7 @@
 </div>
 
 <!-- ══ PAGE CALENDRIER ADMIN (créer des RDV) ══ -->
-<div id="page-admin-calendar" style="display:none;padding:1rem 2rem 80px;max-width:700px;margin:0 auto">
+<div id="page-admin-calendar">
 
   <!-- Bouton créer RDV -->
   <button onclick="openCreateLessonModal()" style="width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;border:none;border-radius:12px;font-size:0.9rem;font-weight:500;cursor:pointer;margin-bottom:1rem;font-family:'DM Sans',sans-serif">
