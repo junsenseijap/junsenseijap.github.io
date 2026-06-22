@@ -1797,7 +1797,7 @@
   </div>
 
 <!-- ══ PAGE CALENDRIER ÉTUDIANT ══ -->
-<div id="page-calendar" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto">
+<div id="page-calendar" style="display:none;padding:1rem 2rem 80px;max-width:700px;margin:0 auto">
 
   <!-- Navigation mois -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.5rem 1rem">
@@ -1828,7 +1828,7 @@
 </div>
 
 <!-- ══ PAGE CALENDRIER ADMIN (créer des RDV) ══ -->
-<div id="page-admin-calendar" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto">
+<div id="page-admin-calendar" style="display:none;padding:1rem 2rem 80px;max-width:700px;margin:0 auto">
 
   <!-- Bouton créer RDV -->
   <button onclick="openCreateLessonModal()" style="width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;border:none;border-radius:12px;font-size:0.9rem;font-weight:500;cursor:pointer;margin-bottom:1rem;font-family:'DM Sans',sans-serif">
@@ -2724,10 +2724,6 @@ function buildBottomNav(role) {
         <span class="nav-icon">🏠</span>
         <span class="nav-label" data-i="navHome">Accueil</span>
       </button>
-      <button class="nav-tab" id="nav-calendar" onclick="switchTab('calendar')">
-        <span class="nav-icon">📅</span>
-        <span class="nav-label" data-i="navCalendar">Calendrier</span>
-      </button>
       <button class="nav-tab" id="nav-exercises" onclick="switchTab('exercises')">
         <span class="nav-icon">📝</span>
         <span class="nav-label" data-i="navExercises">Exercices</span>
@@ -2755,7 +2751,7 @@ function switchTab(tab) {
   const role = currentUserGlobal?.role;
   const isAdmin = role === "Admin";
 
-  // Update active state
+  // Update active state — nav-calendar n'existe que pour l'admin
   ["home","profile","add","exercises","calendar"].forEach(k => {
     const btn = document.getElementById("nav-" + k);
     if (btn) btn.classList.toggle("active", k === tab);
@@ -5769,7 +5765,9 @@ async function doCreateLesson() {
       renderLessonsList("admin-cal-lessons-list", _adminCalYear, _adminCalMonth, _lessonsCache);
       setTimeout(() => closeCreateLessonModal(), 1200);
     } else {
-      showMsg("❌ " + (r && r.message ? r.message : "Erreur"), "error");
+      const errMsg = r ? (r.message || JSON.stringify(r)) : "Pas de réponse du serveur";
+      console.error("createLesson error:", r);
+      showMsg("❌ " + errMsg, "error");
     }
   } catch(e) {
     showMsg("❌ " + e.message, "error");
