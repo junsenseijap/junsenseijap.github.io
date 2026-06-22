@@ -1798,10 +1798,6 @@
 
 <!-- ══ PAGE CALENDRIER ÉTUDIANT ══ -->
 <div id="page-calendar" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.1rem">
-    <div class="page-title" id="calendar-page-title">📅 Calendrier</div>
-  </div>
-  <div class="page-subtitle" id="calendar-page-sub">🌸 Mes cours</div>
 
   <!-- Navigation mois -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.5rem 1rem">
@@ -1833,14 +1829,11 @@
 
 <!-- ══ PAGE CALENDRIER ADMIN (créer des RDV) ══ -->
 <div id="page-admin-calendar" style="display:none;padding:0.5rem 1.2rem 80px;max-width:700px;margin:0 auto">
-  <div class="page-title" id="admin-cal-title">📅 Calendrier</div>
-  <div class="page-subtitle">🌸 Planning des cours</div>
 
   <!-- Bouton créer RDV -->
   <button onclick="openCreateLessonModal()" style="width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;border:none;border-radius:12px;font-size:0.9rem;font-weight:500;cursor:pointer;margin-bottom:1rem;font-family:'DM Sans',sans-serif">
     ➕ <span id="admin-cal-create-lbl">Créer un cours</span>
   </button>
-
   <!-- Navigation mois admin -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.5rem 1rem">
     <button onclick="adminCalNavMonth(-1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">‹</button>
@@ -4229,6 +4222,14 @@ const TRANSLATIONS = {
     navAdd:            "Thêm",
     navAdmin:          "Admin",
     navExercises:      "Bài tập",
+    navCalendar:       "Lịch",
+    // CALENDAR
+    upcomingTitle:     "📅 Lịch học sắp tới",
+    upcomingSeeAll:    "Xem tất cả →",
+    noLessons:         "Không có lớp học tháng này",
+    calCreateLesson:   "Tạo buổi học",
+    calSaveLesson:     "📅 Lưu buổi học",
+    calToday:          "Hôm nay",
     // PROFILE
     profileInfo:       "👤 Thông tin cá nhân",
     profilePinCard:    "🔐 Đổi PIN",
@@ -4403,6 +4404,14 @@ const TRANSLATIONS = {
     navAdd:            "Add",
     navAdmin:          "Admin",
     navExercises:      "Exercises",
+    navCalendar:       "Calendar",
+    // CALENDAR
+    upcomingTitle:     "📅 Upcoming lessons",
+    upcomingSeeAll:    "See all →",
+    noLessons:         "No lessons this month",
+    calCreateLesson:   "Create a lesson",
+    calSaveLesson:     "📅 Save lesson",
+    calToday:          "Today",
     // PROFILE
     profileInfo:       "👤 My info",
     profilePinCard:    "🔐 Change PIN",
@@ -4577,6 +4586,14 @@ const TRANSLATIONS = {
     navAdd:            "Ajouter",
     navAdmin:          "Admin",
     navExercises:      "Exercices",
+    navCalendar:       "Calendrier",
+    // CALENDAR
+    upcomingTitle:     "📅 Prochains cours",
+    upcomingSeeAll:    "Voir tous →",
+    noLessons:         "Aucun cours ce mois-ci",
+    calCreateLesson:   "Créer un cours",
+    calSaveLesson:     "📅 Enregistrer le cours",
+    calToday:          "Aujourd'hui",
     // PROFILE
     profileInfo:       "👤 Mes infos",
     profilePinCard:    "🔐 Changer le PIN",
@@ -4811,6 +4828,11 @@ function applyLang() {
   const progressT = document.getElementById("progress-card-title"); if(progressT) progressT.textContent = t("progressTitle");
   const recentT   = document.getElementById("recent-card-title");   if(recentT)   recentT.textContent   = t("recentTitle");
   const favT      = document.getElementById("fav-card-title");      if(favT)      favT.textContent      = t("favTitle");
+  // Calendar
+  const upcomingT = document.getElementById("upcoming-card-title"); if(upcomingT) upcomingT.textContent = t("upcomingTitle");
+  const upcomingSeeAll = document.getElementById("upcoming-see-all"); if(upcomingSeeAll) upcomingSeeAll.textContent = t("upcomingSeeAll");
+  const calCreate = document.getElementById("admin-cal-create-lbl"); if(calCreate) calCreate.textContent = t("calCreateLesson");
+  const calSave   = document.getElementById("btn-create-lesson");    if(calSave && !calSave.disabled)   calSave.textContent   = t("calSaveLesson");
   const avgGenLbl = document.getElementById("avg-gen-label"); if(avgGenLbl) avgGenLbl.textContent = t("avgGenLabel");
   const avgTestLbl = document.getElementById("avg-test-label"); if(avgTestLbl) avgTestLbl.textContent = t("avgTestLabel");
   const avgLastLblTop = document.getElementById("avg-last-label-top"); if(avgLastLblTop) avgLastLblTop.textContent = t("avgLastLabel");
@@ -5467,6 +5489,7 @@ async function fetchLessons(forceRefresh) {
       ? { action: "getLessons", adminId: user.id, pin: getStoredPin() }
       : { action: "getLessons", studentId: user.id, pin: getStoredPin() };
     const r = await api(params);
+    console.log("📅 fetchLessons réponse:", r);
     if (r && r.success && r.lessons) {
       _cacheSet(LESSONS_KEY, r.lessons);
       _lessonsCache = r.lessons;
@@ -5571,7 +5594,7 @@ function renderLessonsList(containerId, year, month, lessons) {
     .filter(l => l.date && l.date.startsWith(prefix))
     .sort((a, b) => (a.date + a.time) > (b.date + b.time) ? 1 : -1);
   if (!monthLessons.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:0.84rem;padding:1.5rem">' + (currentLang === "en" ? "No lessons this month" : currentLang === "fr" ? "Aucun cours ce mois-ci" : "Không có lớp học tháng này") + '</div>';
+    el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:0.84rem;padding:1.5rem">' + t("noLessons") + '</div>';
     return;
   }
   const isAdmin = currentUserGlobal?.role === "Admin";
@@ -5673,7 +5696,7 @@ function renderUpcomingLessons(lessons) {
         '<div style="font-size:0.95rem;font-weight:700;color:' + (isToday ? "var(--pink)" : "var(--ink)") + ';line-height:1.2">' + dateLabel.split(" ")[1] + '</div>' +
       '</div>' +
       '<div style="flex:1">' +
-        '<div style="font-size:0.85rem;font-weight:600;color:var(--ink)">' + (l.time || "?:??") + ' – ' + endH + ':' + endM + (isToday ? ' <span style="font-size:0.65rem;background:var(--pink);color:white;border-radius:4px;padding:1px 5px;vertical-align:middle">Aujourd\'hui</span>' : '') + '</div>' +
+        '<div style="font-size:0.85rem;font-weight:600;color:var(--ink)">' + (l.time || "?:??") + ' – ' + endH + ':' + endM + (isToday ? ' <span style="font-size:0.65rem;background:var(--pink);color:white;border-radius:4px;padding:1px 5px;vertical-align:middle">' + t("calToday") + '</span>' : '') + '</div>' +
         (l.note ? '<div style="font-size:0.73rem;color:var(--gray);margin-top:1px">' + l.note + '</div>' : '') +
       '</div>' +
       '</div>';
@@ -5751,7 +5774,7 @@ async function doCreateLesson() {
   } catch(e) {
     showMsg("❌ " + e.message, "error");
   }
-  btn.disabled = false; btn.textContent = "📅 Enregistrer le cours";
+  btn.disabled = false; btn.textContent = t("calSaveLesson");
 }
 
 </script>
