@@ -669,6 +669,10 @@
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* ── Skeleton screens ── */
+    .skeleton-row { display:flex;align-items:center;gap:0.5rem;padding:0.45rem 0;border-bottom:1px solid rgba(44,26,34,0.04); }
+    .skeleton-bar { height:10px;border-radius:6px;background:linear-gradient(90deg,rgba(232,75,122,0.07) 25%,rgba(232,75,122,0.14) 50%,rgba(232,75,122,0.07) 75%);background-size:200% 100%;animation:skeleton-shimmer 1.4s ease-in-out infinite; }
+    @keyframes skeleton-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
     /* ── TOAST ── */
     #toast {
@@ -1447,7 +1451,8 @@
       <button id="btn-admin-sync" onclick="forceSyncAdmin()" title="Recharger les données" style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:0.5rem 0.8rem;font-size:1.1rem;cursor:pointer;color:var(--text);flex-shrink:0">🔄</button>
     </div>
     <div id="admin-stats-content" style="margin-bottom:1rem">
-      <div class="loading"><div class="spinner"></div></div>
+      <div class="skeleton-row"><div class="skeleton-bar" style="width:40%"></div><div class="skeleton-bar" style="width:20%"></div></div>
+      <div class="skeleton-row"><div class="skeleton-bar" style="width:55%"></div><div class="skeleton-bar" style="width:15%"></div></div>
     </div>
 
     <!-- Student dropdown -->
@@ -1900,6 +1905,7 @@ async function forceSyncAdmin() {
   const btn = document.getElementById("btn-admin-sync");
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
   invalidateAdminCache();
+  window._adminStatsLoaded = false; // reset lazy flag
   await loadAdminPanel(currentUserGlobal);
   if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
   toast("✅ Données admin rechargées", "success");
@@ -2177,21 +2183,39 @@ function doLogout() {
 }
 
 async function loadStudentContent(user) {
+  // ── Skeleton screens — affichage immédiat avant les données ──
+  const pw = document.getElementById("student-progress-levels");
+  const rw = document.getElementById("student-recent-content");
+  const skeletonBar = '<div class="skeleton-row"><div class="skeleton-bar" style="width:60%"></div><div class="skeleton-bar" style="width:30%"></div></div>';
+  const skeletonItem = '<div class="skeleton-row"><div class="skeleton-bar" style="width:80%"></div></div>';
+  if(pw) pw.innerHTML = skeletonBar+skeletonBar+skeletonBar;
+  if(rw) rw.innerHTML = skeletonItem+skeletonItem+skeletonItem;
+
   try{
-    const [cd,sd,td,cc,ed]=await Promise.all([
-      api({action:"getMyContent", studentId:user.id, pin:getStoredPin()}),
-      api({action:"getMyScores", studentId:user.id, pin:getStoredPin()}),
-      api({action:"getStudentStats", studentId:user.id, pin:getStoredPin()}).catch(()=>({success:false,totalScored:0,avgByLevel:{},globalAvg:0})),
-      api({action:"getContentCount"}).catch(()=>({success:false,counts:{}})),
-      api({action:"getMyExercises", studentId:user.id, pin:getStoredPin()}).catch(()=>({success:false,exercises:[]}))
-    ]);
-    const content=cd.content||[];
-    let totalCounts=(cc&&cc.success)?cc.counts||{}:{};
+    // ── 1 seul appel au lieu de 5 — gain de 3-4 secondes ──
+    const data = await api({action:"getStudentData", studentId:user.id, pin:getStoredPin()});
+    if(!data.success) throw new Error(data.message||"Erreur");
+
+    const content  = data.content   || [];
+    const ed       = { exercises: data.exercises || [] };
+    const sd       = { scores:    data.scores    || [] };
+    const td       = data.stats    || { success:false, totalScored:0, avgByLevel:{}, globalAvg:0 };
+    const cc       = { success:true, counts: data.counts || {} };
+    let totalCounts= cc.counts;
+
     const greet = document.getElementById("student-greeting");
     if(greet) greet.textContent = t("studentGreeting", user.name || "");
     const stuSub = document.getElementById("student-subtitle");
     if(stuSub) stuSub.textContent = t("studentSubtitle");
-    const pw=document.getElementById("student-progress-levels");
+
+    // Badge messages
+    const badge = document.getElementById("mailbox-badge");
+    const btnMail = document.getElementById("btn-mailbox-header");
+    if(data.unreadMessages > 0) {
+      if(badge)  { badge.textContent = data.unreadMessages; badge.style.display = "flex"; }
+      if(btnMail) btnMail.style.display = "block";
+    }
+
     if(pw){
       const lm={};content.filter(c=>(c.type||"").toLowerCase()!=="form").forEach(c=>{const l=c.level||"?";lm[l]=(lm[l]||0)+1;});
       const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0).map(l=>{
@@ -2205,7 +2229,6 @@ async function loadStudentContent(user) {
             '<span class="level-prog-text">'+unlocked+'/'+total+' 🌸</span>'+
             '</div>';
         }
-        // total inconnu : barre à 100% avec unlocked affiché
         return '<div class="level-progress-row">'+
           '<span class="level-prog-badge">'+l+'</span>'+
           '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:100%"></div></div>'+
@@ -2225,7 +2248,6 @@ async function loadStudentContent(user) {
           '</div>';
       }
     }
-    const rw=document.getElementById("student-recent-content");
     if(rw){
       if(!content.length){
         rw.innerHTML='<div style="color:var(--gray);font-size:0.82rem;text-align:center;padding:0.5rem">'+t("emptyContent")+'</div>';
@@ -2251,10 +2273,7 @@ async function loadStudentContent(user) {
         }).join("");
       }
     }
-
-    // Afficher les favoris
     renderFavorites(user.id);
-    // Charger les messages
     loadStudentMessages(user.id);
 
     // Moyenne compacte + graphique tests mensuels
@@ -2264,7 +2283,6 @@ async function loadStudentContent(user) {
     const avgLast = document.getElementById("avg-last-number");
     const avgLastLbl = document.getElementById("avg-last-label");
     if(avgWrap) {
-      // Afficher la moyenne si on a des scores d'exercices normaux
       if(td && td.success && td.totalScored) {
         if(avgBig) avgBig.textContent = td.globalAvg.toFixed(1);
         if(avgLbl) avgLbl.textContent = "/ 10";
@@ -2275,15 +2293,12 @@ async function loadStudentContent(user) {
         if(avgLbl) avgLbl.textContent = "/ 10";
       }
       avgWrap.style.display = "block";
-      // Graphique [TEST] — toujours tenté même si pas de moyenne exercices
       try {
-        const scData = sd;
-        const exData = ed;
         const scMap = {};
-        (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)] = s; });
+        (sd.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)] = s; });
         const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
         const byCat={GR:[],VO:[],LI:[],RE:[]};
-        (exData.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{
+        (ed.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).forEach(e=>{
           const cat=getTestCat(e.title); if(!cat)return;
           const sc=scMap[String(e.id)]; if(!sc||!sc.maxScore)return;
           const d=e.assignedDate?parseDate(e.assignedDate):null;
@@ -2339,7 +2354,6 @@ async function loadStudentContent(user) {
   }
 }
 
-
 async function loadAdminPanel(user) {
   adminUser = user;
   // sync panel est toujours visible dans la page admin
@@ -2354,7 +2368,7 @@ async function loadAdminPanel(user) {
     const cnt = document.getElementById("admin-student-count");
     if(cnt) cnt.textContent = activeStudents.length;
     initNotifPushCard(currentUserGlobal);
-    loadAdminStats();
+    if(!window._adminStatsLoaded){ window._adminStatsLoaded=true; loadAdminStats(); }
     ddList.innerHTML = activeStudents.length === 0
       ? '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</div>'
       : activeStudents.map(s => `
@@ -2389,8 +2403,8 @@ async function loadAdminPanel(user) {
   const cnt = document.getElementById("admin-student-count");
   if(cnt) cnt.textContent = activeStudents.length;
 
-  // Load class averages
-  loadAdminStats();
+  // Load class averages — lazy
+  if(!window._adminStatsLoaded){ window._adminStatsLoaded=true; loadAdminStats(); }
     if (activeStudents.length === 0) {
       ddList.innerHTML = '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("noStudents") + '</div>';
       return;
@@ -2630,6 +2644,11 @@ function switchTab(tab) {
   if (tab === "exercises") {
     if (isAdmin) loadAdminExercises();
     else         loadStudentExercises();
+  }
+  // Lazy load admin stats seulement quand l'onglet home admin est ouvert
+  if (tab === "home" && isAdmin && !window._adminStatsLoaded) {
+    window._adminStatsLoaded = true;
+    loadAdminStats();
   }
 }
 
@@ -5258,7 +5277,6 @@ async function refreshAdminExercises() {
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
   const wrap = document.getElementById("admin-ex-list");
   if (wrap) wrap.innerHTML = '<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
-  // Vider le cache
   _cacheDel(CACHE_ADMIN_KEY + "_ex");
   try {
     await loadAdminExercises();
