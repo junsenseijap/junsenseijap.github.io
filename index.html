@@ -2567,9 +2567,9 @@ function toggleStudentDropdown() {
   const open = list.classList.toggle("open");
   btn.classList.toggle("open", open);
   if (open) {
-    const rect    = btn.getBoundingClientRect();
-    const navH    = 62; // hauteur bottom-nav fixe
-    const margin  = 8;
+    const rect     = btn.getBoundingClientRect();
+    const navH     = 62;
+    const margin   = 8;
     const available = window.innerHeight - rect.bottom - navH - margin;
     list.style.maxHeight = Math.max(120, available) + "px";
   }
@@ -3879,9 +3879,9 @@ function _exGetTitle(ex){
 }
 
 // ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
-function _buildExTree(exList, sm, isStudent, studentId) {
+function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
-  const uidSuffix = sid + "-" + (isStudent?"s":"a");
+  const uidSuffix = sid + "-" + (isStudent?"s":"a") + (sectionKey ? "-"+sectionKey : "");
   // Grouper : level → courseT → courseN → []
   const tree = {};
   exList.forEach(ex => {
@@ -4026,8 +4026,8 @@ function _renderStudentExercises(ed, sd, inB, comB) {
       document.getElementById("ex-stu-completed-body").classList.remove("open");
     }
 
-    inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
-    comB.innerHTML = done.length ? _buildExTree(done, sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
+    inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true, null, "inp")  : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
+    comB.innerHTML = done.length ? _buildExTree(done, sm, true, null, "done") : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
@@ -4177,14 +4177,14 @@ async function loadAdminExercises() {
         ? '<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'pend-'+sid+'\',this)">'+
           '<span>⏳ '+t("exInProgress").toUpperCase()+' ('+sd.pending.length+')</span>'+
           '<span style="font-size:0.6rem;transition:transform 0.2s" id="arr-pend-'+sid+'">▲</span></div>'+
-          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false, sid)+'</div>'
+          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false, sid, 'pend')+'</div>'
         : "";
 
       const doneHtml = sd.done_list.length
         ? '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'done-'+sid+'\',this)">'+
           '<span>✅ '+t("exCompleted").toUpperCase()+' ('+sd.done_list.length+')</span>'+
           '<span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-done-'+sid+'">▲</span></div>'+
-          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false, sid)+'</div>'
+          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false, sid, 'done')+'</div>'
         : "";
 
       return '<div style="margin-bottom:0.6rem;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);overflow:hidden">'+
