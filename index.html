@@ -4170,14 +4170,14 @@ async function loadAdminExercises() {
         ? '<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'pend-'+sid+'\',this)">'+
           '<span>⏳ '+t("exInProgress").toUpperCase()+' ('+sd.pending.length+')</span>'+
           '<span style="font-size:0.6rem;transition:transform 0.2s" id="arr-pend-'+sid+'">▲</span></div>'+
-          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false, sid)+'</div>'
+          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false, sid, 'pend')+'</div>'
         : "";
 
       const doneHtml = sd.done_list.length
         ? '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'done-'+sid+'\',this)">'+
           '<span>✅ '+t("exCompleted").toUpperCase()+' ('+sd.done_list.length+')</span>'+
           '<span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-done-'+sid+'">▲</span></div>'+
-          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false, sid)+'</div>'
+          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false, sid, 'done')+'</div>'
         : "";
 
       return '<div style="margin-bottom:0.6rem;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);overflow:hidden">'+
