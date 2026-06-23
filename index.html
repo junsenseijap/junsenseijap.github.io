@@ -1833,13 +1833,13 @@
   <!-- Grille calendrier -->
   <div id="cal-grid-wrap" style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem">
     <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg-soft);border-bottom:1px solid var(--border)">
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink)">Dim</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Lun</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Mar</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Mer</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Jeu</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Ven</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink-mid)">Sam</div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink)"><span data-i="calDow0">Dim</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow1">Lun</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow2">Mar</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow3">Mer</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow4">Jeu</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow5">Ven</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink-mid)"><span data-i="calDow6">Sam</span></div>
     </div>
     <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr)"></div>
   </div>
@@ -1862,13 +1862,13 @@
   <!-- Grille admin -->
   <div id="admin-cal-grid-wrap" style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem">
     <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg-soft);border-bottom:1px solid var(--border)">
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink)">Dim</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Lun</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Mar</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Mer</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Jeu</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)">Ven</div>
-      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink-mid)">Sam</div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink)"><span data-i="calDow0">Dim</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow1">Lun</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow2">Mar</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow3">Mer</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow4">Jeu</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--gray)"><span data-i="calDow5">Ven</span></div>
+      <div style="text-align:center;padding:0.4rem 0;font-size:0.65rem;font-weight:600;color:var(--pink-mid)"><span data-i="calDow6">Sam</span></div>
     </div>
     <div id="admin-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr)"></div>
   </div>
@@ -4329,6 +4329,7 @@ const TRANSLATIONS = {
     calCreateLesson:   "Tạo buổi học",
     calSaveLesson:     "📅 Lưu buổi học",
     calToday:          "Hôm nay",
+    calDow0: "CN", calDow1: "T2", calDow2: "T3", calDow3: "T4", calDow4: "T5", calDow5: "T6", calDow6: "T7",
     // PROFILE
     profileInfo:       "👤 Thông tin cá nhân",
     profilePinCard:    "🔐 Đổi PIN",
@@ -4511,6 +4512,7 @@ const TRANSLATIONS = {
     calCreateLesson:   "Create a lesson",
     calSaveLesson:     "📅 Save lesson",
     calToday:          "Today",
+    calDow0: "Sun", calDow1: "Mon", calDow2: "Tue", calDow3: "Wed", calDow4: "Thu", calDow5: "Fri", calDow6: "Sat",
     // PROFILE
     profileInfo:       "👤 My info",
     profilePinCard:    "🔐 Change PIN",
@@ -4693,6 +4695,7 @@ const TRANSLATIONS = {
     calCreateLesson:   "Créer un cours",
     calSaveLesson:     "📅 Enregistrer le cours",
     calToday:          "Aujourd'hui",
+    calDow0: "Dim", calDow1: "Lun", calDow2: "Mar", calDow3: "Mer", calDow4: "Jeu", calDow5: "Ven", calDow6: "Sam",
     // PROFILE
     profileInfo:       "👤 Mes infos",
     profilePinCard:    "🔐 Changer le PIN",
