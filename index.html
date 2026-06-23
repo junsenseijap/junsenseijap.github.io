@@ -929,6 +929,7 @@
     .ex-section.open .ex-section-arrow { transform: rotate(180deg); }
     .ex-section-body { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
     .ex-section.open .ex-section-body { display: block; }
+    .ex-section-body.open { display: block; }
 
     /* Admin exercise row */
     .ex-admin-row {
@@ -4014,9 +4015,7 @@ function _renderStudentExercises(ed, sd, inB, comB) {
     // Ne pas forcer l'état des sections si on est en train de restaurer un état
     if (!window._restoringAccordion) {
       document.getElementById("ex-stu-inprogress-section").classList.add("open");
-      document.getElementById("ex-stu-inprogress-body").classList.add("open");
       document.getElementById("ex-stu-completed-section").classList.remove("open");
-      document.getElementById("ex-stu-completed-body").classList.remove("open");
     }
 
     inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
@@ -4238,8 +4237,6 @@ function toggleExSection(id) {
   const section=document.getElementById(id+"-section");
   if(!section)return;
   section.classList.toggle("open");
-  const body=document.getElementById(id+"-body");
-  if(body)body.classList.toggle("open");
   const arrow=section.querySelector(".ex-section-arrow");
   if(arrow)arrow.textContent=section.classList.contains("open")?"▲":"▼";
 }
