@@ -5068,11 +5068,7 @@ async function loadAdminStats() {
         .filter(s=>{
           if(String(s.active).toUpperCase()!=="YES")return false;
           const sid=String(s.id);
-          if(!stuLevels[sid]||!stuLevels[sid].has(lvl))return false;
-          // N'afficher que si au moins 1 score (exercice ou test) dans ce niveau
-          const hasExScore = !!avgEx[sid+"_"+lvl];
-          const hasTestScore = !!(stuTestScores[sid+"_"+lvl]&&Object.values(stuTestScores[sid+"_"+lvl]).some(a=>a.length>0));
-          return hasExScore || hasTestScore;
+          return stuLevels[sid] && stuLevels[sid].has(lvl);
         });
       if(!stuInLevel.length)return "";
 
@@ -5684,16 +5680,19 @@ function renderLessonsList(containerId, year, month, lessons) {
   if (!el) return;
   const isAdmin = currentUserGlobal?.role === "Admin";
   const tz = getUserTimezone();
+  const todayStr = formatLessonDate(new Date().toISOString());
   const monthLessons = (lessons||[]).filter(l => {
     const d = formatLessonDate(l.startISO);
-    return d && parseInt(d.split("-")[0])===year && parseInt(d.split("-")[1])-1===month;
+    if (!d || parseInt(d.split("-")[0])!==year || parseInt(d.split("-")[1])-1!==month) return false;
+    // Admin : masquer les cours passés — Élève : tout afficher
+    if (isAdmin && d < todayStr) return false;
+    return true;
   }).sort((a,b) => (a.startISO||"") > (b.startISO||"") ? 1 : -1);
 
   if (!monthLessons.length) {
     el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:0.84rem;padding:1.5rem">'+t("noLessons")+'</div>';
     return;
   }
-  const todayStr = formatLessonDate(new Date().toISOString());
   el.innerHTML = monthLessons.map(l => {
     const dateStr  = formatLessonDate(l.startISO);
     const tStart   = formatLessonTime(l.startISO);
