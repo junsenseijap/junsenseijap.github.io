@@ -500,10 +500,10 @@
       font-family: 'DM Sans', sans-serif; font-weight: 600; flex-shrink: 0;
       transition: all 0.18s; border: 1.5px solid;
     }
-    .btn-unlock.locked  { background: rgba(158,196,160,0.15); border-color: rgba(74,138,85,0.4); color: #4a8a55; }
-    .btn-unlock.locked:hover  { background: rgba(158,196,160,0.3); }
-    .btn-unlock.unlocked { background: var(--pink-pale); border-color: rgba(232,75,122,0.35); color: var(--pink); }
-    .btn-unlock.unlocked:hover { background: rgba(232,75,122,0.12); }
+    .btn-unlock.locked  { background: var(--pink-pale); border-color: rgba(232,75,122,0.35); color: var(--pink); }
+    .btn-unlock.locked:hover  { background: rgba(232,75,122,0.12); }
+    .btn-unlock.unlocked { background: rgba(158,196,160,0.15); border-color: rgba(74,138,85,0.4); color: #4a8a55; }
+    .btn-unlock.unlocked:hover { background: rgba(158,196,160,0.3); }
 
     .unlock-status { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .unlock-status.on  { background: #4a8a55; box-shadow: 0 0 5px rgba(74,138,85,0.5); }
@@ -1509,20 +1509,6 @@
   <div style="margin-bottom:0.9rem">
     <div style="font-size:0.68rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);margin-bottom:0.4rem" id="pfl-timezone">🌐 Fuseau horaire</div>
     <select id="profile-timezone" onchange="saveTimezone(this.value)" style="width:100%;padding:0.55rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.84rem;outline:none">
-      <option value="Asia/Ho_Chi_Minh">🇻🇳 Vietnam (UTC+7)</option>
-      <option value="Asia/Tokyo">🇯🇵 Japon (UTC+9)</option>
-      <option value="Europe/Paris">🇫🇷 France (UTC+1/+2)</option>
-      <option value="Europe/London">🇬🇧 Royaume-Uni (UTC+0/+1)</option>
-      <option value="America/New_York">🇺🇸 New York (UTC-5/-4)</option>
-      <option value="America/Los_Angeles">🇺🇸 Los Angeles (UTC-8/-7)</option>
-      <option value="America/Chicago">🇺🇸 Chicago (UTC-6/-5)</option>
-      <option value="Australia/Sydney">🇦🇺 Sydney (UTC+10/+11)</option>
-      <option value="Asia/Singapore">🇸🇬 Singapour (UTC+8)</option>
-      <option value="Asia/Seoul">🇰🇷 Corée (UTC+9)</option>
-      <option value="Asia/Shanghai">🇨🇳 Chine (UTC+8)</option>
-      <option value="Europe/Berlin">🇩🇪 Allemagne (UTC+1/+2)</option>
-      <option value="Europe/Madrid">🇪🇸 Espagne (UTC+1/+2)</option>
-      <option value="UTC">🌐 UTC</option>
     </select>
   </div>
 
@@ -2844,13 +2830,11 @@ function loadProfilePage(user) {
     const tz = user.timezone && user.timezone.trim()
       ? user.timezone.trim()
       : Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // Sélectionner l'option correspondante, ou la première si pas trouvée
-    let found = false;
+    updateTimezoneSelect();
+    // Sélectionner le bon fuseau après peuplement
     for (let i = 0; i < tzSel.options.length; i++) {
-      if (tzSel.options[i].value === tz) { tzSel.selectedIndex = i; found = true; break; }
+      if (tzSel.options[i].value === tz) { tzSel.selectedIndex = i; break; }
     }
-    // Si fuseau navigateur pas dans la liste, on le pré-sélectionne quand même
-    if (!found && tz) { tzSel.value = tz; }
   }
   const msg = document.getElementById("pin-msg");
   if (msg) msg.style.display = "none";
@@ -2985,7 +2969,7 @@ async function openMessageModal(studentId, studentName) {
       '<div style="text-align:center;color:var(--gray);font-size:0.8rem;padding:0.5rem">Chargement...</div>'+
     '</div>'+
     '<textarea id="msg-textarea" placeholder="'+t("msgPlaceholder")+'" style="width:100%;min-height:90px;border:1.5px solid var(--border);border-radius:10px;padding:0.8rem;font-family:\'DM Sans\',sans-serif;font-size:0.9rem;resize:vertical;background:var(--bg-soft);color:var(--ink);box-sizing:border-box;margin-bottom:0.8rem"></textarea>'+
-    '<button class="btn-add-student" id="btn-send-msg" onclick="sendMessage('+studentId+',\''+studentName+'\')" style="margin-bottom:0.5rem">✉️ '+t("msgSend")+'</button>'+
+    '<button class="btn-add-student" id="btn-send-msg" onclick="sendMessage('+studentId+',decodeURIComponent(\''+encodeURIComponent(studentName)+'\'))" style="margin-bottom:0.5rem">✉️ '+t("msgSend")+'</button>'+
     '<button style="width:100%;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'message-modal\').remove()">'+t("cancel")+'</button>'+
     '</div>';
   overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
@@ -3653,7 +3637,7 @@ async function loadAdminManage() {
           '<div class="manage-stu-email">'+(s.email||"")+'</div>'+
           '<div class="manage-stu-levels">'+levels+'</div>'+
         '</div>'+
-        '<button class="btn-manage-stu" style="background:rgba(232,75,122,0.1);border-color:rgba(232,75,122,0.3);color:var(--pink);margin-right:0.2rem" onclick="openMessageModal('+s.id+',\''+s.name+' '+(s.familyName||"")+'\')" title="Message">✉️</button>'+
+        '<button class="btn-manage-stu" style="background:rgba(232,75,122,0.1);border-color:rgba(232,75,122,0.3);color:var(--pink);margin-right:0.2rem" onclick="openMessageModal('+s.id+',decodeURIComponent(\''+encodeURIComponent(s.name+' '+(s.familyName||""))+'\'))" title="Message">✉️</button>'+
         '<button class="btn-manage-levels" onclick="openLevelsModal('+s.id+',\''+s.name+'\',\''+( s.levels||"" )+'\')" title="Niveaux">LEVEL</button>'+
         '<button class="btn-manage-stu" style="background:rgba(123,175,212,0.15);border-color:rgba(123,175,212,0.4);color:#3a7aaa;margin-left:0.2rem" onclick="testNotifStudent('+s.id+',\''+s.name+'\')" title="Test notif">🔔</button>'+
         '<button class="btn-manage-stu '+(isActive?"active":"inactive")+'" id="btn-active-'+s.id+'" onclick="toggleStudentActive('+s.id+','+isActive+')">'+
@@ -3888,7 +3872,9 @@ function _exGetTitle(ex){
 }
 
 // ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
-function _buildExTree(exList, sm, isStudent) {
+function _buildExTree(exList, sm, isStudent, studentId) {
+  const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
+  const uidSuffix = sid + "-" + (isStudent?"s":"a");
   // Grouper : level → courseT → courseN → []
   const tree = {};
   exList.forEach(ex => {
@@ -3906,17 +3892,17 @@ function _buildExTree(exList, sm, isStudent) {
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
-    const lvlId = "extree-lvl-" + lvl + "-" + (isStudent?"s":"a");
+    const lvlId = "extree-lvl-" + lvl + "-" + uidSuffix;
     const lvlIcon = LEVEL_ICONS[lvl] || "📘";
     let lvlHtml = "";
 
     Object.keys(tree[lvl]).sort().forEach(cT => {
-      const cTId = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + (isStudent?"s":"a");
+      const cTId = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
       const cTIcon = COURSE_ICONS[cT] || "📂";
       let cTHtml = "";
 
       Object.keys(tree[lvl][cT]).sort().forEach(cN => {
-        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + (isStudent?"s":"a");
+        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
         const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
         cTHtml +=
           '<div style="margin-bottom:0.3rem">'+
@@ -4184,14 +4170,14 @@ async function loadAdminExercises() {
         ? '<div style="font-size:0.68rem;font-weight:600;color:var(--pink);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'pend-'+sid+'\',this)">'+
           '<span>⏳ '+t("exInProgress").toUpperCase()+' ('+sd.pending.length+')</span>'+
           '<span style="font-size:0.6rem;transition:transform 0.2s" id="arr-pend-'+sid+'">▲</span></div>'+
-          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false)+'</div>'
+          '<div id="pend-'+sid+'" style="padding:0.3rem 0.5rem">'+_buildExTree(sd.pending, stuSm, false, sid)+'</div>'
         : "";
 
       const doneHtml = sd.done_list.length
         ? '<div style="font-size:0.68rem;font-weight:600;color:var(--gray);padding:0.5rem 0.8rem 0.2rem;letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:0.4rem" onclick="toggleSubSection(\'done-'+sid+'\',this)">'+
           '<span>✅ '+t("exCompleted").toUpperCase()+' ('+sd.done_list.length+')</span>'+
           '<span style="font-size:0.6rem;transition:transform 0.2s;transform:rotate(180deg)" id="arr-done-'+sid+'">▲</span></div>'+
-          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false)+'</div>'
+          '<div id="done-'+sid+'" style="display:none;padding:0.3rem 0.5rem">'+_buildExTree(sd.done_list, stuSm, false, sid)+'</div>'
         : "";
 
       return '<div style="margin-bottom:0.6rem;border-radius:12px;border:1.5px solid rgba(232,75,122,0.15);background:var(--bg-card);overflow:hidden">'+
@@ -4333,6 +4319,23 @@ const TRANSLATIONS = {
     calSaveLesson:     "📅 Lưu buổi học",
     calToday:          "Hôm nay",
     calDow0: "CN", calDow1: "T2", calDow2: "T3", calDow3: "T4", calDow4: "T5", calDow5: "T6", calDow6: "T7",
+    tzLabel: "🌐 Múi giờ",
+    tzOptions: [
+      { v:"Asia/Ho_Chi_Minh", l:"🇻🇳 Việt Nam (UTC+7)" },
+      { v:"Asia/Tokyo",       l:"🇯🇵 Nhật Bản (UTC+9)" },
+      { v:"Europe/Paris",     l:"🇫🇷 Pháp (UTC+1/+2)" },
+      { v:"Europe/London",    l:"🇬🇧 Anh (UTC+0/+1)" },
+      { v:"America/New_York", l:"🇺🇸 New York (UTC-5/-4)" },
+      { v:"America/Los_Angeles", l:"🇺🇸 Los Angeles (UTC-8/-7)" },
+      { v:"America/Chicago",  l:"🇺🇸 Chicago (UTC-6/-5)" },
+      { v:"Australia/Sydney", l:"🇦🇺 Sydney (UTC+10/+11)" },
+      { v:"Asia/Singapore",   l:"🇸🇬 Singapore (UTC+8)" },
+      { v:"Asia/Seoul",       l:"🇰🇷 Hàn Quốc (UTC+9)" },
+      { v:"Asia/Shanghai",    l:"🇨🇳 Trung Quốc (UTC+8)" },
+      { v:"Europe/Berlin",    l:"🇩🇪 Đức (UTC+1/+2)" },
+      { v:"Europe/Madrid",    l:"🇪🇸 Tây Ban Nha (UTC+1/+2)" },
+      { v:"UTC",              l:"🌐 UTC" },
+    ],
     // PROFILE
     profileInfo:       "👤 Thông tin cá nhân",
     profilePinCard:    "🔐 Đổi PIN",
@@ -4516,6 +4519,23 @@ const TRANSLATIONS = {
     calSaveLesson:     "📅 Save lesson",
     calToday:          "Today",
     calDow0: "Sun", calDow1: "Mon", calDow2: "Tue", calDow3: "Wed", calDow4: "Thu", calDow5: "Fri", calDow6: "Sat",
+    tzLabel: "🌐 Time zone",
+    tzOptions: [
+      { v:"Asia/Ho_Chi_Minh", l:"🇻🇳 Vietnam (UTC+7)" },
+      { v:"Asia/Tokyo",       l:"🇯🇵 Japan (UTC+9)" },
+      { v:"Europe/Paris",     l:"🇫🇷 France (UTC+1/+2)" },
+      { v:"Europe/London",    l:"🇬🇧 United Kingdom (UTC+0/+1)" },
+      { v:"America/New_York", l:"🇺🇸 New York (UTC-5/-4)" },
+      { v:"America/Los_Angeles", l:"🇺🇸 Los Angeles (UTC-8/-7)" },
+      { v:"America/Chicago",  l:"🇺🇸 Chicago (UTC-6/-5)" },
+      { v:"Australia/Sydney", l:"🇦🇺 Sydney (UTC+10/+11)" },
+      { v:"Asia/Singapore",   l:"🇸🇬 Singapore (UTC+8)" },
+      { v:"Asia/Seoul",       l:"🇰🇷 South Korea (UTC+9)" },
+      { v:"Asia/Shanghai",    l:"🇨🇳 China (UTC+8)" },
+      { v:"Europe/Berlin",    l:"🇩🇪 Germany (UTC+1/+2)" },
+      { v:"Europe/Madrid",    l:"🇪🇸 Spain (UTC+1/+2)" },
+      { v:"UTC",              l:"🌐 UTC" },
+    ],
     // PROFILE
     profileInfo:       "👤 My info",
     profilePinCard:    "🔐 Change PIN",
@@ -4699,6 +4719,23 @@ const TRANSLATIONS = {
     calSaveLesson:     "📅 Enregistrer le cours",
     calToday:          "Aujourd'hui",
     calDow0: "Dim", calDow1: "Lun", calDow2: "Mar", calDow3: "Mer", calDow4: "Jeu", calDow5: "Ven", calDow6: "Sam",
+    tzLabel: "🌐 Fuseau horaire",
+    tzOptions: [
+      { v:"Asia/Ho_Chi_Minh", l:"🇻🇳 Vietnam (UTC+7)" },
+      { v:"Asia/Tokyo",       l:"🇯🇵 Japon (UTC+9)" },
+      { v:"Europe/Paris",     l:"🇫🇷 France (UTC+1/+2)" },
+      { v:"Europe/London",    l:"🇬🇧 Royaume-Uni (UTC+0/+1)" },
+      { v:"America/New_York", l:"🇺🇸 New York (UTC-5/-4)" },
+      { v:"America/Los_Angeles", l:"🇺🇸 Los Angeles (UTC-8/-7)" },
+      { v:"America/Chicago",  l:"🇺🇸 Chicago (UTC-6/-5)" },
+      { v:"Australia/Sydney", l:"🇦🇺 Sydney (UTC+10/+11)" },
+      { v:"Asia/Singapore",   l:"🇸🇬 Singapour (UTC+8)" },
+      { v:"Asia/Seoul",       l:"🇰🇷 Corée du Sud (UTC+9)" },
+      { v:"Asia/Shanghai",    l:"🇨🇳 Chine (UTC+8)" },
+      { v:"Europe/Berlin",    l:"🇩🇪 Allemagne (UTC+1/+2)" },
+      { v:"Europe/Madrid",    l:"🇪🇸 Espagne (UTC+1/+2)" },
+      { v:"UTC",              l:"🌐 UTC" },
+    ],
     // PROFILE
     profileInfo:       "👤 Mes infos",
     profilePinCard:    "🔐 Changer le PIN",
@@ -4843,6 +4880,20 @@ function setLangLogin(lang) {
   applyLang();
 }
 
+function updateTimezoneSelect() {
+  const sel = document.getElementById("profile-timezone");
+  if (!sel) return;
+  const current = sel.value;
+  const opts = t("tzOptions") || [];
+  sel.innerHTML = opts.map(o =>
+    '<option value="'+o.v+'"'+(current===o.v?' selected':'')+'>'+o.l+'</option>'
+  ).join("");
+  // Restaurer la valeur courante si elle n'est pas dans la liste
+  if (current && !opts.find(o => o.v === current)) {
+    sel.insertAdjacentHTML("afterbegin", '<option value="'+current+'" selected>'+current+'</option>');
+  }
+}
+
 async function saveTimezone(tz) {
   if (!currentUserGlobal || !tz) return;
   currentUserGlobal.timezone = tz;
@@ -4947,6 +4998,9 @@ function applyLang() {
   const upcomingSeeAll = document.getElementById("upcoming-see-all"); if(upcomingSeeAll) upcomingSeeAll.textContent = t("upcomingSeeAll");
   const calCreate = document.getElementById("admin-cal-create-lbl"); if(calCreate) calCreate.textContent = t("calCreateLesson");
   const calSave   = document.getElementById("btn-create-lesson");    if(calSave && !calSave.disabled)   calSave.textContent   = t("calSaveLesson");
+  // Timezone
+  const tzLbl = document.getElementById("pfl-timezone"); if(tzLbl) tzLbl.textContent = t("tzLabel");
+  updateTimezoneSelect();
   const avgGenLbl = document.getElementById("avg-gen-label"); if(avgGenLbl) avgGenLbl.textContent = t("avgGenLabel");
   const avgTestLbl = document.getElementById("avg-test-label"); if(avgTestLbl) avgTestLbl.textContent = t("avgTestLabel");
   const avgLastLblTop = document.getElementById("avg-last-label-top"); if(avgLastLblTop) avgLastLblTop.textContent = t("avgLastLabel");
