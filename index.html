@@ -535,13 +535,12 @@
     .student-dropdown-btn .dd-arrow { font-size: 0.75rem; color: var(--gray); transition: transform 0.2s; }
     .student-dropdown-btn.open .dd-arrow { transform: rotate(180deg); }
     .student-dropdown-list {
-      display: none; position: fixed; z-index: 999;
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
       background: var(--bg-card);
       border: 1.5px solid var(--pink); border-top: none;
       border-radius: 0 0 12px 12px;
       box-shadow: 0 8px 24px rgba(232,75,122,0.15);
-      max-height: min(320px, 45vh); overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      max-height: 260px; overflow-y: auto;
     }
     .student-dropdown-list.open { display: block; }
     .dd-student-item {
@@ -1765,7 +1764,7 @@
       <span class="ex-section-count inprogress" id="ex-stu-inprogress-count">0</span>
       <span class="ex-section-arrow">▲</span>
     </div>
-    <div class="ex-section-body" id="ex-stu-inprogress-body">
+    <div class="ex-section-body open" id="ex-stu-inprogress-body">
       <div class="loading" style="padding:1rem"><div class="spinner"></div></div>
     </div>
   </div>
@@ -2567,12 +2566,6 @@ function toggleStudentDropdown() {
   const list = document.getElementById("student-dd-list");
   const open = list.classList.toggle("open");
   btn.classList.toggle("open", open);
-  if (open) {
-    const rect = btn.getBoundingClientRect();
-    list.style.top   = rect.bottom + "px";
-    list.style.left  = rect.left + "px";
-    list.style.width = rect.width + "px";
-  }
 }
 
 function selectStudentFromDD(id, name, familyName) {
@@ -3878,49 +3871,24 @@ function _exGetTitle(ex){
   return (ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
 }
 
-// ── Construit l'arborescence niveau→matière→dossier pour une liste d'exercices ──
-// Logique de dossier :
-//   • subType "lesson" → courseT → courseN (unité) → exercices
-//   • subType "exercise" → courseT → "Exercices" → exercices
-//   • subType "test"     → courseT → "Tests" → exercices
-//   • courseT/courseN vides ("?") → dossier "Autres"
+// ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
 function _buildExTree(exList, sm, isStudent, studentId) {
   const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
   const uidSuffix = sid + "-" + (isStudent?"s":"a");
-
-  // Grouper : level → courseT → folderLabel → []
+  // Grouper : level → courseT → courseN → []
   const tree = {};
   exList.forEach(ex => {
     const lvl  = ex.level   || "?";
-    let cT     = ex.courseT || "";
-    let folder = "";
-
-    const sub  = (ex.subType || "lesson").toLowerCase();
-
-    if (!cT || cT === "?") {
-      // Pas de matière connue — mettre en "Autres"
-      cT     = "Autres";
-      folder = sub === "exercise" ? "📝 Exercices"
-             : sub === "test"     ? "🎯 Tests"
-             : "📚 Leçons";
-    } else if (sub === "exercise") {
-      folder = "📝 Exercices";
-    } else if (sub === "test") {
-      folder = "🎯 Tests";
-    } else {
-      // lesson : on utilise courseN comme dossier
-      folder = String(ex.courseN || "?");
-    }
-
-    if (!tree[lvl])          tree[lvl] = {};
-    if (!tree[lvl][cT])      tree[lvl][cT] = {};
-    if (!tree[lvl][cT][folder]) tree[lvl][cT][folder] = [];
-    tree[lvl][cT][folder].push(ex);
+    const cT   = ex.courseT || "?";
+    const cN   = String(ex.courseN || "?");
+    if (!tree[lvl])       tree[lvl] = {};
+    if (!tree[lvl][cT])   tree[lvl][cT] = {};
+    if (!tree[lvl][cT][cN]) tree[lvl][cT][cN] = [];
+    tree[lvl][cT][cN].push(ex);
   });
 
   const LEVEL_ICONS  = { N4:"📘", N5:"📗", N3:"📙", N2:"📕", N1:"📔" };
-  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆",
-                         Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️", Autres:"📂" };
+  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆", Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
@@ -3933,20 +3901,14 @@ function _buildExTree(exList, sm, isStudent, studentId) {
       const cTIcon = COURSE_ICONS[cT] || "📂";
       let cTHtml = "";
 
-      // Trier les dossiers : leçons (par nom) d'abord, puis Exercices, puis Tests
-      const folderKeys = Object.keys(tree[lvl][cT]).sort((a,b) => {
-        const order = k => k.startsWith("📝") ? 1 : k.startsWith("🎯") ? 2 : 0;
-        return order(a) - order(b) || a.localeCompare(b);
-      });
-
-      folderKeys.forEach(folder => {
-        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + folder.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
-        const items = tree[lvl][cT][folder].map(ex => _buildExCard(ex, sm, isStudent)).join("");
+      Object.keys(tree[lvl][cT]).sort().forEach(cN => {
+        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
+        const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
         cTHtml +=
           '<div style="margin-bottom:0.3rem">'+
           '<div onclick="toggleTreeNode(\''+cNId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem;font-weight:600;color:var(--ink2)">'+
           '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
-          '<span>'+folder+'</span>'+
+          '<span>🗂 '+cN+'</span>'+
           '</div>'+
           '<div id="'+cNId+'" style="display:none;padding-left:0.8rem">'+items+'</div>'+
           '</div>';
@@ -4052,7 +4014,9 @@ function _renderStudentExercises(ed, sd, inB, comB) {
     // Ne pas forcer l'état des sections si on est en train de restaurer un état
     if (!window._restoringAccordion) {
       document.getElementById("ex-stu-inprogress-section").classList.add("open");
+      document.getElementById("ex-stu-inprogress-body").classList.add("open");
       document.getElementById("ex-stu-completed-section").classList.remove("open");
+      document.getElementById("ex-stu-completed-body").classList.remove("open");
     }
 
     inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
@@ -4066,7 +4030,7 @@ function saveAccordionState() {
   const state = { classes: new Set(), displays: new Set(), arrows: {} };
 
   // 1. Éléments ouverts via classe "open" (ex-section, coursetype-row, subsection-row)
-  document.querySelectorAll(".ex-section.open, .coursetype-row.open, .subsection-row.open").forEach(el => {
+  document.querySelectorAll(".ex-section.open, .ex-section-body.open, .coursetype-row.open, .subsection-row.open").forEach(el => {
     if (el.id) state.classes.add(el.id);
   });
 
@@ -4274,6 +4238,8 @@ function toggleExSection(id) {
   const section=document.getElementById(id+"-section");
   if(!section)return;
   section.classList.toggle("open");
+  const body=document.getElementById(id+"-body");
+  if(body)body.classList.toggle("open");
   const arrow=section.querySelector(".ex-section-arrow");
   if(arrow)arrow.textContent=section.classList.contains("open")?"▲":"▼";
 }
