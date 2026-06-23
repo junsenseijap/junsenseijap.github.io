@@ -2704,7 +2704,7 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
       invalidateAdminCache();
       delete _studentContentCache[studentId];
       renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
-      restoreAccordionState(openState); // ← restaurer après re-render
+      requestAnimationFrame(() => restoreAccordionState(openState));
     } else {
       toast(data.message || t("errToggle"), "error");
       if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? t('btnLock') : t('btnUnlock'); }
@@ -4059,28 +4059,26 @@ function saveAccordionState() {
 function restoreAccordionState(state) {
   if (!state) return;
   window._restoringAccordion = true;
-  // Petit délai pour laisser le DOM se stabiliser après le re-render
-  requestAnimationFrame(() => {
-    // 1. Restaurer les classes "open"
-    state.classes.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.add("open");
-    });
 
-    // 2. Restaurer les display:block
-    state.displays.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "block";
-    });
-
-    // 3. Restaurer les rotations de flèches
-    Object.entries(state.arrows).forEach(([id, transform]) => {
-      const el = document.getElementById(id);
-      if (el) el.style.transform = transform;
-    });
-
-    window._restoringAccordion = false;
+  // 1. Restaurer les classes "open"
+  state.classes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("open");
   });
+
+  // 2. Restaurer les display:block
+  state.displays.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "block";
+  });
+
+  // 3. Restaurer les rotations de flèches
+  Object.entries(state.arrows).forEach(([id, transform]) => {
+    const el = document.getElementById(id);
+    if (el) el.style.transform = transform;
+  });
+
+  window._restoringAccordion = false;
 }
 
 async function markExerciseDone(exId) {
@@ -4101,7 +4099,7 @@ async function markExerciseDone(exId) {
       _cacheDel(CACHE_EX_KEY);
       _cacheDel(CACHE_EX_DONE_KEY);
       await loadStudentExercises();
-      restoreAccordionState(openState);
+      requestAnimationFrame(() => restoreAccordionState(openState));
     } else {
       toast(data.message || t("errToggle"), "error");
       document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = false; b.textContent = t("exMarkDone"); });
