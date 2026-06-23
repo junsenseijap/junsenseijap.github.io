@@ -1954,10 +1954,11 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxfQk0DHlw4Q8lWwLm0TDoq
 const SESSION_KEY = "jun_session";
 const SESSION_DAYS = 90;
 const DARK_KEY = "jun_dark_mode";
-const CACHE_KEY       = "jun_data_cache";
-const CACHE_EX_KEY      = "jun_ex_cache";         // exercices pending (10 min)
-const CACHE_EX_DONE_KEY = "jun_ex_done_cache";    // exercices done + scores (infini)
-const CACHE_ADMIN_KEY = "jun_admin_cache";
+const CACHE_KEY            = "jun_data_cache";
+const CACHE_EX_KEY         = "jun_ex_cache";         // exercices pending (10 min)
+const CACHE_EX_DONE_KEY    = "jun_ex_done_cache";    // exercices done + scores (infini)
+const CACHE_ADMIN_KEY      = "jun_admin_cache";
+const CACHE_ALL_CONTENT_KEY = "jun_all_content";     // getAllContent — 24h, invalidé après sync
 
 // TTL différenciés par type de données
 const CACHE_TTL_CONTENT   = 24 * 60 * 60 * 1000; // 24h  — contenu (change rarement)
@@ -1973,6 +1974,7 @@ const CACHE_TTL_MAP = {
   [CACHE_EX_DONE_KEY]:      999 * 24 * 60 * 60 * 1000, // ∞ — exercices terminés (état final)
   [CACHE_ADMIN_KEY]:        CACHE_TTL_ADMIN,
   [CACHE_ADMIN_KEY+"_ex"]:  CACHE_TTL_ADMIN_EX,
+  [CACHE_ALL_CONTENT_KEY]:  24 * 60 * 60 * 1000,   // 24h
 };
 
 function _cacheSet(key, data) {
@@ -1994,6 +1996,7 @@ function _cacheDel(key) { try { localStorage.removeItem(key); } catch(e) {} }
 function invalidateAdminCache() {
   _cacheDel(CACHE_ADMIN_KEY);
   _cacheDel(CACHE_ADMIN_KEY + "_ex");
+  _cacheDel(CACHE_ALL_CONTENT_KEY);
 }
 
 // Sync admin uniquement — recharge élèves + contenu sans reload complet
@@ -2010,6 +2013,10 @@ async function runSyncStep(step) {
       // Scan Drive → remplit CONTENT (sans toucher les Forms)
       const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
+        // Invalider le cache allContent pour forcer rechargement après sync Drive
+        _cacheDel(CACHE_ALL_CONTENT_KEY);
+        allContent = []; // vider en mémoire aussi
+        _studentContentCache = {}; // vider le cache par élève
         if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés";
         if (stepEl) stepEl.classList.add("done");
       } else {
@@ -2042,7 +2049,7 @@ async function runSyncStep(step) {
     } else if (step === 5) {
       const r = await api({ action: "importScores", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
-        if (status) status.textContent = "✅ " + (r.created || 0) + " scores importés";
+        if (status) status.textContent = "✅ " + (r.created || "?") + " scores importés";
         if (stepEl) stepEl.classList.add("done");
       } else {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
@@ -2556,8 +2563,9 @@ async function loadAdminPanel(user) {
     }
     allStudents = studentsData.students || [];
     const activeStudents = allStudents.filter(s => String(s.active).toUpperCase() === "YES");
-    // Sauvegarder dans le cache
+    // Sauvegarder dans le cache admin ET dans le cache allContent séparé
     _cacheSet(CACHE_ADMIN_KEY, { students: allStudents, content: allContent });
+    _cacheSet(CACHE_ALL_CONTENT_KEY, { content: allContent });
     initNotifPushCard(currentUserGlobal);
 
   // Update student count — actifs uniquement
@@ -2633,18 +2641,26 @@ async function selectStudent(id, name, familyName) {
     '<div class="loading"><div class="spinner"></div>'+t("loadingStudents")+'</div>';
   try {
     const pin = getStoredPin();
-    const [studentContent, allContentData, exData] = await Promise.all([
-      api({ action:"getMyContent", studentId:id, adminId:currentUserGlobal.id, pin:getStoredPin() }),
-      api({ action: "getAllContent", adminId: adminUser.id, pin: pin }),
-      api({ action:"getMyExercises", studentId:id, adminId:currentUserGlobal.id, pin:getStoredPin() })
-    ]);
-    if (allContentData && allContentData.success) {
-      allContent = (allContentData.content || []).filter(function(c){
-        return c.title && String(c.title).trim() !== "";
-      });
-    } else {
-      console.error("getAllContent failed:", allContentData);
+
+    // ── Charger allContent depuis le cache si dispo, sinon 1 appel GAS et mise en cache ──
+    if (!allContent || !allContent.length) {
+      const cachedAC = _cacheGet(CACHE_ALL_CONTENT_KEY);
+      if (cachedAC && cachedAC.content && cachedAC.content.length) {
+        allContent = cachedAC.content;
+      } else {
+        const allContentData = await api({ action: "getAllContent", adminId: adminUser.id, pin });
+        if (allContentData && allContentData.success) {
+          allContent = (allContentData.content || []).filter(c => c.title && String(c.title).trim() !== "");
+          _cacheSet(CACHE_ALL_CONTENT_KEY, { content: allContent });
+        }
+      }
     }
+
+    // ── 2 appels seulement au lieu de 3 ──
+    const [studentContent, exData] = await Promise.all([
+      api({ action:"getMyContent",   studentId:id, adminId:currentUserGlobal.id, pin }),
+      api({ action:"getMyExercises", studentId:id, adminId:currentUserGlobal.id, pin })
+    ]);
     // Tracker les forms déjà assignés à cet élève (par Content_ID)
     const assignedContentIds = new Set(
       (exData.exercises||[]).map(e => String(e.contentId)).filter(Boolean)
@@ -4141,14 +4157,14 @@ async function loadAdminExercises() {
 
   wrap.innerHTML='<div class="loading" style="padding:2rem"><div class="spinner"></div></div>';
   try{
-    const [ed,sr]=await Promise.all([
-      api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()}),
-      api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()})
-    ]);
-    if(!ed.success){wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';return;}
+    // ── Un seul appel fusionné au lieu de 2 ──
+    const combined = await api({action:"getAdminExData", adminId:currentUserGlobal.id, pin:getStoredPin()});
+    const ed = combined;
+    const sr = combined;
+    if(!combined.success){wrap.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';return;}
 
     const scM={};
-    (sr.scores||[]).forEach(s=>{ scM[String(s.studentId)+"_"+String(s.exerciseId)]=s; });
+    (combined.scores||[]).forEach(s=>{ scM[String(s.studentId)+"_"+String(s.exerciseId)]=s; });
     const stuMap={};
     allStudents.forEach(s=>{ stuMap[String(s.id)]=s; });
 
