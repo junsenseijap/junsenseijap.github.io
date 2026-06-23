@@ -1805,7 +1805,6 @@
     <div class="loading" style="padding:2rem"><div class="spinner"></div></div>
   </div>
 </div>
-</div>
 
 
   <!-- ══ ADMIN STATS DASHBOARD ══ -->
@@ -5570,8 +5569,13 @@ function calMonthLabel(year, month) {
 }
 
 async function fetchLessons(forceRefresh) {
+  // Invalider le cache si l'ancien format (sans startISO) est détecté
   const cached = _cacheGet(LESSONS_KEY);
-  if (!forceRefresh && cached) { _lessonsCache = cached; return cached; }
+  if (cached && cached.length > 0 && cached[0].date && !cached[0].startISO) {
+    _cacheDel(LESSONS_KEY); // vieux format, on force le rechargement
+  } else if (!forceRefresh && cached) {
+    _lessonsCache = cached; return cached;
+  }
   try {
     const user = currentUserGlobal;
     const params = user.role === "Admin"
@@ -5742,13 +5746,6 @@ async function loadStudentCalendar(forceRefresh) {
 async function loadAdminCalendar(forceRefresh) {
   const lbl = document.getElementById("admin-cal-month-label");
   if(lbl) lbl.textContent = calMonthLabel(_adminCalYear,_adminCalMonth);
-  const sel = document.getElementById("lesson-student-select");
-  if(sel && allStudents && sel.options.length<=1) {
-    allStudents.filter(s=>String(s.active).toUpperCase()==="YES").forEach(s=>{
-      const opt=document.createElement("option");
-      opt.value=s.id; opt.textContent=s.name+" "+(s.familyName||""); sel.appendChild(opt);
-    });
-  }
   // Sélectionner le premier cercle de couleur par défaut
   const firstColor = document.querySelector("#lesson-color-picker button");
   if(firstColor && !firstColor.style.transform) selectLessonColor(firstColor,"CYAN");
@@ -5794,6 +5791,16 @@ function openCreateLessonModal() {
   if(ti&&!ti.value) ti.value="09:00";
   const msg = document.getElementById("lesson-msg");
   if(msg) msg.style.display="none";
+  // Peupler la liste élèves à chaque ouverture
+  const sel = document.getElementById("lesson-student-select");
+  if(sel) {
+    sel.innerHTML = '<option value="">— Choisir un élève —</option>';
+    const students = allStudents && allStudents.length ? allStudents : [];
+    students.filter(s=>String(s.active).toUpperCase()==="YES").forEach(s=>{
+      const opt=document.createElement("option");
+      opt.value=s.id; opt.textContent=s.name+" "+(s.familyName||""); sel.appendChild(opt);
+    });
+  }
   // Sélectionner CYAN par défaut
   const firstBtn = document.querySelector("#lesson-color-picker button");
   if(firstBtn) selectLessonColor(firstBtn,"CYAN");
@@ -5841,318 +5848,6 @@ async function doCreateLesson() {
   btn.disabled=false; btn.textContent=t("calSaveLesson");
 }
 
-// ── Mois en format lisible ──
-function calMonthLabel(year, month) {
-  const MONTHS = {
-    vi: ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"],
-    fr: ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
-    en: ["January","February","March","April","May","June","July","August","September","October","November","December"]
-  };
-  const lang = currentLang || "vi";
-  const arr  = MONTHS[lang] || MONTHS.fr;
-  return arr[month] + " " + year;
-}
-
-// ── Récupère les cours depuis GAS ──
-async function fetchLessons(forceRefresh) {
-  // Cache en mémoire valable 15 min
-  const cached = _cacheGet(LESSONS_KEY);
-  if (!forceRefresh && cached) { _lessonsCache = cached; return cached; }
-  try {
-    const user = currentUserGlobal;
-    const params = user.role === "Admin"
-      ? { action: "getLessons", adminId: user.id, pin: getStoredPin() }
-      : { action: "getLessons", studentId: user.id, pin: getStoredPin() };
-    const r = await api(params);
-    console.log("📅 fetchLessons réponse:", r);
-    if (r && r.success && r.lessons) {
-      _cacheSet(LESSONS_KEY, r.lessons);
-      _lessonsCache = r.lessons;
-      return r.lessons;
-    }
-  } catch(e) { console.error("fetchLessons:", e); }
-  return _lessonsCache || [];
-}
-
-// ── Rendu de la grille calendrier ──
-function renderCalGrid(gridId, year, month, lessons) {
-  const grid = document.getElementById(gridId);
-  if (!grid) return;
-  const today  = new Date();
-  const todayStr = today.toISOString().split("T")[0];
-  const first  = new Date(year, month, 1);
-  const last   = new Date(year, month + 1, 0);
-  const startDow = first.getDay(); // 0=Dim
-  const totalCells = startDow + last.getDate();
-  const rows   = Math.ceil(totalCells / 7);
-
-  // Index cours par date
-  const lessonDays = {};
-  (lessons || []).forEach(l => {
-    if (l.date && l.date.startsWith(year + "-" + String(month + 1).padStart(2,"0"))) {
-      const d = parseInt(l.date.split("-")[2]);
-      if (!lessonDays[d]) lessonDays[d] = [];
-      lessonDays[d].push(l);
-    }
-  });
-
-  let html = "";
-  let dayCount = 1;
-  for (let cell = 0; cell < rows * 7; cell++) {
-    const dow  = cell % 7;
-    const isDay = cell >= startDow && dayCount <= last.getDate();
-    const d    = isDay ? dayCount : null;
-    const dateStr = isDay ? year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0") : null;
-    const isToday = dateStr === todayStr;
-    const isPast  = dateStr && dateStr < todayStr;
-    const hasLesson = d && lessonDays[d];
-
-    let cellStyle = "min-height:38px;padding:3px 2px;position:relative;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:" + (hasLesson ? "pointer" : "default") + ";";
-    if (dow === 0) cellStyle += "background:rgba(232,75,122,0.03);";
-    if (dow === 6) cellStyle += "background:rgba(123,175,212,0.04);";
-    if (isToday)  cellStyle += "background:var(--pink-pale);";
-    if (!isDay)   cellStyle += "background:var(--bg-soft);";
-
-    const numStyle = "font-size:0.7rem;font-weight:" + (isToday ? "700" : "400") + ";color:" + (isToday ? "var(--pink)" : isPast ? "var(--gray)" : "var(--ink)") + ";display:block;text-align:center;line-height:2";
-    const dotHtml  = hasLesson ? '<div style="display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:1px">' + lessonDays[d].map(() => '<span style="width:5px;height:5px;border-radius:50%;background:var(--pink);display:inline-block"></span>').join("") + '</div>' : "";
-    const clickAttr = hasLesson ? ('onclick="calDayClick(\'' + dateStr + '\')"') : "";
-
-    html += '<div style="' + cellStyle + '" ' + clickAttr + '>' + (isDay ? '<span style="' + numStyle + '">' + d + '</span>' + dotHtml : "") + '</div>';
-    if (isDay) dayCount++;
-  }
-  grid.innerHTML = html;
-}
-
-// ── Click sur un jour avec cours ──
-function calDayClick(dateStr) {
-  const lessons = (_lessonsCache || []).filter(l => l.date === dateStr);
-  if (!lessons.length) return;
-  const isAdmin = currentUserGlobal?.role === "Admin";
-  const html = lessons.map(l => {
-    const endMin = (parseInt(l.time ? l.time.split(":")[0] : 0) * 60 + parseInt(l.time ? l.time.split(":")[1] : 0) + (l.duration || 60));
-    const endH = String(Math.floor(endMin / 60)).padStart(2, "0");
-    const endM = String(endMin % 60).padStart(2, "0");
-    return '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border)">' +
-      '<div style="font-weight:600;font-size:0.9rem;color:var(--ink)">' + (l.time || "?:??") + ' → ' + endH + ':' + endM + '</div>' +
-      (isAdmin ? '<div style="font-size:0.8rem;color:var(--pink);margin-top:2px">👤 ' + (l.studentName || "Élève") + '</div>' : '') +
-      (l.note ? '<div style="font-size:0.78rem;color:var(--gray);margin-top:3px">📝 ' + l.note + '</div>' : '') +
-      '</div>';
-  }).join("");
-  // Toast simple avec les infos du cours
-  const d = new Date(dateStr + "T00:00:00");
-  const label = d.toLocaleDateString(currentLang === "vi" ? "vi-VN" : currentLang === "en" ? "en-US" : "fr-FR", { weekday:"long", day:"numeric", month:"long" });
-  // Afficher dans une modale légère
-  let modal = document.getElementById("modal-day-lessons");
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "modal-day-lessons";
-    modal.style.cssText = "display:none;position:fixed;inset:0;z-index:2000;background:rgba(44,26,34,0.45);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center";
-    modal.innerHTML = '<div style="background:var(--bg-card);border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-width:500px;animation:slideUp 0.22s ease">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem">' +
-      '<span id="modal-day-title" style="font-size:0.95rem;font-weight:600;color:var(--ink)"></span>' +
-      '<button onclick="document.getElementById(\'modal-day-lessons\').style.display=\'none\'" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--gray)">×</button>' +
-      '</div><div id="modal-day-body"></div></div>';
-    document.body.appendChild(modal);
-  }
-  document.getElementById("modal-day-title").textContent = "📅 " + label;
-  document.getElementById("modal-day-body").innerHTML = html;
-  modal.style.display = "flex";
-  modal.onclick = function(e) { if (e.target === modal) modal.style.display = "none"; };
-}
-
-// ── Rendu liste cours du mois ──
-function renderLessonsList(containerId, year, month, lessons) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  const prefix = year + "-" + String(month + 1).padStart(2, "0");
-  const monthLessons = (lessons || [])
-    .filter(l => l.date && l.date.startsWith(prefix))
-    .sort((a, b) => (a.date + a.time) > (b.date + b.time) ? 1 : -1);
-  if (!monthLessons.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:0.84rem;padding:1.5rem">' + t("noLessons") + '</div>';
-    return;
-  }
-  const isAdmin = currentUserGlobal?.role === "Admin";
-  el.innerHTML = monthLessons.map(l => {
-    const endMin = (parseInt(l.time ? l.time.split(":")[0] : 0) * 60 + parseInt(l.time ? l.time.split(":")[1] : 0) + (l.duration || 60));
-    const endH = String(Math.floor(endMin / 60)).padStart(2, "0");
-    const endM = String(endMin % 60).padStart(2, "0");
-    const dateObj = new Date(l.date + "T00:00:00");
-    const dateLabel = dateObj.toLocaleDateString(currentLang === "vi" ? "vi-VN" : currentLang === "en" ? "en-US" : "fr-FR", { weekday:"short", day:"numeric", month:"short" });
-    const isPast = l.date < new Date().toISOString().split("T")[0];
-    return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:0.5rem;opacity:' + (isPast ? "0.6" : "1") + '">' +
-      '<div style="text-align:center;min-width:42px;background:' + (isPast ? "var(--bg-soft)" : "var(--pink-pale)") + ';border-radius:8px;padding:0.3rem">' +
-        '<div style="font-size:0.62rem;color:' + (isPast ? "var(--gray)" : "var(--pink)") + ';font-weight:600">' + dateLabel.split(" ")[0].toUpperCase() + '</div>' +
-        '<div style="font-size:1rem;font-weight:700;color:' + (isPast ? "var(--gray)" : "var(--ink)") + ';line-height:1.2">' + dateLabel.split(" ")[1] + '</div>' +
-      '</div>' +
-      '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:0.88rem;font-weight:600;color:var(--ink)">' + (l.time || "?:??") + ' → ' + endH + ':' + endM + '</div>' +
-        (isAdmin ? '<div style="font-size:0.75rem;color:var(--pink);margin-top:1px">👤 ' + (l.studentName || "Élève") + '</div>' : '') +
-        (l.note ? '<div style="font-size:0.74rem;color:var(--gray);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + l.note + '</div>' : '') +
-      '</div>' +
-      '<div style="font-size:0.68rem;color:var(--gray);flex-shrink:0">' + l.duration + 'min</div>' +
-      '</div>';
-  }).join("");
-}
-
-// ── Navigation mois ──
-function calNavMonth(delta) {
-  _calMonth += delta;
-  if (_calMonth > 11) { _calMonth = 0; _calYear++; }
-  if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
-  const lbl = document.getElementById("cal-month-label");
-  if (lbl) lbl.textContent = calMonthLabel(_calYear, _calMonth);
-  const lessons = _lessonsCache || [];
-  renderCalGrid("cal-grid", _calYear, _calMonth, lessons);
-  renderLessonsList("cal-lessons-list", _calYear, _calMonth, lessons);
-}
-
-function adminCalNavMonth(delta) {
-  _adminCalMonth += delta;
-  if (_adminCalMonth > 11) { _adminCalMonth = 0; _adminCalYear++; }
-  if (_adminCalMonth < 0)  { _adminCalMonth = 11; _adminCalYear--; }
-  const lbl = document.getElementById("admin-cal-month-label");
-  if (lbl) lbl.textContent = calMonthLabel(_adminCalYear, _adminCalMonth);
-  const lessons = _lessonsCache || [];
-  renderCalGrid("admin-cal-grid", _adminCalYear, _adminCalMonth, lessons);
-  renderLessonsList("admin-cal-lessons-list", _adminCalYear, _adminCalMonth, lessons);
-}
-
-// ── Charger calendrier étudiant ──
-async function loadStudentCalendar(forceRefresh) {
-  const lbl = document.getElementById("cal-month-label");
-  if (lbl) lbl.textContent = calMonthLabel(_calYear, _calMonth);
-  const lessons = await fetchLessons(forceRefresh);
-  renderCalGrid("cal-grid", _calYear, _calMonth, lessons);
-  renderLessonsList("cal-lessons-list", _calYear, _calMonth, lessons);
-}
-
-// ── Charger calendrier admin ──
-async function loadAdminCalendar(forceRefresh) {
-  const lbl = document.getElementById("admin-cal-month-label");
-  if (lbl) lbl.textContent = calMonthLabel(_adminCalYear, _adminCalMonth);
-  // Peupler le select élèves
-  const sel = document.getElementById("lesson-student-select");
-  if (sel && allStudents && sel.options.length <= 1) {
-    allStudents.filter(s => String(s.active).toUpperCase() === "YES").forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = s.name + " " + (s.familyName || "");
-      sel.appendChild(opt);
-    });
-  }
-  const lessons = await fetchLessons(forceRefresh);
-  renderCalGrid("admin-cal-grid", _adminCalYear, _adminCalMonth, lessons);
-  renderLessonsList("admin-cal-lessons-list", _adminCalYear, _adminCalMonth, lessons);
-}
-
-// ── Widget "Prochains cours" sur la home étudiant ──
-function renderUpcomingLessons(lessons) {
-  const card  = document.getElementById("card-upcoming-lessons");
-  const inner = document.getElementById("student-upcoming-lessons");
-  if (!card || !inner) return;
-  const todayStr = new Date().toISOString().split("T")[0];
-  const upcoming = (lessons || [])
-    .filter(l => l.date >= todayStr)
-    .sort((a, b) => (a.date + a.time) > (b.date + b.time) ? 1 : -1)
-    .slice(0, 3);
-  if (!upcoming.length) { card.style.display = "none"; return; }
-  card.style.display = "block";
-  inner.innerHTML = upcoming.map(l => {
-    const dateObj = new Date(l.date + "T00:00:00");
-    const dateLabel = dateObj.toLocaleDateString(currentLang === "vi" ? "vi-VN" : currentLang === "en" ? "en-US" : "fr-FR", { weekday:"short", day:"numeric", month:"short" });
-    const endMin = (parseInt(l.time ? l.time.split(":")[0] : 0) * 60 + parseInt(l.time ? l.time.split(":")[1] : 0) + (l.duration || 60));
-    const endH = String(Math.floor(endMin / 60)).padStart(2, "0");
-    const endM = String(endMin % 60).padStart(2, "0");
-    const isToday = l.date === todayStr;
-    return '<div style="display:flex;align-items:center;gap:0.7rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">' +
-      '<div style="min-width:38px;text-align:center;background:' + (isToday ? "var(--pink-pale)" : "var(--bg-soft)") + ';border-radius:8px;padding:0.25rem">' +
-        '<div style="font-size:0.58rem;font-weight:600;color:' + (isToday ? "var(--pink)" : "var(--gray)") + '">' + dateLabel.split(" ")[0].toUpperCase() + '</div>' +
-        '<div style="font-size:0.95rem;font-weight:700;color:' + (isToday ? "var(--pink)" : "var(--ink)") + ';line-height:1.2">' + dateLabel.split(" ")[1] + '</div>' +
-      '</div>' +
-      '<div style="flex:1">' +
-        '<div style="font-size:0.85rem;font-weight:600;color:var(--ink)">' + (l.time || "?:??") + ' – ' + endH + ':' + endM + (isToday ? ' <span style="font-size:0.65rem;background:var(--pink);color:white;border-radius:4px;padding:1px 5px;vertical-align:middle">' + t("calToday") + '</span>' : '') + '</div>' +
-        (l.note ? '<div style="font-size:0.73rem;color:var(--gray);margin-top:1px">' + l.note + '</div>' : '') +
-      '</div>' +
-      '</div>';
-  }).join("");
-}
-
-// ── Modale créer un cours (Admin) ──
-function openCreateLessonModal() {
-  // Pré-remplir date = aujourd'hui
-  const today = new Date().toISOString().split("T")[0];
-  const di = document.getElementById("lesson-date");
-  if (di && !di.value) di.value = today;
-  const ti = document.getElementById("lesson-time");
-  if (ti && !ti.value) ti.value = "09:00";
-  const msg = document.getElementById("lesson-msg");
-  if (msg) msg.style.display = "none";
-  document.getElementById("modal-create-lesson").style.display = "flex";
-}
-
-function closeCreateLessonModal() {
-  document.getElementById("modal-create-lesson").style.display = "none";
-}
-
-async function doCreateLesson() {
-  const studentId  = document.getElementById("lesson-student-select").value;
-  const date       = document.getElementById("lesson-date").value;
-  const time       = document.getElementById("lesson-time").value;
-  const duration   = document.getElementById("lesson-duration").value;
-  const note       = (document.getElementById("lesson-note").value || "").trim();
-  const msg        = document.getElementById("lesson-msg");
-  const btn        = document.getElementById("btn-create-lesson");
-
-  const showMsg = (txt, type) => {
-    msg.textContent = txt;
-    msg.style.display = "block";
-    msg.style.background = type === "error" ? "rgba(232,75,122,0.1)" : "rgba(158,196,160,0.2)";
-    msg.style.color = type === "error" ? "var(--pink)" : "var(--sage)";
-    msg.style.border = "1px solid " + (type === "error" ? "rgba(232,75,122,0.3)" : "rgba(158,196,160,0.4)");
-  };
-
-  if (!studentId) return showMsg("⚠️ Choisir un élève", "error");
-  if (!date)      return showMsg("⚠️ Date obligatoire", "error");
-  if (!time)      return showMsg("⚠️ Heure obligatoire", "error");
-
-  btn.disabled = true; btn.textContent = "⏳ En cours...";
-
-  try {
-    const r = await api({
-      action: "createLesson",
-      adminId: currentUserGlobal.id, pin: getStoredPin(),
-      studentId, date, time,
-      duration: parseInt(duration) || 60,
-      note
-    });
-    if (r && r.success) {
-      showMsg("✅ Cours créé !", "success");
-      // Invalider le cache leçons + recharger
-      _cacheDel(LESSONS_KEY);
-      _lessonsCache = null;
-      // Trouver le nom de l'élève
-      const stu = (allStudents || []).find(s => String(s.id) === String(studentId));
-      const newLesson = { id: r.eventId || Date.now(), studentId, studentName: stu ? stu.name + " " + (stu.familyName || "") : "", date, time, duration: parseInt(duration) || 60, note };
-      // Mettre à jour le cache local immédiatement
-      const existing = _cacheGet(LESSONS_KEY) || [];
-      existing.push(newLesson);
-      _cacheSet(LESSONS_KEY, existing);
-      _lessonsCache = existing;
-      // Rafraîchir le calendrier admin
-      renderCalGrid("admin-cal-grid", _adminCalYear, _adminCalMonth, _lessonsCache);
-      renderLessonsList("admin-cal-lessons-list", _adminCalYear, _adminCalMonth, _lessonsCache);
-      setTimeout(() => closeCreateLessonModal(), 1200);
-    } else {
-      const errMsg = r ? (r.message || JSON.stringify(r)) : "Pas de réponse du serveur";
-      console.error("createLesson error:", r);
-      showMsg("❌ " + errMsg, "error");
-    }
-  } catch(e) {
-    showMsg("❌ " + e.message, "error");
-  }
-  btn.disabled = false; btn.textContent = t("calSaveLesson");
-}
 
 </script>
 </body>
