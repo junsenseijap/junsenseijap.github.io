@@ -4020,10 +4020,13 @@ function _renderStudentExercises(ed, sd, inB, comB) {
 
     document.getElementById("ex-stu-inprogress-count").textContent = inP.length;
     document.getElementById("ex-stu-completed-count").textContent  = done.length;
-    document.getElementById("ex-stu-inprogress-section").classList.add("open");
-    document.getElementById("ex-stu-inprogress-body").classList.add("open");
-    document.getElementById("ex-stu-completed-section").classList.remove("open");
-    document.getElementById("ex-stu-completed-body").classList.remove("open");
+    // Ne pas forcer l'état des sections si on est en train de restaurer un état
+    if (!window._restoringAccordion) {
+      document.getElementById("ex-stu-inprogress-section").classList.add("open");
+      document.getElementById("ex-stu-inprogress-body").classList.add("open");
+      document.getElementById("ex-stu-completed-section").classList.remove("open");
+      document.getElementById("ex-stu-completed-body").classList.remove("open");
+    }
 
     inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
     comB.innerHTML = done.length ? _buildExTree(done, sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
@@ -4031,46 +4034,52 @@ function _renderStudentExercises(ed, sd, inB, comB) {
 }
 
 
-// ── Sauvegarde/restaure l'état ouvert des accordéons ──
-// Fonctionne pour les arbres d'exercices ET les accordéons de contenu admin
+// ── Sauvegarde/restaure l'état ouvert de TOUS les accordéons ──
 function saveAccordionState() {
-  const open = new Set();
-  // Nœuds extree (exercices étudiant + admin)
-  document.querySelectorAll("[id^='extree-']").forEach(el => {
-    if (el.style.display !== "none") open.add(el.id);
+  const state = { classes: new Set(), displays: new Set(), arrows: {} };
+
+  // 1. Éléments ouverts via classe "open" (ex-section, coursetype-row, subsection-row)
+  document.querySelectorAll(".ex-section.open, .ex-section-body.open, .coursetype-row.open, .subsection-row.open").forEach(el => {
+    if (el.id) state.classes.add(el.id);
   });
-  // Sections ex-section (En cours / Terminés)
-  document.querySelectorAll(".ex-section.open").forEach(el => {
-    if (el.id) open.add(el.id);
+
+  // 2. Éléments ouverts via style.display (extree nodes, admin pending/done sections)
+  document.querySelectorAll("[id^='extree-'], [id^='pend-'], [id^='done-']").forEach(el => {
+    if (el.style.display === "block") state.displays.add(el.id);
   });
-  // Accordéons admin contenu (coursetype-row, subsection-row)
-  document.querySelectorAll(".coursetype-row.open, .subsection-row.open").forEach(el => {
-    if (el.id) open.add(el.id);
+
+  // 3. Rotations des flèches (pour les extree et admin ex)
+  document.querySelectorAll("[id^='arr-']").forEach(el => {
+    if (el.style.transform && el.style.transform !== "") state.arrows[el.id] = el.style.transform;
   });
-  return open;
+
+  return state;
 }
 
-function restoreAccordionState(openSet) {
-  if (!openSet || !openSet.size) return;
-  // Nœuds extree
-  document.querySelectorAll("[id^='extree-']").forEach(el => {
-    if (openSet.has(el.id)) {
-      el.style.display = "block";
-      const arr = document.getElementById("arr-" + el.id);
-      if (arr) arr.style.transform = "rotate(90deg)";
-    }
-  });
-  // Sections ex-section
-  document.querySelectorAll(".ex-section").forEach(el => {
-    if (el.id && openSet.has(el.id)) {
-      el.classList.add("open");
-      const body = document.getElementById(el.id.replace("-section","") + "-body");
-      if (body) body.classList.add("open");
-    }
-  });
-  // Accordéons admin contenu
-  document.querySelectorAll(".coursetype-row, .subsection-row").forEach(el => {
-    if (el.id && openSet.has(el.id)) el.classList.add("open");
+function restoreAccordionState(state) {
+  if (!state) return;
+  window._restoringAccordion = true;
+  // Petit délai pour laisser le DOM se stabiliser après le re-render
+  requestAnimationFrame(() => {
+    // 1. Restaurer les classes "open"
+    state.classes.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("open");
+    });
+
+    // 2. Restaurer les display:block
+    state.displays.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "block";
+    });
+
+    // 3. Restaurer les rotations de flèches
+    Object.entries(state.arrows).forEach(([id, transform]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.transform = transform;
+    });
+
+    window._restoringAccordion = false;
   });
 }
 
@@ -4079,7 +4088,7 @@ async function markExerciseDone(exId) {
   document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = true; });
   const btn = document.getElementById("btn-done-" + exId);
   if (btn) btn.textContent = "...";
-  const openState = saveAccordionState(); // ← sauvegarder avant re-render
+  const openState = saveAccordionState();
   try {
     const data = await api({
       action: "markExerciseDone",
@@ -4092,7 +4101,7 @@ async function markExerciseDone(exId) {
       _cacheDel(CACHE_EX_KEY);
       _cacheDel(CACHE_EX_DONE_KEY);
       await loadStudentExercises();
-      restoreAccordionState(openState); // ← restaurer après re-render
+      restoreAccordionState(openState);
     } else {
       toast(data.message || t("errToggle"), "error");
       document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = false; b.textContent = t("exMarkDone"); });
