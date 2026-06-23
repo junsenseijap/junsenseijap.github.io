@@ -2686,6 +2686,7 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
   const btn = document.getElementById("btn-c-" + contentId);
   if (btn) { btn.disabled = true; btn.textContent = "..."; }
   const action = isCurrentlyUnlocked ? "lockContent" : "unlockContent";
+  const openState = saveAccordionState(); // ← sauvegarder avant re-render
   try {
     const data = await api({ action, adminId: adminUser.id, pin: getStoredPin(), studentId, contentId });
     if (data.success) {
@@ -2696,14 +2697,14 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
       ]);
       const unlocked = new Set((accessData.content || []).map(c => String(c.id)));
       studentAccessMap[studentId] = unlocked;
-      // Mettre à jour _assignedContentIds pour que le tick ✓ persiste après reload
       window._assignedContentIds = new Set(
         (exData2.exercises || []).map(e => String(e.contentId)).filter(Boolean)
       );
       const stu = allStudents.find(s => String(s.id) === String(studentId)) || {};
       invalidateAdminCache();
-      delete _studentContentCache[studentId]; // invalider cache élève
+      delete _studentContentCache[studentId];
       renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
+      restoreAccordionState(openState); // ← restaurer après re-render
     } else {
       toast(data.message || t("errToggle"), "error");
       if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? t('btnLock') : t('btnUnlock'); }
@@ -3900,17 +3901,17 @@ function _buildExTree(exList, sm, isStudent) {
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
-    const lvlId = "extree-lvl-" + lvl + "-" + (isStudent?"s":"a") + "-" + Math.random().toString(36).slice(2,6);
+    const lvlId = "extree-lvl-" + lvl + "-" + (isStudent?"s":"a");
     const lvlIcon = LEVEL_ICONS[lvl] || "📘";
     let lvlHtml = "";
 
     Object.keys(tree[lvl]).sort().forEach(cT => {
-      const cTId = "extree-ct-" + lvlId + "-" + cT.replace(/\s/g,"_");
+      const cTId = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + (isStudent?"s":"a");
       const cTIcon = COURSE_ICONS[cT] || "📂";
       let cTHtml = "";
 
       Object.keys(tree[lvl][cT]).sort().forEach(cN => {
-        const cNId = "extree-cn-" + cTId + "-" + cN.replace(/\s/g,"_");
+        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + (isStudent?"s":"a");
         const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
         cTHtml +=
           '<div style="margin-bottom:0.3rem">'+
@@ -4030,11 +4031,55 @@ function _renderStudentExercises(ed, sd, inB, comB) {
 }
 
 
+// ── Sauvegarde/restaure l'état ouvert des accordéons ──
+// Fonctionne pour les arbres d'exercices ET les accordéons de contenu admin
+function saveAccordionState() {
+  const open = new Set();
+  // Nœuds extree (exercices étudiant + admin)
+  document.querySelectorAll("[id^='extree-']").forEach(el => {
+    if (el.style.display !== "none") open.add(el.id);
+  });
+  // Sections ex-section (En cours / Terminés)
+  document.querySelectorAll(".ex-section.open").forEach(el => {
+    if (el.id) open.add(el.id);
+  });
+  // Accordéons admin contenu (coursetype-row, subsection-row)
+  document.querySelectorAll(".coursetype-row.open, .subsection-row.open").forEach(el => {
+    if (el.id) open.add(el.id);
+  });
+  return open;
+}
+
+function restoreAccordionState(openSet) {
+  if (!openSet || !openSet.size) return;
+  // Nœuds extree
+  document.querySelectorAll("[id^='extree-']").forEach(el => {
+    if (openSet.has(el.id)) {
+      el.style.display = "block";
+      const arr = document.getElementById("arr-" + el.id);
+      if (arr) arr.style.transform = "rotate(90deg)";
+    }
+  });
+  // Sections ex-section
+  document.querySelectorAll(".ex-section").forEach(el => {
+    if (el.id && openSet.has(el.id)) {
+      el.classList.add("open");
+      const body = document.getElementById(el.id.replace("-section","") + "-body");
+      if (body) body.classList.add("open");
+    }
+  });
+  // Accordéons admin contenu
+  document.querySelectorAll(".coursetype-row, .subsection-row").forEach(el => {
+    if (el.id && openSet.has(el.id)) el.classList.add("open");
+  });
+}
+
 async function markExerciseDone(exId) {
   // Bloquer TOUS les boutons done pendant le traitement (anti-clic en rafale)
   document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = true; });
   const btn = document.getElementById("btn-done-" + exId);
   if (btn) btn.textContent = "...";
+  const openState = saveAccordionState(); // ← sauvegarder avant re-render
   try {
     const data = await api({
       action: "markExerciseDone",
@@ -4046,7 +4091,8 @@ async function markExerciseDone(exId) {
       toast(t("exMarkedDone"), "success");
       _cacheDel(CACHE_EX_KEY);
       _cacheDel(CACHE_EX_DONE_KEY);
-      await loadStudentExercises(); // await = on attend la fin avant de débloquer
+      await loadStudentExercises();
+      restoreAccordionState(openState); // ← restaurer après re-render
     } else {
       toast(data.message || t("errToggle"), "error");
       document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = false; b.textContent = t("exMarkDone"); });
