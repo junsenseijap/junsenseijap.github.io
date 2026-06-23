@@ -535,7 +535,7 @@
     .student-dropdown-btn .dd-arrow { font-size: 0.75rem; color: var(--gray); transition: transform 0.2s; }
     .student-dropdown-btn.open .dd-arrow { transform: rotate(180deg); }
     .student-dropdown-list {
-      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      display: none; position: fixed; z-index: 999;
       background: var(--bg-card);
       border: 1.5px solid var(--pink); border-top: none;
       border-radius: 0 0 12px 12px;
@@ -930,7 +930,6 @@
     .ex-section.open .ex-section-arrow { transform: rotate(180deg); }
     .ex-section-body { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
     .ex-section.open .ex-section-body { display: block; }
-    .ex-section-body.open { display: block; }
 
     /* Admin exercise row */
     .ex-admin-row {
@@ -1766,7 +1765,7 @@
       <span class="ex-section-count inprogress" id="ex-stu-inprogress-count">0</span>
       <span class="ex-section-arrow">▲</span>
     </div>
-    <div class="ex-section-body open" id="ex-stu-inprogress-body">
+    <div class="ex-section-body" id="ex-stu-inprogress-body">
       <div class="loading" style="padding:1rem"><div class="spinner"></div></div>
     </div>
   </div>
@@ -2568,6 +2567,12 @@ function toggleStudentDropdown() {
   const list = document.getElementById("student-dd-list");
   const open = list.classList.toggle("open");
   btn.classList.toggle("open", open);
+  if (open) {
+    const rect = btn.getBoundingClientRect();
+    list.style.top   = rect.bottom + "px";
+    list.style.left  = rect.left + "px";
+    list.style.width = rect.width + "px";
+  }
 }
 
 function selectStudentFromDD(id, name, familyName) {
@@ -4047,9 +4052,7 @@ function _renderStudentExercises(ed, sd, inB, comB) {
     // Ne pas forcer l'état des sections si on est en train de restaurer un état
     if (!window._restoringAccordion) {
       document.getElementById("ex-stu-inprogress-section").classList.add("open");
-      document.getElementById("ex-stu-inprogress-body").classList.add("open");
       document.getElementById("ex-stu-completed-section").classList.remove("open");
-      document.getElementById("ex-stu-completed-body").classList.remove("open");
     }
 
     inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
@@ -4063,7 +4066,7 @@ function saveAccordionState() {
   const state = { classes: new Set(), displays: new Set(), arrows: {} };
 
   // 1. Éléments ouverts via classe "open" (ex-section, coursetype-row, subsection-row)
-  document.querySelectorAll(".ex-section.open, .ex-section-body.open, .coursetype-row.open, .subsection-row.open").forEach(el => {
+  document.querySelectorAll(".ex-section.open, .coursetype-row.open, .subsection-row.open").forEach(el => {
     if (el.id) state.classes.add(el.id);
   });
 
@@ -4271,8 +4274,6 @@ function toggleExSection(id) {
   const section=document.getElementById(id+"-section");
   if(!section)return;
   section.classList.toggle("open");
-  const body=document.getElementById(id+"-body");
-  if(body)body.classList.toggle("open");
   const arrow=section.querySelector(".ex-section-arrow");
   if(arrow)arrow.textContent=section.classList.contains("open")?"▲":"▼";
 }
