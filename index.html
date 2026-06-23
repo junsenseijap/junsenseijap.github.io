@@ -1742,6 +1742,18 @@
           <button class="btn-sync-step" id="btn-sync-4" onclick="runSyncStep(4)" data-i="syncRun">Lancer</button>
         </div>
 
+        <div class="sync-step" id="sync-step-5">
+          <div class="sync-step-header">
+            <span class="sync-step-num">⑥</span>
+            <div style="flex:1;min-width:0">
+              <div class="sync-step-label" data-i="syncStep5">Forcer import des scores</div>
+              <div class="sync-step-desc" data-i="syncDesc5">Relit tous les Form Responses et importe les scores manquants dans le Sheet Scores</div>
+            </div>
+            <span class="sync-step-status" id="sync-status-5"></span>
+          </div>
+          <button class="btn-sync-step" id="btn-sync-5" onclick="runSyncStep(5)" data-i="syncRun">Lancer</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -2027,6 +2039,14 @@ async function runSyncStep(step) {
       await loadAdminPanel(currentUserGlobal);
       if (status) status.textContent = "✅ Rechargé";
       if (stepEl) stepEl.classList.add("done");
+    } else if (step === 5) {
+      const r = await api({ action: "importScores", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (r && r.success) {
+        if (status) status.textContent = "✅ " + (r.created || 0) + " scores importés";
+        if (stepEl) stepEl.classList.add("done");
+      } else {
+        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+      }
     }
   } catch(e) {
     if (status) status.textContent = "❌ " + e.message;
@@ -3874,73 +3894,48 @@ function _exTypeLabel(ex){
   if(tp==="audio") return "Audio";
   return "Exercice";
 }
-function _cleanFileTitle(raw) {
-  let s = String(raw || "").trim();
-  s = s.replace(/(\.(pdf|docx?|pptx?|mp3|mp4|m4a|wav|ogg|key))+$/i, "");
-  s = s.replace(/^(\[[^\]]+\])+\s*/i, "");
-  s = s.replace(/^\d+_/, "");
-  s = s.replace(/^(GR|VO|LI|RE|SP)_/i, "");
-  s = s.replace(/[_\- ]N[1-5]$/i, "");
-  s = s.replace(/_/g, " ").trim();
-  return s || String(raw || "");
-}
 function _exGetTitle(ex){
-  const raw = (ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
-  return _cleanFileTitle(raw);
+  return (ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
 }
 
 // ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
 function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
   const uidSuffix = sid + "-" + (isStudent?"s":"a") + (sectionKey ? "-"+sectionKey : "");
-
-  // Grouper : level → courseT → folder → []
-  // subType "exercise" OU courseN numérique → "📝 Exercices"
-  // subType "test"                          → "🎯 Tests"
-  // subType "lesson" + courseN texte        → courseN (ex: "U21-U25")
+  // Grouper : level → courseT → courseN → []
   const tree = {};
   exList.forEach(ex => {
-    const lvl     = ex.level   || "?";
-    const cT      = ex.courseT || "?";
-    const sub     = (ex.subType || "lesson").toLowerCase();
-    const rawN    = String(ex.courseN || "");
-    const isNum   = /^\d+$/.test(rawN.trim());
-    let folder;
-    if (sub === "exercise" || isNum) folder = "\u{1F4DD} Exercices";
-    else if (sub === "test")         folder = "\u{1F3AF} Tests";
-    else                             folder = rawN || "?";
-    if (!tree[lvl])              tree[lvl] = {};
-    if (!tree[lvl][cT])          tree[lvl][cT] = {};
-    if (!tree[lvl][cT][folder])  tree[lvl][cT][folder] = [];
-    tree[lvl][cT][folder].push(ex);
+    const lvl  = ex.level   || "?";
+    const cT   = ex.courseT || "?";
+    const cN   = String(ex.courseN || "?");
+    if (!tree[lvl])       tree[lvl] = {};
+    if (!tree[lvl][cT])   tree[lvl][cT] = {};
+    if (!tree[lvl][cT][cN]) tree[lvl][cT][cN] = [];
+    tree[lvl][cT][cN].push(ex);
   });
 
-  const LEVEL_ICONS  = { N4:"\u{1F4D8}", N5:"\u{1F4D7}", N3:"\u{1F4D9}", N2:"\u{1F4D5}", N1:"\u{1F4D4}" };
-  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
+  const LEVEL_ICONS  = { N4:"📘", N5:"📗", N3:"📙", N2:"📕", N1:"📔" };
+  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆", Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
-    const lvlId   = "extree-lvl-" + lvl + "-" + uidSuffix;
-    const lvlIcon = LEVEL_ICONS[lvl] || "\u{1F4D8}";
-    let lvlHtml   = "";
+    const lvlId = "extree-lvl-" + lvl + "-" + uidSuffix;
+    const lvlIcon = LEVEL_ICONS[lvl] || "📘";
+    let lvlHtml = "";
 
     Object.keys(tree[lvl]).sort().forEach(cT => {
-      const cTId   = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
-      const cTIcon = COURSE_ICONS[cT] || "\u{1F4C2}";
-      let cTHtml   = "";
+      const cTId = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
+      const cTIcon = COURSE_ICONS[cT] || "📂";
+      let cTHtml = "";
 
-      const folderKeys = Object.keys(tree[lvl][cT]).sort((a,b) => {
-        const rank = k => k === "\u{1F4DD} Exercices" ? 1 : k === "\u{1F3AF} Tests" ? 2 : 0;
-        return rank(a) - rank(b) || a.localeCompare(b);
-      });
-      folderKeys.forEach(folder => {
-        const cNId  = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + folder.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
-        const items = tree[lvl][cT][folder].map(ex => _buildExCard(ex, sm, isStudent)).join("");
+      Object.keys(tree[lvl][cT]).sort().forEach(cN => {
+        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
+        const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
         cTHtml +=
           '<div style="margin-bottom:0.3rem">'+
           '<div onclick="toggleTreeNode(\''+cNId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem;font-weight:600;color:var(--ink2)">'+
-          '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">\u25B6</span>'+
-          '<span>'+folder+'</span>'+
+          '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
+          '<span>🗂 '+cN+'</span>'+
           '</div>'+
           '<div id="'+cNId+'" style="display:none;padding-left:0.8rem">'+items+'</div>'+
           '</div>';
@@ -3949,7 +3944,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
       lvlHtml +=
         '<div style="margin-bottom:0.4rem">'+
         '<div onclick="toggleTreeNode(\''+cTId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.78rem;font-weight:600;color:var(--ink)">'+
-        '<span id="arr-'+cTId+'" style="font-size:0.55rem;transition:transform 0.2s">\u25B6</span>'+
+        '<span id="arr-'+cTId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
         '<span>'+cTIcon+' '+cT+'</span>'+
         '</div>'+
         '<div id="'+cTId+'" style="display:none;padding-left:0.7rem">'+cTHtml+'</div>'+
@@ -3959,7 +3954,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
     html +=
       '<div style="margin-bottom:0.5rem;border:1px solid var(--border);border-radius:10px;overflow:hidden">'+
       '<div onclick="toggleTreeNode(\''+lvlId+'\')" style="display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.7rem;cursor:pointer;background:var(--bg-soft);font-size:0.82rem;font-weight:700;color:var(--ink)">'+
-      '<span id="arr-'+lvlId+'" style="font-size:0.6rem;transition:transform 0.2s">\u25B6</span>'+
+      '<span id="arr-'+lvlId+'" style="font-size:0.6rem;transition:transform 0.2s">▶</span>'+
       '<span>'+lvlIcon+' '+lvl+'</span>'+
       '</div>'+
       '<div id="'+lvlId+'" style="display:none;padding:0.4rem 0.3rem 0.3rem">'+lvlHtml+'</div>'+
@@ -3968,6 +3963,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   return html;
 }
 
+// ── Carte exercice individuelle (étudiant ou admin) ──
 function _buildExCard(ex, sm, isStudent) {
   const icon  = _exTypeIcon(ex);
   const lbl   = _exTypeLabel(ex);
@@ -4415,6 +4411,8 @@ const TRANSLATIONS = {
     syncDesc3: "Đọc ID thật của các trường Form và hoàn thiện Sheet để tự điền Student ID",
     syncStep4: "Tải lại dữ liệu",
     syncDesc4: "Xóa cache và tải lại từ Sheet — học viên sẽ thấy nội dung mới",
+    syncStep5: "Nhập điểm từ Form",
+    syncDesc5: "Đọc lại tất cả Form Responses và nhập điểm còn thiếu vào Sheet Scores",
     syncRun:   "Khởi động",
     subLecons:    "Bài học",
     subExercices: "Bài tập",
@@ -4615,6 +4613,8 @@ const TRANSLATIONS = {
     syncDesc3: "Reads real Form field IDs and completes the Sheet for auto-fill",
     syncStep4: "Reload data",
     syncDesc4: "Clears cache and reloads from the Sheet — students will see new content",
+    syncStep5: "Force score import",
+    syncDesc5: "Re-reads all Form Responses and imports missing scores into the Scores sheet",
     syncRun:   "Run",
     subLecons:    "Lessons",
     subExercices: "Exercises",
@@ -4815,6 +4815,8 @@ const TRANSLATIONS = {
     syncDesc3: "Lit les vrais IDs des champs Forms et complète le Sheet pour le pré-remplissage auto",
     syncStep4: "Recharger les données",
     syncDesc4: "Vide le cache et recharge tout depuis le Sheet — les élèves verront les nouveaux contenus",
+    syncStep5: "Forcer import des scores",
+    syncDesc5: "Relit tous les Form Responses et importe les scores manquants dans le Sheet Scores",
     syncRun:   "Lancer",
     subLecons:    "Leçons",
     subExercices: "Exercices",
