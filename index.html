@@ -2701,10 +2701,15 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
         (exData2.exercises || []).map(e => String(e.contentId)).filter(Boolean)
       );
       const stu = allStudents.find(s => String(s.id) === String(studentId)) || {};
+      // Recalculer le filteredContent selon les niveaux de l'élève
+      const stuLevels = stu.levels ? stu.levels.split(",").map(l => l.trim()).filter(Boolean) : [];
+      const filteredContent = stuLevels.length > 0
+        ? allContent.filter(c => stuLevels.includes(String(c.level || "").trim()))
+        : allContent;
       invalidateAdminCache();
       delete _studentContentCache[studentId];
-      renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked);
-      requestAnimationFrame(() => restoreAccordionState(openState));
+      renderContentManage(studentId, stu.name || "", stu.familyName || "", unlocked, filteredContent);
+      setTimeout(() => restoreAccordionState(openState), 50);
     } else {
       toast(data.message || t("errToggle"), "error");
       if (btn) { btn.disabled = false; btn.textContent = isCurrentlyUnlocked ? t('btnLock') : t('btnUnlock'); }
@@ -4099,7 +4104,7 @@ async function markExerciseDone(exId) {
       _cacheDel(CACHE_EX_KEY);
       _cacheDel(CACHE_EX_DONE_KEY);
       await loadStudentExercises();
-      requestAnimationFrame(() => restoreAccordionState(openState));
+      setTimeout(() => restoreAccordionState(openState), 50);
     } else {
       toast(data.message || t("errToggle"), "error");
       document.querySelectorAll(".btn-ex-done").forEach(b => { b.disabled = false; b.textContent = t("exMarkDone"); });
@@ -5407,11 +5412,16 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   function makeSubSection(items, icon, label, safeId) {
     if (!items||!items.length) return "";
     const sorted = items.slice().sort(function(a,b){ return (Number(a.courseN)||0)-(Number(b.courseN)||0); });
+    const unlockedCount = sorted.filter(function(c){ return unlocked.has(String(c.id)); }).length;
+    const totalCount    = sorted.length;
+    const countBadge    = unlockedCount > 0
+      ? '<span style="font-size:0.6rem;color:var(--pink);font-weight:600;margin-left:4px">'+unlockedCount+'/'+totalCount+' 🌸</span>'
+      : '<span style="font-size:0.6rem;color:var(--gray);margin-left:4px">'+totalCount+'</span>';
     return '<div class="subsection-row" id="sub-'+safeId+'">'+
       '<div class="subsection-header" onclick="toggleSubSection(\'sub-'+safeId+'\')">'+
       '<span class="subsection-icon">'+icon+'</span>'+
       '<span class="subsection-label">'+label+'</span>'+
-      '<span class="subsection-count">'+items.length+'</span>'+
+      countBadge+
       '<span class="subsection-arrow">▶</span></div>'+
       '<div class="subsection-items">'+sorted.map(makeItemHtml).join("")+'</div></div>';
   }
