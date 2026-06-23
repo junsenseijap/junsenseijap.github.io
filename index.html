@@ -929,7 +929,6 @@
     .ex-section.open .ex-section-arrow { transform: rotate(180deg); }
     .ex-section-body { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
     .ex-section.open .ex-section-body { display: block; }
-    .ex-section-body.open { display: block; }
 
     /* Admin exercise row */
     .ex-admin-row {
@@ -3873,9 +3872,9 @@ function _exGetTitle(ex){
 }
 
 // ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
-function _buildExTree(exList, sm, isStudent, studentId) {
+function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
-  const uidSuffix = sid + "-" + (isStudent?"s":"a");
+  const uidSuffix = sid + "-" + (isStudent?"s":"a") + (sectionKey ? "-"+sectionKey : "");
   // Grouper : level → courseT → courseN → []
   const tree = {};
   exList.forEach(ex => {
@@ -4015,11 +4014,13 @@ function _renderStudentExercises(ed, sd, inB, comB) {
     // Ne pas forcer l'état des sections si on est en train de restaurer un état
     if (!window._restoringAccordion) {
       document.getElementById("ex-stu-inprogress-section").classList.add("open");
+      document.getElementById("ex-stu-inprogress-body").classList.add("open");
       document.getElementById("ex-stu-completed-section").classList.remove("open");
+      document.getElementById("ex-stu-completed-body").classList.remove("open");
     }
 
-    inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
-    comB.innerHTML = done.length ? _buildExTree(done, sm, true) : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
+    inB.innerHTML  = inP.length  ? _buildExTree(inP,  sm, true, null, "inp")  : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">🎉 '+t("exNoneInProgress")+'</div>';
+    comB.innerHTML = done.length ? _buildExTree(done, sm, true, null, "done") : '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("exNoneCompleted")+'</div>';
   }catch(e){console.error(e);if(inB)inB.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
@@ -4237,6 +4238,8 @@ function toggleExSection(id) {
   const section=document.getElementById(id+"-section");
   if(!section)return;
   section.classList.toggle("open");
+  const body=document.getElementById(id+"-body");
+  if(body)body.classList.toggle("open");
   const arrow=section.querySelector(".ex-section-arrow");
   if(arrow)arrow.textContent=section.classList.contains("open")?"▲":"▼";
 }
