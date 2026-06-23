@@ -540,7 +540,8 @@
       border: 1.5px solid var(--pink); border-top: none;
       border-radius: 0 0 12px 12px;
       box-shadow: 0 8px 24px rgba(232,75,122,0.15);
-      max-height: 260px; overflow-y: auto;
+      max-height: min(320px, 45vh); overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .student-dropdown-list.open { display: block; }
     .dd-student-item {
@@ -929,6 +930,7 @@
     .ex-section.open .ex-section-arrow { transform: rotate(180deg); }
     .ex-section-body { display: none; border-top: 1px solid rgba(232,75,122,0.1); }
     .ex-section.open .ex-section-body { display: block; }
+    .ex-section-body.open { display: block; }
 
     /* Admin exercise row */
     .ex-admin-row {
@@ -3871,24 +3873,49 @@ function _exGetTitle(ex){
   return (ex.title&&ex.title.length>3&&!ex.title.startsWith("http")&&ex.title!==ex.level)?ex.title:(ex.level||"Exercice");
 }
 
-// ── Construit l'arborescence niveau→matière→courseN pour une liste d'exercices ──
+// ── Construit l'arborescence niveau→matière→dossier pour une liste d'exercices ──
+// Logique de dossier :
+//   • subType "lesson" → courseT → courseN (unité) → exercices
+//   • subType "exercise" → courseT → "Exercices" → exercices
+//   • subType "test"     → courseT → "Tests" → exercices
+//   • courseT/courseN vides ("?") → dossier "Autres"
 function _buildExTree(exList, sm, isStudent, studentId) {
   const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
   const uidSuffix = sid + "-" + (isStudent?"s":"a");
-  // Grouper : level → courseT → courseN → []
+
+  // Grouper : level → courseT → folderLabel → []
   const tree = {};
   exList.forEach(ex => {
     const lvl  = ex.level   || "?";
-    const cT   = ex.courseT || "?";
-    const cN   = String(ex.courseN || "?");
-    if (!tree[lvl])       tree[lvl] = {};
-    if (!tree[lvl][cT])   tree[lvl][cT] = {};
-    if (!tree[lvl][cT][cN]) tree[lvl][cT][cN] = [];
-    tree[lvl][cT][cN].push(ex);
+    let cT     = ex.courseT || "";
+    let folder = "";
+
+    const sub  = (ex.subType || "lesson").toLowerCase();
+
+    if (!cT || cT === "?") {
+      // Pas de matière connue — mettre en "Autres"
+      cT     = "Autres";
+      folder = sub === "exercise" ? "📝 Exercices"
+             : sub === "test"     ? "🎯 Tests"
+             : "📚 Leçons";
+    } else if (sub === "exercise") {
+      folder = "📝 Exercices";
+    } else if (sub === "test") {
+      folder = "🎯 Tests";
+    } else {
+      // lesson : on utilise courseN comme dossier
+      folder = String(ex.courseN || "?");
+    }
+
+    if (!tree[lvl])          tree[lvl] = {};
+    if (!tree[lvl][cT])      tree[lvl][cT] = {};
+    if (!tree[lvl][cT][folder]) tree[lvl][cT][folder] = [];
+    tree[lvl][cT][folder].push(ex);
   });
 
   const LEVEL_ICONS  = { N4:"📘", N5:"📗", N3:"📙", N2:"📕", N1:"📔" };
-  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆", Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️" };
+  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆",
+                         Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️", Autres:"📂" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
@@ -3901,14 +3928,20 @@ function _buildExTree(exList, sm, isStudent, studentId) {
       const cTIcon = COURSE_ICONS[cT] || "📂";
       let cTHtml = "";
 
-      Object.keys(tree[lvl][cT]).sort().forEach(cN => {
-        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
-        const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
+      // Trier les dossiers : leçons (par nom) d'abord, puis Exercices, puis Tests
+      const folderKeys = Object.keys(tree[lvl][cT]).sort((a,b) => {
+        const order = k => k.startsWith("📝") ? 1 : k.startsWith("🎯") ? 2 : 0;
+        return order(a) - order(b) || a.localeCompare(b);
+      });
+
+      folderKeys.forEach(folder => {
+        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + folder.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
+        const items = tree[lvl][cT][folder].map(ex => _buildExCard(ex, sm, isStudent)).join("");
         cTHtml +=
           '<div style="margin-bottom:0.3rem">'+
           '<div onclick="toggleTreeNode(\''+cNId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem;font-weight:600;color:var(--ink2)">'+
           '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
-          '<span>🗂 '+cN+'</span>'+
+          '<span>'+folder+'</span>'+
           '</div>'+
           '<div id="'+cNId+'" style="display:none;padding-left:0.8rem">'+items+'</div>'+
           '</div>';
