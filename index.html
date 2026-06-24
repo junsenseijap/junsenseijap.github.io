@@ -2624,19 +2624,19 @@ async function loadAdminPanel(user) {
 
   ddList.innerHTML = '<div class="loading" style="padding:1rem"><div class="spinner"></div></div>';
   try {
-    const [studentsData, contentData] = await Promise.all([
-      api({ action: "getStudents",   adminId: user.id, pin: getStoredPin() }),
-      api({ action: "getAllContent", adminId: user.id, pin: getStoredPin() })
-    ]);
+    const adminData = await api({ action: "getAdminData", adminId: user.id, pin: getStoredPin() });
     // Filter out content with empty fields (only ID filled)
-    allContent = (contentData.success ? contentData.content : []).filter(c =>
+    allContent = (adminData.success ? adminData.content : []).filter(c =>
       c.title && String(c.title).trim() !== ""
     );
-    if (!studentsData.success) {
+    if (!adminData.success) {
       ddList.innerHTML = '<div style="padding:1rem;color:var(--gray);font-size:0.84rem">' + t("errStudents") + '</div>';
       return;
     }
-    allStudents = studentsData.students || [];
+    allStudents = adminData.students || [];
+    // Pré-charger exercises + scores dans le cache global pour loadAdminStats
+    if (adminData.exercises) window._cachedAdminExercises = adminData.exercises;
+    if (adminData.scores)    window._cachedAdminScores    = adminData.scores;
     const activeStudents = allStudents.filter(s => String(s.active).toUpperCase() === "YES");
     // Sauvegarder dans le cache admin ET dans le cache allContent séparé
     _cacheSet(CACHE_ADMIN_KEY, { students: allStudents, content: allContent });
@@ -5216,10 +5216,16 @@ async function loadAdminDashboard(forceRefresh) {
   }
 
   try{
-    const [sr,er]=await Promise.all([
-      api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
-      api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
-    ]);
+    let sr, er;
+    if (window._cachedAdminScores && window._cachedAdminExercises) {
+      sr = { success: true, scores:    window._cachedAdminScores };
+      er = { success: true, exercises: window._cachedAdminExercises };
+    } else {
+      [sr, er] = await Promise.all([
+        api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
+        api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
+      ]);
+    }
     const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
     const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
@@ -5302,10 +5308,16 @@ async function loadAdminStats(forceRefresh) {
   }
 
   try{
-    const [sr,er]=await Promise.all([
-      api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
-      api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
-    ]);
+    let sr, er;
+    if (window._cachedAdminScores && window._cachedAdminExercises) {
+      sr = { success: true, scores:    window._cachedAdminScores };
+      er = { success: true, exercises: window._cachedAdminExercises };
+    } else {
+      [sr, er] = await Promise.all([
+        api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
+        api({action:"getExercisesAdmin",adminId:currentUserGlobal.id,pin:getStoredPin()})
+      ]);
+    }
 
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
     const activeIds=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
