@@ -3918,40 +3918,56 @@ function _exGetTitle(ex){
 function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   const sid = studentId ? String(studentId) : (isStudent && window.currentUserGlobal ? String(window.currentUserGlobal.id) : "0");
   const uidSuffix = sid + "-" + (isStudent?"s":"a") + (sectionKey ? "-"+sectionKey : "");
-  // Grouper : level → courseT → courseN → []
+
+  // Règle de groupement :
+  //   subType "exercise" OU courseN numérique → regrouper sous "📝 Exercices"
+  //   subType "test"                          → regrouper sous "🎯 Tests"
+  //   subType "lesson" + courseN texte        → dossier courseN (ex: "U21-U25")
   const tree = {};
   exList.forEach(ex => {
-    const lvl  = ex.level   || "?";
-    const cT   = ex.courseT || "?";
-    const cN   = String(ex.courseN || "?");
-    if (!tree[lvl])       tree[lvl] = {};
-    if (!tree[lvl][cT])   tree[lvl][cT] = {};
-    if (!tree[lvl][cT][cN]) tree[lvl][cT][cN] = [];
-    tree[lvl][cT][cN].push(ex);
+    const lvl   = ex.level   || "?";
+    const cT    = ex.courseT || "?";
+    const sub   = (ex.subType || "lesson").toLowerCase();
+    const rawN  = String(ex.courseN || "");
+    const isNum = /^\d+$/.test(rawN.trim());
+    let folder;
+    if (sub === "exercise" || isNum) folder = "\u{1F4DD} Exercices";
+    else if (sub === "test")         folder = "\u{1F3AF} Tests";
+    else                             folder = rawN || "?";
+    if (!tree[lvl])              tree[lvl] = {};
+    if (!tree[lvl][cT])          tree[lvl][cT] = {};
+    if (!tree[lvl][cT][folder])  tree[lvl][cT][folder] = [];
+    tree[lvl][cT][folder].push(ex);
   });
 
-  const LEVEL_ICONS  = { N4:"📘", N5:"📗", N3:"📙", N2:"📕", N1:"📔" };
-  const COURSE_ICONS = { Grammar:"📖", Vocabulary:"💬", Listening:"🔊", Reading:"👁️", JLPT:"🏆", Grammaire:"📖", Vocabulaire:"💬", Écoute:"🔊", Lecture:"👁️" };
+  const LEVEL_ICONS  = { N4:"\u{1F4D8}", N5:"\u{1F4D7}", N3:"\u{1F4D9}", N2:"\u{1F4D5}", N1:"\u{1F4D4}" };
+  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
-    const lvlId = "extree-lvl-" + lvl + "-" + uidSuffix;
-    const lvlIcon = LEVEL_ICONS[lvl] || "📘";
-    let lvlHtml = "";
+    const lvlId   = "extree-lvl-" + lvl + "-" + uidSuffix;
+    const lvlIcon = LEVEL_ICONS[lvl] || "\u{1F4D8}";
+    let lvlHtml   = "";
 
     Object.keys(tree[lvl]).sort().forEach(cT => {
-      const cTId = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
-      const cTIcon = COURSE_ICONS[cT] || "📂";
-      let cTHtml = "";
+      const cTId   = "extree-ct-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
+      const cTIcon = COURSE_ICONS[cT] || "\u{1F4C2}";
+      let cTHtml   = "";
 
-      Object.keys(tree[lvl][cT]).sort().forEach(cN => {
-        const cNId = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + cN.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
-        const items = tree[lvl][cT][cN].map(ex => _buildExCard(ex, sm, isStudent)).join("");
+      // Trier : leçons d'abord (alpha), puis Exercices, puis Tests
+      const folderKeys = Object.keys(tree[lvl][cT]).sort((a,b) => {
+        const rank = k => k === "\u{1F4DD} Exercices" ? 1 : k === "\u{1F3AF} Tests" ? 2 : 0;
+        return rank(a) - rank(b) || a.localeCompare(b);
+      });
+
+      folderKeys.forEach(folder => {
+        const cNId  = "extree-cn-" + lvl + "-" + cT.replace(/[^a-zA-Z0-9]/g,"_") + "-" + folder.replace(/[^a-zA-Z0-9]/g,"_") + "-" + uidSuffix;
+        const items = tree[lvl][cT][folder].map(ex => _buildExCard(ex, sm, isStudent)).join("");
         cTHtml +=
           '<div style="margin-bottom:0.3rem">'+
           '<div onclick="toggleTreeNode(\''+cNId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.25rem 0.5rem;cursor:pointer;font-size:0.75rem;font-weight:600;color:var(--ink2)">'+
-          '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
-          '<span>🗂 '+cN+'</span>'+
+          '<span id="arr-'+cNId+'" style="font-size:0.55rem;transition:transform 0.2s">\u25B6</span>'+
+          '<span>'+folder+'</span>'+
           '</div>'+
           '<div id="'+cNId+'" style="display:none;padding-left:0.8rem">'+items+'</div>'+
           '</div>';
@@ -3960,7 +3976,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
       lvlHtml +=
         '<div style="margin-bottom:0.4rem">'+
         '<div onclick="toggleTreeNode(\''+cTId+'\')" style="display:flex;align-items:center;gap:0.35rem;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.78rem;font-weight:600;color:var(--ink)">'+
-        '<span id="arr-'+cTId+'" style="font-size:0.55rem;transition:transform 0.2s">▶</span>'+
+        '<span id="arr-'+cTId+'" style="font-size:0.55rem;transition:transform 0.2s">\u25B6</span>'+
         '<span>'+cTIcon+' '+cT+'</span>'+
         '</div>'+
         '<div id="'+cTId+'" style="display:none;padding-left:0.7rem">'+cTHtml+'</div>'+
@@ -3970,7 +3986,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
     html +=
       '<div style="margin-bottom:0.5rem;border:1px solid var(--border);border-radius:10px;overflow:hidden">'+
       '<div onclick="toggleTreeNode(\''+lvlId+'\')" style="display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.7rem;cursor:pointer;background:var(--bg-soft);font-size:0.82rem;font-weight:700;color:var(--ink)">'+
-      '<span id="arr-'+lvlId+'" style="font-size:0.6rem;transition:transform 0.2s">▶</span>'+
+      '<span id="arr-'+lvlId+'" style="font-size:0.6rem;transition:transform 0.2s">\u25B6</span>'+
       '<span>'+lvlIcon+' '+lvl+'</span>'+
       '</div>'+
       '<div id="'+lvlId+'" style="display:none;padding:0.4rem 0.3rem 0.3rem">'+lvlHtml+'</div>'+
@@ -3979,7 +3995,6 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   return html;
 }
 
-// ── Carte exercice individuelle (étudiant ou admin) ──
 function _buildExCard(ex, sm, isStudent) {
   const icon  = _exTypeIcon(ex);
   const lbl   = _exTypeLabel(ex);
