@@ -2026,6 +2026,9 @@ const CACHE_TTL_ADMIN_EX  = 24 * 60 * 60 * 1000;      // 24h      — page exerc
 const CACHE_TTL_EX_DONE   = 30 * 24 * 60 * 60 * 1000; // 30 jours — exercices terminés
 
 // Map clé → TTL
+const CACHE_LESSONS_TTL = 15 * 60 * 1000;          // 15min — calendrier
+const CACHE_DASH_KEY    = "jun_dash_stats";         // stats dashboard admin
+const CACHE_DASH_TTL    = 24 * 60 * 60 * 1000;     // 24h   — stats niveaux
 const CACHE_TTL_MAP = {
   [CACHE_KEY]:              CACHE_TTL_CONTENT,
   [CACHE_EX_KEY]:           CACHE_TTL_EXERCISES,
@@ -2055,6 +2058,7 @@ function invalidateAdminCache() {
   _cacheDel(CACHE_ADMIN_KEY);
   _cacheDel(CACHE_ADMIN_KEY + "_ex");
   _cacheDel(CACHE_ALL_CONTENT_KEY);
+  _cacheDel(CACHE_DASH_KEY);
 }
 
 // Sync admin uniquement — recharge élèves + contenu sans reload complet
@@ -2126,6 +2130,7 @@ async function forceSyncAdmin() {
   const btn = document.getElementById("btn-admin-sync");
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
   invalidateAdminCache();
+  _cacheDel("jun_admin_stats"); // invalider cache stats niveaux
   window._adminStatsLoaded = false; // reset lazy flag
   await loadAdminPanel(currentUserGlobal);
   if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
@@ -5165,12 +5170,33 @@ function toggleExRow(rowId) {
   if (btn) btn.textContent = row.classList.contains("open") ? "▲" : "▼";
 }
 
-async function loadAdminDashboard() {
+async function loadAdminDashboard(forceRefresh) {
   const aw=document.getElementById("dash-avg-content");
   const sc2=document.getElementById("dash-student-count");
   if(sc2)sc2.textContent=allStudents.filter(s=>String(s.active).toUpperCase()==="YES").length;
   if(!aw)return;
-  aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+
+  // ── Chargement progressif : afficher squelette immédiatement ──
+  const levels = ["N5","N4","N3","N2","N1"];
+  const skeleton = levels.map(lvl => {
+    const stuCount = allStudents.filter(s=>String(s.active).toUpperCase()==="YES"&&(s.levels||"").includes(lvl)).length;
+    if(!stuCount) return "";
+    return '<div class="dash-avg-level-row" style="opacity:0.5">'+
+      '<div class="dash-avg-level-header">'+
+      '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+      '<span class="dash-avg-level-label">'+stuCount+' élève'+(stuCount>1?"s":"")+'</span>'+
+      '<span class="dash-avg-level-score" style="color:var(--gray)">—</span>'+
+      '</div></div>';
+  }).join("");
+  if(skeleton) aw.innerHTML = skeleton;
+  else aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+
+  // ── Cache 24h pour les stats dashboard ──
+  if(!forceRefresh) {
+    const cachedDash = _cacheGet(CACHE_DASH_KEY);
+    if(cachedDash) { aw.innerHTML = cachedDash; return; }
+  }
+
   try{
     const [sr,er]=await Promise.all([
       api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
@@ -5189,7 +5215,7 @@ async function loadAdminDashboard() {
     });
     const keys=LEVELS.filter(l=>bl[l]);
     if(!keys.length){aw.innerHTML='<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.84rem">'+t("noData")+'</div>';return;}
-    aw.innerHTML=keys.map(lvl=>{
+    const dashHtml=keys.map(lvl=>{
       const se=Object.entries(bl[lvl]);
       const lvlSum=se.reduce((s,[,d])=>s+d.sum,0);
       const lvlCnt=se.reduce((s,[,d])=>s+d.cnt,0);
@@ -5221,16 +5247,42 @@ async function loadAdminDashboard() {
         '<div class="dash-avg-student-list">'+rows+'</div>'+
         '</div>';
     }).join("");
+    aw.innerHTML = dashHtml;
+    // Sauvegarder dans le cache 24h
+    _cacheSet(CACHE_DASH_KEY, dashHtml);
   }catch(e){console.error(e);aw.innerHTML='<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';}
 }
 
 
-async function loadAdminStats() {
+async function loadAdminStats(forceRefresh) {
   const aw=document.getElementById("admin-stats-content");
   const sc2=document.getElementById("admin-student-count");
   if(sc2)sc2.textContent=allStudents.filter(s=>String(s.active).toUpperCase()==="YES").length;
   if(!aw)return;
-  aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+
+  // ── Squelette immédiat ──
+  const LEVELS=["N5","N4","N3","N2","N1"];
+  const skeleton = LEVELS.map(lvl => {
+    const stuCount = allStudents.filter(s=>String(s.active).toUpperCase()==="YES"&&(s.levels||"").includes(lvl)).length;
+    if(!stuCount) return "";
+    return '<div class="dash-avg-level-row" style="opacity:0.45">'+
+      '<div class="dash-avg-level-header">'+
+      '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+      '<span class="dash-avg-level-label">'+stuCount+' élève'+(stuCount>1?"s":"")+'</span>'+
+      '<span class="dash-avg-level-score" style="color:var(--gray)">—</span>'+
+      '<span class="dash-avg-level-arrow">▼</span>'+
+      '</div></div>';
+  }).filter(Boolean).join("");
+  if(skeleton) aw.innerHTML = skeleton;
+  else aw.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+
+  // ── Cache 24h ──
+  const CACHE_STATS_KEY = "jun_admin_stats";
+  if(!forceRefresh) {
+    const cachedStats = _cacheGet(CACHE_STATS_KEY);
+    if(cachedStats) { aw.innerHTML = cachedStats; return; }
+  }
+
   try{
     const [sr,er]=await Promise.all([
       api({action:"getScoresAdmin",   adminId:currentUserGlobal.id,pin:getStoredPin()}),
@@ -5370,6 +5422,8 @@ async function loadAdminStats() {
       return;
     }
     aw.innerHTML=levelHtml;
+    // Sauvegarder dans cache 24h (sans les sparklines qui sont dessinées après)
+    _cacheSet("jun_admin_stats", levelHtml);
 
     // Dessiner les sparklines
     window._stuTestScores=stuTestScores;
@@ -5812,7 +5866,13 @@ async function fetchLessons(forceRefresh) {
   if (cached && cached.length > 0 && cached[0].date && !cached[0].startISO) {
     _cacheDel(LESSONS_KEY); // vieux format, on force le rechargement
   } else if (!forceRefresh && cached) {
-    _lessonsCache = cached; return cached;
+    // Vérifier TTL 15min
+    const cacheEntry = localStorage.getItem(LESSONS_KEY + "_ts");
+    const ts = cacheEntry ? parseInt(cacheEntry) : 0;
+    if (Date.now() - ts < CACHE_LESSONS_TTL) {
+      _lessonsCache = cached; return cached;
+    }
+    // TTL expiré → forcer rechargement
   }
   try {
     const user = currentUserGlobal;
@@ -5820,9 +5880,9 @@ async function fetchLessons(forceRefresh) {
       ? { action:"getLessons", adminId:user.id, pin:getStoredPin() }
       : { action:"getLessons", studentId:user.id, pin:getStoredPin() };
     const r = await api(params);
-    console.log("📅 fetchLessons:", r);
     if (r && r.success && r.lessons) {
       _cacheSet(LESSONS_KEY, r.lessons);
+      localStorage.setItem(LESSONS_KEY + "_ts", String(Date.now()));
       _lessonsCache = r.lessons;
       return r.lessons;
     }
@@ -5892,8 +5952,8 @@ function calDayClick(dateStr) {
       (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+(l.studentName||"Élève")+'</div>':'')+
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:2px">📝 '+l.note+'</div>':'')+
       (isAdmin?'<div style="display:flex;gap:0.4rem;margin-top:6px">'+
-      '<button onclick="openEditLessonModal('+JSON.stringify(l)+')" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ Modifier</button>'+
-      '<button onclick="doDeleteLesson(\''+l.id+'\',\''+encodeURIComponent(l.studentName||'')+'\')" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>'+
+      '<button onclick="_editTargetLesson=_lessonsCache&&_lessonsCache.find(x=>x.id===\''+l.id+'\');openEditLessonModal(_editTargetLesson||'+JSON.stringify({id:l.id,studentId:l.studentId,studentName:l.studentName,startISO:l.startISO,endISO:l.endISO,duration:l.duration,color:l.color,note:l.note})+')" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ Modifier</button>'+
+      '<button onclick="doDeleteLesson(\''+l.id+'\')" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>'+
       '</div>':'')+
       '</div>';
   }).join("");
@@ -6036,6 +6096,9 @@ function selectEditLessonColor(btn, color) {
 }
 
 function openEditLessonModal(lesson) {
+  // Utiliser window._editTargetLesson si disponible (plus fiable que param inline)
+  if (!lesson && window._editTargetLesson) lesson = window._editTargetLesson;
+  if (!lesson) { console.error("openEditLessonModal: pas de leçon"); return; }
   // Pré-remplir les champs avec les données existantes
   document.getElementById("edit-lesson-event-id").value   = lesson.id;
   document.getElementById("edit-lesson-student-id").value = lesson.studentId;
