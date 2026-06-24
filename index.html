@@ -3021,6 +3021,12 @@ async function toggleNotifications() {
 function forceSync() {
   const btn = document.getElementById("btn-force-sync");
   if (btn) { btn.disabled = true; btn.style.opacity = "0.7"; }
+  // Sauvegarder les favoris (clés "jun_favorites_*") avant de vider
+  const saved = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("jun_favorites_")) saved[k] = localStorage.getItem(k);
+  }
   // Garder la session, la langue et le dark mode — vider tout le reste
   const keep = [SESSION_KEY, LANG_KEY, DARK_KEY];
   const toDelete = [];
@@ -3029,6 +3035,8 @@ function forceSync() {
     if (!keep.includes(k)) toDelete.push(k);
   }
   toDelete.forEach(k => localStorage.removeItem(k));
+  // Remettre les favoris
+  Object.entries(saved).forEach(([k, v]) => localStorage.setItem(k, v));
   setTimeout(() => location.reload(), 300);
 }
 
