@@ -1857,7 +1857,7 @@
     <span id="admin-cal-month-label" style="font-size:1rem;font-weight:600;color:var(--ink)">—</span>
     <div style="display:flex;align-items:center;gap:0.3rem">
       <button onclick="adminCalNavMonth(1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">›</button>
-      <button onclick="_cacheDel(LESSONS_KEY);try{localStorage.removeItem(LESSONS_KEY+'_ts')}catch(e){};_lessonsCache=null;loadAdminCalendar(true)" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
+      <button onclick="refreshAdminCalendar()" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
     </div>
   </div>
   <!-- Grille admin -->
@@ -6051,6 +6051,13 @@ async function loadStudentCalendar(forceRefresh) {
   renderCalGrid("cal-grid",_calYear,_calMonth,lessons);
   renderLessonsList("cal-lessons-list",_calYear,_calMonth,lessons);
 }
+function refreshAdminCalendar() {
+  _cacheDel(LESSONS_KEY);
+  localStorage.removeItem(LESSONS_KEY + '_ts');
+  _lessonsCache = null;
+  loadAdminCalendar(true);
+}
+
 async function loadAdminCalendar(forceRefresh) {
   const lbl = document.getElementById("admin-cal-month-label");
   if(lbl) lbl.textContent = calMonthLabel(_adminCalYear,_adminCalMonth);
