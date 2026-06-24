@@ -2554,9 +2554,15 @@ async function loadStudentContent(user) {
         });
         const allPts=Object.values(byCat).flat();
         if(allPts.length > 0) {
-          const lastPt=allPts.reduce((a,b)=>b.x>a.x?b:a,allPts[0]);
-          if(avgLast) avgLast.textContent = lastPt.y;
-          if(avgLastLbl) avgLastLbl.textContent = t("lastTest");
+          // Moyenne des 4 derniers tests : dernier score de chaque catégorie
+          const lastByCat = Object.values(byCat)
+            .map(pts => pts.length ? pts[pts.length-1] : null)
+            .filter(Boolean);
+          const avgTestPct = lastByCat.length
+            ? Math.round(lastByCat.reduce((a,b)=>a+b.y,0)/lastByCat.length)
+            : null;
+          if(avgLast) avgLast.textContent = avgTestPct !== null ? avgTestPct : "—";
+          if(avgLastLbl) avgLastLbl.textContent = t("avgLastLabel");
           const chartEl = document.getElementById("student-test-chart");
           if(chartEl && window.Chart) {
             if(window._studentTestChart) { try{window._studentTestChart.destroy();}catch(e){} }
@@ -4543,11 +4549,13 @@ const TRANSLATIONS = {
     favAdd:            "✅ Đã thêm vào yêu thích",
     favRemove:         "🗑 Đã xoá khỏi yêu thích",
     favMax:            "Tối đa 10 nội dung yêu thích",
+    calBtnEdit:        "Sửa",
+    calBtnDelete:      "Xoá",
     lastTest:          "Bài kiểm tra cuối",
     myTestResults:     "Kết quả kiểm tra của tôi",
     avgGenLabel:       "Trung bình bài tập",
     avgTestLabel:      "Tiến độ hàng tháng",
-    avgLastLabel:      "Bài kiểm tra cuối",
+    avgLastLabel:      "Trung bình [TEST]",
     testProgLabel:     "Tiến độ [TEST] · %",
     avgColLabel:       "Moy. bài tập",
     noTestsYet:        "Chưa có bài kiểm tra [TEST] nào cho học viên này",
@@ -4745,11 +4753,13 @@ const TRANSLATIONS = {
     favAdd:            "✅ Added to favorites",
     favRemove:         "🗑 Removed from favorites",
     favMax:            "Maximum 10 favorites reached",
+    calBtnEdit:        "Edit",
+    calBtnDelete:      "Delete",
     lastTest:          "Last test",
     myTestResults:     "My test results",
     avgGenLabel:       "Exercise average",
     avgTestLabel:      "Monthly progress",
-    avgLastLabel:      "Last [TEST]",
+    avgLastLabel:      "Avg. [TEST]",
     testProgLabel:     "[TEST] progress · %",
     avgColLabel:       "Exercise avg.",
     noTestsYet:        "No [TEST] tests yet for this student",
@@ -4947,11 +4957,13 @@ const TRANSLATIONS = {
     favAdd:            "✅ Ajouté aux favoris",
     favRemove:         "🗑 Retiré des favoris",
     favMax:            "Maximum 10 favoris atteint",
+    calBtnEdit:        "Modifier",
+    calBtnDelete:      "Supprimer",
     lastTest:          "Dernier test",
     myTestResults:     "Mes résultats de tests",
     avgGenLabel:       "Moyenne exercices",
     avgTestLabel:      "Progression mensuelle",
-    avgLastLabel:      "Dernier [TEST]",
+    avgLastLabel:      "Moy. [TEST]",
     testProgLabel:     "Progression [TEST] · %",
     avgColLabel:       "Moy. exercices",
     noTestsYet:        "Pas encore de tests [TEST] pour cet élève",
@@ -5388,8 +5400,9 @@ async function loadAdminStats(forceRefresh) {
         const testData=stuTestScores[exKey]||{GR:[],VO:[],LI:[],RE:[]};
         const allPts=Object.values(testData).flat();
         const hasTests=allPts.length>0;
-        const lastPt=hasTests?allPts.reduce((a,b)=>b.ts>a.ts?b:a):null;
-        const lastPct=lastPt?lastPt.pct:null;
+        // Moyenne des 4 derniers : dernier score de chaque catégorie
+        const lastByCat=Object.values(testData).map(pts=>pts.length?pts[pts.length-1]:null).filter(Boolean);
+        const avgTestPct=lastByCat.length?Math.round(lastByCat.reduce((a,b)=>a+b.pct,0)/lastByCat.length):null;
         const exData=avgEx[exKey];
         const avg10=exData?(exData.sum/exData.cnt).toFixed(1):null;
         const name=s.name+" "+(s.familyName||"");
@@ -5397,7 +5410,7 @@ async function loadAdminStats(forceRefresh) {
           '<span class="dash-avg-student-name">'+name+'</span>'+
           '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
             (hasTests?'<div id="spark-wrap-'+spId+'" style="width:70px;height:24px;flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+sid+'\',\''+name+'\',\''+lvl+'\')" title="Voir progression"></div>':'<span style="width:70px;display:inline-block"></span>')+
-            '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(lastPct!==null?lastPct+'%':'—')+'</span>'+
+            '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(avgTestPct!==null?avgTestPct+'%':'—')+'</span>'+
           '</div>'+
           '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
           (avg10!==null
@@ -5962,8 +5975,8 @@ function calDayClick(dateStr) {
       (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+(l.studentName||"Élève")+'</div>':'')+
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:2px">📝 '+l.note+'</div>':'')+
       (isAdmin?'<div style="display:flex;gap:0.4rem;margin-top:6px">'+
-      '<button onclick="openEditLessonModal(window._lessonIndex[\''+safeId+'\'])" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ Modifier</button>'+
-      '<button onclick="doDeleteLesson(\''+safeId+'\')" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>'+
+      '<button onclick="openEditLessonModal(window._lessonIndex[\''+safeId+'\'])" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ '+t("calBtnEdit")+'</button>'+
+      '<button onclick="doDeleteLesson(\''+safeId+'\')" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 '+t("calBtnDelete")+'</button>'+
       '</div>':'')+
       '</div>';
   }).join("");
