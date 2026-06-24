@@ -1857,7 +1857,7 @@
     <span id="admin-cal-month-label" style="font-size:1rem;font-weight:600;color:var(--ink)">—</span>
     <div style="display:flex;align-items:center;gap:0.3rem">
       <button onclick="adminCalNavMonth(1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">›</button>
-      <button onclick="_cacheDel(LESSONS_KEY);_lessonsCache=null;loadAdminCalendar(true)" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
+      <button onclick="_cacheDel(LESSONS_KEY);localStorage.removeItem(LESSONS_KEY+'_ts');_lessonsCache=null;loadAdminCalendar(true)" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
     </div>
   </div>
   <!-- Grille admin -->
@@ -5941,6 +5941,9 @@ function calDayClick(dateStr) {
   const isAdmin = currentUserGlobal?.role === "Admin";
   const lessons  = (_lessonsCache || []).filter(l => formatLessonDate(l.startISO) === dateStr);
   if (!lessons.length) return;
+  // Indexer pour le bouton Modifier (pas de JSON dans onclick)
+  _lessonIndex = {};
+  lessons.forEach(l => { _lessonIndex[l.id] = l; });
   const d = new Date(dateStr + "T12:00:00");
   const label = d.toLocaleDateString(currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR",{weekday:"long",day:"numeric",month:"long"});
   const html = lessons.map(l => {
@@ -5952,8 +5955,8 @@ function calDayClick(dateStr) {
       (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+(l.studentName||"Élève")+'</div>':'')+
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:2px">📝 '+l.note+'</div>':'')+
       (isAdmin?'<div style="display:flex;gap:0.4rem;margin-top:6px">'+
-      '<button onclick="_editTargetLesson=_lessonsCache&&_lessonsCache.find(x=>x.id===\''+l.id+'\');openEditLessonModal(_editTargetLesson||'+JSON.stringify({id:l.id,studentId:l.studentId,studentName:l.studentName,startISO:l.startISO,endISO:l.endISO,duration:l.duration,color:l.color,note:l.note})+')" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ Modifier</button>'+
-      '<button onclick="doDeleteLesson(\''+l.id+'\')" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>'+
+      '<button onclick="openEditLessonModal(_lessonIndex[&quot;'+l.id+'&quot;])" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ Modifier</button>'+
+      '<button onclick="doDeleteLesson(&quot;'+l.id+'&quot;)" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>'+
       '</div>':'')+
       '</div>';
   }).join("");
