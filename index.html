@@ -1855,7 +1855,10 @@
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.5rem 1rem">
     <button onclick="adminCalNavMonth(-1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">‹</button>
     <span id="admin-cal-month-label" style="font-size:1rem;font-weight:600;color:var(--ink)">—</span>
-    <button onclick="adminCalNavMonth(1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">›</button>
+    <div style="display:flex;align-items:center;gap:0.3rem">
+      <button onclick="adminCalNavMonth(1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">›</button>
+      <button onclick="_cacheDel(LESSONS_KEY);_lessonsCache=null;loadAdminCalendar(true)" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
+    </div>
   </div>
   <!-- Grille admin -->
   <div id="admin-cal-grid-wrap" style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem">
@@ -3932,7 +3935,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
     const isNum = /^\d+$/.test(rawN.trim());
     let folder;
     if (sub === "exercise" || isNum) folder = "\u{1F4DD} Exercices";
-    else if (sub === "test")         folder = "\u{1F3AF} Tests";
+    else if (sub === "test")         folder = isNum ? "\u{1F3AF} Tests" : (rawN || "\u{1F3AF} Tests");
     else                             folder = rawN || "?";
     if (!tree[lvl])              tree[lvl] = {};
     if (!tree[lvl][cT])          tree[lvl][cT] = {};
