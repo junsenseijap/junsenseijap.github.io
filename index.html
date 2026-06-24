@@ -1937,6 +1937,60 @@
   </div>
 </div>
 
+<!-- ══ MODAL MODIFIER UN COURS ══ -->
+<div id="modal-edit-lesson" style="display:none;position:fixed;inset:0;z-index:2001;background:rgba(44,26,34,0.45);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
+  <div style="background:var(--bg-card);border-radius:20px 20px 0 0;padding:1.5rem 1.5rem 2.5rem;width:100%;max-width:500px;animation:slideUp 0.25s ease;overflow-y:auto;max-height:92vh">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem">
+      <span style="font-size:1rem;font-weight:600;color:var(--ink)">✏️ Modifier le cours</span>
+      <button onclick="document.getElementById('modal-edit-lesson').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--gray);line-height:1">×</button>
+    </div>
+    <!-- Élève (lecture seule) -->
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Élève</div>
+    <div id="edit-lesson-student-name" style="padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-size:0.88rem;margin-bottom:0.9rem"></div>
+    <input type="hidden" id="edit-lesson-event-id"/>
+    <input type="hidden" id="edit-lesson-student-id"/>
+    <!-- Date -->
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Date</div>
+    <input type="date" id="edit-lesson-date" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.9rem;box-sizing:border-box"/>
+    <!-- Heure + Durée -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.9rem">
+      <div>
+        <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Heure</div>
+        <input type="time" id="edit-lesson-time" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box"/>
+      </div>
+      <div>
+        <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Durée</div>
+        <select id="edit-lesson-duration" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none">
+          <option value="30">30 min</option>
+          <option value="45">45 min</option>
+          <option value="60">60 min</option>
+          <option value="90">90 min</option>
+          <option value="120">2h</option>
+        </select>
+      </div>
+    </div>
+    <!-- Couleur -->
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.5rem">Couleur</div>
+    <div id="edit-lesson-color-picker" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.9rem">
+      <button onclick="selectEditLessonColor(this,'CYAN')"     data-color="CYAN"     style="width:28px;height:28px;border-radius:50%;background:#4dd0e1;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'GREEN')"    data-color="GREEN"    style="width:28px;height:28px;border-radius:50%;background:#57bb8a;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'YELLOW')"   data-color="YELLOW"   style="width:28px;height:28px;border-radius:50%;background:#f6c026;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'ORANGE')"   data-color="ORANGE"   style="width:28px;height:28px;border-radius:50%;background:#f5511d;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'RED')"      data-color="RED"      style="width:28px;height:28px;border-radius:50%;background:#d61f1f;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'PINK')"     data-color="PINK"     style="width:28px;height:28px;border-radius:50%;background:#e67c73;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'MAUVE')"    data-color="MAUVE"    style="width:28px;height:28px;border-radius:50%;background:#7986cb;border:2px solid transparent;cursor:pointer"></button>
+      <button onclick="selectEditLessonColor(this,'GRAPHITE')" data-color="GRAPHITE" style="width:28px;height:28px;border-radius:50%;background:#616161;border:2px solid transparent;cursor:pointer"></button>
+    </div>
+    <!-- Note -->
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Note (optionnel)</div>
+    <input type="text" id="edit-lesson-note" maxlength="100" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:1.1rem;box-sizing:border-box"/>
+    <div id="edit-lesson-msg" style="display:none;font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:8px;margin-bottom:0.75rem"></div>
+    <button id="btn-edit-lesson" onclick="doEditLesson()" style="width:100%;padding:0.8rem;background:linear-gradient(135deg,#7986cb,#5c6bc0);color:white;border:none;border-radius:12px;font-size:0.9rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">
+      ✏️ Enregistrer les modifications
+    </button>
+  </div>
+</div>
+
 <!-- ══ MODAL DÉTAIL JOUR ══ -->
 <div id="modal-day-lessons" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(44,26,34,0.45);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
   <div style="background:var(--bg-card);border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-width:500px;animation:slideUp 0.22s ease">
@@ -1964,11 +2018,12 @@ const CACHE_ADMIN_KEY      = "jun_admin_cache";
 const CACHE_ALL_CONTENT_KEY = "jun_all_content";     // getAllContent — 24h, invalidé après sync
 
 // TTL différenciés par type de données
-const CACHE_TTL_CONTENT   = 24 * 60 * 60 * 1000; // 24h  — contenu (change rarement)
-const CACHE_TTL_ADMIN     = 999 * 24 * 60 * 60 * 1000; // ∞    — élèves + contenu admin (invalidé manuellement)
-const CACHE_TTL_SCORES    = 60 * 60 * 1000;       // 1h   — scores
-const CACHE_TTL_EXERCISES = 10 * 60 * 1000;       // 10min — exercices (statut pending/done)
-const CACHE_TTL_ADMIN_EX  = 5  * 60 * 1000;       // 5min  — page exercices admin
+const CACHE_TTL_CONTENT   = 7 * 24 * 60 * 60 * 1000;   // 7 jours  — contenu (change rarement)
+const CACHE_TTL_ADMIN     = 7 * 24 * 60 * 60 * 1000;   // 7 jours  — élèves (invalidé manuellement)
+const CACHE_TTL_SCORES    = 24 * 60 * 60 * 1000;       // 24h      — scores
+const CACHE_TTL_EXERCISES = 60 * 60 * 1000;            // 1h       — exercices pending
+const CACHE_TTL_ADMIN_EX  = 24 * 60 * 60 * 1000;      // 24h      — page exercices admin
+const CACHE_TTL_EX_DONE   = 30 * 24 * 60 * 60 * 1000; // 30 jours — exercices terminés
 
 // Map clé → TTL
 const CACHE_TTL_MAP = {
@@ -5836,7 +5891,10 @@ function calDayClick(dateStr) {
       '<div style="font-weight:600;font-size:0.9rem;color:var(--ink)">'+dot+tStart+' → '+tEnd+'</div>'+
       (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+(l.studentName||"Élève")+'</div>':'')+
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:2px">📝 '+l.note+'</div>':'')+
-      (isAdmin?'<button onclick="doDeleteLesson(\''+l.id+'\')" style="margin-top:6px;background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>':'')+
+      (isAdmin?'<div style="display:flex;gap:0.4rem;margin-top:6px">'+
+      '<button onclick="openEditLessonModal('+JSON.stringify(l)+')" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ Modifier</button>'+
+      '<button onclick="doDeleteLesson(\''+l.id+'\',\''+encodeURIComponent(l.studentName||'')+'\')" style="background:none;border:1px solid rgba(232,75,122,0.3);color:var(--pink);border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">🗑 Supprimer</button>'+
+      '</div>':'')+
       '</div>';
   }).join("");
   document.getElementById("modal-day-title").textContent = "📅 " + label;
@@ -5967,6 +6025,86 @@ function renderUpcomingLessons(lessons) {
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:1px">'+l.note+'</div>':'')+
       '</div>';
   }).join("");
+}
+
+// ── Couleur sélectionnée pour l'édition ──
+let _editLessonColor = "CYAN";
+function selectEditLessonColor(btn, color) {
+  _editLessonColor = color;
+  document.querySelectorAll("#edit-lesson-color-picker button").forEach(b => b.style.border="2px solid transparent");
+  btn.style.border = "2px solid var(--ink)";
+}
+
+function openEditLessonModal(lesson) {
+  // Pré-remplir les champs avec les données existantes
+  document.getElementById("edit-lesson-event-id").value   = lesson.id;
+  document.getElementById("edit-lesson-student-id").value = lesson.studentId;
+  document.getElementById("edit-lesson-student-name").textContent = "👤 " + (lesson.studentName || "");
+
+  // Date locale depuis ISO UTC
+  const tz = getUserTimezone();
+  const startLocal = new Date(lesson.startISO);
+  const yyyy = startLocal.toLocaleDateString("sv-SE", {timeZone:tz}); // "2026-06-24"
+  const hhmm = startLocal.toLocaleTimeString("fr-FR", {hour:"2-digit",minute:"2-digit",timeZone:tz});
+  document.getElementById("edit-lesson-date").value     = yyyy;
+  document.getElementById("edit-lesson-time").value     = hhmm;
+  document.getElementById("edit-lesson-duration").value = String(lesson.duration || 60);
+  document.getElementById("edit-lesson-note").value     = lesson.note || "";
+
+  // Couleur
+  const colorMap = {"1":"CYAN","2":"GREEN","3":"YELLOW","4":"ORANGE","5":"RED","6":"PINK","7":"MAUVE","9":"GRAPHITE"};
+  const colorName = colorMap[String(lesson.color)] || "CYAN";
+  _editLessonColor = colorName;
+  document.querySelectorAll("#edit-lesson-color-picker button").forEach(b => {
+    b.style.border = b.getAttribute("data-color") === colorName ? "2px solid var(--ink)" : "2px solid transparent";
+  });
+
+  const msg = document.getElementById("edit-lesson-msg");
+  if(msg) msg.style.display = "none";
+  document.getElementById("modal-edit-lesson").style.display = "flex";
+}
+
+async function doEditLesson() {
+  const eventId   = document.getElementById("edit-lesson-event-id").value;
+  const studentId = document.getElementById("edit-lesson-student-id").value;
+  const date      = document.getElementById("edit-lesson-date").value;
+  const time      = document.getElementById("edit-lesson-time").value;
+  const duration  = document.getElementById("edit-lesson-duration").value;
+  const note      = (document.getElementById("edit-lesson-note").value || "").trim();
+  const color     = _editLessonColor || "CYAN";
+  const msg       = document.getElementById("edit-lesson-msg");
+  const btn       = document.getElementById("btn-edit-lesson");
+
+  const showMsg = (txt, type) => {
+    msg.textContent = txt; msg.style.display = "block";
+    msg.style.background = type==="error" ? "rgba(232,75,122,0.1)" : "rgba(158,196,160,0.2)";
+    msg.style.color  = type==="error" ? "var(--pink)" : "var(--sage)";
+    msg.style.border = "1px solid " + (type==="error" ? "rgba(232,75,122,0.3)" : "rgba(158,196,160,0.4)");
+  };
+  if(!date) return showMsg("⚠️ Date obligatoire","error");
+  if(!time) return showMsg("⚠️ Heure obligatoire","error");
+
+  btn.disabled = true; btn.textContent = "⏳ En cours...";
+  try {
+    // Modifier = supprimer + recréer
+    const del = await api({ action:"deleteLesson", adminId:currentUserGlobal.id, pin:getStoredPin(), eventId });
+    if(!del || !del.success) { showMsg("❌ Erreur suppression: " + (del?.message||""), "error"); btn.disabled=false; btn.textContent="✏️ Enregistrer les modifications"; return; }
+
+    const create = await api({ action:"createLesson", adminId:currentUserGlobal.id, pin:getStoredPin(),
+      studentId, date, time, duration:parseInt(duration)||60, note, color });
+    if(create && create.success) {
+      showMsg("✅ Cours modifié !", "success");
+      _cacheDel(LESSONS_KEY); _lessonsCache = null;
+      const lessons = await fetchLessons(true);
+      renderCalGrid("admin-cal-grid", _adminCalYear, _adminCalMonth, lessons);
+      renderLessonsList("admin-cal-lessons-list", _adminCalYear, _adminCalMonth, lessons);
+      document.getElementById("modal-day-lessons").style.display = "none";
+      setTimeout(() => { document.getElementById("modal-edit-lesson").style.display = "none"; }, 1200);
+    } else {
+      showMsg("❌ " + (create?.message||"Erreur création"), "error");
+    }
+  } catch(e) { showMsg("❌ " + e.message, "error"); }
+  btn.disabled = false; btn.textContent = "✏️ Enregistrer les modifications";
 }
 
 function openCreateLessonModal() {
