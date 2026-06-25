@@ -2451,7 +2451,9 @@ async function loadStudentContent(user) {
     }
 
     if(pw){
-      const lm={};content.filter(c=>(c.type||"").toLowerCase()!=="form").forEach(c=>{const l=c.level||"?";lm[l]=(lm[l]||0)+1;});
+      // Compter tous les types débloqués : PDF/audio/video/link depuis content, forms depuis exercises
+      const lm={};
+      content.forEach(function(c){ var l=c.level||"?"; lm[l]=(lm[l]||0)+1; });
       const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0).map(l=>{
         const unlocked=lm[l]||0;
         const total=totalCounts[l]||0;
@@ -5595,6 +5597,12 @@ function toggleCourse(lvl, ctId, cn) {
 
 function renderContentManage(studentId, name, familyName, unlocked, contentList) {
   const panel = document.getElementById("admin-content-panel");
+  // ── Helper : form = compté si envoyé (assignedContentIds), sinon unlocked normal ──
+  var _assigned = window._assignedContentIds || new Set();
+  function isEffectivelyUnlocked(c) {
+    if ((c.type||"").toLowerCase() === "form") return _assigned.has(String(c.id));
+    return unlocked.has(String(c.id));
+  }
   const content = contentList || allContent;
   if (!content || content.length === 0) {
     panel.innerHTML =
@@ -5681,7 +5689,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   function makeSubSection(items, icon, label, safeId) {
     if (!items||!items.length) return "";
     const sorted = items.slice().sort(function(a,b){ return (Number(a.courseN)||0)-(Number(b.courseN)||0); });
-    const unlockedCount = sorted.filter(function(c){ return unlocked.has(String(c.id)); }).length;
+    const unlockedCount = sorted.filter(function(c){ return isEffectivelyUnlocked(c); }).length;
     const totalCount    = sorted.length;
     const countBadge    = unlockedCount > 0
       ? '<span style="font-size:0.6rem;color:var(--pink);font-weight:600;margin-left:4px">'+unlockedCount+'/'+totalCount+' 🌸</span>'
@@ -5705,18 +5713,18 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     }, 0);
     const unlockedInLevel = subjKeys.reduce(function(n,s){
       var d = subjMap[s];
-      return n + d.lessons.filter(function(c){ return unlocked.has(String(c.id)); }).length
-               + d.exercises.filter(function(c){ return unlocked.has(String(c.id)); }).length
-               + d.tests.filter(function(c){ return unlocked.has(String(c.id)); }).length;
+      return n + d.lessons.filter(function(c){ return isEffectivelyUnlocked(c); }).length
+               + d.exercises.filter(function(c){ return isEffectivelyUnlocked(c); }).length
+               + d.tests.filter(function(c){ return isEffectivelyUnlocked(c); }).length;
     }, 0);
     const subjRows = subjKeys.map(function(subj) {
       const data   = subjMap[subj];
       const ctInfo = translateCourseT(subj);
       const safeId = subj.replace(/[^a-zA-Z0-9]/g,"_")+"_"+lvl;
       const totalInSubj    = data.lessons.length + data.exercises.length + data.tests.length;
-      const unlockedInSubj = data.lessons.filter(function(c){ return unlocked.has(String(c.id)); }).length
-                           + data.exercises.filter(function(c){ return unlocked.has(String(c.id)); }).length
-                           + data.tests.filter(function(c){ return unlocked.has(String(c.id)); }).length;
+      const unlockedInSubj = data.lessons.filter(function(c){ return isEffectivelyUnlocked(c); }).length
+                           + data.exercises.filter(function(c){ return isEffectivelyUnlocked(c); }).length
+                           + data.tests.filter(function(c){ return isEffectivelyUnlocked(c); }).length;
       return '<div class="coursetype-row" id="ct-'+lvl+'-'+safeId+'">'+
         '<div class="coursetype-header" onclick="toggleCourseT(\''+lvl+'\',\''+safeId+'\')">'+
         '<span class="coursetype-icon">'+ctInfo.icon+'</span>'+
