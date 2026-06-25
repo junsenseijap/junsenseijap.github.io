@@ -2081,12 +2081,16 @@ async function runSyncStep(step) {
       // Scan Drive → remplit CONTENT (sans toucher les Forms)
       const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
-        // Invalider le cache allContent pour forcer rechargement après sync Drive
-        _cacheDel(CACHE_ALL_CONTENT_KEY);
-        allContent = []; // vider en mémoire aussi
-        _studentContentCache = {}; // vider le cache par élève
-        if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés";
+        if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés — rechargement...";
         if (stepEl) stepEl.classList.add("done");
+        // Vider TOUT le cache (GAS déjà vidé côté serveur par syncDriveContent)
+        localStorage.removeItem("jun_all_content");
+        localStorage.removeItem("jun_admin_cache");
+        _cacheDel(CACHE_ALL_CONTENT_KEY);
+        allContent = [];
+        _studentContentCache = {};
+        // Recharger la page pour tout repartir de zéro
+        setTimeout(function(){ location.reload(); }, 1200);
       } else {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
       }
@@ -2109,6 +2113,8 @@ async function runSyncStep(step) {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
       }
     } else if (step === 4) {
+      // Vider le cache GAS côté serveur + localStorage côté client
+      await api({ action: "clearCache", adminId: currentUserGlobal.id, pin: getStoredPin() });
       clearDataCache();
       invalidateAdminCache();
       await loadAdminPanel(currentUserGlobal);
