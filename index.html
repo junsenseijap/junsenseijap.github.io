@@ -2011,31 +2011,31 @@
 <div id="toast"></div>
 
 <script>
-const FORM_ENTRY_ID = "entry.8401610"; // fallback si Entry_ID absent dans CONTENT
+var FORM_ENTRY_ID = "entry.8401610"; // fallback si Entry_ID absent dans CONTENT
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
-const SESSION_KEY = "jun_session";
-const SESSION_DAYS = 90;
-const DARK_KEY = "jun_dark_mode";
-const CACHE_KEY            = "jun_data_cache";
-const CACHE_EX_KEY         = "jun_ex_cache";         // exercices pending (10 min)
-const CACHE_EX_DONE_KEY    = "jun_ex_done_cache";    // exercices done + scores (infini)
-const CACHE_ADMIN_KEY      = "jun_admin_cache";
-const CACHE_ALL_CONTENT_KEY = "jun_all_content";     // getAllContent — 24h, invalidé après sync
+var API_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+var SESSION_KEY = "jun_session";
+var SESSION_DAYS = 90;
+var DARK_KEY = "jun_dark_mode";
+var CACHE_KEY            = "jun_data_cache";
+var CACHE_EX_KEY         = "jun_ex_cache";         // exercices pending (10 min)
+var CACHE_EX_DONE_KEY    = "jun_ex_done_cache";    // exercices done + scores (infini)
+var CACHE_ADMIN_KEY      = "jun_admin_cache";
+var CACHE_ALL_CONTENT_KEY = "jun_all_content";     // getAllContent — 24h, invalidé après sync
 
 // TTL différenciés par type de données
-const CACHE_TTL_CONTENT   = 7 * 24 * 60 * 60 * 1000;   // 7 jours  — contenu (change rarement)
-const CACHE_TTL_ADMIN     = 7 * 24 * 60 * 60 * 1000;   // 7 jours  — élèves (invalidé manuellement)
-const CACHE_TTL_SCORES    = 24 * 60 * 60 * 1000;       // 24h      — scores
-const CACHE_TTL_EXERCISES = 60 * 60 * 1000;            // 1h       — exercices pending
-const CACHE_TTL_ADMIN_EX  = 24 * 60 * 60 * 1000;      // 24h      — page exercices admin
-const CACHE_TTL_EX_DONE   = 30 * 24 * 60 * 60 * 1000; // 30 jours — exercices terminés
+var CACHE_TTL_CONTENT   = 7 * 24 * 60 * 60 * 1000;   // 7 jours  — contenu (change rarement)
+var CACHE_TTL_ADMIN     = 7 * 24 * 60 * 60 * 1000;   // 7 jours  — élèves (invalidé manuellement)
+var CACHE_TTL_SCORES    = 24 * 60 * 60 * 1000;       // 24h      — scores
+var CACHE_TTL_EXERCISES = 60 * 60 * 1000;            // 1h       — exercices pending
+var CACHE_TTL_ADMIN_EX  = 24 * 60 * 60 * 1000;      // 24h      — page exercices admin
+var CACHE_TTL_EX_DONE   = 30 * 24 * 60 * 60 * 1000; // 30 jours — exercices terminés
 
 // Map clé → TTL
-const CACHE_LESSONS_TTL = 15 * 60 * 1000;          // 15min — calendrier
-const CACHE_DASH_KEY    = "jun_dash_stats";         // stats dashboard admin
-const CACHE_DASH_TTL    = 24 * 60 * 60 * 1000;     // 24h   — stats niveaux
-const CACHE_TTL_MAP = {
+var CACHE_LESSONS_TTL = 15 * 60 * 1000;          // 15min — calendrier
+var CACHE_DASH_KEY    = "jun_dash_stats";         // stats dashboard admin
+var CACHE_DASH_TTL    = 24 * 60 * 60 * 1000;     // 24h   — stats niveaux
+var CACHE_TTL_MAP = {
   [CACHE_KEY]:              CACHE_TTL_CONTENT,
   [CACHE_EX_KEY]:           CACHE_TTL_EXERCISES,
   [CACHE_EX_DONE_KEY]:      999 * 24 * 60 * 60 * 1000, // ∞ — exercices terminés (état final)
@@ -2692,7 +2692,7 @@ function selectStudentFromDD(id, name, familyName) {
   selectStudent(id, name, familyName);
 }
 // Cache par élève : { unlocked, assignedContentIds, filteredContent }
-const _studentContentCache = {};
+var _studentContentCache = {};
 
 async function selectStudent(id, name, familyName) {
   selectedStudentId = id;
@@ -2829,13 +2829,13 @@ async function toggleContent(studentId, contentId, isCurrentlyUnlocked) {
 // ══════════════════════════════════════════════
 // BOTTOM NAV
 // ══════════════════════════════════════════════
-let currentNavTab = "home";
-let currentUserGlobal = null;
-let allStudents       = [];
-let allContent        = [];
-let adminUser         = null;
-let selectedStudentId = null;
-let studentAccessMap  = {};
+var currentNavTab = "home";
+var currentUserGlobal = null;
+var allStudents       = [];
+var allContent        = [];
+var adminUser         = null;
+var selectedStudentId = null;
+var studentAccessMap  = {};
 
 function buildBottomNav(role) {
   const nav = document.getElementById("bottom-nav");
@@ -3453,7 +3453,7 @@ async function sendPushToAll() {
   } catch(e) { toast(t("errConn"), "error"); }
   if (btn) { btn.disabled=false; btn.style.opacity="1"; }
 }
-const _drawnLevels = new Set();
+var _drawnLevels = new Set();
 function toggleAdminLevel(rid, lvl) {
   const row = document.getElementById(rid);
   if (!row) return;
@@ -3494,7 +3494,7 @@ function parseDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-const TEST_CATS = {
+var TEST_CATS = {
   GR: { label: "Grammar",    color: "#E84B7A" },
   VO: { label: "Vocabulary", color: "#7B5EA7" },
   LI: { label: "Listening",  color: "#3A8FC7" },
@@ -3513,7 +3513,7 @@ function getTestCat(title) {
 }
 
 // ── SPARKLINE ADMIN — canvas 2D pur, 4 lignes par catégorie ──
-const _sparkCharts = {};
+var _sparkCharts = {};
 function drawSparkline(wrapId, byCat) {
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
@@ -3662,8 +3662,8 @@ async function openStudentChart(studentId, studentName, level) {
     if(el) el.textContent=t("errConn");
   }
 }
-const FAV_MAX = 10;
-const STAR_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+var FAV_MAX = 10;
+var STAR_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 function getFavKey(userId) { return "jun_favorites_" + userId; }
 function getFavs(userId) {
   try { return JSON.parse(localStorage.getItem(getFavKey(userId)) || "[]"); } catch { return []; }
@@ -4396,7 +4396,7 @@ function applyNavLang() {
 // ══════════════════════════════════════════════
 // i18n — TRADUCTIONS
 // ══════════════════════════════════════════════
-const TRANSLATIONS = {
+var TRANSLATIONS = {
   vi: {
     // LOGIN
     loginLabel:        "Email",
@@ -5010,8 +5010,8 @@ const TRANSLATIONS = {
   }
 };
 
-const LANG_KEY = "jun_lang";
-let currentLang = localStorage.getItem(LANG_KEY) || "vi";
+var LANG_KEY = "jun_lang";
+var currentLang = localStorage.getItem(LANG_KEY) || "vi";
 document.documentElement.classList.toggle("lang-vi", currentLang === "vi");
 
 function t(key, ...args) {
@@ -5185,7 +5185,7 @@ function applyLang() {
 }
 
 // Override showError to use current lang
-const _origShowError = window.showError;
+var _origShowError = window.showError;
 
 
 function toggleExRow(rowId) {
@@ -5835,7 +5835,7 @@ async function refreshAdminExercises() {
 // ══════════════════════════════════════════════
 // CALENDRIER
 // ══════════════════════════════════════════════
-const LESSONS_KEY = "jun_lessons_cache";
+var LESSONS_KEY = "jun_lessons_cache";
 var _calYear  = new Date().getFullYear();
 var _calMonth = new Date().getMonth();
 var _adminCalYear  = new Date().getFullYear();
@@ -5844,7 +5844,7 @@ var _lessonsCache  = null;
 var _selectedLessonColor = "CYAN"; // couleur par défaut
 
 // Couleurs GAS → hex pour affichage
-const LESSON_COLORS = {
+var LESSON_COLORS = {
   CYAN:"#4dd0e1", GREEN:"#57bb8a", YELLOW:"#f6c026", ORANGE:"#f5511d",
   RED:"#d61f1f", PINK:"#e67c73", MAUVE:"#7986cb", GRAPHITE:"#616161"
 };
@@ -6138,7 +6138,7 @@ function renderUpcomingLessons(lessons) {
 }
 
 // ── Couleur sélectionnée pour l'édition ──
-let _editLessonColor = "CYAN";
+var _editLessonColor = "CYAN";
 function selectEditLessonColor(btn, color) {
   _editLessonColor = color;
   document.querySelectorAll("#edit-lesson-color-picker button").forEach(b => b.style.border="2px solid transparent");
