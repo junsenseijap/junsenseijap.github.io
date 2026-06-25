@@ -1744,7 +1744,7 @@
 
         <div class="sync-step" id="sync-step-5">
           <div class="sync-step-header">
-            <span class="sync-step-num">⑥</span>
+            <span class="sync-step-num">⑤</span>
             <div style="flex:1;min-width:0">
               <div class="sync-step-label" data-i="syncStep5">Forcer import des scores</div>
               <div class="sync-step-desc" data-i="syncDesc5">Relit tous les Form Responses et importe les scores manquants dans le Sheet Scores</div>
@@ -2081,16 +2081,11 @@ async function runSyncStep(step) {
       // Scan Drive → remplit CONTENT (sans toucher les Forms)
       const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (r && r.success) {
-        if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés — rechargement...";
-        if (stepEl) stepEl.classList.add("done");
-        // Vider TOUT le cache (GAS déjà vidé côté serveur par syncDriveContent)
-        localStorage.removeItem("jun_all_content");
-        localStorage.removeItem("jun_admin_cache");
         _cacheDel(CACHE_ALL_CONTENT_KEY);
         allContent = [];
         _studentContentCache = {};
-        // Recharger la page pour tout repartir de zéro
-        setTimeout(function(){ location.reload(); }, 1200);
+        if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés";
+        if (stepEl) stepEl.classList.add("done");
       } else {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
       }
@@ -3026,9 +3021,15 @@ async function toggleNotifications() {
   if(btn) { btn.disabled = false; }
 }
 
-function forceSync() {
+async function forceSync() {
   const btn = document.getElementById("btn-force-sync");
+  const lbl = document.getElementById("sync-btn-label");
   if (btn) { btn.disabled = true; btn.style.opacity = "0.7"; }
+  if (lbl) lbl.textContent = "⏳ Nettoyage...";
+  // Vider le cache GAS côté serveur
+  if (currentUserGlobal && currentUserGlobal.role === "Admin") {
+    await api({ action: "clearCache", adminId: currentUserGlobal.id, pin: getStoredPin() });
+  }
   // Sauvegarder les favoris (clés "jun_favorites_*") avant de vider
   const saved = {};
   for (let i = 0; i < localStorage.length; i++) {
