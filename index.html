@@ -2459,7 +2459,7 @@ async function loadStudentContent(user) {
       // UNIQUEMENT les forms (exercices/tests) par niveau — pas les PDFs/slides
       const exByLevel={}, testByLevel={};
       (ed.exercises||[]).forEach(function(e){
-        if((e.type||"").toLowerCase()!=="form") return; // ignorer PDFs, slides, etc.
+        var eType=(e.type||"").toLowerCase(); var eTitle=e.title||""; if(eType!=="form"&&!eTitle.includes("[TEST]")&&!eTitle.toUpperCase().includes("[EXERCICE]")) return; // garder seulement forms/exercices/tests
         var l=e.level||"?";
         if(!exByLevel[l]) exByLevel[l]=[];
         if(!testByLevel[l]) testByLevel[l]=[];
