@@ -2470,10 +2470,8 @@ async function loadStudentContent(user) {
       const scMap={};
       (sd.scores||[]).forEach(function(s){ scMap[String(s.exerciseId)]=s; });
 
-      // Niveaux de l eleve (depuis ses niveaux attribues) + ceux qui ont du contenu
-      var stuLevelsRaw = (currentUserGlobal&&currentUserGlobal.levels) ? String(currentUserGlobal.levels).split(",").map(function(x){return x.trim();}).filter(Boolean) : [];
+      // Niveaux : union de tout ce que l'eleve a (contenu + exercices + tests)
       var allLevelsSet = {};
-      stuLevelsRaw.forEach(function(l){ allLevelsSet[l]=true; });
       Object.keys(lm).forEach(function(l){ allLevelsSet[l]=true; });
       Object.keys(exByLevel).forEach(function(l){ allLevelsSet[l]=true; });
       Object.keys(testByLevel).forEach(function(l){ allLevelsSet[l]=true; });
