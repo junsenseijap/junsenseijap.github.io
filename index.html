@@ -2456,6 +2456,10 @@ async function loadStudentContent(user) {
       const lm={};
       content.forEach(function(c){ var l=c.level||"?"; lm[l]=(lm[l]||0)+1; });
 
+      // Debug temporaire
+      window._debugExercises = ed.exercises||[];
+      console.log("DEBUG exercises total:", (ed.exercises||[]).length, "| sample:", JSON.stringify((ed.exercises||[]).slice(0,2)));
+
       // UNIQUEMENT les forms (exercices/tests) par niveau — pas les PDFs/slides
       const exByLevel={}, testByLevel={};
       (ed.exercises||[]).forEach(function(e){
