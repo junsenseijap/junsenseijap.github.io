@@ -2504,9 +2504,9 @@ async function loadStudentContent(user) {
         el.innerHTML=
           '<div style="border-left:2px solid rgba(232,75,122,0.2);margin:0.2rem 0 0.4rem 0.7rem;padding:0.4rem 0.7rem">'+
           '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px">'+
-          '<div style="flex:1;text-align:center"><span style="font-size:0.62rem;color:var(--gray)">Moyenne ex.</span></div>'+
-          '<div style="flex:2;text-align:center"><span style="font-size:0.58rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 4px;border-radius:4px;font-weight:600">[TEST]</span> <span style="font-size:0.62rem;color:var(--gray)">Progression</span></div>'+
-          '<div style="flex:1;text-align:center"><span style="font-size:0.62rem;color:var(--gray)">Moy.[TEST]</span></div>'+
+          '<div style="flex:1;text-align:center"><span style="font-size:0.62rem;color:var(--gray)">'+t("avgGenLabel")+'</span></div>'+
+          '<div style="flex:2;text-align:center"><span style="font-size:0.58rem;background:rgba(232,75,122,0.12);color:var(--pink);padding:1px 4px;border-radius:4px;font-weight:600">[TEST]</span> <span style="font-size:0.62rem;color:var(--gray)">'+t("avgTestLabel")+'</span></div>'+
+          '<div style="flex:1;text-align:center"><span style="font-size:0.62rem;color:var(--gray)">'+t("avgLastLabel")+'</span></div>'+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:0.5rem">'+
           '<div class="lvl-avg-ex" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer"><div style="font-size:1.6rem;color:var(--pink);font-weight:400;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">'+(avgEx!==null?avgEx.toFixed(1):"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">/ 10</div></div>'+
