@@ -2509,10 +2509,10 @@ async function loadStudentContent(user) {
           '<div style="flex:1;text-align:center"><span style="font-size:0.62rem;color:var(--gray)">Moy.[TEST]</span></div>'+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:0.5rem">'+
-          '<div style="flex:1;text-align:center"><div style="font-size:1.6rem;color:var(--pink);font-weight:400;line-height:1">'+(avgEx!==null?avgEx.toFixed(1):"&#8212;")+"</div><div style='font-size:0.62rem;color:var(--gray)'>/ 10</div></div>"+
-          "<div style='flex:2;display:flex;align-items:center;justify-content:center;height:50px'>"+(allPts.length?'<canvas id="'+cid+'" width="130" height="45" style="display:block"></canvas>':"<span style='font-size:0.75rem;color:var(--gray)'>&#8212;</span>")+"</div>"+
-          "<div style='flex:1;text-align:center'><div style='font-size:1.1rem;color:var(--pink);font-weight:500'>"+(avgT!==null?avgT:"&#8212;")+"</div><div style='font-size:0.62rem;color:var(--gray)'>%</div></div>"+
-          "</div></div>";
+          '<div class="lvl-avg-ex" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer"><div style="font-size:1.6rem;color:var(--pink);font-weight:400;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">'+(avgEx!==null?avgEx.toFixed(1):"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">/ 10</div></div>'+
+          '<div class="lvl-chart-wrap" data-level="'+l+'" style="flex:2;display:flex;align-items:center;justify-content:center;height:50px;cursor:pointer">'+(allPts.length?'<canvas id="'+cid+'" width="130" height="45" style="display:block"></canvas>':'<span style="font-size:0.75rem;color:var(--gray)">&#8212;</span>')+'</div>'+
+          '<div class="lvl-avg-test" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer" title="Voir résultats tests"><div style="font-size:1.1rem;color:var(--pink);font-weight:500;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+(avgT!==null?avgT:"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">%</div></div>'+
+          '</div></div>';
         if(allPts.length&&window.Chart){
           setTimeout(function(){
             const ce=document.getElementById(cid); if(!ce)return;
@@ -2529,6 +2529,16 @@ async function loadStudentContent(user) {
                 scales:{y:{min:0,max:100,display:false},x:{ticks:{font:{size:7}},grid:{display:false}}}}});
           },50);
         }
+      });
+      // Event listeners pour les clics sur les stats par niveau
+      document.querySelectorAll(".lvl-avg-ex").forEach(function(el){
+        el.addEventListener("click", function(){ openMyScoresModalByLevel(this.dataset.level); });
+      });
+      document.querySelectorAll(".lvl-chart-wrap").forEach(function(el){
+        el.addEventListener("click", function(){ openStudentChartByLevel(this.dataset.level); });
+      });
+      document.querySelectorAll(".lvl-avg-test").forEach(function(el){
+        el.addEventListener("click", function(){ openTestResultsModalByLevel(this.dataset.level); });
       });
     }
     const aw=document.getElementById("student-avg-content");
@@ -3465,6 +3475,69 @@ function openStudentChartSelf() {
   const fullName = (currentUserGlobal.name||"") + (currentUserGlobal.familyName?" "+currentUserGlobal.familyName:"");
   const badge = document.querySelector("#student-progress-levels .level-badge, #student-content-panel .level-badge, .level-accordion .level-badge");
   const level = badge ? badge.textContent.trim() : "";
+  openStudentChart(currentUserGlobal.id, fullName, level);
+}
+
+// ── POPUPS PAR NIVEAU ──
+function openMyScoresModalByLevel(level) {
+  if (!currentUserGlobal) return;
+  document.getElementById("scores-modal")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "scores-modal";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="max-height:80vh;display:flex;flex-direction:column">'+
+    '<div class="levels-modal-title">📝 Exercices '+level+'</div>'+
+    '<div id="scores-modal-body" style="flex:1;overflow-y:auto"><div class="loading"><div class="spinner"></div></div></div>'+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'scores-modal\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  Promise.all([
+    api({action:"getMyScores", studentId:String(currentUserGlobal.id), pin:getStoredPin()}),
+    api({action:"getMyExercises", studentId:String(currentUserGlobal.id), pin:getStoredPin()})
+  ]).then(function(res) {
+    const scRes = res[0], exRes = res[1];
+    // Filtrer par niveau
+    const filteredEx = { exercises: (exRes.exercises||[]).filter(e=>e.level===level&&!e.title.includes("[TEST]")) };
+    const filteredSc = { scores: scRes.scores||[] };
+    renderScoresList("scores-modal-body", filteredSc, filteredEx, null);
+  }).catch(function(e) {
+    const b=document.getElementById("scores-modal-body");
+    if(b) b.innerHTML='<div style="color:var(--gray);padding:1rem">'+t("errConn")+'</div>';
+  });
+}
+
+function openTestResultsModalByLevel(level) {
+  if (!currentUserGlobal) return;
+  document.getElementById("test-results-modal")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "test-results-modal";
+  overlay.className = "levels-modal-overlay";
+  overlay.innerHTML =
+    '<div class="levels-modal-sheet" style="max-height:82vh;display:flex;flex-direction:column">'+
+    '<div class="levels-modal-title">🎯 Tests '+level+'</div>'+
+    '<div id="test-results-body" style="flex:1;overflow-y:auto"><div class="loading"><div class="spinner"></div></div></div>'+
+    '<button style="width:100%;margin-top:1rem;padding:0.7rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--gray);font-family:\'DM Sans\',sans-serif;cursor:pointer" onclick="document.getElementById(\'test-results-modal\').remove()">'+t("cancel")+'</button>'+
+    '</div>';
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  Promise.all([
+    api({action:"getMyScores",    studentId:currentUserGlobal.id, pin:getStoredPin()}),
+    api({action:"getMyExercises", studentId:currentUserGlobal.id, pin:getStoredPin()})
+  ]).then(function(res) {
+    const scData = res[0], exData = res[1];
+    const filteredEx = { exercises: (exData.exercises||[]).filter(e=>e.level===level) };
+    renderTestResultsList("test-results-body", scData, filteredEx);
+  }).catch(function() {
+    const b = document.getElementById("test-results-body");
+    if(b) b.innerHTML='<div style="color:var(--gray);padding:1rem">'+t("errConn")+'</div>';
+  });
+}
+
+function openStudentChartByLevel(level) {
+  if (!currentUserGlobal) return;
+  const fullName = (currentUserGlobal.name||"") + (currentUserGlobal.familyName?" "+currentUserGlobal.familyName:"");
   openStudentChart(currentUserGlobal.id, fullName, level);
 }
 
