@@ -2589,7 +2589,7 @@ async function loadStudentContent(user) {
         if(avgBig) avgBig.textContent = "—";
         if(avgLbl) avgLbl.textContent = "/ 10";
       }
-      avgWrap.style.display = "block";
+      avgWrap.style.display = "none"; // remplacé par accordéons par niveau
       try {
         const scMap = {};
         (sd.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)] = s; });
