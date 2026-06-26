@@ -1388,7 +1388,7 @@
 
     <!-- CARTE 1 : Progression + Moyenne + Mini graphique -->
     <div class="stats-card">
-      <div class="stats-card-title" id="progress-card-title">📚 Progression &amp; Moyenne</div>
+      <div class="stats-card-title" id="progress-card-title">📚 Ma Progression</div>
       <div id="student-progress-levels"><div class="loading"><div class="spinner"></div></div></div>
       <div id="student-avg-graph-wrap" style="display:none">
         <div style="border-top:1px solid rgba(232,75,122,0.1);margin:0.8rem 0"></div>
@@ -2452,27 +2452,109 @@ async function loadStudentContent(user) {
     }
 
     if(pw){
-      // Compter tous les types débloqués : PDF/audio/video/link depuis content, forms depuis exercises
+      // ── Accordéon par niveau ──
       const lm={};
       content.forEach(function(c){ var l=c.level||"?"; lm[l]=(lm[l]||0)+1; });
-      const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0).map(l=>{
-        const unlocked=lm[l]||0;
-        const total=totalCounts[l]||0;
-        if(total>0){
-          const pct=Math.round((unlocked/total)*100);
-          return '<div class="level-progress-row">'+
-            '<span class="level-prog-badge">'+l+'</span>'+
-            '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:'+pct+'%"></div></div>'+
-            '<span class="level-prog-text">'+unlocked+'/'+total+' 🌸</span>'+
+
+      // Préparer exercices et tests par niveau
+      const exByLevel={}, testByLevel={};
+      (ed.exercises||[]).forEach(function(e){
+        var l=e.level||"?";
+        if(!exByLevel[l]) exByLevel[l]=[];
+        if(!testByLevel[l]) testByLevel[l]=[];
+        if(e.title&&e.title.includes("[TEST]")) testByLevel[l].push(e);
+        else exByLevel[l].push(e);
+      });
+
+      // Scores map
+      const scMap={};
+      (sd.scores||[]).forEach(function(s){ scMap[String(s.exerciseId)]=s; });
+
+      const levels=["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0||exByLevel[l]||testByLevel[l]);
+
+      if(!levels.length){
+        pw.innerHTML='<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("emptyContent")+'</div>';
+      } else {
+        pw.innerHTML = levels.map(function(l, idx){
+          const unlocked=lm[l]||0;
+          const total=totalCounts[l]||0;
+          const pct=total>0?Math.round((unlocked/total)*100):100;
+          const isOpen = idx===0; // premier niveau ouvert par défaut
+
+          // Stats exercices pour ce niveau
+          const exList=exByLevel[l]||[];
+          const testList=testByLevel[l]||[];
+          const exDone=exList.filter(function(e){return e.status==="done";}).length;
+          const exPending=exList.filter(function(e){return e.status==="pending";}).length;
+
+          // Barre de progression
+          const barHtml='<div class="level-progress-row" style="margin-bottom:0.5rem">'+
+            '<div class="level-prog-bar-wrap" style="flex:1"><div class="level-prog-bar" style="width:'+pct+'%"></div></div>'+
+            '<span class="level-prog-text" style="min-width:60px;text-align:right">'+unlocked+'/'+total+' 🌸</span>'+
             '</div>';
-        }
-        return '<div class="level-progress-row">'+
-          '<span class="level-prog-badge">'+l+'</span>'+
-          '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:100%"></div></div>'+
-          '<span class="level-prog-text">'+unlocked+' 🌸</span>'+
-          '</div>';
-      }).join("");
-      pw.innerHTML=rows||'<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("emptyContent")+'</div>';
+
+          // Section exercices
+          var exHtml='';
+          if(exList.length){
+            exHtml='<div style="margin-top:0.6rem">'+
+              '<div style="font-size:0.7rem;font-weight:600;color:var(--pink);margin-bottom:0.3rem">✏️ Exercices ('+exDone+'/'+exList.length+')</div>'+
+              exList.map(function(e){
+                const sc=scMap[String(e.id)];
+                const pctEx=sc&&sc.maxScore?Math.round((sc.score/sc.maxScore)*100):null;
+                const isDone=e.status==="done";
+                const url=e.formUrl||e.driveLink||"";
+                return '<div style="display:flex;align-items:center;gap:0.4rem;padding:0.25rem 0;border-bottom:1px solid rgba(128,128,128,0.1)">'+
+                  '<span style="font-size:0.7rem;flex:1;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+
+                  (e.title||"").replace(/\[EXERCICE\]\[.*?\]/i,"").replace(/\[Exercice\]\[.*?\]/i,"").trim()+
+                  '</span>'+
+                  (pctEx!==null?'<span style="font-size:0.65rem;font-weight:600;color:'+(pctEx>=70?"#3DAA6E":pctEx>=50?"#f6c026":"#E84B7A")+'">'+pctEx+'%</span>':'<span style="font-size:0.65rem;color:var(--gray)">'+(isDone?"✅":"…")+'</span>')+
+                  (url?'<a href="'+url+'" target="_blank" style="font-size:0.6rem;padding:1px 5px;background:rgba(232,75,122,0.1);color:var(--pink);border-radius:4px;text-decoration:none;flex-shrink:0">▶</a>':'')+
+                  '</div>';
+              }).join("")+
+              '</div>';
+          }
+
+          // Section tests
+          var testHtml='';
+          if(testList.length){
+            testHtml='<div style="margin-top:0.6rem">'+
+              '<div style="font-size:0.7rem;font-weight:600;color:#7B5EA7;margin-bottom:0.3rem">🎯 Tests ('+testList.length+')</div>'+
+              testList.map(function(e){
+                const sc=scMap[String(e.id)];
+                const pctT=sc&&sc.maxScore?Math.round((sc.score/sc.maxScore)*100):null;
+                const cat=getTestCat(e.title||"");
+                const catColor=cat&&TEST_CATS[cat]?TEST_CATS[cat].color:"#7B5EA7";
+                const url=e.formUrl||e.driveLink||"";
+                return '<div style="display:flex;align-items:center;gap:0.4rem;padding:0.25rem 0;border-bottom:1px solid rgba(128,128,128,0.1)">'+
+                  (cat?'<span style="font-size:0.55rem;padding:1px 4px;border-radius:3px;background:'+catColor+'22;color:'+catColor+';font-weight:700;flex-shrink:0">'+cat+'</span>':'')+
+                  '<span style="font-size:0.7rem;flex:1;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+
+                  (e.title||"").replace(/\[TEST\]\[.*?\]/i,"").replace(/\[TEST\]/i,"").trim()+
+                  '</span>'+
+                  (pctT!==null?'<span style="font-size:0.7rem;font-weight:700;color:'+(pctT>=70?"#3DAA6E":pctT>=50?"#f6c026":"#E84B7A")+'">'+pctT+'%</span>':'<span style="font-size:0.65rem;color:var(--gray)">—</span>')+
+                  (url?'<a href="'+url+'" target="_blank" style="font-size:0.6rem;padding:1px 5px;background:rgba(123,94,167,0.1);color:#7B5EA7;border-radius:4px;text-decoration:none;flex-shrink:0">▶</a>':'')+
+                  '</div>';
+              }).join("")+
+              '</div>';
+          }
+
+          const hasDetails=exList.length||testList.length;
+
+          return '<div style="border:1px solid rgba(232,75,122,0.15);border-radius:10px;overflow:hidden;margin-bottom:0.5rem">'+
+            // Header accordéon
+            '<div onclick="toggleLevelAccordion(this)" '+
+            'style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.8rem;cursor:'+(hasDetails?"pointer":"default")+';background:rgba(232,75,122,0.04)">'+
+            '<span class="level-prog-badge" style="font-size:0.75rem;padding:0.2rem 0.5rem">'+l+'</span>'+
+            barHtml+
+            (hasDetails?'<span class="acc-chevron" style="font-size:0.6rem;color:var(--gray);flex-shrink:0">'+(isOpen?"▼":"▶")+'</span>':'')+
+            '</div>'+
+            // Corps accordéon
+            '<div style="padding:0.5rem 0.8rem;display:'+(isOpen&&hasDetails?"block":"none")+'">'+
+            exHtml+testHtml+
+            (!hasDetails?'<div style="color:var(--gray);font-size:0.75rem;padding:0.3rem 0">'+t("exEmpty")+'</div>':'')+
+            '</div>'+
+            '</div>';
+        }).join("");
+      }
     }
     const aw=document.getElementById("student-avg-content");
     if(aw){
@@ -3047,6 +3129,15 @@ async function forceSync() {
   // Remettre les favoris
   Object.entries(saved).forEach(([k, v]) => localStorage.setItem(k, v));
   setTimeout(() => location.reload(), 300);
+}
+
+function toggleLevelAccordion(el) {
+  var body = el.nextElementSibling;
+  var chev = el.querySelector('.acc-chevron');
+  if (!body) return;
+  var isHidden = body.style.display === 'none' || body.style.display === '';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (chev) chev.textContent = isHidden ? '▼' : '▶';
 }
 
 function togglePin(inputId) {
