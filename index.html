@@ -4156,8 +4156,10 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
     const rawN  = String(ex.courseN || "");
     const isNum = /^\d+$/.test(rawN.trim());
     let folder;
-    if (sub === "exercise" || isNum) folder = "\u{1F4DD} Exercices";
-    else if (sub === "test")         folder = isNum ? "\u{1F3AF} Tests" : (rawN || "\u{1F3AF} Tests");
+    // Détecter les tests par titre ([TEST]) en priorité sur subType
+    const isTest = sub === "test" || (ex.title && ex.title.toUpperCase().includes("[TEST]"));
+    if (isTest)                      folder = "\u{1F3AF} Tests";
+    else if (sub === "exercise" || isNum) folder = "\u{1F4DD} Exercices";
     else                             folder = rawN || "?";
     if (!tree[lvl])              tree[lvl] = {};
     if (!tree[lvl][cT])          tree[lvl][cT] = {};
