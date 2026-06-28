@@ -2452,8 +2452,19 @@ async function loadStudentContent(user) {
 
     if(pw){
       const lm={};
+      // Contenu débloqué (PDF, audio, vidéo, link, form via ACCESS)
       content.forEach(function(c){
         const l=c.level||"?"; lm[l]=(lm[l]||0)+1;
+      });
+      // Ajouter les forms envoyés via exercises (assignedContentIds)
+      const _assigned2 = window._assignedContentIds || new Set();
+      (ed.exercises||[]).forEach(function(e){
+        if(!e.contentId) return;
+        // Vérifier que ce contentId n'est pas déjà compté dans content
+        var alreadyCounted = content.some(function(c){ return String(c.id)===String(e.contentId); });
+        if(!alreadyCounted && _assigned2.has(String(e.contentId))){
+          var l = e.level||"?"; lm[l]=(lm[l]||0)+1;
+        }
       });
       const scMapPw={};
       (sd.scores||[]).forEach(function(s){ scMapPw[String(s.exerciseId)]=s; });
@@ -5833,9 +5844,10 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     const sorted = items.slice().sort(function(a,b){ return (Number(a.courseN)||0)-(Number(b.courseN)||0); });
     const unlockedCount = sorted.filter(function(c){ return isEffectivelyUnlocked(c); }).length;
     const totalCount    = sorted.length;
-    const countBadge    = unlockedCount > 0
+    const isComplete = unlockedCount === totalCount && totalCount > 0;
+    const countBadge = isComplete
       ? '<span style="font-size:0.6rem;color:var(--pink);font-weight:600;margin-left:4px">'+unlockedCount+'/'+totalCount+' 🌸</span>'
-      : '<span style="font-size:0.6rem;color:var(--gray);margin-left:4px">'+totalCount+'</span>';
+      : '<span style="font-size:0.6rem;color:var(--gray);font-weight:600;margin-left:4px">'+unlockedCount+'/'+totalCount+'</span>';
     return '<div class="subsection-row" id="sub-'+safeId+'">'+
       '<div class="subsection-header" onclick="toggleSubSection(\'sub-'+safeId+'\')">'+
       '<span class="subsection-icon">'+icon+'</span>'+
@@ -5871,7 +5883,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
         '<div class="coursetype-header" onclick="toggleCourseT(\''+lvl+'\',\''+safeId+'\')">'+
         '<span class="coursetype-icon">'+ctInfo.icon+'</span>'+
         '<span class="coursetype-label">'+ctInfo.label+'</span>'+
-        '<span class="coursetype-count">'+unlockedInSubj+'/'+totalInSubj+' 🌸</span>'+
+        '<span class="coursetype-count" style="color:'+(unlockedInSubj===totalInSubj&&totalInSubj>0?'var(--pink)':'var(--gray)')+';font-weight:600">'+unlockedInSubj+'/'+totalInSubj+(unlockedInSubj===totalInSubj&&totalInSubj>0?' 🌸':'')+'</span>'+
         '<span class="coursetype-arrow">▼</span></div>'+
         '<div class="coursetype-courses">'+
         (subj === "JLPT"
@@ -5919,7 +5931,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
       '<div class="level-header" onclick="toggleLevel(\''+lvl+'\')">'+
       '<span class="level-badge">'+lvl+'</span>'+
       '<span class="level-label">'+t("contenus", totalInLevel)+'</span>'+
-      '<span class="level-unlocked">'+unlockedInLevel+'/'+totalInLevel+' 🌸</span>'+
+      '<span class="level-unlocked" style="color:'+(unlockedInLevel===totalInLevel&&totalInLevel>0?'var(--pink)':'var(--gray)')+';font-weight:600">'+unlockedInLevel+'/'+totalInLevel+(unlockedInLevel===totalInLevel&&totalInLevel>0?' 🌸':'')+'</span>'+
       '<span class="level-arrow">▼</span></div>'+
       '<div class="level-courses">'+subjRows+'</div></div>';
   }).filter(function(r){ return r!==""; }).join("");
