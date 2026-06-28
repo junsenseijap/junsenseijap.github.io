@@ -4098,17 +4098,23 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
 // Retourne { prefix: "EXERCICE"|"TEST·GR"|…|null, cleanTitle: "..." }
 // ══════════════════════════════════════════════
 function parseExTitle(raw) {
-  const s = raw || "";
-  const m = s.match(/^(\[(?:EXERCICE|TEST\]\[?(?:GR|VO|LI|RE)?)\]?)\s*/i);
+  var s = raw || "";
+  // Supprimer le préfixe numérique ex: "1_" ou "2_"
+  s = s.replace(/^\d+_/, "");
+  // Matcher [EXERCICE][...] ou [TEST][GR/VO/LI/RE/JLPT][...] ou [TEST]
+  var m = s.match(/^((?:\[[^\]]+\])+)\s*/i);
   if (!m) return { prefix: null, cleanTitle: s };
-  const tag = m[1].toUpperCase()
-    .replace("[EXERCICE]",   "EXERCICE")
-    .replace("[TEST][GR]",  "TEST·GR")
-    .replace("[TEST][VO]",  "TEST·VO")
-    .replace("[TEST][LI]",  "TEST·LI")
-    .replace("[TEST][RE]",  "TEST·RE")
-    .replace("[TEST]",      "TEST");
-  return { prefix: tag, cleanTitle: s.slice(m[0].length) || s };
+  var tags = m[1].toUpperCase();
+  var prefix = "EXERCICE";
+  if (tags.includes("[TEST]")) {
+    if (tags.includes("[GR]"))   prefix = "TEST·GR";
+    else if (tags.includes("[VO]")) prefix = "TEST·VO";
+    else if (tags.includes("[LI]")) prefix = "TEST·LI";
+    else if (tags.includes("[RE]")) prefix = "TEST·RE";
+    else if (tags.includes("[JLPT]")) prefix = "TEST·JLPT";
+    else prefix = "TEST";
+  }
+  return { prefix: prefix, cleanTitle: s.slice(m[0].length) || s };
 }
 // ══════════════════════════════════════════════
 // EXERCISES — STUDENT
