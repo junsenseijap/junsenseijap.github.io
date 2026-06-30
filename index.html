@@ -2137,6 +2137,7 @@ async function forceSyncAdmin() {
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
   invalidateAdminCache();
   _cacheDel("jun_admin_stats"); // invalider cache stats niveaux
+  _cacheDel("jun_admin_sparklines");
   window._adminStatsLoaded = false; // reset lazy flag
   await loadAdminPanel(currentUserGlobal);
   if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
@@ -5475,7 +5476,20 @@ async function loadAdminStats(forceRefresh) {
   const CACHE_STATS_KEY = "jun_admin_stats";
   if(!forceRefresh) {
     const cachedStats = _cacheGet(CACHE_STATS_KEY);
-    if(cachedStats) { aw.innerHTML = cachedStats; return; }
+    if(cachedStats) {
+      aw.innerHTML = cachedStats;
+      // Les <canvas> des sparklines ne sont pas dans le cache HTML (ils sont dessinés après coup) :
+      // on les redessine depuis les données mises en cache séparément (ou depuis la mémoire si dispo).
+      const cachedSparkData = window._stuTestScores || _cacheGet("jun_admin_sparklines");
+      if (cachedSparkData) {
+        window._stuTestScores = cachedSparkData;
+        const activeIdsCached = new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
+        requestAnimationFrame(()=>{
+          stuInLevel_all(null, null, cachedSparkData, activeIdsCached);
+        });
+      }
+      return;
+    }
   }
 
   try{
@@ -5630,6 +5644,7 @@ async function loadAdminStats(forceRefresh) {
     aw.innerHTML=levelHtml;
     // Sauvegarder dans cache 24h (sans les sparklines qui sont dessinées après)
     _cacheSet("jun_admin_stats", levelHtml);
+    _cacheSet("jun_admin_sparklines", stuTestScores);
 
     // Dessiner les sparklines
     window._stuTestScores=stuTestScores;
