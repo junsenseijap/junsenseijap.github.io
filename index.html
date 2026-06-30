@@ -2500,21 +2500,26 @@ async function loadStudentContent(user) {
           return !e.title.includes("[TEST]")&&scMapPw[String(e.id)]&&scMapPw[String(e.id)].maxScore;
         }).map(function(e){const s=scMapPw[String(e.id)];return (s.score/s.maxScore)*10;});
         const avgEx=exSc.length?exSc.reduce(function(a,b){return a+b;},0)/exSc.length:null;
-        const byCat={GR:[],VO:[],LI:[],RE:[]};
+        const rawEntries=[];
         exList.filter(function(e){return e.title&&e.title.includes("[TEST]");}).forEach(function(e){
           const cat=getTestCat(e.title); if(!cat)return;
           const sc=scMapPw[String(e.id)]; if(!sc||!sc.maxScore)return;
           const d=e.assignedDate?parseDate(e.assignedDate):null;
-          const ts=d?d.getTime():0; // utilisé seulement pour trier chronologiquement
-          byCat[cat].push({ts:ts,y:Math.round((sc.score/sc.maxScore)*100),label:d?d.toLocaleDateString(locale,{day:"numeric",month:"short"}):"-"});
+          const ts=d?d.getTime():0; // utilisé seulement pour trier chronologiquement les groupes
+          rawEntries.push({cat:cat, title:e.title, ts:ts, pct:Math.round((sc.score/sc.maxScore)*100)});
         });
-        // Trier chaque catégorie par date réelle — chaque test prend la position suivante (1,2,3...) sans regroupement
-        Object.keys(byCat).forEach(function(k){byCat[k].sort(function(a,b){return a.ts-b.ts;});});
-        const allPts=Object.keys(byCat).reduce(function(a,k){return a.concat(byCat[k]);},[]);
-        const lastByCat=Object.keys(byCat).map(function(k){const pts=byCat[k];return pts.length?pts[pts.length-1]:null;}).filter(Boolean);
-        const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b.y;},0)/lastByCat.length):null;
+        // Regroupement par session JLPT (4 matières = 1 position commune) + tests individuels intercalés
+        const axisData=buildTestAxisData(rawEntries);
+        const maxLen=axisData.maxLen;
+        const byCat=axisData.byCat;
+        const hasAnyPts=maxLen>0;
+        const lastByCat=Object.keys(byCat).map(function(k){
+          const arr=byCat[k];
+          for(let i=arr.length-1;i>=0;i--){ if(arr[i]!==null&&arr[i]!==undefined) return arr[i]; }
+          return null;
+        }).filter(function(v){return v!==null;});
+        const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b;},0)/lastByCat.length):null;
         const cid="chart-"+l;
-        const maxLen=Math.max.apply(null,Object.keys(byCat).map(function(k){return byCat[k].length;}).concat([0]));
         el.innerHTML=
           '<div style="border-left:2px solid rgba(232,75,122,0.2);margin:0.2rem 0 0.4rem 0.7rem;padding:0.4rem 0.7rem">'+
           '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px">'+
@@ -2524,20 +2529,18 @@ async function loadStudentContent(user) {
           '</div>'+
           '<div style="display:flex;align-items:center;gap:0.5rem">'+
           '<div class="lvl-avg-ex" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer"><div style="font-size:1.6rem;color:var(--pink);font-weight:400;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">'+(avgEx!==null?avgEx.toFixed(1):"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">/ 10</div></div>'+
-          '<div class="lvl-chart-wrap" data-level="'+l+'" style="flex:2;display:flex;align-items:center;justify-content:center;height:50px;cursor:pointer">'+(allPts.length?'<canvas id="'+cid+'" width="130" height="45" style="display:block"></canvas>':'<span style="font-size:0.75rem;color:var(--gray)">&#8212;</span>')+'</div>'+
+          '<div class="lvl-chart-wrap" data-level="'+l+'" style="flex:2;display:flex;align-items:center;justify-content:center;height:50px;cursor:pointer">'+(hasAnyPts?'<canvas id="'+cid+'" width="130" height="45" style="display:block"></canvas>':'<span style="font-size:0.75rem;color:var(--gray)">&#8212;</span>')+'</div>'+
           '<div class="lvl-avg-test" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer" title="Voir résultats tests"><div style="font-size:1.1rem;color:var(--pink);font-weight:500;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+(avgT!==null?avgT:"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">%</div></div>'+
           '</div></div>';
-        if(allPts.length&&window.Chart){
+        if(hasAnyPts&&window.Chart){
           setTimeout(function(){
             const ce=document.getElementById(cid); if(!ce)return;
-            // Axe X = position séquentielle (1,2,3...) — chaque catégorie avance indépendamment, sans regroupement par date
+            // Axe X = groupes (sessions JLPT fusionnées + tests individuels), triés par date la plus ancienne du groupe
             const lbls=[];
             for(let i=0;i<maxLen;i++) lbls.push(String(i+1));
             const dsets=Object.entries(TEST_CATS).map(function(kv){
               const k=kv[0],v=kv[1];
-              const pts=byCat[k];
-              const data=[];
-              for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
+              const data=byCat[k];
               return {label:v.label,data:data,
                 borderColor:v.color,backgroundColor:v.color+"18",pointBackgroundColor:v.color,borderWidth:1.5,tension:0.35,pointRadius:2,spanGaps:false};
             });
@@ -3672,6 +3675,20 @@ function getTestCat(title) {
   const cat = m[1];
   return TEST_CATS[cat] ? cat : null;
 }
+// ── Clé de groupement sur l'axe X des graphiques tests ──
+// Les 4 matières d'une même session JLPT (même nom après [JLPT]GR/VO/LI/RE_...)
+// doivent TOUJOURS partager la même position sur l'axe, peu importe leur date
+// individuelle réelle — même si des tests indépendants ont été passés entre les deux.
+// Un test "normal" (sans tag JLPT) garde sa propre position, basée sur son titre nettoyé.
+function getTestGroupKey(title) {
+  if (!title) return title;
+  const jlpt = title.match(/\[JLPT\](?:GR|VO|LI|RE)[_\s]?(.*)$/i);
+  if (jlpt) return "JLPT_" + jlpt[1].trim();
+  // Test non-JLPT : enlever les tags [TEST][GR] etc. et le préfixe numérique pour obtenir une clé stable
+  const { cleanTitle } = parseExTitle(title);
+  return cleanTitle;
+}
+
 
 // ── SPARKLINE ADMIN — canvas 2D pur, 4 lignes par catégorie ──
 var _sparkCharts = {};
@@ -3687,27 +3704,56 @@ function drawSparkline(wrapId, byCat) {
   wrap.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   const w=70,h=24,p=2;
-  // Chaque catégorie est triée chronologiquement puis positionnée séquentiellement (1,2,3...),
-  // indépendamment des autres matières — pas de regroupement par date ni axe commun.
-  const sortedByCat={};
+  // Reconstruire les entrées brutes {cat,title,ts,pct} pour les regrouper par session JLPT
+  const rawEntries = [];
   Object.entries(byCat).forEach(([cat,pts])=>{
-    sortedByCat[cat]=[...pts].sort((a,b)=>(a.ts||0)-(b.ts||0));
+    (pts||[]).forEach(pt=>rawEntries.push({ cat, title: pt.title||"", ts: pt.ts||0, pct: pt.pct }));
   });
-  const maxLen=Math.max(...Object.values(sortedByCat).map(pts=>pts.length),0);
+  const { maxLen, byCat: groupedByCat } = buildTestAxisData(rawEntries);
   if(!maxLen)return;
   const pxF=i=>maxLen>1?p+(i/(maxLen-1))*(w-2*p):w/2;
   const pyF=v=>h-p-(v/100)*(h-2*p);
   Object.entries(TEST_CATS).forEach(([cat,def])=>{
-    const pts=sortedByCat[cat]||[];
+    const data=groupedByCat[cat]||[];
+    const pts=[];
+    data.forEach((v,j)=>{ if(v!==null&&v!==undefined) pts.push({i:j,pct:v}); });
     if(!pts.length)return;
     ctx.beginPath();
-    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(j),pyF(pt.pct)):ctx.lineTo(pxF(j),pyF(pt.pct)));
+    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.i),pyF(pt.pct)):ctx.lineTo(pxF(pt.i),pyF(pt.pct)));
     ctx.strokeStyle=def.color; ctx.lineWidth=1.5; ctx.stroke();
-    pts.forEach((pt,j)=>{
-      ctx.beginPath();ctx.arc(pxF(j),pyF(pt.pct),1.8,0,Math.PI*2);
+    pts.forEach(pt=>{
+      ctx.beginPath();ctx.arc(pxF(pt.i),pyF(pt.pct),1.8,0,Math.PI*2);
       ctx.fillStyle=def.color;ctx.fill();
     });
   });
+}
+
+// ── Construit l'axe X des graphiques tests à partir d'une liste de points bruts ──
+// entries: [{cat:"GR", title, ts, pct}, ...]
+// Règle : les tests JLPT d'une même session (même nom après [JLPT]GR/VO/LI/RE_...)
+// partagent TOUJOURS la même position sur l'axe, peu importe leur date individuelle,
+// même si des tests indépendants ont été passés entre les deux. Les tests non-JLPT
+// gardent chacun leur propre position. Si une session JLPT est repassée (même clé),
+// on garde le point le plus récent. L'ordre des positions suit la date la plus
+// ancienne rencontrée dans chaque groupe.
+function buildTestAxisData(entries) {
+  const groups = {}; // groupKey → { ts(min), byCat:{GR:pt,...} }
+  entries.forEach(e=>{
+    const key = getTestGroupKey(e.title) || e.title || "?";
+    if (!groups[key]) groups[key] = { ts: e.ts, byCat: {} };
+    if (e.ts < groups[key].ts) groups[key].ts = e.ts;
+    const existing = groups[key].byCat[e.cat];
+    if (!existing || e.ts >= existing.ts) groups[key].byCat[e.cat] = { ts: e.ts, pct: e.pct };
+  });
+  const orderedKeys = Object.keys(groups).sort((a,b)=>groups[a].ts-groups[b].ts);
+  const byCat = { GR:[], VO:[], LI:[], RE:[] };
+  orderedKeys.forEach((key,i)=>{
+    Object.keys(byCat).forEach(cat=>{
+      const pt = groups[key].byCat[cat];
+      byCat[cat][i] = pt ? pt.pct : null;
+    });
+  });
+  return { maxLen: orderedKeys.length, byCat };
 }
 
 async function openStudentChart(studentId, studentName, level) {
@@ -3742,8 +3788,8 @@ async function openStudentChart(studentId, studentName, level) {
     const scMap = {};
     (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
 
-    // Grouper les [TEST] par catégorie — chaque test prend la position suivante (1,2,3...) sans regroupement par date
-    const byCat = { GR:[], VO:[], LI:[], RE:[] };
+    // Collecter les points bruts [TEST] avec catégorie + date
+    const rawEntries = [];
     const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
     (exData.exercises||[])
       .filter(e=>e.title&&e.title.includes("[TEST]")&&(!level||e.level===level))
@@ -3753,27 +3799,21 @@ async function openStudentChart(studentId, studentName, level) {
         const sc = scMap[String(e.id)];
         if (!sc || !sc.maxScore) return;
         const d = e.assignedDate ? parseDate(e.assignedDate) : null;
-        const ts = d ? d.getTime() : 0; // utilisé seulement pour trier chronologiquement
-        const label = d ? d.toLocaleDateString(locale,{day:"numeric",month:"short",year:"2-digit"}) : "—";
-        byCat[cat].push({ label, ts, y: Math.round((sc.score/sc.maxScore)*100) });
+        const ts = d ? d.getTime() : 0;
+        rawEntries.push({ cat, title: e.title, ts, pct: Math.round((sc.score/sc.maxScore)*100) });
       });
 
-    // Trier chaque catégorie par date réelle (pas d'agrégation/regroupement)
-    Object.keys(byCat).forEach(k=>{ byCat[k].sort((a,b)=>a.ts-b.ts); });
-
     document.getElementById("scm-loading").style.display="none";
-    const hasData = Object.values(byCat).some(a=>a.length>0);
-    if (!hasData) { document.getElementById("scm-empty").style.display="block"; return; }
+    if (!rawEntries.length) { document.getElementById("scm-empty").style.display="block"; return; }
 
-    // Axe X = position séquentielle — la plus longue catégorie définit le nombre de positions
-    const maxLen = Math.max(...Object.values(byCat).map(a=>a.length), 0);
+    // Axe X = groupes (JLPT d'une même session fusionnés, tests individuels séparés),
+    // triés par date la plus ancienne de chaque groupe
+    const { maxLen, byCat } = buildTestAxisData(rawEntries);
     const labels = [];
     for(let i=0;i<maxLen;i++) labels.push(String(i+1));
 
     const datasets = Object.entries(TEST_CATS).map(([k,v])=>{
-      const pts = byCat[k];
-      const data = [];
-      for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
+      const data = byCat[k];
       return {
         label: v.label,
         data: data,
@@ -5518,7 +5558,7 @@ async function loadAdminStats(forceRefresh) {
       elm[String(ex.id)] = ex.level||"?"; // fallback global (dernier vu)
       exOwnerLevel[compKey] = ex.level||"?";
       if(ex.title&&ex.title.includes("[TEST]")){
-        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||""};
+        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||"", title:ex.title};
       }
     });
     const testExIds=new Set(Object.keys(testExMap).map(k=>k.split("_")[0]));
@@ -5564,7 +5604,7 @@ async function loadAdminStats(forceRefresh) {
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       const ts=ex.date?(parseDate(ex.date)||new Date()).getTime():Date.now();
-      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100)});
+      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100),title:ex.title});
     });
     Object.values(stuTestScores).forEach(byCat=>
       Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.ts-b.ts))
