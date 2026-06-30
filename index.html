@@ -2504,14 +2504,16 @@ async function loadStudentContent(user) {
           const cat=getTestCat(e.title); if(!cat)return;
           const sc=scMapPw[String(e.id)]; if(!sc||!sc.maxScore)return;
           const d=e.assignedDate?parseDate(e.assignedDate):null;
-          const mts=d?new Date(d.getFullYear(),d.getMonth(),1).getTime():0;
-          byCat[cat].push({x:mts,y:Math.round((sc.score/sc.maxScore)*100),label:d?d.toLocaleDateString(locale,{month:"short"}):"-"});
+          const ts=d?d.getTime():0; // utilisé seulement pour trier chronologiquement
+          byCat[cat].push({ts:ts,y:Math.round((sc.score/sc.maxScore)*100),label:d?d.toLocaleDateString(locale,{day:"numeric",month:"short"}):"-"});
         });
-        Object.keys(byCat).forEach(function(k){byCat[k].sort(function(a,b){return a.x-b.x;});});
+        // Trier chaque catégorie par date réelle — chaque test prend la position suivante (1,2,3...) sans regroupement
+        Object.keys(byCat).forEach(function(k){byCat[k].sort(function(a,b){return a.ts-b.ts;});});
         const allPts=Object.keys(byCat).reduce(function(a,k){return a.concat(byCat[k]);},[]);
         const lastByCat=Object.keys(byCat).map(function(k){const pts=byCat[k];return pts.length?pts[pts.length-1]:null;}).filter(Boolean);
         const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b.y;},0)/lastByCat.length):null;
         const cid="chart-"+l;
+        const maxLen=Math.max.apply(null,Object.keys(byCat).map(function(k){return byCat[k].length;}).concat([0]));
         el.innerHTML=
           '<div style="border-left:2px solid rgba(232,75,122,0.2);margin:0.2rem 0 0.4rem 0.7rem;padding:0.4rem 0.7rem">'+
           '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px">'+
@@ -2527,12 +2529,16 @@ async function loadStudentContent(user) {
         if(allPts.length&&window.Chart){
           setTimeout(function(){
             const ce=document.getElementById(cid); if(!ce)return;
-            const allTs=[...new Set(allPts.map(function(p){return p.x;}))].sort(function(a,b){return a-b;});
-            const lbls=allTs.map(function(ts){return new Date(ts).toLocaleDateString(locale,{month:"short"});});
+            // Axe X = position séquentielle (1,2,3...) — chaque catégorie avance indépendamment, sans regroupement par date
+            const lbls=[];
+            for(let i=0;i<maxLen;i++) lbls.push(String(i+1));
             const dsets=Object.entries(TEST_CATS).map(function(kv){
               const k=kv[0],v=kv[1];
-              return {label:v.label,data:allTs.map(function(ts){const pt=byCat[k].find(function(p){return p.x===ts;});return pt?pt.y:null;}),
-                borderColor:v.color,backgroundColor:v.color+"18",pointBackgroundColor:v.color,borderWidth:1.5,tension:0.35,pointRadius:2,spanGaps:true};
+              const pts=byCat[k];
+              const data=[];
+              for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
+              return {label:v.label,data:data,
+                borderColor:v.color,backgroundColor:v.color+"18",pointBackgroundColor:v.color,borderWidth:1.5,tension:0.35,pointRadius:2,spanGaps:false};
             });
             new Chart(ce,{type:"line",data:{labels:lbls,datasets:dsets},
               options:{responsive:false,animation:false,
@@ -2620,8 +2626,8 @@ async function loadStudentContent(user) {
           const cat=getTestCat(e.title); if(!cat)return;
           const sc=scMap[String(e.id)]; if(!sc||!sc.maxScore)return;
           const d=e.assignedDate?parseDate(e.assignedDate):null;
-          const monthTs = d ? new Date(d.getFullYear(), d.getMonth(), 1).getTime() : 0;
-          const label = d ? d.toLocaleDateString(locale,{month:"short"}) : "—";
+          const monthTs = d ? new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() : 0; // group by DAY not month
+          const label = d ? d.toLocaleDateString(locale,{day:"numeric",month:"short"}) : "—";
           byCat[cat].push({label, x: monthTs, y:Math.round((sc.score/sc.maxScore)*100)});
         });
         Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.x-b.x));
@@ -2648,7 +2654,7 @@ async function loadStudentContent(user) {
           if(chartEl && window.Chart) {
             if(window._studentTestChart) { try{window._studentTestChart.destroy();}catch(e){} }
             const allTs=[...new Set(allPts.map(p=>p.x))].sort((a,b)=>a-b);
-            const labels=allTs.map(ts=>new Date(ts).toLocaleDateString(locale,{month:"short"}));
+            const labels=allTs.map(ts=>new Date(ts).toLocaleDateString(locale,{day:"numeric",month:"short"}));
             const datasets=Object.entries(TEST_CATS).map(([k,v])=>({
               label:v.label,
               data:allTs.map(ts=>{const pt=byCat[k].find(p=>p.x===ts);return pt?pt.y:null;}),
@@ -3741,7 +3747,7 @@ async function openStudentChart(studentId, studentName, level) {
     const scMap = {};
     (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
 
-    // Grouper les [TEST] par catégorie
+    // Grouper les [TEST] par catégorie — chaque test prend la position suivante (1,2,3...) sans regroupement par date
     const byCat = { GR:[], VO:[], LI:[], RE:[] };
     const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
     (exData.exercises||[])
@@ -3752,41 +3758,39 @@ async function openStudentChart(studentId, studentName, level) {
         const sc = scMap[String(e.id)];
         if (!sc || !sc.maxScore) return;
         const d = e.assignedDate ? parseDate(e.assignedDate) : null;
-        const monthTs = d ? new Date(d.getFullYear(), d.getMonth(), 1).getTime() : 0;
-        const label = d ? d.toLocaleDateString(locale,{month:"short",year:"2-digit"}) : "—";
-        byCat[cat].push({ label, x: monthTs, y: Math.round((sc.score/sc.maxScore)*100) });
+        const ts = d ? d.getTime() : 0; // utilisé seulement pour trier chronologiquement
+        const label = d ? d.toLocaleDateString(locale,{day:"numeric",month:"short",year:"2-digit"}) : "—";
+        byCat[cat].push({ label, ts, y: Math.round((sc.score/sc.maxScore)*100) });
       });
 
-    // Trier par date + agréger par mois
-    Object.keys(byCat).forEach(k=>{
-      byCat[k].sort((a,b)=>a.x-b.x);
-      const byMonth={};
-      byCat[k].forEach(pt=>{
-        if(!byMonth[pt.x]){byMonth[pt.x]={sum:0,cnt:0,x:pt.x,label:pt.label};}
-        byMonth[pt.x].sum+=pt.y; byMonth[pt.x].cnt++;
-      });
-      byCat[k]=Object.values(byMonth).map(v=>({x:v.x,y:Math.round(v.sum/v.cnt),label:v.label})).sort((a,b)=>a.x-b.x);
-    });
+    // Trier chaque catégorie par date réelle (pas d'agrégation/regroupement)
+    Object.keys(byCat).forEach(k=>{ byCat[k].sort((a,b)=>a.ts-b.ts); });
 
     document.getElementById("scm-loading").style.display="none";
     const hasData = Object.values(byCat).some(a=>a.length>0);
     if (!hasData) { document.getElementById("scm-empty").style.display="block"; return; }
 
-    // Labels = union de toutes les dates triées
-    const allTs = [...new Set(Object.values(byCat).flat().map(p=>p.x))].sort((a,b)=>a-b);
-    const labels = allTs.map(ts=>new Date(ts).toLocaleDateString(locale,{month:"short",year:"2-digit"}));
+    // Axe X = position séquentielle — la plus longue catégorie définit le nombre de positions
+    const maxLen = Math.max(...Object.values(byCat).map(a=>a.length), 0);
+    const labels = [];
+    for(let i=0;i<maxLen;i++) labels.push(String(i+1));
 
-    const datasets = Object.entries(TEST_CATS).map(([k,v])=>({
-      label: v.label,
-      data: allTs.map(ts=>{ const pt=byCat[k].find(p=>p.x===ts); return pt?pt.y:null; }),
-      borderColor: v.color,
-      backgroundColor: v.color+"18",
-      pointBackgroundColor: v.color,
-      borderWidth: 2,
-      tension: 0.35,
-      pointRadius: 4,
-      spanGaps: true
-    }));
+    const datasets = Object.entries(TEST_CATS).map(([k,v])=>{
+      const pts = byCat[k];
+      const data = [];
+      for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
+      return {
+        label: v.label,
+        data: data,
+        borderColor: v.color,
+        backgroundColor: v.color+"18",
+        pointBackgroundColor: v.color,
+        borderWidth: 2,
+        tension: 0.35,
+        pointRadius: 4,
+        spanGaps: false
+      };
+    });
 
     const cw = document.getElementById("scm-chart-wrap");
     cw.style.display = "block";
