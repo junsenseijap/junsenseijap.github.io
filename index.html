@@ -3686,30 +3686,24 @@ function drawSparkline(wrapId, byCat) {
   wrap.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   const w=70,h=24,p=2;
-  const aggByCat={};
+  // Chaque catégorie est triée chronologiquement puis positionnée séquentiellement (1,2,3...),
+  // indépendamment des autres matières — pas de regroupement par date ni axe commun.
+  const sortedByCat={};
   Object.entries(byCat).forEach(([cat,pts])=>{
-    const byMonth={};
-    pts.forEach((pt,i)=>{
-      const d = pt.ts ? new Date(pt.ts) : null;
-      const key = (d && !isNaN(d)) ? d.toISOString().slice(0,7) : ("idx_"+i);
-      const ts  = (d && !isNaN(d)) ? pt.ts : i;
-      if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,ts};}
-      byMonth[key].sum+=pt.pct; byMonth[key].cnt++;
-    });
-    aggByCat[cat]=Object.values(byMonth).sort((a,b)=>a.ts-b.ts).map(v=>({ts:v.ts,pct:Math.round(v.sum/v.cnt)}));
+    sortedByCat[cat]=[...pts].sort((a,b)=>(a.ts||0)-(b.ts||0));
   });
-  const allTs=[...new Set(Object.values(aggByCat).flat().map(pt=>pt.ts))].sort((a,b)=>a-b);
-  const n=allTs.length; if(!n)return;
-  const pxF=ts=>n>1?p+(allTs.indexOf(ts)/(n-1))*(w-2*p):w/2;
+  const maxLen=Math.max(...Object.values(sortedByCat).map(pts=>pts.length),0);
+  if(!maxLen)return;
+  const pxF=i=>maxLen>1?p+(i/(maxLen-1))*(w-2*p):w/2;
   const pyF=v=>h-p-(v/100)*(h-2*p);
   Object.entries(TEST_CATS).forEach(([cat,def])=>{
-    const pts=aggByCat[cat]||[];
+    const pts=sortedByCat[cat]||[];
     if(!pts.length)return;
     ctx.beginPath();
-    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.ts),pyF(pt.pct)):ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
+    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(j),pyF(pt.pct)):ctx.lineTo(pxF(j),pyF(pt.pct)));
     ctx.strokeStyle=def.color; ctx.lineWidth=1.5; ctx.stroke();
-    pts.forEach(pt=>{
-      ctx.beginPath();ctx.arc(pxF(pt.ts),pyF(pt.pct),1.8,0,Math.PI*2);
+    pts.forEach((pt,j)=>{
+      ctx.beginPath();ctx.arc(pxF(j),pyF(pt.pct),1.8,0,Math.PI*2);
       ctx.fillStyle=def.color;ctx.fill();
     });
   });
