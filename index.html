@@ -2034,7 +2034,7 @@ var CACHE_TTL_EX_DONE   = 30 * 24 * 60 * 60 * 1000; // 30 jours — exercices te
 // Map clé → TTL
 var CACHE_LESSONS_TTL = 15 * 60 * 1000;          // 15min — calendrier
 var CACHE_DASH_KEY    = "jun_dash_stats";         // stats dashboard admin
-var CACHE_DASH_TTL    = 24 * 60 * 60 * 1000;     // 24h   — stats niveaux
+var CACHE_DASH_TTL    = 60 * 60 * 1000;           // 1h — stats niveaux (invalidé manuellement via 🔄)
 var CACHE_TTL_MAP = {
   [CACHE_KEY]:              CACHE_TTL_CONTENT,
   [CACHE_EX_KEY]:           CACHE_TTL_EXERCISES,
@@ -4099,22 +4099,25 @@ async function assignFormContent(studentId, contentId, formBaseUrl, title, sheet
 // ══════════════════════════════════════════════
 function parseExTitle(raw) {
   var s = raw || "";
-  // Supprimer le préfixe numérique ex: "1_" ou "2_"
-  s = s.replace(/^\d+_/, "");
-  // Matcher [EXERCICE][...] ou [TEST][GR/VO/LI/RE/JLPT][...] ou [TEST]
+  // Matcher [EXERCICE][...] ou [TEST][GR/VO/LI/RE/JLPT][...] ou [TEST] en début de chaîne
   var m = s.match(/^((?:\[[^\]]+\])+)\s*/i);
-  if (!m) return { prefix: null, cleanTitle: s };
-  var tags = m[1].toUpperCase();
-  var prefix = "EXERCICE";
-  if (tags.includes("[TEST]")) {
-    if (tags.includes("[GR]"))   prefix = "TEST·GR";
-    else if (tags.includes("[VO]")) prefix = "TEST·VO";
-    else if (tags.includes("[LI]")) prefix = "TEST·LI";
-    else if (tags.includes("[RE]")) prefix = "TEST·RE";
-    else if (tags.includes("[JLPT]")) prefix = "TEST·JLPT";
-    else prefix = "TEST";
+  var prefix = null;
+  if (m) {
+    var tags = m[1].toUpperCase();
+    prefix = "EXERCICE";
+    if (tags.includes("[TEST]")) {
+      if (tags.includes("[GR]"))   prefix = "TEST·GR";
+      else if (tags.includes("[VO]")) prefix = "TEST·VO";
+      else if (tags.includes("[LI]")) prefix = "TEST·LI";
+      else if (tags.includes("[RE]")) prefix = "TEST·RE";
+      else if (tags.includes("[JLPT]")) prefix = "TEST·JLPT";
+      else prefix = "TEST";
+    }
+    s = s.slice(m[0].length) || s;
   }
-  return { prefix: prefix, cleanTitle: s.slice(m[0].length) || s };
+  // Supprimer le préfixe numérique ex: "9_" ou "12_" (après les tags [...])
+  s = s.replace(/^\d+_/, "");
+  return { prefix: prefix, cleanTitle: s };
 }
 // ══════════════════════════════════════════════
 // EXERCISES — STUDENT
@@ -5494,16 +5497,18 @@ async function loadAdminStats(forceRefresh) {
 
     // Index exercices
     const elm={};     // exId → level
-    const exOwner={}; // exId → studentId
-    const testExMap={}; // exId → {level, cat, date}
+    // Map composite exId+studentId → level (gère les exercises partagés entre plusieurs élèves)
+    const exOwnerLevel={}; // "exId_studentId" → level
+    const testExMap={}; // "exId_studentId" → {level, cat, date}
     (er.exercises||[]).forEach(ex=>{
-      elm[String(ex.id)]     = ex.level||"?";
-      exOwner[String(ex.id)] = String(ex.studentId);
+      const compKey = String(ex.id)+"_"+String(ex.studentId);
+      elm[String(ex.id)] = ex.level||"?"; // fallback global (dernier vu)
+      exOwnerLevel[compKey] = ex.level||"?";
       if(ex.title&&ex.title.includes("[TEST]")){
-        testExMap[String(ex.id)]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||""};
+        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||""};
       }
     });
-    const testExIds=new Set(Object.keys(testExMap));
+    const testExIds=new Set(Object.keys(testExMap).map(k=>k.split("_")[0]));
 
     // Calculer les niveaux de chaque étudiant depuis ses exercices
     const stuLevels={}; // sid → Set(levels)
@@ -5527,8 +5532,9 @@ async function loadAdminStats(forceRefresh) {
       if(!sc.maxScore)return;
       if(!activeIds.has(String(sc.studentId)))return;
       if(testExIds.has(String(sc.exerciseId)))return;
-      if(exOwner[String(sc.exerciseId)]!==String(sc.studentId))return;
-      const l=elm[String(sc.exerciseId)]||"?";
+      const compKey = String(sc.exerciseId)+"_"+String(sc.studentId);
+      const l = exOwnerLevel[compKey];
+      if(l===undefined)return; // cet élève n'a pas cet exercise assigné
       const key=String(sc.studentId)+"_"+l;
       if(!avgEx[key])avgEx[key]={sum:0,cnt:0};
       avgEx[key].sum+=(sc.score/sc.maxScore)*10;
@@ -5538,7 +5544,8 @@ async function loadAdminStats(forceRefresh) {
     // Scores tests par étudiant par niveau
     const stuTestScores={}; // sid_lvl → {GR:[],VO:[],LI:[],RE:[]}
     (sr.scores||[]).forEach(sc=>{
-      const ex=testExMap[String(sc.exerciseId)];
+      const compKey = String(sc.exerciseId)+"_"+String(sc.studentId);
+      const ex=testExMap[compKey];
       if(!ex||!ex.cat||!sc.maxScore)return;
       if(!activeIds.has(String(sc.studentId)))return;
       const key=String(sc.studentId)+"_"+ex.level;
