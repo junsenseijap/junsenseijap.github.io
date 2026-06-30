@@ -3461,9 +3461,10 @@ function renderScoresList(bodyId, scData, exData, filterLevel) {
     const score20=(pct*10).toFixed(1);
     totalSum+=pct*10; totalCnt++;
     const color=pct>=0.7?"#3b6d11":pct>=0.5?"#854f0b":"#c0392b";
+    const {cleanTitle}=parseExTitle(e.title||"");
     return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.4rem;border-bottom:1px solid rgba(44,26,34,0.05)">'+
       '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:0.84rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div>'+
+        '<div style="font-size:0.84rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+cleanTitle+'</div>'+
         '<div style="font-size:0.65rem;color:var(--gray)">'+(e.level||"")+(e.doneDate?' · ✅ '+e.doneDate:'')+'</div>'+
       '</div>'+
       '<div style="text-align:right;flex-shrink:0">'+
