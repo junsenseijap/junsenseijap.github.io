@@ -2870,6 +2870,7 @@ function translateCourseT(raw) {
   if (r.includes("listen") || r.includes("écoute"))      return { label: t("courseTypeListening"),  icon: "🔊" };
   if (r.includes("read") || r.includes("lecture"))       return { label: t("courseTypeReading"),    icon: "👁️" };
   if (r.includes("jlpt"))                                return { label: t("courseTypeJLPT"),       icon: "🏆" };
+  if (r.includes("kanji"))                               return { label: t("courseTypeKanji"),      icon: "🈶" };
   if (r.includes("exerc"))                               return { label: t("courseTypeExercices"),  icon: "✏️" };
   if (r.includes("test"))                                return { label: t("courseTypeTests"),      icon: "🎯" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
@@ -4228,7 +4229,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   });
 
   const LEVEL_ICONS  = { N4:"\u{1F4D8}", N5:"\u{1F4D7}", N3:"\u{1F4D9}", N2:"\u{1F4D5}", N1:"\u{1F4D4}" };
-  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
+  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Kanji:"\u{1F236}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
@@ -4718,6 +4719,7 @@ var TRANSLATIONS = {
     courseTypeExercices: "Bài tập",
     courseTypeTests:     "Kiểm tra",
     courseTypeJLPT:      "JLPT",
+    courseTypeKanji:     "Kanji",
     courseTypeOther:     "Khác",
     syncDriveTitle: "Cập nhật nội dung",
     syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
@@ -4922,6 +4924,7 @@ var TRANSLATIONS = {
     courseTypeExercices: "Exercises",
     courseTypeTests:     "Tests",
     courseTypeJLPT:      "JLPT",
+    courseTypeKanji:     "Kanji",
     courseTypeOther:     "Other",
     syncDriveTitle: "Update Content",
     syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
@@ -5126,6 +5129,7 @@ var TRANSLATIONS = {
     courseTypeExercices: "Exercices",
     courseTypeTests:     "Tests",
     courseTypeJLPT:      "JLPT",
+    courseTypeKanji:     "Kanji",
     courseTypeOther:     "Autre",
     syncDriveTitle: "Mise à jour des contenus",
     syncDriveHint: "Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.",
@@ -5833,7 +5837,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return;
   }
 
-  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt"];
+  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt","kanji"];
   const LEVELS = ["N5","N4","N3","N2","N1"];
   // Fixed order: 1=Grammar, 2=Vocabulary, 3=Listening, 4=Reading
   const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5 };
@@ -5844,6 +5848,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     if (ctL.includes("listen") || ctL.includes("écoute")) return 3;
     if (ctL.includes("read") || ctL.includes("lecture")) return 4;
     if (ctL.includes("jlpt")) return 5;
+    if (ctL.includes("kanji")) return 6;
     return 99;
   }
   const subjectOrder = {};
