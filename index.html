@@ -2135,11 +2135,8 @@ async function runSyncStep(step) {
 async function forceSyncAdmin() {
   const btn = document.getElementById("btn-admin-sync");
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
-  // Vider aussi le cache GAS côté serveur (all_content, all_students)
-  try { await api({ action:"clearCache", adminId: adminUser ? adminUser.id : (currentUserGlobal ? currentUserGlobal.id : ""), pin: getStoredPin() }); } catch(e) {}
   invalidateAdminCache();
   _cacheDel("jun_admin_stats"); // invalider cache stats niveaux
-  _cacheDel("jun_admin_sparklines");
   window._adminStatsLoaded = false; // reset lazy flag
   await loadAdminPanel(currentUserGlobal);
   if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
@@ -2487,7 +2484,7 @@ async function loadStudentContent(user) {
           '<span class="level-prog-badge">'+l+'</span>'+
           '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:'+(total>0?pct:100)+'%"></div></div>'+
           '<span class="level-prog-text">'+scoreText+'</span>'+
-          '<span id="chev-'+l+'" style="font-size:0.62rem;color:var(--gray);margin-left:5px;flex-shrink:0">&#9654;</span>'+
+          '<span id="chev-'+l+'" style="display:inline-flex;align-items:center;gap:3px;font-size:0.58rem;background:rgba(232,75,122,0.12);color:var(--pink);border:1px solid rgba(232,75,122,0.3);padding:2px 7px;border-radius:20px;margin-left:6px;flex-shrink:0;white-space:nowrap;transition:background 0.2s">'+t("myScoreBtn")+' &#9654;</span>'+
           '</div>'+
           '<div id="lvl-'+l+'" style="display:none"></div>'+
           '</div>';
@@ -2502,26 +2499,21 @@ async function loadStudentContent(user) {
           return !e.title.includes("[TEST]")&&scMapPw[String(e.id)]&&scMapPw[String(e.id)].maxScore;
         }).map(function(e){const s=scMapPw[String(e.id)];return (s.score/s.maxScore)*10;});
         const avgEx=exSc.length?exSc.reduce(function(a,b){return a+b;},0)/exSc.length:null;
-        const rawEntries=[];
+        const byCat={GR:[],VO:[],LI:[],RE:[]};
         exList.filter(function(e){return e.title&&e.title.includes("[TEST]");}).forEach(function(e){
           const cat=getTestCat(e.title); if(!cat)return;
           const sc=scMapPw[String(e.id)]; if(!sc||!sc.maxScore)return;
           const d=e.assignedDate?parseDate(e.assignedDate):null;
-          const ts=d?d.getTime():0; // utilisé seulement pour trier chronologiquement les groupes
-          rawEntries.push({cat:cat, title:e.title, ts:ts, pct:Math.round((sc.score/sc.maxScore)*100)});
+          const ts=d?d.getTime():0; // utilisé seulement pour trier chronologiquement
+          byCat[cat].push({ts:ts,y:Math.round((sc.score/sc.maxScore)*100),label:d?d.toLocaleDateString(locale,{day:"numeric",month:"short"}):"-"});
         });
-        // Regroupement par session JLPT (4 matières = 1 position commune) + tests individuels intercalés
-        const axisData=buildTestAxisData(rawEntries);
-        const maxLen=axisData.maxLen;
-        const byCat=axisData.byCat;
-        const hasAnyPts=maxLen>0;
-        const lastByCat=Object.keys(byCat).map(function(k){
-          const arr=byCat[k];
-          for(let i=arr.length-1;i>=0;i--){ if(arr[i]!==null&&arr[i]!==undefined) return arr[i]; }
-          return null;
-        }).filter(function(v){return v!==null;});
-        const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b;},0)/lastByCat.length):null;
+        // Trier chaque catégorie par date réelle — chaque test prend la position suivante (1,2,3...) sans regroupement
+        Object.keys(byCat).forEach(function(k){byCat[k].sort(function(a,b){return a.ts-b.ts;});});
+        const allPts=Object.keys(byCat).reduce(function(a,k){return a.concat(byCat[k]);},[]);
+        const lastByCat=Object.keys(byCat).map(function(k){const pts=byCat[k];return pts.length?pts[pts.length-1]:null;}).filter(Boolean);
+        const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b.y;},0)/lastByCat.length):null;
         const cid="chart-"+l;
+        const maxLen=Math.max.apply(null,Object.keys(byCat).map(function(k){return byCat[k].length;}).concat([0]));
         el.innerHTML=
           '<div style="border-left:2px solid rgba(232,75,122,0.2);margin:0.2rem 0 0.4rem 0.7rem;padding:0.4rem 0.7rem">'+
           '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px">'+
@@ -2531,18 +2523,20 @@ async function loadStudentContent(user) {
           '</div>'+
           '<div style="display:flex;align-items:center;gap:0.5rem">'+
           '<div class="lvl-avg-ex" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer"><div style="font-size:1.6rem;color:var(--pink);font-weight:400;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">'+(avgEx!==null?avgEx.toFixed(1):"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">/ 10</div></div>'+
-          '<div class="lvl-chart-wrap" data-level="'+l+'" style="flex:2;display:flex;align-items:center;justify-content:center;height:50px;cursor:pointer">'+(hasAnyPts?'<canvas id="'+cid+'" width="130" height="45" style="display:block"></canvas>':'<span style="font-size:0.75rem;color:var(--gray)">&#8212;</span>')+'</div>'+
+          '<div class="lvl-chart-wrap" data-level="'+l+'" style="flex:2;display:flex;align-items:center;justify-content:center;height:50px;cursor:pointer">'+(allPts.length?'<canvas id="'+cid+'" width="130" height="45" style="display:block"></canvas>':'<span style="font-size:0.75rem;color:var(--gray)">&#8212;</span>')+'</div>'+
           '<div class="lvl-avg-test" data-level="'+l+'" style="flex:1;text-align:center;cursor:pointer" title="Voir résultats tests"><div style="font-size:1.1rem;color:var(--pink);font-weight:500;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">'+(avgT!==null?avgT:"&#8212;")+'</div><div style="font-size:0.62rem;color:var(--gray)">%</div></div>'+
           '</div></div>';
-        if(hasAnyPts&&window.Chart){
+        if(allPts.length&&window.Chart){
           setTimeout(function(){
             const ce=document.getElementById(cid); if(!ce)return;
-            // Axe X = groupes (sessions JLPT fusionnées + tests individuels), triés par date la plus ancienne du groupe
+            // Axe X = position séquentielle (1,2,3...) — chaque catégorie avance indépendamment, sans regroupement par date
             const lbls=[];
             for(let i=0;i<maxLen;i++) lbls.push(String(i+1));
             const dsets=Object.entries(TEST_CATS).map(function(kv){
               const k=kv[0],v=kv[1];
-              const data=byCat[k];
+              const pts=byCat[k];
+              const data=[];
+              for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
               return {label:v.label,data:data,
                 borderColor:v.color,backgroundColor:v.color+"18",pointBackgroundColor:v.color,borderWidth:1.5,tension:0.35,pointRadius:2,spanGaps:false};
             });
@@ -2872,7 +2866,6 @@ function translateCourseT(raw) {
   if (r.includes("listen") || r.includes("écoute"))      return { label: t("courseTypeListening"),  icon: "🔊" };
   if (r.includes("read") || r.includes("lecture"))       return { label: t("courseTypeReading"),    icon: "👁️" };
   if (r.includes("jlpt"))                                return { label: t("courseTypeJLPT"),       icon: "🏆" };
-  if (r.includes("kanji"))                               return { label: t("courseTypeKanji"),      icon: "🈶" };
   if (r.includes("exerc"))                               return { label: t("courseTypeExercices"),  icon: "✏️" };
   if (r.includes("test"))                                return { label: t("courseTypeTests"),      icon: "🎯" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
@@ -3678,20 +3671,6 @@ function getTestCat(title) {
   const cat = m[1];
   return TEST_CATS[cat] ? cat : null;
 }
-// ── Clé de groupement sur l'axe X des graphiques tests ──
-// Les 4 matières d'une même session JLPT (même nom après [JLPT]GR/VO/LI/RE_...)
-// doivent TOUJOURS partager la même position sur l'axe, peu importe leur date
-// individuelle réelle — même si des tests indépendants ont été passés entre les deux.
-// Un test "normal" (sans tag JLPT) garde sa propre position, basée sur son titre nettoyé.
-function getTestGroupKey(title) {
-  if (!title) return title;
-  const jlpt = title.match(/\[JLPT\](?:GR|VO|LI|RE)[_\s]?(.*)$/i);
-  if (jlpt) return "JLPT_" + jlpt[1].trim();
-  // Test non-JLPT : enlever les tags [TEST][GR] etc. et le préfixe numérique pour obtenir une clé stable
-  const { cleanTitle } = parseExTitle(title);
-  return cleanTitle;
-}
-
 
 // ── SPARKLINE ADMIN — canvas 2D pur, 4 lignes par catégorie ──
 var _sparkCharts = {};
@@ -3707,56 +3686,33 @@ function drawSparkline(wrapId, byCat) {
   wrap.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   const w=70,h=24,p=2;
-  // Reconstruire les entrées brutes {cat,title,ts,pct} pour les regrouper par session JLPT
-  const rawEntries = [];
+  const aggByCat={};
   Object.entries(byCat).forEach(([cat,pts])=>{
-    (pts||[]).forEach(pt=>rawEntries.push({ cat, title: pt.title||"", ts: pt.ts||0, pct: pt.pct }));
+    const byMonth={};
+    pts.forEach((pt,i)=>{
+      const d = pt.ts ? new Date(pt.ts) : null;
+      const key = (d && !isNaN(d)) ? d.toISOString().slice(0,7) : ("idx_"+i);
+      const ts  = (d && !isNaN(d)) ? pt.ts : i;
+      if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,ts};}
+      byMonth[key].sum+=pt.pct; byMonth[key].cnt++;
+    });
+    aggByCat[cat]=Object.values(byMonth).sort((a,b)=>a.ts-b.ts).map(v=>({ts:v.ts,pct:Math.round(v.sum/v.cnt)}));
   });
-  const { maxLen, byCat: groupedByCat } = buildTestAxisData(rawEntries);
-  if(!maxLen)return;
-  const pxF=i=>maxLen>1?p+(i/(maxLen-1))*(w-2*p):w/2;
+  const allTs=[...new Set(Object.values(aggByCat).flat().map(pt=>pt.ts))].sort((a,b)=>a-b);
+  const n=allTs.length; if(!n)return;
+  const pxF=ts=>n>1?p+(allTs.indexOf(ts)/(n-1))*(w-2*p):w/2;
   const pyF=v=>h-p-(v/100)*(h-2*p);
   Object.entries(TEST_CATS).forEach(([cat,def])=>{
-    const data=groupedByCat[cat]||[];
-    const pts=[];
-    data.forEach((v,j)=>{ if(v!==null&&v!==undefined) pts.push({i:j,pct:v}); });
+    const pts=aggByCat[cat]||[];
     if(!pts.length)return;
     ctx.beginPath();
-    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.i),pyF(pt.pct)):ctx.lineTo(pxF(pt.i),pyF(pt.pct)));
+    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.ts),pyF(pt.pct)):ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
     ctx.strokeStyle=def.color; ctx.lineWidth=1.5; ctx.stroke();
     pts.forEach(pt=>{
-      ctx.beginPath();ctx.arc(pxF(pt.i),pyF(pt.pct),1.8,0,Math.PI*2);
+      ctx.beginPath();ctx.arc(pxF(pt.ts),pyF(pt.pct),1.8,0,Math.PI*2);
       ctx.fillStyle=def.color;ctx.fill();
     });
   });
-}
-
-// ── Construit l'axe X des graphiques tests à partir d'une liste de points bruts ──
-// entries: [{cat:"GR", title, ts, pct}, ...]
-// Règle : les tests JLPT d'une même session (même nom après [JLPT]GR/VO/LI/RE_...)
-// partagent TOUJOURS la même position sur l'axe, peu importe leur date individuelle,
-// même si des tests indépendants ont été passés entre les deux. Les tests non-JLPT
-// gardent chacun leur propre position. Si une session JLPT est repassée (même clé),
-// on garde le point le plus récent. L'ordre des positions suit la date la plus
-// ancienne rencontrée dans chaque groupe.
-function buildTestAxisData(entries) {
-  const groups = {}; // groupKey → { ts(min), byCat:{GR:pt,...} }
-  entries.forEach(e=>{
-    const key = getTestGroupKey(e.title) || e.title || "?";
-    if (!groups[key]) groups[key] = { ts: e.ts, byCat: {} };
-    if (e.ts < groups[key].ts) groups[key].ts = e.ts;
-    const existing = groups[key].byCat[e.cat];
-    if (!existing || e.ts >= existing.ts) groups[key].byCat[e.cat] = { ts: e.ts, pct: e.pct };
-  });
-  const orderedKeys = Object.keys(groups).sort((a,b)=>groups[a].ts-groups[b].ts);
-  const byCat = { GR:[], VO:[], LI:[], RE:[] };
-  orderedKeys.forEach((key,i)=>{
-    Object.keys(byCat).forEach(cat=>{
-      const pt = groups[key].byCat[cat];
-      byCat[cat][i] = pt ? pt.pct : null;
-    });
-  });
-  return { maxLen: orderedKeys.length, byCat };
 }
 
 async function openStudentChart(studentId, studentName, level) {
@@ -3791,8 +3747,8 @@ async function openStudentChart(studentId, studentName, level) {
     const scMap = {};
     (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
 
-    // Collecter les points bruts [TEST] avec catégorie + date
-    const rawEntries = [];
+    // Grouper les [TEST] par catégorie — chaque test prend la position suivante (1,2,3...) sans regroupement par date
+    const byCat = { GR:[], VO:[], LI:[], RE:[] };
     const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
     (exData.exercises||[])
       .filter(e=>e.title&&e.title.includes("[TEST]")&&(!level||e.level===level))
@@ -3802,21 +3758,27 @@ async function openStudentChart(studentId, studentName, level) {
         const sc = scMap[String(e.id)];
         if (!sc || !sc.maxScore) return;
         const d = e.assignedDate ? parseDate(e.assignedDate) : null;
-        const ts = d ? d.getTime() : 0;
-        rawEntries.push({ cat, title: e.title, ts, pct: Math.round((sc.score/sc.maxScore)*100) });
+        const ts = d ? d.getTime() : 0; // utilisé seulement pour trier chronologiquement
+        const label = d ? d.toLocaleDateString(locale,{day:"numeric",month:"short",year:"2-digit"}) : "—";
+        byCat[cat].push({ label, ts, y: Math.round((sc.score/sc.maxScore)*100) });
       });
 
-    document.getElementById("scm-loading").style.display="none";
-    if (!rawEntries.length) { document.getElementById("scm-empty").style.display="block"; return; }
+    // Trier chaque catégorie par date réelle (pas d'agrégation/regroupement)
+    Object.keys(byCat).forEach(k=>{ byCat[k].sort((a,b)=>a.ts-b.ts); });
 
-    // Axe X = groupes (JLPT d'une même session fusionnés, tests individuels séparés),
-    // triés par date la plus ancienne de chaque groupe
-    const { maxLen, byCat } = buildTestAxisData(rawEntries);
+    document.getElementById("scm-loading").style.display="none";
+    const hasData = Object.values(byCat).some(a=>a.length>0);
+    if (!hasData) { document.getElementById("scm-empty").style.display="block"; return; }
+
+    // Axe X = position séquentielle — la plus longue catégorie définit le nombre de positions
+    const maxLen = Math.max(...Object.values(byCat).map(a=>a.length), 0);
     const labels = [];
     for(let i=0;i<maxLen;i++) labels.push(String(i+1));
 
     const datasets = Object.entries(TEST_CATS).map(([k,v])=>{
-      const data = byCat[k];
+      const pts = byCat[k];
+      const data = [];
+      for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
       return {
         label: v.label,
         data: data,
@@ -4231,7 +4193,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   });
 
   const LEVEL_ICONS  = { N4:"\u{1F4D8}", N5:"\u{1F4D7}", N3:"\u{1F4D9}", N2:"\u{1F4D5}", N1:"\u{1F4D4}" };
-  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Kanji:"\u{1F236}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
+  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
@@ -4721,7 +4683,6 @@ var TRANSLATIONS = {
     courseTypeExercices: "Bài tập",
     courseTypeTests:     "Kiểm tra",
     courseTypeJLPT:      "JLPT",
-    courseTypeKanji:     "Kanji",
     courseTypeOther:     "Khác",
     syncDriveTitle: "Cập nhật nội dung",
     syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
@@ -4776,6 +4737,7 @@ var TRANSLATIONS = {
     avgColLabel:       "Moy. bài tập",
     noTestsYet:        "Chưa có bài kiểm tra [TEST] nào cho học viên này",
     myScoresTitle:     "Kết quả bài tập của tôi",
+    myScoreBtn:        "Kết quả",
     noScoresYet:       "Chưa có bài tập nào được chấm điểm",
     formSent:          "Đã gửi",
     clickToResend:     "Nhấn để gửi lại",
@@ -4926,7 +4888,6 @@ var TRANSLATIONS = {
     courseTypeExercices: "Exercises",
     courseTypeTests:     "Tests",
     courseTypeJLPT:      "JLPT",
-    courseTypeKanji:     "Kanji",
     courseTypeOther:     "Other",
     syncDriveTitle: "Update Content",
     syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
@@ -4981,6 +4942,7 @@ var TRANSLATIONS = {
     avgColLabel:       "Exercise avg.",
     noTestsYet:        "No [TEST] tests yet for this student",
     myScoresTitle:     "My exercise results",
+    myScoreBtn:        "My scores",
     noScoresYet:       "No graded exercises yet",
     formSent:          "Sent",
     clickToResend:     "Click to resend",
@@ -5131,7 +5093,6 @@ var TRANSLATIONS = {
     courseTypeExercices: "Exercices",
     courseTypeTests:     "Tests",
     courseTypeJLPT:      "JLPT",
-    courseTypeKanji:     "Kanji",
     courseTypeOther:     "Autre",
     syncDriveTitle: "Mise à jour des contenus",
     syncDriveHint: "Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.",
@@ -5186,6 +5147,7 @@ var TRANSLATIONS = {
     avgColLabel:       "Moy. exercices",
     noTestsYet:        "Pas encore de tests [TEST] pour cet élève",
     myScoresTitle:     "Mes résultats exercices",
+    myScoreBtn:        "Mes résultats",
     noScoresYet:       "Pas encore d'exercices notés",
     formSent:          "Envoyé",
     clickToResend:     "Cliquer pour renvoyer",
@@ -5522,20 +5484,7 @@ async function loadAdminStats(forceRefresh) {
   const CACHE_STATS_KEY = "jun_admin_stats";
   if(!forceRefresh) {
     const cachedStats = _cacheGet(CACHE_STATS_KEY);
-    if(cachedStats) {
-      aw.innerHTML = cachedStats;
-      // Les <canvas> des sparklines ne sont pas dans le cache HTML (ils sont dessinés après coup) :
-      // on les redessine depuis les données mises en cache séparément (ou depuis la mémoire si dispo).
-      const cachedSparkData = window._stuTestScores || _cacheGet("jun_admin_sparklines");
-      if (cachedSparkData) {
-        window._stuTestScores = cachedSparkData;
-        const activeIdsCached = new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
-        requestAnimationFrame(()=>{
-          stuInLevel_all(null, null, cachedSparkData, activeIdsCached);
-        });
-      }
-      return;
-    }
+    if(cachedStats) { aw.innerHTML = cachedStats; return; }
   }
 
   try{
@@ -5564,7 +5513,7 @@ async function loadAdminStats(forceRefresh) {
       elm[String(ex.id)] = ex.level||"?"; // fallback global (dernier vu)
       exOwnerLevel[compKey] = ex.level||"?";
       if(ex.title&&ex.title.includes("[TEST]")){
-        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||"", title:ex.title};
+        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||""};
       }
     });
     const testExIds=new Set(Object.keys(testExMap).map(k=>k.split("_")[0]));
@@ -5610,7 +5559,7 @@ async function loadAdminStats(forceRefresh) {
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       const ts=ex.date?(parseDate(ex.date)||new Date()).getTime():Date.now();
-      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100),title:ex.title});
+      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100)});
     });
     Object.values(stuTestScores).forEach(byCat=>
       Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.ts-b.ts))
@@ -5690,7 +5639,6 @@ async function loadAdminStats(forceRefresh) {
     aw.innerHTML=levelHtml;
     // Sauvegarder dans cache 24h (sans les sparklines qui sont dessinées après)
     _cacheSet("jun_admin_stats", levelHtml);
-    _cacheSet("jun_admin_sparklines", stuTestScores);
 
     // Dessiner les sparklines
     window._stuTestScores=stuTestScores;
@@ -5839,7 +5787,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return;
   }
 
-  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt","kanji"];
+  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt"];
   const LEVELS = ["N5","N4","N3","N2","N1"];
   // Fixed order: 1=Grammar, 2=Vocabulary, 3=Listening, 4=Reading
   const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5 };
@@ -5850,7 +5798,6 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     if (ctL.includes("listen") || ctL.includes("écoute")) return 3;
     if (ctL.includes("read") || ctL.includes("lecture")) return 4;
     if (ctL.includes("jlpt")) return 5;
-    if (ctL.includes("kanji")) return 6;
     return 99;
   }
   const subjectOrder = {};
@@ -5887,7 +5834,6 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   });
 
   function makeItemHtml(c) {
-    const {cleanTitle: dispTitle} = parseExTitle(c.title || "");
     const isForm = (c.type||"").toLowerCase()==="form";
     const isUnlocked = isEffectivelyUnlocked(c);
     if (isForm) {
@@ -5897,7 +5843,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
       return '<div class="content-manage-item">'+
         '<div class="unlock-status" style="background:rgba(103,58,183,0.5)"></div>'+
         '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
-        '<div class="content-manage-title">'+dispTitle+
+        '<div class="content-manage-title">'+c.title+
         (alreadySent?'<span style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
         '</div><div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
         '<button class="btn-assign-content" id="btn-assign-'+c.id+'" style="'+btnStyle+'"'+
@@ -5907,7 +5853,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return '<div class="content-manage-item">'+
       '<div class="unlock-status '+(isUnlocked?"on":"off")+'"></div>'+
       '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
-      '<div class="content-manage-title">'+dispTitle+'</div>'+
+      '<div class="content-manage-title">'+c.title+'</div>'+
       '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type==="link"?"🔗 LINK":(c.type||"").toUpperCase())+'</span></div></div>'+
       '<button class="btn-unlock '+(isUnlocked?"unlocked":"locked")+'" id="btn-c-'+c.id+'"'+
       ' onclick="toggleContent('+studentId+',\''+c.id+'\','+isUnlocked+')">'+
