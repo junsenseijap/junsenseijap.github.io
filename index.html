@@ -3133,7 +3133,11 @@ function toggleLvlStats(bodyId, chevId) {
   if (!body) return;
   var isHidden = body.style.display === "none";
   body.style.display = isHidden ? "block" : "none";
-  if (chev) chev.innerHTML = isHidden ? "&#9660;" : "&#9654;";
+  if (chev) {
+    // Garder le texte du badge, changer seulement la flèche à la fin
+    var html = chev.innerHTML;
+    chev.innerHTML = html.replace(/[▶►▼▾&#9654;&#9660;]+$/, isHidden ? "&#9660;" : "&#9654;");
+  }
 }
 
 function togglePin(inputId) {
