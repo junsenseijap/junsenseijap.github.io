@@ -1864,6 +1864,7 @@
     <div style="display:flex;align-items:center;gap:0.3rem">
       <button onclick="adminCalNavMonth(1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">›</button>
       <button onclick="refreshAdminCalendar()" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
+      <button onclick="doSyncScheduleSheet()" id="btn-sync-schedule" title="Synchroniser le calendrier depuis Google Calendar" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--gray);font-size:0.65rem;padding:0.15rem 0.45rem;opacity:0.8;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">🔄 Sync</button>
     </div>
   </div>
   <!-- Grille admin -->
@@ -1897,11 +1898,12 @@
       <span style="font-size:1rem;font-weight:600;color:var(--ink)">➕ Nouveau cours</span>
       <button onclick="closeCreateLessonModal()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--gray);line-height:1">×</button>
     </div>
-    <!-- Élève -->
-    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Élève</div>
-    <select id="lesson-student-select" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.9rem">
-      <option value="">— Choisir un élève —</option>
-    </select>
+    <!-- Élèves — multi-select avec cases à cocher -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem">
+      <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray)">Élèves</div>
+      <span id="lesson-selected-count" style="font-size:0.68rem;color:var(--pink);font-weight:600"></span>
+    </div>
+    <div id="lesson-student-checklist" style="max-height:140px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);margin-bottom:0.9rem;padding:0.3rem 0"></div>
     <!-- Date + Heure + Durée -->
     <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Date</div>
     <input type="date" id="lesson-date" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.9rem;box-sizing:border-box"/>
@@ -6180,6 +6182,7 @@ function calDayClick(dateStr) {
     return '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border)">' +
       '<div style="font-weight:600;font-size:0.9rem;color:var(--ink)">'+dot+tStart+' → '+tEnd+'</div>'+
       (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+(l.studentName||"Élève")+'</div>':'')+
+      (!isAdmin&&l.isGroup&&l.peers&&l.peers.length?'<div style="font-size:0.73rem;color:var(--pink);margin-top:2px">👥 Avec '+l.peers.join(", ")+'</div>':'')+
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:2px">📝 '+l.note+'</div>':'')+
       (isAdmin?'<div style="display:flex;gap:0.4rem;margin-top:6px">'+
       '<button onclick="openEditLessonModal(window._lessonIndex[\''+safeId+'\'])" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ '+t("calBtnEdit")+'</button>'+
@@ -6244,6 +6247,7 @@ function renderLessonsList(containerId, year, month, lessons) {
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:0.88rem;font-weight:600;color:var(--ink)">'+dot+tStart+' → '+tEnd+'</div>'+
         (isAdmin?'<div style="font-size:0.75rem;color:var(--pink);margin-top:1px">👤 '+(l.studentName||"")+'</div>':'')+
+        (!isAdmin&&l.isGroup&&l.peers&&l.peers.length?'<div style="font-size:0.72rem;color:var(--pink);margin-top:2px">👥 Avec '+l.peers.join(", ")+'</div>':'')+
         (l.note?'<div style="font-size:0.74rem;color:var(--gray);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+l.note+'</div>':'')+
       '</div>'+
       '<div style="font-size:0.68rem;color:var(--gray);flex-shrink:0">'+(l.duration||60)+'min</div>'+
@@ -6408,68 +6412,104 @@ async function doEditLesson() {
 }
 
 function openCreateLessonModal() {
-  const today = new Date().toISOString().split("T")[0];
-  const di = document.getElementById("lesson-date");
+  var today = new Date().toISOString().split("T")[0];
+  var di = document.getElementById("lesson-date");
   if(di&&!di.value) di.value=today;
-  const ti = document.getElementById("lesson-time");
+  var ti = document.getElementById("lesson-time");
   if(ti&&!ti.value) ti.value="09:00";
-  const msg = document.getElementById("lesson-msg");
+  var msg = document.getElementById("lesson-msg");
   if(msg) msg.style.display="none";
-  // Peupler la liste élèves à chaque ouverture
-  const sel = document.getElementById("lesson-student-select");
-  if(sel) {
-    sel.innerHTML = '<option value="">— Choisir un élève —</option>';
-    const students = allStudents && allStudents.length ? allStudents : [];
-    students.filter(s=>String(s.active).toUpperCase()==="YES").forEach(s=>{
-      const opt=document.createElement("option");
-      opt.value=s.id; opt.textContent=s.name+" "+(s.familyName||""); sel.appendChild(opt);
+  // Peupler la checklist élèves
+  var cl = document.getElementById("lesson-student-checklist");
+  if(cl) {
+    cl.innerHTML = "";
+    var students = allStudents && allStudents.length ? allStudents : [];
+    students.filter(function(s){return String(s.active).toUpperCase()==="YES";}).forEach(function(s){
+      var row = document.createElement("label");
+      row.style.cssText = "display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.75rem;cursor:pointer;border-bottom:1px solid var(--border);font-size:0.85rem;color:var(--ink)";
+      var cb = document.createElement("input");
+      cb.type="checkbox"; cb.value=s.id;
+      cb.style.cssText="accent-color:var(--pink);width:15px;height:15px;flex-shrink:0";
+      cb.addEventListener("change", _updateLessonSelectedCount);
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(s.name+" "+(s.familyName||"")));
+      cl.appendChild(row);
     });
   }
+  _updateLessonSelectedCount();
   // Sélectionner CYAN par défaut
-  const firstBtn = document.querySelector("#lesson-color-picker button");
+  var firstBtn = document.querySelector("#lesson-color-picker button");
   if(firstBtn) selectLessonColor(firstBtn,"CYAN");
   document.getElementById("modal-create-lesson").style.display="flex";
 }
+
+function _updateLessonSelectedCount() {
+  var boxes = document.querySelectorAll("#lesson-student-checklist input[type=checkbox]:checked");
+  var cntEl = document.getElementById("lesson-selected-count");
+  if(!cntEl) return;
+  if(boxes.length===0) { cntEl.textContent=""; return; }
+  cntEl.textContent = boxes.length===1 ? "1 élève" : boxes.length+" élèves (groupe)";
+}
+
 function closeCreateLessonModal() {
   document.getElementById("modal-create-lesson").style.display="none";
 }
 
 async function doCreateLesson() {
-  const studentId = document.getElementById("lesson-student-select").value;
-  const date      = document.getElementById("lesson-date").value;
-  const time      = document.getElementById("lesson-time").value;
-  const duration  = document.getElementById("lesson-duration").value;
-  const note      = (document.getElementById("lesson-note").value||"").trim();
-  const color     = _selectedLessonColor || "CYAN";
-  const msg       = document.getElementById("lesson-msg");
-  const btn       = document.getElementById("btn-create-lesson");
+  var boxes    = document.querySelectorAll("#lesson-student-checklist input[type=checkbox]:checked");
+  var ids      = Array.from(boxes).map(function(b){return b.value;});
+  var date     = document.getElementById("lesson-date").value;
+  var time     = document.getElementById("lesson-time").value;
+  var duration = document.getElementById("lesson-duration").value;
+  var note     = (document.getElementById("lesson-note").value||"").trim();
+  var color    = _selectedLessonColor || "CYAN";
+  var msg      = document.getElementById("lesson-msg");
+  var btn      = document.getElementById("btn-create-lesson");
 
-  const showMsg = (txt,type) => {
+  var showMsg = function(txt,type) {
     msg.textContent=txt; msg.style.display="block";
     msg.style.background=type==="error"?"rgba(232,75,122,0.1)":"rgba(158,196,160,0.2)";
     msg.style.color=type==="error"?"var(--pink)":"var(--sage)";
     msg.style.border="1px solid "+(type==="error"?"rgba(232,75,122,0.3)":"rgba(158,196,160,0.4)");
   };
-  if(!studentId) return showMsg("⚠️ Choisir un élève","error");
-  if(!date)      return showMsg("⚠️ Date obligatoire","error");
-  if(!time)      return showMsg("⚠️ Heure obligatoire","error");
+  if(!ids.length) return showMsg("⚠️ Choisir au moins un élève","error");
+  if(!date)       return showMsg("⚠️ Date obligatoire","error");
+  if(!time)       return showMsg("⚠️ Heure obligatoire","error");
 
   btn.disabled=true; btn.textContent="⏳ En cours...";
   try {
-    const r = await api({ action:"createLesson", adminId:currentUserGlobal.id, pin:getStoredPin(),
-      studentId, date, time, duration:parseInt(duration)||60, note, color });
+    var r = await api({ action:"createLesson", adminId:currentUserGlobal.id, pin:getStoredPin(),
+      studentIds:ids.join(","), date, time, duration:parseInt(duration)||60, note, color });
     if(r&&r.success) {
-      showMsg("✅ Cours créé !","success");
+      showMsg(ids.length>1?"✅ Cours de groupe créé !":"✅ Cours créé !","success");
       _cacheDel(LESSONS_KEY); _lessonsCache=null;
-      const lessons = await fetchLessons(true);
+      var lessons = await fetchLessons(true);
       renderCalGrid("admin-cal-grid",_adminCalYear,_adminCalMonth,lessons);
       renderLessonsList("admin-cal-lessons-list",_adminCalYear,_adminCalMonth,lessons);
-      setTimeout(()=>closeCreateLessonModal(),1200);
+      setTimeout(function(){closeCreateLessonModal();},1200);
     } else {
       showMsg("❌ "+(r?(r.message||JSON.stringify(r)):"Pas de réponse"),"error");
     }
   } catch(e){ showMsg("❌ "+e.message,"error"); }
   btn.disabled=false; btn.textContent=t("calSaveLesson");
+}
+
+async function doSyncScheduleSheet() {
+  var btn = document.getElementById("btn-sync-schedule");
+  if(btn) { btn.disabled=true; btn.textContent="⏳"; }
+  try {
+    var r = await api({ action:"syncScheduleSheet", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      _cacheDel(LESSONS_KEY); _lessonsCache=null;
+      var lessons = await fetchLessons(true);
+      renderCalGrid("admin-cal-grid",_adminCalYear,_adminCalMonth,lessons);
+      renderLessonsList("admin-cal-lessons-list",_adminCalYear,_adminCalMonth,lessons);
+      toast("✅ Calendrier synchronisé ("+r.synced+" cours)","success");
+    } else {
+      toast("❌ "+(r&&r.message||"Erreur sync"),"error");
+    }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🔄 Sync"; }
 }
 
 
