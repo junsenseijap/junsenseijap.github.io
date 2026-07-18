@@ -1864,7 +1864,6 @@
     <div style="display:flex;align-items:center;gap:0.3rem">
       <button onclick="adminCalNavMonth(1)" style="background:none;border:none;cursor:pointer;color:var(--pink);font-size:1.2rem;padding:0.2rem 0.5rem">›</button>
       <button onclick="refreshAdminCalendar()" title="Rafraîchir" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:0.2rem 0.4rem;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">↺</button>
-      <button onclick="doSyncScheduleSheet()" id="btn-sync-schedule" title="Synchroniser le calendrier depuis Google Calendar" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--gray);font-size:0.65rem;padding:0.15rem 0.45rem;opacity:0.8;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">🔄 Sync</button>
     </div>
   </div>
   <!-- Grille admin -->
@@ -1898,12 +1897,11 @@
       <span style="font-size:1rem;font-weight:600;color:var(--ink)">➕ Nouveau cours</span>
       <button onclick="closeCreateLessonModal()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--gray);line-height:1">×</button>
     </div>
-    <!-- Élèves — multi-select avec cases à cocher -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem">
-      <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray)">Élèves</div>
-      <span id="lesson-selected-count" style="font-size:0.68rem;color:var(--pink);font-weight:600"></span>
-    </div>
-    <div id="lesson-student-checklist" style="max-height:140px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);margin-bottom:0.9rem;padding:0.3rem 0"></div>
+    <!-- Élève -->
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Élève</div>
+    <select id="lesson-student-select" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.9rem">
+      <option value="">— Choisir un élève —</option>
+    </select>
     <!-- Date + Heure + Durée -->
     <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:0.35rem">Date</div>
     <input type="date" id="lesson-date" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-soft);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;margin-bottom:0.9rem;box-sizing:border-box"/>
@@ -3678,45 +3676,82 @@ function getTestCat(title) {
   return TEST_CATS[cat] ? cat : null;
 }
 
+// Clé de groupement pour l'axe X des graphiques tests.
+// Les 4 matières d'une même session JLPT (ex: GR/VO/LI/RE_ZETTAI_第3回_N4)
+// partagent TOUJOURS la même position X. Un test non-JLPT garde sa propre position.
+function getTestGroupKey(title) {
+  if (!title) return "?";
+  var jlpt = title.match(/\[JLPT\](?:GR|VO|LI|RE)[_\s]?(.*)$/i);
+  if (jlpt) return "JLPT_" + jlpt[1].trim();
+  // Test non-JLPT : enlever préfixe numérique + tags pour obtenir clé stable
+  var s = title.replace(/^\d+_/, "").replace(/^((?:\[[^\]]+\])+)\s*/i, "").replace(/^\d+_/, "");
+  return s || title;
+}
+
+// Construit l'axe X à partir d'une liste de points bruts {cat, title, ts, pct}.
+// Règle : sessions JLPT fusionnées sur une même position, tests individuels séparés.
+// Si une session est repassée (même clé), on garde le point le plus récent.
+// Ordre des positions : date la plus ancienne de chaque groupe.
+function buildTestAxisData(entries) {
+  var groups = {};
+  entries.forEach(function(e) {
+    var key = getTestGroupKey(e.title) || "?";
+    if (!groups[key]) groups[key] = { ts: e.ts, byCat: {} };
+    if (e.ts < groups[key].ts) groups[key].ts = e.ts;
+    var existing = groups[key].byCat[e.cat];
+    if (!existing || e.ts >= existing.ts) groups[key].byCat[e.cat] = { ts: e.ts, pct: e.pct };
+  });
+  var orderedKeys = Object.keys(groups).sort(function(a,b){ return groups[a].ts - groups[b].ts; });
+  var byCat = { GR:[], VO:[], LI:[], RE:[] };
+  orderedKeys.forEach(function(key, i) {
+    Object.keys(byCat).forEach(function(cat) {
+      var pt = groups[key].byCat[cat];
+      byCat[cat][i] = pt ? pt.pct : null;
+    });
+  });
+  return { maxLen: orderedKeys.length, byCat: byCat };
+}
+
 // ── SPARKLINE ADMIN — canvas 2D pur, 4 lignes par catégorie ──
 var _sparkCharts = {};
 function drawSparkline(wrapId, byCat) {
-  const wrap = document.getElementById(wrapId);
+  var wrap = document.getElementById(wrapId);
   if (!wrap) return;
   wrap.innerHTML = "";
-  const allPts = Object.values(byCat).flat();
+  var allPts = Object.values(byCat).flat();
   if (!allPts.length) return;
-  const canvas = document.createElement("canvas");
+  var canvas = document.createElement("canvas");
   canvas.width = 70; canvas.height = 24;
   canvas.style.cssText = "display:block";
   wrap.appendChild(canvas);
-  const ctx = canvas.getContext("2d");
-  const w=70,h=24,p=2;
-  const aggByCat={};
-  Object.entries(byCat).forEach(([cat,pts])=>{
-    const byMonth={};
-    pts.forEach((pt,i)=>{
-      const d = pt.ts ? new Date(pt.ts) : null;
-      const key = (d && !isNaN(d)) ? d.toISOString().slice(0,7) : ("idx_"+i);
-      const ts  = (d && !isNaN(d)) ? pt.ts : i;
-      if(!byMonth[key]){byMonth[key]={sum:0,cnt:0,ts};}
-      byMonth[key].sum+=pt.pct; byMonth[key].cnt++;
+  var ctx = canvas.getContext("2d");
+  var w=70,h=24,p=2;
+  // Reconstruire les entrées brutes {cat,title,ts,pct} pour buildTestAxisData
+  var rawEntries = [];
+  Object.entries(byCat).forEach(function(kv) {
+    var cat = kv[0], pts = kv[1];
+    (pts||[]).forEach(function(pt) {
+      rawEntries.push({ cat:cat, title:pt.title||"", ts:pt.ts||0, pct:pt.pct });
     });
-    aggByCat[cat]=Object.values(byMonth).sort((a,b)=>a.ts-b.ts).map(v=>({ts:v.ts,pct:Math.round(v.sum/v.cnt)}));
   });
-  const allTs=[...new Set(Object.values(aggByCat).flat().map(pt=>pt.ts))].sort((a,b)=>a-b);
-  const n=allTs.length; if(!n)return;
-  const pxF=ts=>n>1?p+(allTs.indexOf(ts)/(n-1))*(w-2*p):w/2;
-  const pyF=v=>h-p-(v/100)*(h-2*p);
-  Object.entries(TEST_CATS).forEach(([cat,def])=>{
-    const pts=aggByCat[cat]||[];
-    if(!pts.length)return;
+  var axisData = buildTestAxisData(rawEntries);
+  var maxLen = axisData.maxLen;
+  var grouped = axisData.byCat;
+  if (!maxLen) return;
+  var pxF = function(i){ return maxLen>1 ? p+(i/(maxLen-1))*(w-2*p) : w/2; };
+  var pyF = function(v){ return h-p-(v/100)*(h-2*p); };
+  Object.entries(TEST_CATS).forEach(function(kv) {
+    var cat=kv[0], def=kv[1];
+    var data = grouped[cat]||[];
+    var pts = [];
+    data.forEach(function(v,j){ if(v!==null&&v!==undefined) pts.push({i:j,pct:v}); });
+    if (!pts.length) return;
     ctx.beginPath();
-    pts.forEach((pt,j)=>j===0?ctx.moveTo(pxF(pt.ts),pyF(pt.pct)):ctx.lineTo(pxF(pt.ts),pyF(pt.pct)));
+    pts.forEach(function(pt,j){ j===0?ctx.moveTo(pxF(pt.i),pyF(pt.pct)):ctx.lineTo(pxF(pt.i),pyF(pt.pct)); });
     ctx.strokeStyle=def.color; ctx.lineWidth=1.5; ctx.stroke();
-    pts.forEach(pt=>{
-      ctx.beginPath();ctx.arc(pxF(pt.ts),pyF(pt.pct),1.8,0,Math.PI*2);
-      ctx.fillStyle=def.color;ctx.fill();
+    pts.forEach(function(pt){
+      ctx.beginPath(); ctx.arc(pxF(pt.i),pyF(pt.pct),1.8,0,Math.PI*2);
+      ctx.fillStyle=def.color; ctx.fill();
     });
   });
 }
@@ -6088,6 +6123,21 @@ function calMonthLabel(year, month) {
   return arr[month] + " " + year;
 }
 
+// Résout le nom affiché d'un cours — gère les anciens événements qui n'ont que l'ID
+function _resolveLessonName(l) {
+  var name = l.studentName || l.studentNames || "";
+  // Si le nom ressemble à un ID ou "Élève #X", chercher dans allStudents
+  if (!name || /^[\d,]+$/.test(name) || name.startsWith("Élève #")) {
+    var ids = (l.studentIds || l.studentId || "").split(",").map(function(s){return s.trim();}).filter(Boolean);
+    var resolved = ids.map(function(sid) {
+      var stu = (allStudents||[]).find(function(s){ return String(s.id)===sid; });
+      return stu ? (stu.name + " " + (stu.familyName||"")).trim() : ("Élève #"+sid);
+    });
+    return resolved.join(", ") || "Élève";
+  }
+  return name;
+}
+
 async function fetchLessons(forceRefresh) {
   // Invalider le cache si l'ancien format (sans startISO) est détecté
   const cached = _cacheGet(LESSONS_KEY);
@@ -6181,8 +6231,7 @@ function calDayClick(dateStr) {
     const safeId = String(l.id).replace(/'/g, "\'");
     return '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border)">' +
       '<div style="font-weight:600;font-size:0.9rem;color:var(--ink)">'+dot+tStart+' → '+tEnd+'</div>'+
-      (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+(l.studentName||"Élève")+'</div>':'')+
-      (!isAdmin&&l.isGroup&&l.peers&&l.peers.length?'<div style="font-size:0.73rem;color:var(--pink);margin-top:2px">👥 Avec '+l.peers.join(", ")+'</div>':'')+
+      (isAdmin?'<div style="font-size:0.78rem;color:var(--pink);margin-top:2px">👤 '+_resolveLessonName(l)+'</div>':'')+
       (l.note?'<div style="font-size:0.75rem;color:var(--gray);margin-top:2px">📝 '+l.note+'</div>':'')+
       (isAdmin?'<div style="display:flex;gap:0.4rem;margin-top:6px">'+
       '<button onclick="openEditLessonModal(window._lessonIndex[\''+safeId+'\'])" style="background:none;border:1px solid rgba(103,58,183,0.3);color:#7986cb;border-radius:6px;padding:2px 8px;font-size:0.72rem;cursor:pointer">✏️ '+t("calBtnEdit")+'</button>'+
@@ -6246,8 +6295,7 @@ function renderLessonsList(containerId, year, month, lessons) {
       '</div>'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:0.88rem;font-weight:600;color:var(--ink)">'+dot+tStart+' → '+tEnd+'</div>'+
-        (isAdmin?'<div style="font-size:0.75rem;color:var(--pink);margin-top:1px">👤 '+(l.studentName||"")+'</div>':'')+
-        (!isAdmin&&l.isGroup&&l.peers&&l.peers.length?'<div style="font-size:0.72rem;color:var(--pink);margin-top:2px">👥 Avec '+l.peers.join(", ")+'</div>':'')+
+        (isAdmin?'<div style="font-size:0.75rem;color:var(--pink);margin-top:1px">👤 '+_resolveLessonName(l)+'</div>':'')+
         (l.note?'<div style="font-size:0.74rem;color:var(--gray);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+l.note+'</div>':'')+
       '</div>'+
       '<div style="font-size:0.68rem;color:var(--gray);flex-shrink:0">'+(l.duration||60)+'min</div>'+
@@ -6412,104 +6460,68 @@ async function doEditLesson() {
 }
 
 function openCreateLessonModal() {
-  var today = new Date().toISOString().split("T")[0];
-  var di = document.getElementById("lesson-date");
+  const today = new Date().toISOString().split("T")[0];
+  const di = document.getElementById("lesson-date");
   if(di&&!di.value) di.value=today;
-  var ti = document.getElementById("lesson-time");
+  const ti = document.getElementById("lesson-time");
   if(ti&&!ti.value) ti.value="09:00";
-  var msg = document.getElementById("lesson-msg");
+  const msg = document.getElementById("lesson-msg");
   if(msg) msg.style.display="none";
-  // Peupler la checklist élèves
-  var cl = document.getElementById("lesson-student-checklist");
-  if(cl) {
-    cl.innerHTML = "";
-    var students = allStudents && allStudents.length ? allStudents : [];
-    students.filter(function(s){return String(s.active).toUpperCase()==="YES";}).forEach(function(s){
-      var row = document.createElement("label");
-      row.style.cssText = "display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.75rem;cursor:pointer;border-bottom:1px solid var(--border);font-size:0.85rem;color:var(--ink)";
-      var cb = document.createElement("input");
-      cb.type="checkbox"; cb.value=s.id;
-      cb.style.cssText="accent-color:var(--pink);width:15px;height:15px;flex-shrink:0";
-      cb.addEventListener("change", _updateLessonSelectedCount);
-      row.appendChild(cb);
-      row.appendChild(document.createTextNode(s.name+" "+(s.familyName||"")));
-      cl.appendChild(row);
+  // Peupler la liste élèves à chaque ouverture
+  const sel = document.getElementById("lesson-student-select");
+  if(sel) {
+    sel.innerHTML = '<option value="">— Choisir un élève —</option>';
+    const students = allStudents && allStudents.length ? allStudents : [];
+    students.filter(s=>String(s.active).toUpperCase()==="YES").forEach(s=>{
+      const opt=document.createElement("option");
+      opt.value=s.id; opt.textContent=s.name+" "+(s.familyName||""); sel.appendChild(opt);
     });
   }
-  _updateLessonSelectedCount();
   // Sélectionner CYAN par défaut
-  var firstBtn = document.querySelector("#lesson-color-picker button");
+  const firstBtn = document.querySelector("#lesson-color-picker button");
   if(firstBtn) selectLessonColor(firstBtn,"CYAN");
   document.getElementById("modal-create-lesson").style.display="flex";
 }
-
-function _updateLessonSelectedCount() {
-  var boxes = document.querySelectorAll("#lesson-student-checklist input[type=checkbox]:checked");
-  var cntEl = document.getElementById("lesson-selected-count");
-  if(!cntEl) return;
-  if(boxes.length===0) { cntEl.textContent=""; return; }
-  cntEl.textContent = boxes.length===1 ? "1 élève" : boxes.length+" élèves (groupe)";
-}
-
 function closeCreateLessonModal() {
   document.getElementById("modal-create-lesson").style.display="none";
 }
 
 async function doCreateLesson() {
-  var boxes    = document.querySelectorAll("#lesson-student-checklist input[type=checkbox]:checked");
-  var ids      = Array.from(boxes).map(function(b){return b.value;});
-  var date     = document.getElementById("lesson-date").value;
-  var time     = document.getElementById("lesson-time").value;
-  var duration = document.getElementById("lesson-duration").value;
-  var note     = (document.getElementById("lesson-note").value||"").trim();
-  var color    = _selectedLessonColor || "CYAN";
-  var msg      = document.getElementById("lesson-msg");
-  var btn      = document.getElementById("btn-create-lesson");
+  const studentId = document.getElementById("lesson-student-select").value;
+  const date      = document.getElementById("lesson-date").value;
+  const time      = document.getElementById("lesson-time").value;
+  const duration  = document.getElementById("lesson-duration").value;
+  const note      = (document.getElementById("lesson-note").value||"").trim();
+  const color     = _selectedLessonColor || "CYAN";
+  const msg       = document.getElementById("lesson-msg");
+  const btn       = document.getElementById("btn-create-lesson");
 
-  var showMsg = function(txt,type) {
+  const showMsg = (txt,type) => {
     msg.textContent=txt; msg.style.display="block";
     msg.style.background=type==="error"?"rgba(232,75,122,0.1)":"rgba(158,196,160,0.2)";
     msg.style.color=type==="error"?"var(--pink)":"var(--sage)";
     msg.style.border="1px solid "+(type==="error"?"rgba(232,75,122,0.3)":"rgba(158,196,160,0.4)");
   };
-  if(!ids.length) return showMsg("⚠️ Choisir au moins un élève","error");
-  if(!date)       return showMsg("⚠️ Date obligatoire","error");
-  if(!time)       return showMsg("⚠️ Heure obligatoire","error");
+  if(!studentId) return showMsg("⚠️ Choisir un élève","error");
+  if(!date)      return showMsg("⚠️ Date obligatoire","error");
+  if(!time)      return showMsg("⚠️ Heure obligatoire","error");
 
   btn.disabled=true; btn.textContent="⏳ En cours...";
   try {
-    var r = await api({ action:"createLesson", adminId:currentUserGlobal.id, pin:getStoredPin(),
-      studentIds:ids.join(","), date, time, duration:parseInt(duration)||60, note, color });
+    const r = await api({ action:"createLesson", adminId:currentUserGlobal.id, pin:getStoredPin(),
+      studentId, date, time, duration:parseInt(duration)||60, note, color });
     if(r&&r.success) {
-      showMsg(ids.length>1?"✅ Cours de groupe créé !":"✅ Cours créé !","success");
+      showMsg("✅ Cours créé !","success");
       _cacheDel(LESSONS_KEY); _lessonsCache=null;
-      var lessons = await fetchLessons(true);
+      const lessons = await fetchLessons(true);
       renderCalGrid("admin-cal-grid",_adminCalYear,_adminCalMonth,lessons);
       renderLessonsList("admin-cal-lessons-list",_adminCalYear,_adminCalMonth,lessons);
-      setTimeout(function(){closeCreateLessonModal();},1200);
+      setTimeout(()=>closeCreateLessonModal(),1200);
     } else {
       showMsg("❌ "+(r?(r.message||JSON.stringify(r)):"Pas de réponse"),"error");
     }
   } catch(e){ showMsg("❌ "+e.message,"error"); }
   btn.disabled=false; btn.textContent=t("calSaveLesson");
-}
-
-async function doSyncScheduleSheet() {
-  var btn = document.getElementById("btn-sync-schedule");
-  if(btn) { btn.disabled=true; btn.textContent="⏳"; }
-  try {
-    var r = await api({ action:"syncScheduleSheet", adminId:currentUserGlobal.id, pin:getStoredPin() });
-    if(r&&r.success) {
-      _cacheDel(LESSONS_KEY); _lessonsCache=null;
-      var lessons = await fetchLessons(true);
-      renderCalGrid("admin-cal-grid",_adminCalYear,_adminCalMonth,lessons);
-      renderLessonsList("admin-cal-lessons-list",_adminCalYear,_adminCalMonth,lessons);
-      toast("✅ Calendrier synchronisé ("+r.synced+" cours)","success");
-    } else {
-      toast("❌ "+(r&&r.message||"Erreur sync"),"error");
-    }
-  } catch(e){ toast("❌ "+e.message,"error"); }
-  if(btn) { btn.disabled=false; btn.textContent="🔄 Sync"; }
 }
 
 
