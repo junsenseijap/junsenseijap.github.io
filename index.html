@@ -5519,7 +5519,7 @@ async function loadAdminStats(forceRefresh) {
       elm[String(ex.id)] = ex.level||"?"; // fallback global (dernier vu)
       exOwnerLevel[compKey] = ex.level||"?";
       if(ex.title&&ex.title.includes("[TEST]")){
-        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||""};
+        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||"", title:ex.title||""};
       }
     });
     const testExIds=new Set(Object.keys(testExMap).map(k=>k.split("_")[0]));
