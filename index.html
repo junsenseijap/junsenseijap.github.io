@@ -5565,7 +5565,7 @@ async function loadAdminStats(forceRefresh) {
       const key=String(sc.studentId)+"_"+ex.level;
       if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
       const ts=ex.date?(parseDate(ex.date)||new Date()).getTime():Date.now();
-      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100)});
+      stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100),title:ex.title||""});
     });
     Object.values(stuTestScores).forEach(byCat=>
       Object.keys(byCat).forEach(k=>byCat[k].sort((a,b)=>a.ts-b.ts))
