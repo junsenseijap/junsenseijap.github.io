@@ -6395,7 +6395,7 @@ function openEditLessonModal(lesson) {
   // Pré-remplir les champs avec les données existantes
   document.getElementById("edit-lesson-event-id").value   = lesson.id;
   document.getElementById("edit-lesson-student-id").value = lesson.studentId;
-  document.getElementById("edit-lesson-student-name").textContent = "👤 " + (lesson.studentName || "");
+  document.getElementById("edit-lesson-student-name").textContent = "👤 " + _resolveLessonName(lesson);
 
   // Date locale depuis ISO UTC
   const tz = getUserTimezone();
@@ -6443,8 +6443,15 @@ async function doEditLesson() {
   btn.disabled = true; btn.textContent = "⏳ En cours...";
   try {
     // Modifier = supprimer + recréer
+    // Si l'événement n'existe plus dans Calendar (doublon déjà supprimé), on continue quand même
     const del = await api({ action:"deleteLesson", adminId:currentUserGlobal.id, pin:getStoredPin(), eventId });
-    if(!del || !del.success) { showMsg("❌ Erreur suppression: " + (del?.message||""), "error"); btn.disabled=false; btn.textContent="✏️ Enregistrer les modifications"; return; }
+    if(del && !del.success && del.message && del.message.toLowerCase().includes("introuvable")) {
+      // Événement déjà supprimé — on continue la recréation quand même
+    } else if(!del || !del.success) {
+      showMsg("❌ Erreur suppression: " + (del?.message||""), "error");
+      btn.disabled=false; btn.textContent="✏️ Enregistrer les modifications";
+      return;
+    }
 
     const create = await api({ action:"createLesson", adminId:currentUserGlobal.id, pin:getStoredPin(),
       studentId, date, time, duration:parseInt(duration)||60, note, color });
