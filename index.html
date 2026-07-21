@@ -2484,7 +2484,7 @@ async function loadStudentContent(user) {
         if(!exByLvl[l]) exByLvl[l]=[];
         exByLvl[l].push(e);
       });
-      const rows=["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0).map(function(l){
+      const rows=["N5","N4","N3","N2","N1","SPEAKING"].filter(l=>lm[l]>0).map(function(l){
         const unlocked=lm[l]||0;
         const total=totalCounts[l]||0;
         const pct=total>0?Math.round((unlocked/total)*100):100;
@@ -4040,7 +4040,7 @@ async function toggleStudentActive(studentId, isCurrentlyActive) {
 }
 
 function openLevelsModal(studentId, studentName, currentLevels) {
-  const allLevels = ["N5","N4","N3","N2","N1"];
+  const allLevels = ["N5","N4","N3","N2","N1","SPEAKING"];
   const checked   = currentLevels ? currentLevels.split(",").map(l => l.trim()).filter(Boolean) : [];
   const overlay   = document.createElement("div");
   overlay.className = "levels-modal-overlay";
@@ -4051,7 +4051,8 @@ function openLevelsModal(studentId, studentName, currentLevels) {
     '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.2rem">'+
     allLevels.map(l =>
       '<label class="level-check-label" style="font-size:0.9rem;padding:0.5rem 1rem">'+
-      '<input type="checkbox" name="modal-level" value="'+l+'"'+(checked.includes(l)?" checked":"")+'>'+l+
+      '<input type="checkbox" name="modal-level" value="'+l+'"'+(checked.includes(l)?" checked":"")+'>'+
+      (l==="SPEAKING"?"SP":l)+
       '</label>'
     ).join("")+
     '</div>'+
@@ -5461,7 +5462,7 @@ async function loadAdminDashboard(forceRefresh) {
   if(!aw)return;
 
   // ── Chargement progressif : afficher squelette immédiatement ──
-  const levels = ["N5","N4","N3","N2","N1"];
+  const levels = ["N5","N4","N3","N2","N1","SPEAKING"];
   const skeleton = levels.map(lvl => {
     const stuCount = allStudents.filter(s=>String(s.active).toUpperCase()==="YES"&&(s.levels||"").includes(lvl)).length;
     if(!stuCount) return "";
@@ -5495,7 +5496,7 @@ async function loadAdminDashboard(forceRefresh) {
     const elm={};(er.exercises||[]).forEach(ex=>{elm[String(ex.id)]=ex.level||"?";});
     const testExIds=new Set((er.exercises||[]).filter(e=>e.title&&e.title.includes("[TEST]")).map(e=>String(e.id)));
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
-    const LEVELS=["N5","N4","N3","N2","N1"],bl={};
+    const LEVELS=["N5","N4","N3","N2","N1","SPEAKING"],bl={};
     (sr.scores||[]).forEach(sc=>{
       if(!sc.maxScore)return;
       if(testExIds.has(String(sc.exerciseId)))return; // ignorer [TEST] pour la moyenne exercices
@@ -5551,7 +5552,7 @@ async function loadAdminStats(forceRefresh) {
   if(!aw)return;
 
   // ── Squelette immédiat ──
-  const LEVELS=["N5","N4","N3","N2","N1"];
+  const LEVELS=["N5","N4","N3","N2","N1","SPEAKING"];
   const skeleton = LEVELS.map(lvl => {
     const stuCount = allStudents.filter(s=>String(s.active).toUpperCase()==="YES"&&(s.levels||"").includes(lvl)).length;
     if(!stuCount) return "";
@@ -5587,7 +5588,7 @@ async function loadAdminStats(forceRefresh) {
 
     const sm2={};allStudents.forEach(s=>{sm2[String(s.id)]=s;});
     const activeIds=new Set(allStudents.filter(s=>String(s.active).toUpperCase()==="YES").map(s=>String(s.id)));
-    const LEVELS=["N5","N4","N3","N2","N1"];
+    const LEVELS=["N5","N4","N3","N2","N1","SPEAKING"];
 
     // Index exercices
     const elm={};     // exId → level
