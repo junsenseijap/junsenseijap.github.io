@@ -5926,6 +5926,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   });
 
   function makeItemHtml(c) {
+    const {cleanTitle: dispTitle} = parseExTitle(c.title || "");
     const isForm = (c.type||"").toLowerCase()==="form";
     const isUnlocked = isEffectivelyUnlocked(c);
     if (isForm) {
@@ -5935,7 +5936,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
       return '<div class="content-manage-item">'+
         '<div class="unlock-status" style="background:rgba(103,58,183,0.5)"></div>'+
         '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
-        '<div class="content-manage-title">'+c.title+
+        '<div class="content-manage-title">'+dispTitle+
         (alreadySent?'<span style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
         '</div><div class="content-manage-meta"><span class="card-type type-form" style="font-size:0.5rem;padding:0.1rem 0.35rem">📝 FORM</span></div></div>'+
         '<button class="btn-assign-content" id="btn-assign-'+c.id+'" style="'+btnStyle+'"'+
@@ -5945,7 +5946,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return '<div class="content-manage-item">'+
       '<div class="unlock-status '+(isUnlocked?"on":"off")+'"></div>'+
       '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
-      '<div class="content-manage-title">'+c.title+'</div>'+
+      '<div class="content-manage-title">'+dispTitle+'</div>'+
       '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type==="link"?"🔗 LINK":(c.type||"").toUpperCase())+'</span></div></div>'+
       '<button class="btn-unlock '+(isUnlocked?"unlocked":"locked")+'" id="btn-c-'+c.id+'"'+
       ' onclick="toggleContent('+studentId+',\''+c.id+'\','+isUnlocked+')">'+
