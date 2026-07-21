@@ -5926,7 +5926,18 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
   });
 
   function makeItemHtml(c) {
-    const {cleanTitle: dispTitle} = parseExTitle(c.title || "");
+    // Nettoyer le titre : supprimer [LESSONS]/[LECONS] seulement (pas [Exercice]/[TEST] qui sont utiles)
+    var rawTitle = c.title || "";
+    var dispTitle = rawTitle;
+    if (rawTitle.charAt(0) === "[") {
+      var up = rawTitle.toUpperCase();
+      if (up.indexOf("[LESSONS]") === 0 || up.indexOf("[LECONS]") === 0 || up.indexOf("[LESSON]") === 0) {
+        var closeIdx = rawTitle.indexOf("]");
+        if (closeIdx >= 0) dispTitle = rawTitle.substring(closeIdx + 1).replace(/^\d+_/, "").trim();
+      }
+    }
+    // Supprimer aussi l'extension .pdf/.mp3 etc. si présente (cas SPEAKING direct files)
+    dispTitle = dispTitle.replace(/\.(pdf|mp3|mp4|m4a|wav|ogg|docx?|pptx?)$/i, "").trim();
     const isForm = (c.type||"").toLowerCase()==="form";
     const isUnlocked = isEffectivelyUnlocked(c);
     if (isForm) {
