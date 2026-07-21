@@ -574,6 +574,10 @@
       background: linear-gradient(135deg, var(--pink), var(--pink-mid));
       color: white; flex-shrink: 0;
     }
+    .level-badge.speaking-badge {
+      font-size: 0.6rem; letter-spacing: 0; padding: 0.2rem 0.5rem;
+      background: linear-gradient(135deg, #5B8DEF, #3A6ED8);
+    }
     .level-label { flex: 1; font-size: 0.88rem; color: var(--ink2); }
     .level-count { font-size: 0.68rem; color: var(--gray); }
     .level-arrow { font-size: 0.7rem; color: var(--gray); transition: transform 0.2s; }
@@ -1102,6 +1106,7 @@
     .stats-card-title{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);font-weight:600;margin-bottom:0.8rem;}
     .level-progress-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.45rem;padding:0.4rem 0.6rem;background:var(--bg-soft);border-radius:8px;}
     .level-prog-badge{font-size:0.68rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:99px;flex-shrink:0;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;min-width:32px;text-align:center;}
+    .level-prog-badge.speaking{font-size:0.55rem;letter-spacing:0;background:linear-gradient(135deg,#5B8DEF,#3A6ED8);}
     .level-prog-bar-wrap{flex:1;height:6px;background:rgba(232,75,122,0.1);border-radius:99px;overflow:hidden;}
     .level-prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pink),var(--pink-mid));}
     .level-prog-text{font-size:0.7rem;color:var(--gray);flex-shrink:0;}
@@ -1142,6 +1147,7 @@
     .dash-avg-level-header{padding:0.75rem 1rem;cursor:pointer;display:flex;align-items:center;gap:0.8rem;background:var(--bg-card);transition:background 0.15s;user-select:none;}
     .dash-avg-level-header:hover{background:var(--pink-pale);}
     .dash-avg-level-badge{font-size:0.68rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:99px;background:linear-gradient(135deg,var(--pink),var(--pink-mid));color:white;flex-shrink:0;}
+    .dash-avg-level-badge.speaking{font-size:0.55rem;letter-spacing:0;background:linear-gradient(135deg,#5B8DEF,#3A6ED8);}
     .dash-avg-level-label{flex:1;font-size:0.88rem;color:var(--ink2);}
     .dash-avg-level-score{font-size:0.88rem;font-weight:700;color:var(--pink);}
     .dash-avg-level-arrow{font-size:0.7rem;color:var(--gray);transition:transform 0.2s;}
@@ -1620,6 +1626,7 @@
             <label class="level-check-label"><input type="checkbox" name="as-level" value="N3"> N3</label>
             <label class="level-check-label"><input type="checkbox" name="as-level" value="N2"> N2</label>
             <label class="level-check-label"><input type="checkbox" name="as-level" value="N1"> N1</label>
+            <label class="level-check-label"><input type="checkbox" name="as-level" value="SPEAKING"> SP</label>
           </div>
         </div>
         <div class="add-msg" id="add-msg"></div>
@@ -1673,6 +1680,7 @@
         <label class="level-check-label"><input type="checkbox" name="notif-level" value="N3" checked> N3</label>
         <label class="level-check-label"><input type="checkbox" name="notif-level" value="N2" checked> N2</label>
         <label class="level-check-label"><input type="checkbox" name="notif-level" value="N1" checked> N1</label>
+        <label class="level-check-label"><input type="checkbox" name="notif-level" value="SPEAKING" checked> SP</label>
       </div>
       <button onclick="sendPushToAll()" id="notif-btn-all"
         style="width:100%;padding:0.7rem;border:none;border-radius:10px;background:var(--pink);color:white;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem">
@@ -2483,7 +2491,7 @@ async function loadStudentContent(user) {
         const scoreText=total>0?(unlocked+"/"+total+" \uD83C\uDF38"):(unlocked+" \uD83C\uDF38");
         return '<div>'+
           '<div class="level-progress-row" style="cursor:pointer" onclick="toggleLvlStats(\'lvl-'+l+'\',\'chev-'+l+'\')">'+ 
-          '<span class="level-prog-badge">'+l+'</span>'+
+          '<span class="level-prog-badge'+(l==="SPEAKING"?" speaking":"")+'">'+(l==="SPEAKING"?"SP":l)+'</span>'+
           '<div class="level-prog-bar-wrap"><div class="level-prog-bar" style="width:'+(total>0?pct:100)+'%"></div></div>'+
           '<span class="level-prog-text">'+scoreText+'</span>'+
           '<span id="chev-'+l+'" style="display:inline-flex;align-items:center;gap:3px;font-size:0.58rem;background:rgba(232,75,122,0.12);color:var(--pink);border:1px solid rgba(232,75,122,0.3);padding:2px 7px;border-radius:20px;margin-left:6px;flex-shrink:0;white-space:nowrap;transition:background 0.2s">'+t("myScoreBtn")+' &#9654;</span>'+
@@ -2493,7 +2501,7 @@ async function loadStudentContent(user) {
       }).join("");
       pw.innerHTML=rows||'<div style="color:var(--gray);font-size:0.82rem;padding:0.3rem">'+t("emptyContent")+'</div>';
 
-      ["N5","N4","N3","N2","N1"].filter(l=>lm[l]>0).forEach(function(l){
+      ["N5","N4","N3","N2","N1","SPEAKING"].filter(l=>lm[l]>0).forEach(function(l){
         const el=document.getElementById("lvl-"+l); if(!el) return;
         const locale=currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
         const exList=exByLvl[l]||[];
@@ -2501,21 +2509,23 @@ async function loadStudentContent(user) {
           return !e.title.includes("[TEST]")&&scMapPw[String(e.id)]&&scMapPw[String(e.id)].maxScore;
         }).map(function(e){const s=scMapPw[String(e.id)];return (s.score/s.maxScore)*10;});
         const avgEx=exSc.length?exSc.reduce(function(a,b){return a+b;},0)/exSc.length:null;
-        const byCat={GR:[],VO:[],LI:[],RE:[]};
+        // Collecter les entrées brutes [TEST] — cat via titre (japonais) ou courseT (SPEAKING)
+        const rawEntries=[];
         exList.filter(function(e){return e.title&&e.title.includes("[TEST]");}).forEach(function(e){
-          const cat=getTestCat(e.title); if(!cat)return;
+          const cat=(getTestCat(e.title))||(l==="SPEAKING"?getSpeakingCat(e.courseT):null); if(!cat)return;
           const sc=scMapPw[String(e.id)]; if(!sc||!sc.maxScore)return;
           const d=e.assignedDate?parseDate(e.assignedDate):null;
-          const ts=d?d.getTime():0; // utilisé seulement pour trier chronologiquement
-          byCat[cat].push({ts:ts,y:Math.round((sc.score/sc.maxScore)*100),label:d?d.toLocaleDateString(locale,{day:"numeric",month:"short"}):"-"});
+          const ts=d?d.getTime():0;
+          rawEntries.push({cat:cat,title:e.title,ts:ts,pct:Math.round((sc.score/sc.maxScore)*100)});
         });
-        // Trier chaque catégorie par date réelle — chaque test prend la position suivante (1,2,3...) sans regroupement
-        Object.keys(byCat).forEach(function(k){byCat[k].sort(function(a,b){return a.ts-b.ts;});});
-        const allPts=Object.keys(byCat).reduce(function(a,k){return a.concat(byCat[k]);},[]);
-        const lastByCat=Object.keys(byCat).map(function(k){const pts=byCat[k];return pts.length?pts[pts.length-1]:null;}).filter(Boolean);
-        const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b.y;},0)/lastByCat.length):null;
+        const axisData=buildTestAxisData(rawEntries);
+        const maxLen=axisData.maxLen;
+        const byCat=axisData.byCat;
+        const allPts=rawEntries;
+        const _levelCats=getCatSet(l);
+        const lastByCat=Object.keys(_levelCats).map(function(k){const arr=byCat[k]||[];for(var i=arr.length-1;i>=0;i--){if(arr[i]!==null&&arr[i]!==undefined)return arr[i];}return null;}).filter(Boolean);
+        const avgT=lastByCat.length?Math.round(lastByCat.reduce(function(a,b){return a+b;},0)/lastByCat.length):null;
         const cid="chart-"+l;
-        const maxLen=Math.max.apply(null,Object.keys(byCat).map(function(k){return byCat[k].length;}).concat([0]));
         el.innerHTML=
           '<div style="border-left:2px solid rgba(232,75,122,0.2);margin:0.2rem 0 0.4rem 0.7rem;padding:0.4rem 0.7rem">'+
           '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px">'+
@@ -2531,14 +2541,11 @@ async function loadStudentContent(user) {
         if(allPts.length&&window.Chart){
           setTimeout(function(){
             const ce=document.getElementById(cid); if(!ce)return;
-            // Axe X = position séquentielle (1,2,3...) — chaque catégorie avance indépendamment, sans regroupement par date
             const lbls=[];
             for(let i=0;i<maxLen;i++) lbls.push(String(i+1));
-            const dsets=Object.entries(TEST_CATS).map(function(kv){
+            const dsets=Object.entries(_levelCats).map(function(kv){
               const k=kv[0],v=kv[1];
-              const pts=byCat[k];
-              const data=[];
-              for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
+              const data=byCat[k]||[];
               return {label:v.label,data:data,
                 borderColor:v.color,backgroundColor:v.color+"18",pointBackgroundColor:v.color,borderWidth:1.5,tension:0.35,pointRadius:2,spanGaps:false};
             });
@@ -2868,6 +2875,10 @@ function translateCourseT(raw) {
   if (r.includes("listen") || r.includes("écoute"))      return { label: t("courseTypeListening"),  icon: "🔊" };
   if (r.includes("read") || r.includes("lecture"))       return { label: t("courseTypeReading"),    icon: "👁️" };
   if (r.includes("jlpt"))                                return { label: t("courseTypeJLPT"),       icon: "🏆" };
+  if (r.includes("advanced"))                            return { label: t("courseTypeAdvanced"),   icon: "🏅" };
+  if (r.includes("lower"))                               return { label: t("courseTypeLowerInter"), icon: "🌿" };
+  if (r.includes("intermediate"))                        return { label: t("courseTypeInter"),      icon: "🌳" };
+  if (r.includes("beginner"))                            return { label: t("courseTypeBeginner"),   icon: "🌱" };
   if (r.includes("exerc"))                               return { label: t("courseTypeExercices"),  icon: "✏️" };
   if (r.includes("test"))                                return { label: t("courseTypeTests"),      icon: "🎯" };
   return { label: raw || t("courseTypeOther"), icon: "📌" };
@@ -3637,8 +3648,8 @@ function toggleAdminLevel(rid, lvl) {
           // Essayer les deux préfixes (sp3 nouveau, sp2 ancien)
           const spId3 = "spark-wrap-sp3-"+lvl+"-"+sid;
           const spId2 = "spark-wrap-sp2-"+lvl+"-"+sid;
-          if (document.getElementById(spId3)) drawSparkline(spId3, data);
-          else if (document.getElementById(spId2)) drawSparkline(spId2, data);
+          if (document.getElementById(spId3)) drawSparkline(spId3, data, getCatSet(lvl));
+          else if (document.getElementById(spId2)) drawSparkline(spId2, data, getCatSet(lvl));
         }
       });
     });
@@ -3666,6 +3677,26 @@ var TEST_CATS = {
   LI: { label: "Listening",  color: "#3A8FC7" },
   RE: { label: "Reading",    color: "#3DAA6E" }
 };
+// Catégories pour le niveau SPEAKING (remplace GR/VO/LI/RE dans les graphiques)
+var SPEAKING_CATS = {
+  BE: { label: "Beginner",           color: "#E84B7A" },
+  LI: { label: "Lower Intermediate", color: "#7B5EA7" },
+  IN: { label: "Intermediate",       color: "#3A8FC7" },
+  AD: { label: "Advanced",           color: "#3DAA6E" }
+};
+// Retourne l'objet CATS approprié selon le niveau (SPEAKING vs japonais)
+function getCatSet(level) {
+  return (level === "SPEAKING") ? SPEAKING_CATS : TEST_CATS;
+}
+// Retourne la catégorie SPEAKING (BE/LI/IN/AD) à partir de courseT
+function getSpeakingCat(courseT) {
+  var t = (courseT||"").toUpperCase();
+  if (t.indexOf("ADVANCED")     !== -1) return "AD";
+  if (t.indexOf("LOWER")        !== -1) return "LI";
+  if (t.indexOf("INTERMEDIATE") !== -1) return "IN";
+  if (t.indexOf("BEGINNER")     !== -1) return "BE";
+  return null;
+}
 function getTestCat(title) {
   // Matcher [GR], [VO], [LI], [RE] directement ou après [JLPT]
   // ex: "[TEST][GR]..." ou "[TEST][JLPT]VO_..." ou "1_[TEST][JLPT]GR_..."
@@ -3681,6 +3712,12 @@ function getTestCat(title) {
 // Clé de groupement pour l'axe X des graphiques tests.
 // Les 4 matières d'une même session JLPT (ex: GR/VO/LI/RE_ZETTAI_第3回_N4)
 // partagent TOUJOURS la même position X. Un test non-JLPT garde sa propre position.
+// Badge de niveau — SPEAKING affiche "SP" en bleu (trop long sinon)
+function fmtLvlBadge(lvl) {
+  if (lvl === "SPEAKING") return '<span class="level-badge speaking-badge">SP</span>';
+  return '<span class="level-badge">'+lvl+'</span>';
+}
+
 function getTestGroupKey(title) {
   if (!title) return "?";
   var jlpt = title.match(/\[JLPT\](?:GR|VO|LI|RE)[_\s]?(.*)$/i);
@@ -3716,7 +3753,7 @@ function buildTestAxisData(entries) {
 
 // ── SPARKLINE ADMIN — canvas 2D pur, 4 lignes par catégorie ──
 var _sparkCharts = {};
-function drawSparkline(wrapId, byCat) {
+function drawSparkline(wrapId, byCat, catsObj) {
   var wrap = document.getElementById(wrapId);
   if (!wrap) return;
   wrap.innerHTML = "";
@@ -3728,7 +3765,6 @@ function drawSparkline(wrapId, byCat) {
   wrap.appendChild(canvas);
   var ctx = canvas.getContext("2d");
   var w=70,h=24,p=2;
-  // Reconstruire les entrées brutes {cat,title,ts,pct} pour buildTestAxisData
   var rawEntries = [];
   Object.entries(byCat).forEach(function(kv) {
     var cat = kv[0], pts = kv[1];
@@ -3742,7 +3778,8 @@ function drawSparkline(wrapId, byCat) {
   if (!maxLen) return;
   var pxF = function(i){ return maxLen>1 ? p+(i/(maxLen-1))*(w-2*p) : w/2; };
   var pyF = function(v){ return h-p-(v/100)*(h-2*p); };
-  Object.entries(TEST_CATS).forEach(function(kv) {
+  var _cats = catsObj || TEST_CATS;
+  Object.entries(_cats).forEach(function(kv) {
     var cat=kv[0], def=kv[1];
     var data = grouped[cat]||[];
     var pts = [];
@@ -3764,8 +3801,9 @@ async function openStudentChart(studentId, studentName, level) {
   overlay.id = "student-chart-modal";
   overlay.className = "levels-modal-overlay";
 
-  // Légende 4 catégories
-  const legendHtml = Object.entries(TEST_CATS).map(([k,v])=>
+  // Légende 4 catégories (adaptée au niveau : SPEAKING ou japonais)
+  const _chartCats = getCatSet(level||"");
+  const legendHtml = Object.entries(_chartCats).map(([k,v])=>
     '<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:var(--ink2)">'+
     '<span style="display:inline-block;width:16px;height:2.5px;background:'+v.color+';border-radius:2px"></span>'+v.label+'</span>'
   ).join("");
@@ -3790,38 +3828,31 @@ async function openStudentChart(studentId, studentName, level) {
     const scMap = {};
     (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
 
-    // Grouper les [TEST] par catégorie — chaque test prend la position suivante (1,2,3...) sans regroupement par date
-    const byCat = { GR:[], VO:[], LI:[], RE:[] };
+    // Collecter les entrées [TEST] avec catégorie (japonais via titre, SPEAKING via courseT)
+    const rawEntries = [];
     const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
     (exData.exercises||[])
       .filter(e=>e.title&&e.title.includes("[TEST]")&&(!level||e.level===level))
       .forEach(e=>{
-        const cat = getTestCat(e.title);
+        const cat = getTestCat(e.title) || (e.level==="SPEAKING" ? getSpeakingCat(e.courseT) : null);
         if (!cat) return;
         const sc = scMap[String(e.id)];
         if (!sc || !sc.maxScore) return;
         const d = e.assignedDate ? parseDate(e.assignedDate) : null;
-        const ts = d ? d.getTime() : 0; // utilisé seulement pour trier chronologiquement
-        const label = d ? d.toLocaleDateString(locale,{day:"numeric",month:"short",year:"2-digit"}) : "—";
-        byCat[cat].push({ label, ts, y: Math.round((sc.score/sc.maxScore)*100) });
+        const ts = d ? d.getTime() : 0;
+        rawEntries.push({ cat, title: e.title, ts, pct: Math.round((sc.score/sc.maxScore)*100) });
       });
 
-    // Trier chaque catégorie par date réelle (pas d'agrégation/regroupement)
-    Object.keys(byCat).forEach(k=>{ byCat[k].sort((a,b)=>a.ts-b.ts); });
-
     document.getElementById("scm-loading").style.display="none";
-    const hasData = Object.values(byCat).some(a=>a.length>0);
-    if (!hasData) { document.getElementById("scm-empty").style.display="block"; return; }
+    if (!rawEntries.length) { document.getElementById("scm-empty").style.display="block"; return; }
 
-    // Axe X = position séquentielle — la plus longue catégorie définit le nombre de positions
-    const maxLen = Math.max(...Object.values(byCat).map(a=>a.length), 0);
+    // Axe X groupé par session (JLPT fusionné, SPEAKING individuel)
+    const { maxLen, byCat } = buildTestAxisData(rawEntries);
     const labels = [];
     for(let i=0;i<maxLen;i++) labels.push(String(i+1));
 
-    const datasets = Object.entries(TEST_CATS).map(([k,v])=>{
-      const pts = byCat[k];
-      const data = [];
-      for(let i=0;i<maxLen;i++) data.push(i<pts.length?pts[i].y:null);
+    const datasets = Object.entries(_chartCats).map(([k,v])=>{
+      const data = byCat[k] || [];
       return {
         label: v.label,
         data: data,
@@ -4236,7 +4267,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   });
 
   const LEVEL_ICONS  = { N4:"\u{1F4D8}", N5:"\u{1F4D7}", N3:"\u{1F4D9}", N2:"\u{1F4D5}", N1:"\u{1F4D4}" };
-  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F" };
+  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F", Beginner:"🌱", "Lower Intermediate":"🌿", Intermediate:"🌳", Advanced:"🏅" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
@@ -4726,6 +4757,10 @@ var TRANSLATIONS = {
     courseTypeExercices: "Bài tập",
     courseTypeTests:     "Kiểm tra",
     courseTypeJLPT:      "JLPT",
+    courseTypeBeginner:  "Người mới bắt đầu",
+    courseTypeLowerInter:"Dưới trung cấp",
+    courseTypeInter:     "Trung cấp",
+    courseTypeAdvanced:  "Nâng cao",
     courseTypeOther:     "Khác",
     syncDriveTitle: "Cập nhật nội dung",
     syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
@@ -4931,6 +4966,10 @@ var TRANSLATIONS = {
     courseTypeExercices: "Exercises",
     courseTypeTests:     "Tests",
     courseTypeJLPT:      "JLPT",
+    courseTypeBeginner:  "Beginner",
+    courseTypeLowerInter:"Lower Intermediate",
+    courseTypeInter:     "Intermediate",
+    courseTypeAdvanced:  "Advanced",
     courseTypeOther:     "Other",
     syncDriveTitle: "Update Content",
     syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
@@ -5136,6 +5175,10 @@ var TRANSLATIONS = {
     courseTypeExercices: "Exercices",
     courseTypeTests:     "Tests",
     courseTypeJLPT:      "JLPT",
+    courseTypeBeginner:  "Débutant",
+    courseTypeLowerInter:"Intermédiaire inf.",
+    courseTypeInter:     "Intermédiaire",
+    courseTypeAdvanced:  "Avancé",
     courseTypeOther:     "Autre",
     syncDriveTitle: "Mise à jour des contenus",
     syncDriveHint: "Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.",
@@ -5424,7 +5467,7 @@ async function loadAdminDashboard(forceRefresh) {
     if(!stuCount) return "";
     return '<div class="dash-avg-level-row" style="opacity:0.5">'+
       '<div class="dash-avg-level-header">'+
-      '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+      '<span class="dash-avg-level-badge'+(lvl==="SPEAKING"?' speaking':'')+'">'+(lvl==="SPEAKING"?'SP':lvl)+'</span>'+
       '<span class="dash-avg-level-label">'+stuCount+' élève'+(stuCount>1?"s":"")+'</span>'+
       '<span class="dash-avg-level-score" style="color:var(--gray)">—</span>'+
       '</div></div>';
@@ -5485,7 +5528,7 @@ async function loadAdminDashboard(forceRefresh) {
       ).join("");
       return '<div class="dash-avg-level-row" id="'+rid+'">'+
         '<div class="dash-avg-level-header" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'open\')">'+
-        '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+        '<span class="dash-avg-level-badge'+(lvl==="SPEAKING"?' speaking':'')+'">'+(lvl==="SPEAKING"?'SP':lvl)+'</span>'+
         '<span class="dash-avg-level-label">'+t("students", se.length)+'</span>'+
         '<span class="dash-avg-level-score">'+la+'/10</span>'+
         '<span class="dash-avg-level-arrow">▼</span>'+
@@ -5514,7 +5557,7 @@ async function loadAdminStats(forceRefresh) {
     if(!stuCount) return "";
     return '<div class="dash-avg-level-row" style="opacity:0.45">'+
       '<div class="dash-avg-level-header">'+
-      '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+      '<span class="dash-avg-level-badge'+(lvl==="SPEAKING"?' speaking':'')+'">'+(lvl==="SPEAKING"?'SP':lvl)+'</span>'+
       '<span class="dash-avg-level-label">'+stuCount+' élève'+(stuCount>1?"s":"")+'</span>'+
       '<span class="dash-avg-level-score" style="color:var(--gray)">—</span>'+
       '<span class="dash-avg-level-arrow">▼</span>'+
@@ -5556,7 +5599,8 @@ async function loadAdminStats(forceRefresh) {
       elm[String(ex.id)] = ex.level||"?"; // fallback global (dernier vu)
       exOwnerLevel[compKey] = ex.level||"?";
       if(ex.title&&ex.title.includes("[TEST]")){
-        testExMap[compKey]={level:ex.level||"?", cat:getTestCat(ex.title), date:ex.assignedDate||"", title:ex.title||""};
+        var _cat = getTestCat(ex.title) || (ex.level==="SPEAKING" ? getSpeakingCat(ex.courseT) : null);
+        testExMap[compKey]={level:ex.level||"?", cat:_cat, date:ex.assignedDate||"", title:ex.title||""};
       }
     });
     const testExIds=new Set(Object.keys(testExMap).map(k=>k.split("_")[0]));
@@ -5600,7 +5644,7 @@ async function loadAdminStats(forceRefresh) {
       if(!ex||!ex.cat||!sc.maxScore)return;
       if(!activeIds.has(String(sc.studentId)))return;
       const key=String(sc.studentId)+"_"+ex.level;
-      if(!stuTestScores[key])stuTestScores[key]={GR:[],VO:[],LI:[],RE:[]};
+      if(!stuTestScores[key]) stuTestScores[key] = (ex.level==="SPEAKING") ? {BE:[],LI:[],IN:[],AD:[]} : {GR:[],VO:[],LI:[],RE:[]};
       const ts=ex.date?(parseDate(ex.date)||new Date()).getTime():Date.now();
       stuTestScores[key][ex.cat].push({ts,pct:Math.round((sc.score/sc.maxScore)*100),title:ex.title||""});
     });
@@ -5665,7 +5709,7 @@ async function loadAdminStats(forceRefresh) {
 
       return '<div class="dash-avg-level-row" id="'+rid+'">'+
         '<div class="dash-avg-level-header" onclick="toggleAdminLevel(\''+rid+'\',\''+lvl+'\')">'+
-          '<span class="dash-avg-level-badge">'+lvl+'</span>'+
+          '<span class="dash-avg-level-badge'+(lvl==="SPEAKING"?' speaking':'')+'">'+(lvl==="SPEAKING"?'SP':lvl)+'</span>'+
           '<span class="dash-avg-level-label">'+t("students", stuInLevel.length)+'</span>'+
           (la!=="—"?'<span class="dash-avg-level-score">'+la+'/10</span>':'<span class="dash-avg-level-score" style="color:var(--gray)">—</span>')+
           '<span class="dash-avg-level-arrow">▼</span>'+
@@ -5699,7 +5743,7 @@ function stuInLevel_all(er,sr,stuTestScores,activeIds){
     const sid=parts[0], lvl=parts.slice(1).join("_");
     const spId="sp3-"+lvl+"-"+sid;
     const wrap=document.getElementById("spark-wrap-"+spId);
-    if(wrap) drawSparkline("spark-wrap-"+spId, byCat);
+    if(wrap) drawSparkline("spark-wrap-"+spId, byCat, getCatSet(lvl));
   });
 }
 
@@ -5830,10 +5874,10 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return;
   }
 
-  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt"];
-  const LEVELS = ["N5","N4","N3","N2","N1"];
-  // Fixed order: 1=Grammar, 2=Vocabulary, 3=Listening, 4=Reading
-  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5 };
+  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt","beginner","lower","intermediate","advanced"];
+  const LEVELS = ["N5","N4","N3","N2","N1","SPEAKING"];
+  // Fixed order: 1=Grammar/Beginner, 2=Vocabulary/Lower, 3=Listening/Inter, 4=Reading/Advanced
+  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5, beginner: 1, lower: 2, intermediate: 3, advanced: 4 };
   function getSubjectOrderKey(ct) {
     const ctL = (ct||"").toLowerCase();
     if (ctL.includes("gram")) return 1;
@@ -5841,6 +5885,10 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     if (ctL.includes("listen") || ctL.includes("écoute")) return 3;
     if (ctL.includes("read") || ctL.includes("lecture")) return 4;
     if (ctL.includes("jlpt")) return 5;
+    if (ctL.includes("advanced")) return 4;
+    if (ctL.includes("lower")) return 2;
+    if (ctL.includes("intermediate")) return 3;
+    if (ctL.includes("beginner")) return 1;
     return 99;
   }
   const subjectOrder = {};
@@ -5993,7 +6041,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     }).join("");
     return '<div class="level-accordion level-row has-content" id="level-row-'+lvl+'">'+
       '<div class="level-header" onclick="toggleLevel(\''+lvl+'\')">'+
-      '<span class="level-badge">'+lvl+'</span>'+
+      fmtLvlBadge(lvl)+
       '<span class="level-label">'+t("contenus", totalInLevel)+'</span>'+
       '<span class="level-unlocked" style="color:'+(unlockedInLevel===totalInLevel&&totalInLevel>0?'var(--pink)':'var(--gray)')+';font-weight:600">'+unlockedInLevel+'/'+totalInLevel+(unlockedInLevel===totalInLevel&&totalInLevel>0?' 🌸':'')+'</span>'+
       '<span class="level-arrow">▼</span></div>'+
