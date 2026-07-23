@@ -1582,6 +1582,9 @@
       <button class="btn-save-pin" id="btn-force-sync" onclick="forceSync()" style="background:linear-gradient(135deg,#7BAFD4,#5a9ac4)">
         🔄 <span id="sync-btn-label">Forcer la synchronisation</span>
       </button>
+      <button class="btn-save-pin" id="btn-dedup-content" onclick="doDeduplicateContent()" style="background:linear-gradient(135deg,#7B5EA7,#5a3a8a);margin-top:0.6rem">
+        🧹 Supprimer les doublons (CONTENT)
+      </button>
     </div>
   </div>
 </div>
@@ -2142,6 +2145,21 @@ async function runSyncStep(step) {
     btn.textContent = step < 4 ? "↻" : "✓";
   }
 }
+async function doDeduplicateContent() {
+  var btn = document.getElementById("btn-dedup-content");
+  if(btn) { btn.disabled=true; btn.textContent="⏳ En cours..."; }
+  try {
+    var r = await api({ action:"deduplicateContent", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      _cacheDel(CACHE_ALL_CONTENT_KEY);
+      toast("✅ " + r.removed + " doublon(s) supprimé(s) du Sheet CONTENT", "success");
+    } else {
+      toast("❌ " + (r&&r.message||"Erreur"), "error");
+    }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🧹 Supprimer les doublons (CONTENT)"; }
+}
+
 async function forceSyncAdmin() {
   const btn = document.getElementById("btn-admin-sync");
   if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
