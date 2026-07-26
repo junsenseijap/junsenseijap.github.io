@@ -1585,6 +1585,12 @@
       <button class="btn-save-pin" id="btn-dedup-content" onclick="doDeduplicateContent()" style="background:linear-gradient(135deg,#7B5EA7,#5a3a8a);margin-top:0.6rem">
         🧹 Supprimer les doublons (CONTENT)
       </button>
+      <button class="btn-save-pin" id="btn-clean-bad-rows" onclick="doCleanBadContentRows()" style="background:linear-gradient(135deg,#c0392b,#922b21);margin-top:0.6rem">
+        🚑 Étape A — Supprimer les lignes corrompues
+      </button>
+      <button class="btn-save-pin" id="btn-sync-ex-tabs" onclick="doSyncExercisesSheetTabs()" style="background:linear-gradient(135deg,#e67e22,#ca6f1e);margin-top:0.3rem">
+        🔧 Étape C — Corriger les exercices étudiants
+      </button>
     </div>
   </div>
 </div>
@@ -2145,6 +2151,33 @@ async function runSyncStep(step) {
     btn.textContent = step < 4 ? "↻" : "✓";
   }
 }
+async function doCleanBadContentRows() {
+  var btn = document.getElementById("btn-clean-bad-rows");
+  if(btn) { btn.disabled=true; btn.textContent="⏳ Nettoyage..."; }
+  try {
+    var r = await api({ action:"cleanBadContentRows", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      _cacheDel(CACHE_ALL_CONTENT_KEY);
+      toast("✅ Étape A : "+r.deleted+" ligne(s) corrompue(s) supprimée(s). Lance maintenant l'Étape B (Configurer les formulaires — bouton ② dans Mise à jour des contenus), puis l'Étape C.", "success");
+    } else { toast("❌ "+(r&&r.message||"Erreur"), "error"); }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🚑 Étape A — Supprimer les lignes corrompues"; }
+}
+
+async function doSyncExercisesSheetTabs() {
+  var btn = document.getElementById("btn-sync-ex-tabs");
+  if(btn) { btn.disabled=true; btn.textContent="⏳ Correction..."; }
+  try {
+    var r = await api({ action:"syncExercisesSheetTabs", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      toast("✅ Étape C : "+r.updated+" exercice(s) corrigé(s). Fais un Forcer la synchronisation.", "success");
+    } else { toast("❌ "+(r&&r.message||"Erreur"), "error"); }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🔧 Étape C — Corriger les exercices étudiants"; }
+}
+
+async function doRecoverDuplicateContent() {} // gardé pour compatibilité
+
 async function doDeduplicateContent() {
   var btn = document.getElementById("btn-dedup-content");
   if(btn) { btn.disabled=true; btn.textContent="⏳ En cours..."; }
