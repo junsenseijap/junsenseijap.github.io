@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特訓 — 漢字れんしゅう</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap');
+
+  :root{
+    --sumi:#1c1a17;
+    --washi:#f3ede1;
+    --washi-2:#eae1cf;
+    --shu:#c0392f;      /* vermillon hanko */
+    --shu-dark:#93271e;
+    --ai:#2c4a5e;        /* bleu indigo */
+    --gold:#b98a3d;
+    --line:#d9cdb2;
+    --ok:#3a7d5c;
+    --bad:#c0392f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 90% -10%, rgba(192,57,47,0.07), transparent 40%),
+      radial-gradient(circle at -10% 110%, rgba(44,74,94,0.08), transparent 45%),
+      var(--washi);
+    color:var(--sumi);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+
+  /* header */
+  header{
+    display:flex;align-items:center;gap:16px;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:2px solid var(--sumi);
+  }
+  .hanko{
+    width:56px;height:56px;flex:none;
+    background:var(--shu);
+    color:var(--washi);
+    border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Shippori Mincho',serif;
+    font-size:26px;font-weight:700;
+    box-shadow: 3px 3px 0 rgba(28,26,23,0.15);
+    transform:rotate(-2deg);
+  }
+  header h1{
+    font-family:'Shippori Mincho',serif;
+    font-size:26px;
+    margin:0;
+    line-height:1.15;
+    letter-spacing:.02em;
+  }
+  header p{margin:2px 0 0;font-size:13px;color:#6b6255;letter-spacing:.04em;}
+
+  /* progress */
+  .stats{
+    display:flex;gap:10px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    background:#fff;
+    border:1.5px solid var(--sumi);
+    border-radius:10px;
+    padding:8px 14px;
+    font-size:13px;
+    display:flex;align-items:baseline;gap:6px;
+    box-shadow:2px 2px 0 rgba(28,26,23,0.08);
+  }
+  .stat b{font-size:18px;font-family:'Shippori Mincho',serif;}
+  .stat.ok b{color:var(--ok);}
+  .stat.pending b{color:var(--gold);}
+
+  /* nav modes */
+  nav.modes{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:26px;
+  }
+  nav.modes button{
+    font-family:inherit;
+    background:#fff;
+    border:1.5px solid var(--sumi);
+    border-radius:10px;
+    padding:10px 4px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    color:var(--sumi);
+    transition:transform .12s ease, background .12s ease, color .12s ease;
+    box-shadow:2px 2px 0 rgba(28,26,23,0.12);
+  }
+  nav.modes button .jp{display:block;font-family:'Shippori Mincho',serif;font-size:16px;margin-bottom:2px;}
+  nav.modes button:hover{transform:translateY(-2px);}
+  nav.modes button.active{
+    background:var(--sumi);
+    color:var(--washi);
+    box-shadow:2px 2px 0 var(--shu);
+  }
+
+  section.panel{
+    background:#fffdf8;
+    border:2px solid var(--sumi);
+    border-radius:16px;
+    padding:26px 22px;
+    box-shadow:4px 4px 0 rgba(28,26,23,0.10);
+    min-height:340px;
+    position:relative;
+  }
+  .panel-title{
+    font-family:'Shippori Mincho',serif;
+    font-size:15px;
+    color:#6b6255;
+    margin:0 0 18px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel-title .count{font-size:12px;color:#a89d88;}
+
+  /* FLASHCARDS */
+  .card-stage{display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .flashcard{
+    width:100%;max-width:340px;height:230px;
+    perspective:1200px;
+    cursor:pointer;
+  }
+  .flashcard-inner{
+    position:relative;width:100%;height:100%;
+    transition:transform .5s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    border:2px solid var(--sumi);
+    border-radius:14px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#fff;
+  }
+  .face.front{font-size:64px;font-family:'Shippori Mincho',serif;}
+  .face.back{
+    transform:rotateY(180deg);
+    background:var(--ai);
+    color:var(--washi);
+  }
+  .face.back .reading{font-size:34px;font-family:'Shippori Mincho',serif;}
+  .face.back .hint{font-size:12px;opacity:.7;margin-top:8px;letter-spacing:.05em;}
+  .flash-controls{display:flex;gap:10px;}
+  .flash-controls button{
+    font-family:inherit;font-weight:700;font-size:14px;
+    border-radius:24px;padding:10px 20px;border:1.5px solid var(--sumi);
+    background:#fff;cursor:pointer;
+  }
+  .flash-controls button.know{border-color:var(--ok);color:var(--ok);}
+  .flash-controls button.dontknow{border-color:var(--shu);color:var(--shu);}
+  .flash-controls button:active{transform:scale(.96);}
+
+  /* QUIZ */
+  .quiz-prompt{
+    text-align:center;
+    font-family:'Shippori Mincho',serif;
+    font-size:52px;
+    margin:6px 0 26px;
+  }
+  .quiz-sub{text-align:center;font-size:13px;color:#8a8070;margin-top:-18px;margin-bottom:20px;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{
+    font-family:inherit;
+    background:#fff;border:1.5px solid var(--sumi);border-radius:10px;
+    padding:16px 10px;font-size:20px;cursor:pointer;
+    font-family:'Shippori Mincho',serif;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .opt:hover{background:var(--washi-2);}
+  .opt.correct{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .opt.wrong{background:var(--bad);border-color:var(--bad);color:#fff;}
+  .opt[disabled]{cursor:default;}
+
+  /* ECRITURE */
+  .write-kanji{
+    text-align:center;font-family:'Shippori Mincho',serif;font-size:70px;margin-bottom:8px;
+  }
+  .write-sub{text-align:center;font-size:13px;color:#8a8070;margin-bottom:22px;}
+  .write-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  input#writeInput{
+    font-family:'Shippori Mincho',serif;
+    font-size:22px;padding:10px 14px;border:1.5px solid var(--sumi);border-radius:10px;
+    width:220px;text-align:center;background:#fff;
+  }
+  input#writeInput:focus{outline:2px solid var(--ai);}
+  button.submitbtn{
+    font-family:inherit;font-weight:700;background:var(--sumi);color:var(--washi);
+    border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-size:14px;
+  }
+  .write-feedback{text-align:center;margin-top:16px;font-size:15px;min-height:24px;}
+  .write-feedback.ok{color:var(--ok);font-weight:700;}
+  .write-feedback.bad{color:var(--bad);font-weight:700;}
+
+  /* MATCH */
+  .match-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  }
+  .match-col{display:flex;flex-direction:column;gap:8px;}
+  .match-item{
+    font-family:'Shippori Mincho',serif;
+    border:1.5px solid var(--sumi);border-radius:10px;
+    padding:10px;text-align:center;cursor:pointer;background:#fff;font-size:18px;
+    transition:background .15s,color .15s;
+  }
+  .match-item.kanji{font-size:24px;}
+  .match-item.selected{background:var(--ai);color:#fff;border-color:var(--ai);}
+  .match-item.solved{background:var(--ok);color:#fff;border-color:var(--ok);opacity:.55;cursor:default;}
+  .match-item.shake{animation:shake .3s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+
+  .end-screen{text-align:center;padding:30px 10px;}
+  .end-screen .big{font-family:'Shippori Mincho',serif;font-size:40px;margin-bottom:6px;}
+  .end-screen p{color:#6b6255;font-size:14px;}
+  .end-screen button{
+    margin-top:16px;font-family:inherit;font-weight:700;background:var(--sumi);color:var(--washi);
+    border:none;border-radius:10px;padding:12px 24px;cursor:pointer;font-size:14px;
+  }
+
+  footer{
+    text-align:center;margin-top:26px;font-size:11.5px;color:#a89d88;letter-spacing:.04em;
+  }
+
+  @media (max-width:420px){
+    nav.modes{grid-template-columns:repeat(2,1fr);}
+    .options{grid-template-columns:1fr;}
+    .match-grid{gap:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">漢</div>
+    <div>
+      <h1>特訓 — 漢字れんしゅう</h1>
+      <p>家族の語彙 · 全24語</p>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">24</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span>単語帳</button>
+    <button data-mode="quiz"><span class="jp">選択</span>クイズ</button>
+    <button data-mode="write"><span class="jp">記入</span>記入</button>
+    <button data-mode="match"><span class="jp">対戦</span>対戦</button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>日本語クラスのために作成</footer>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const VOCAB = [
+  {k:"夫", r:"おっと"},
+  {k:"会社員", r:"かいしゃいん"},
+  {k:"妻", r:"つま"},
+  {k:"毎日", r:"まいにち"},
+  {k:"料理", r:"りょうり"},
+  {k:"作ります", r:"つくります"},
+  {k:"家内", r:"かない"},
+  {k:"行く", r:"いく"},
+  {k:"祖父", r:"そふ"},
+  {k:"祖母", r:"そぼ"},
+  {k:"今年", r:"ことし"},
+  {k:"八十歳", r:"はたち"},
+  {k:"花", r:"はな"},
+  {k:"大好き", r:"だいすき"},
+  {k:"今日", r:"きょう"},
+  {k:"帰る", r:"かえる"},
+  {k:"息子", r:"むすこ"},
+  {k:"娘", r:"むすめ"},
+  {k:"赤ちゃん", r:"あかちゃん"},
+  {k:"元気", r:"げんき"},
+  {k:"公園", r:"こうえん"},
+  {k:"泣く", r:"なく"},
+  {k:"運動", r:"うんどう"},
+  {k:"彼女", r:"かのじょ"},
+  {k:"読書", r:"どくしょ"},
+  {k:"男性", r:"だんせい"},
+  {k:"女性", r:"じょせい"},
+  {k:"少ない", r:"すくない"},
+];
+
+const STORAGE_KEY = "kanji_famille_progress_v1";
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  const p = {};
+  VOCAB.forEach(v=> p[v.k] = {known:false});
+  return p;
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+let progress = loadProgress();
+let streak = Number(localStorage.getItem(STORAGE_KEY+"_streak") || 0);
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function updateStats(){
+  const known = Object.values(progress).filter(p=>p.known).length;
+  document.getElementById('statKnown').textContent = known;
+  document.getElementById('statTotal').textContent = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+/* ---------- NAV ---------- */
+const panel = document.getElementById('panel');
+document.querySelectorAll('nav.modes button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.modes button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode){
+  if(mode==='flash') renderFlash();
+  else if(mode==='quiz') renderQuiz();
+  else if(mode==='write') renderWrite();
+  else if(mode==='match') renderMatch();
+}
+
+/* ---------- FLASHCARDS ---------- */
+let flashOrder = shuffle(VOCAB);
+let flashIndex = 0;
+
+function renderFlash(){
+  if(flashIndex >= flashOrder.length){
+    panel.innerHTML = endScreen("単語帳 終了", "全部見ました！", ()=>{
+      flashOrder = shuffle(VOCAB); flashIndex = 0; renderFlash();
+    });
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex+1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">${item.k}</div>
+          <div class="face back">
+            <div class="reading">${item.r}</div>
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="dontknow">✗ もう一度</button>
+        <button class="know">✓ わかる</button>
+      </div>
+    </div>
+  `;
+  const card = document.getElementById('flashcard');
+  card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+
+  panel.querySelector('.know').addEventListener('click', ()=>{
+    progress[item.k].known = true; saveProgress(); streak++; updateStats();
+    flashIndex++; renderFlash();
+  });
+  panel.querySelector('.dontknow').addEventListener('click', ()=>{
+    progress[item.k].known = false; saveProgress(); streak=0; updateStats();
+    flashIndex++; renderFlash();
+  });
+}
+
+/* ---------- QCM ---------- */
+let quizPool = shuffle(VOCAB);
+let quizIndex = 0;
+const QUIZ_LEN = 12;
+
+function renderQuiz(){
+  if(quizIndex >= QUIZ_LEN){
+    panel.innerHTML = endScreen("クイズ 終了", "クイズ終了！", ()=>{
+      quizPool = shuffle(VOCAB); quizIndex = 0; renderQuiz();
+    });
+    return;
+  }
+  const item = quizPool[quizIndex % quizPool.length];
+  const askKanji = Math.random() < 0.5; // true: montre kanji, choisir lecture / false: montre lecture, choisir kanji
+  const prompt = askKanji ? item.k : item.r;
+  const promptLabel = askKanji ? "読み方は？" : "漢字は？";
+
+  let distractors = shuffle(VOCAB.filter(v=>v.k!==item.k)).slice(0,3);
+  let options = shuffle([item, ...distractors]).map(v => askKanji ? v.r : v.k);
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex+1} / ${QUIZ_LEN}</span></p>
+    <div class="quiz-prompt">${prompt}</div>
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${options.map(o=>`<button class="opt" data-val="${o}">${o}</button>`).join('')}
+    </div>
+  `;
+
+  const correctVal = askKanji ? item.r : item.k;
+  panel.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      panel.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+      if(btn.dataset.val === correctVal){
+        btn.classList.add('correct');
+        progress[item.k].known = true; streak++;
+      } else {
+        btn.classList.add('wrong');
+        panel.querySelectorAll('.opt').forEach(b=>{ if(b.dataset.val===correctVal) b.classList.add('correct'); });
+        progress[item.k].known = false; streak=0;
+      }
+      saveProgress(); updateStats();
+      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 800);
+    });
+  });
+}
+
+/* ---------- ECRITURE ---------- */
+let writeOrder = shuffle(VOCAB);
+let writeIndex = 0;
+
+function renderWrite(){
+  if(writeIndex >= writeOrder.length){
+    panel.innerHTML = endScreen("記入 終了", "終了しました！", ()=>{
+      writeOrder = shuffle(VOCAB); writeIndex = 0; renderWrite();
+    });
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex+1} / ${writeOrder.length}</span></p>
+    <div class="write-kanji">${item.k}</div>
+    <p class="write-sub">読み方をひらがなで入力</p>
+    <div class="write-row">
+      <input id="writeInput" type="text" autocomplete="off" autocapitalize="off" placeholder="ひらがな">
+      <button class="submitbtn" id="writeSubmit">確認</button>
+    </div>
+    <div class="write-feedback" id="writeFeedback"></div>
+  `;
+  const input = document.getElementById('writeInput');
+  const feedback = document.getElementById('writeFeedback');
+  input.focus();
+
+  function check(){
+    const val = input.value.trim();
+    if(!val) return;
+    if(val === item.r){
+      feedback.textContent = "正解！";
+      feedback.className = "write-feedback ok";
+      progress[item.k].known = true; streak++;
+    } else {
+      feedback.textContent = `残念、正解は ${item.r}`;
+      feedback.className = "write-feedback bad";
+      progress[item.k].known = false; streak=0;
+    }
+    saveProgress(); updateStats();
+    input.disabled = true;
+    document.getElementById('writeSubmit').disabled = true;
+    setTimeout(()=>{ writeIndex++; renderWrite(); }, 1100);
+  }
+  document.getElementById('writeSubmit').addEventListener('click', check);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') check(); });
+}
+
+/* ---------- ASSOCIATION ---------- */
+let matchSet = [];
+let matchSelectedLeft = null;
+let matchSelectedRight = null;
+let matchSolved = new Set();
+
+function newMatchRound(){
+  matchSet = shuffle(VOCAB).slice(0,6);
+  matchSelectedLeft = null;
+  matchSelectedRight = null;
+  matchSolved = new Set();
+}
+
+function renderMatch(){
+  if(matchSet.length===0) newMatchRound();
+  if(matchSolved.size === matchSet.length){
+    panel.innerHTML = endScreen("対戦 終了", "全部そろいました！", ()=>{
+      newMatchRound(); renderMatch();
+    });
+    return;
+  }
+  const leftItems = matchSet;
+  const rightItems = shuffle(matchSet);
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchSolved.size} / ${matchSet.length} 組</span></p>
+    <div class="match-grid">
+      <div class="match-col" id="matchLeft">
+        ${leftItems.map(v=>`<div class="match-item kanji ${matchSolved.has(v.k)?'solved':''}" data-k="${v.k}">${v.k}</div>`).join('')}
+      </div>
+      <div class="match-col" id="matchRight">
+        ${rightItems.map(v=>`<div class="match-item reading ${matchSolved.has(v.k)?'solved':''}" data-k="${v.k}">${v.r}</div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  panel.querySelectorAll('.match-item.kanji').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.kanji').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      matchSelectedLeft = el.dataset.k;
+      tryMatch();
+    });
+  });
+  panel.querySelectorAll('.match-item.reading').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.reading').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      matchSelectedRight = el.dataset.k;
+      tryMatch();
+    });
+  });
+
+  function tryMatch(){
+    if(matchSelectedLeft && matchSelectedRight){
+      if(matchSelectedLeft === matchSelectedRight){
+        matchSolved.add(matchSelectedLeft);
+        progress[matchSelectedLeft].known = true; streak++;
+        saveProgress(); updateStats();
+        matchSelectedLeft = null; matchSelectedRight = null;
+        renderMatch();
+      } else {
+        const badKey = matchSelectedLeft;
+        streak = 0; updateStats();
+        const leftEl = panel.querySelector(`.match-item.kanji[data-k="${matchSelectedLeft}"]`);
+        const rightEl = panel.querySelector(`.match-item.reading[data-k="${matchSelectedRight}"]`);
+        [leftEl,rightEl].forEach(e=> e && e.classList.add('shake'));
+        setTimeout(()=>{
+          [leftEl,rightEl].forEach(e=>{
+            if(e){ e.classList.remove('shake'); e.classList.remove('selected'); }
+          });
+          matchSelectedLeft = null; matchSelectedRight = null;
+        }, 350);
+      }
+    }
+  }
+}
+
+/* ---------- END SCREEN ---------- */
+function endScreen(title, subtitle){
+  const known = Object.values(progress).filter(p=>p.known).length;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <button id="restartBtn">もう一度</button>
+    </div>
+  `;
+}
+
+panel.addEventListener('click', (e)=>{
+  if(e.target && e.target.id === 'restartBtn'){
+    // find active mode
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if(mode==='flash'){ flashOrder = shuffle(VOCAB); flashIndex = 0; }
+    if(mode==='quiz'){ quizPool = shuffle(VOCAB); quizIndex = 0; }
+    if(mode==='write'){ writeOrder = shuffle(VOCAB); writeIndex = 0; }
+    if(mode==='match'){ newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ---------- INIT ---------- */
+updateStats();
+render('flash');
+</script>
+</body>
+</html>
