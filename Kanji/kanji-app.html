@@ -5,60 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>特訓 — 漢字れんしゅう</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
 
   :root{
-    --sumi:#1c1a17;
-    --washi:#f3ede1;
-    --washi-2:#eae1cf;
-    --shu:#c0392f;      /* vermillon hanko */
-    --shu-dark:#93271e;
-    --ai:#2c4a5e;        /* bleu indigo */
-    --gold:#b98a3d;
-    --line:#d9cdb2;
-    --ok:#3a7d5c;
-    --bad:#c0392f;
+    /* Palette Hanami — reprise du style Jun Sensei */
+    --pink:        #E84B7A;
+    --pink-mid:    #F07099;
+    --pink-soft:   #F9C0D0;
+    --pink-pale:   #FDE8EF;
+    --pink-glow:   rgba(232,75,122,0.15);
+    --blue:        #7BAFD4;
+    --blue-pale:   #D6EBF7;
+    --sage:        #4a8a55;
+    --sage-pale:   rgba(158,196,160,0.22);
+    --gold:        #C89B3C;
+    --bg:          #FAFAFA;
+    --bg-card:     #FFFFFF;
+    --bg-soft:     #F5F0F3;
+    --border:      rgba(232,75,122,0.16);
+    --border-blue: rgba(123,175,212,0.3);
+    --ink:         #2C1A22;
+    --ink2:        #5A3D4A;
+    --gray:        #9A8590;
+    --shadow:      rgba(44,26,34,0.08);
+    --shadow-pink: rgba(232,75,122,0.14);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(circle at 90% -10%, rgba(192,57,47,0.07), transparent 40%),
-      radial-gradient(circle at -10% 110%, rgba(44,74,94,0.08), transparent 45%),
-      var(--washi);
-    color:var(--sumi);
-    font-family:'Shippori Mincho', serif;
+      radial-gradient(ellipse 60% 40% at 5% 0%, rgba(249,192,208,0.35) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 35% at 98% 5%, rgba(123,175,212,0.20) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 50% 110%, rgba(249,192,208,0.20) 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'DM Sans', sans-serif;
     min-height:100vh;
     padding:24px 16px 60px;
+    position:relative;
   }
-  .wrap{max-width:760px;margin:0 auto;}
+  .wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
 
   /* header */
   header{
     display:flex;align-items:center;gap:16px;
     margin-bottom:22px;
     padding-bottom:18px;
-    border-bottom:2px solid var(--sumi);
+    border-bottom:1px solid var(--border);
   }
   .hanko{
     width:56px;height:56px;flex:none;
-    background:var(--shu);
-    color:var(--washi);
-    border-radius:6px;
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
+    color:#fff;
+    border-radius:16px;
     display:flex;align-items:center;justify-content:center;
-    font-family:'Shippori Mincho',serif;
+    font-family:'Noto Serif JP',serif;
     font-size:26px;font-weight:700;
-    box-shadow: 3px 3px 0 rgba(28,26,23,0.15);
-    transform:rotate(-2deg);
+    box-shadow: 0 4px 16px rgba(232,75,122,0.35);
   }
   header h1{
-    font-family:'Shippori Mincho',serif;
-    font-size:26px;
+    font-family:'Zen Antique Soft',serif;
+    font-size:28px;font-weight:400;
     margin:0;
-    line-height:1.15;
-    letter-spacing:.02em;
+    line-height:1.2;
+    letter-spacing:.04em;
+    color:var(--ink);
   }
-  header p{margin:2px 0 0;font-size:13px;color:#6b6255;letter-spacing:.04em;}
+  header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
 
   /* progress */
   .stats{
@@ -67,16 +80,17 @@
     flex-wrap:wrap;
   }
   .stat{
-    background:#fff;
-    border:1.5px solid var(--sumi);
-    border-radius:10px;
+    background:var(--bg-card);
+    border:1.5px solid var(--border);
+    border-radius:12px;
     padding:8px 14px;
     font-size:13px;
     display:flex;align-items:baseline;gap:6px;
-    box-shadow:2px 2px 0 rgba(28,26,23,0.08);
+    box-shadow:0 2px 10px var(--shadow-pink);
+    color:var(--ink2);
   }
-  .stat b{font-size:18px;font-family:'Shippori Mincho',serif;}
-  .stat.ok b{color:var(--ok);}
+  .stat b{font-size:18px;font-family:'Zen Antique Soft',serif;font-weight:400;}
+  .stat.ok b{color:var(--sage);}
   .stat.pending b{color:var(--gold);}
 
   /* nav modes */
@@ -87,43 +101,45 @@
     margin-bottom:26px;
   }
   nav.modes button{
-    font-family:inherit;
-    background:#fff;
-    border:1.5px solid var(--sumi);
-    border-radius:10px;
+    font-family:'DM Sans', sans-serif;
+    background:var(--bg-card);
+    border:1.5px solid var(--border);
+    border-radius:12px;
     padding:10px 4px;
     font-size:12.5px;
-    font-weight:700;
+    font-weight:500;
     cursor:pointer;
-    color:var(--sumi);
-    transition:transform .12s ease, background .12s ease, color .12s ease;
-    box-shadow:2px 2px 0 rgba(28,26,23,0.12);
+    color:var(--ink2);
+    transition:transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+    box-shadow:0 2px 10px var(--shadow-pink);
   }
-  nav.modes button .jp{display:block;font-family:'Shippori Mincho',serif;font-size:16px;margin-bottom:2px;}
-  nav.modes button:hover{transform:translateY(-2px);}
+  nav.modes button .jp{display:block;font-family:'Zen Antique Soft',serif;font-size:17px;margin-bottom:2px;color:inherit;}
+  nav.modes button:hover{transform:translateY(-2px);border-color:var(--pink-soft);}
   nav.modes button.active{
-    background:var(--sumi);
-    color:var(--washi);
-    box-shadow:2px 2px 0 var(--shu);
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 6px 20px rgba(232,75,122,0.35);
   }
 
   section.panel{
-    background:#fffdf8;
-    border:2px solid var(--sumi);
-    border-radius:16px;
+    background:var(--bg-card);
+    border:1.5px solid var(--border);
+    border-radius:18px;
     padding:26px 22px;
-    box-shadow:4px 4px 0 rgba(28,26,23,0.10);
+    box-shadow:0 4px 30px var(--shadow-pink), 0 1px 4px var(--shadow);
     min-height:340px;
     position:relative;
   }
   .panel-title{
-    font-family:'Shippori Mincho',serif;
-    font-size:15px;
-    color:#6b6255;
+    font-family:'Zen Antique Soft',serif;
+    font-size:16px;
+    color:var(--pink);
     margin:0 0 18px;
     display:flex;justify-content:space-between;align-items:center;
+    letter-spacing:.04em;
   }
-  .panel-title .count{font-size:12px;color:#a89d88;}
+  .panel-title .count{font-size:12px;color:var(--gray);font-family:'DM Sans',sans-serif;letter-spacing:0;}
 
   /* FLASHCARDS */
   .card-stage{display:flex;flex-direction:column;align-items:center;gap:20px;}
@@ -141,69 +157,81 @@
   .face{
     position:absolute;inset:0;
     backface-visibility:hidden;
-    border:2px solid var(--sumi);
-    border-radius:14px;
+    border:1.5px solid var(--border);
+    border-radius:16px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:#fff;
+    background:var(--bg-card);
+    box-shadow:0 4px 24px var(--shadow-pink);
   }
-  .face.front{font-size:64px;font-family:'Shippori Mincho',serif;}
+  .face.front{font-size:64px;font-family:'Noto Serif JP',serif;font-weight:700;color:var(--ink);}
   .face.back{
     transform:rotateY(180deg);
-    background:var(--ai);
-    color:var(--washi);
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
+    color:#fff;
+    border-color:transparent;
   }
-  .face.back .reading{font-size:34px;font-family:'Shippori Mincho',serif;}
-  .face.back .hint{font-size:12px;opacity:.7;margin-top:8px;letter-spacing:.05em;}
+  .face.back .reading{font-size:34px;font-family:'Noto Serif JP',serif;font-weight:700;}
+  .face.back .hint{font-size:12px;opacity:.85;margin-top:8px;letter-spacing:.05em;}
   .flash-controls{display:flex;gap:10px;}
   .flash-controls button{
-    font-family:inherit;font-weight:700;font-size:14px;
-    border-radius:24px;padding:10px 20px;border:1.5px solid var(--sumi);
-    background:#fff;cursor:pointer;
+    font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;
+    border-radius:24px;padding:10px 20px;border:1.5px solid var(--border);
+    background:var(--bg-card);cursor:pointer;transition:all .15s;
   }
-  .flash-controls button.know{border-color:var(--ok);color:var(--ok);}
-  .flash-controls button.dontknow{border-color:var(--shu);color:var(--shu);}
+  .flash-controls button.know{border-color:var(--sage);color:var(--sage);}
+  .flash-controls button.know:hover{background:var(--sage-pale);}
+  .flash-controls button.dontknow{border-color:var(--pink);color:var(--pink);}
+  .flash-controls button.dontknow:hover{background:var(--pink-pale);}
   .flash-controls button:active{transform:scale(.96);}
 
   /* QUIZ */
   .quiz-prompt{
     text-align:center;
-    font-family:'Shippori Mincho',serif;
-    font-size:52px;
-    margin:6px 0 26px;
+    font-family:'Noto Serif JP',serif;font-weight:700;
+    font-size:48px;
+    margin:6px 0 6px;
+    color:var(--ink);
   }
-  .quiz-sub{text-align:center;font-size:13px;color:#8a8070;margin-top:-18px;margin-bottom:20px;}
+  .quiz-prompt.meaning-mode{font-size:34px;}
+  .quiz-sub{text-align:center;font-size:12.5px;color:var(--pink);margin-top:0;margin-bottom:22px;text-transform:uppercase;letter-spacing:.14em;}
   .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .opt{
-    font-family:inherit;
-    background:#fff;border:1.5px solid var(--sumi);border-radius:10px;
-    padding:16px 10px;font-size:20px;cursor:pointer;
-    font-family:'Shippori Mincho',serif;
-    transition:background .15s, color .15s, border-color .15s;
+    font-family:'Noto Serif JP',serif;font-weight:500;
+    background:var(--pink-pale);border:1.5px solid rgba(232,75,122,0.25);border-radius:12px;
+    padding:16px 10px;font-size:20px;cursor:pointer;color:var(--ink2);
+    transition:background .15s, color .15s, border-color .15s, box-shadow .15s;
   }
-  .opt:hover{background:var(--washi-2);}
-  .opt.correct{background:var(--ok);border-color:var(--ok);color:#fff;}
-  .opt.wrong{background:var(--bad);border-color:var(--bad);color:#fff;}
+  .opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;line-height:1.4;}
+  .opt:hover{background:linear-gradient(135deg, var(--pink), var(--pink-mid));color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(232,75,122,0.3);}
+  .opt.correct{background:var(--sage);border-color:var(--sage);color:#fff;}
+  .opt.wrong{background:var(--pink);border-color:var(--pink);color:#fff;}
   .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{box-shadow:none;}
 
   /* ECRITURE */
   .write-kanji{
-    text-align:center;font-family:'Shippori Mincho',serif;font-size:70px;margin-bottom:8px;
+    text-align:center;font-family:'Noto Serif JP',serif;font-weight:700;font-size:66px;margin-bottom:8px;color:var(--ink);
   }
-  .write-sub{text-align:center;font-size:13px;color:#8a8070;margin-bottom:22px;}
+  .write-sub{text-align:center;font-size:12.5px;color:var(--pink);margin-bottom:22px;text-transform:uppercase;letter-spacing:.14em;}
   .write-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
   input#writeInput{
-    font-family:'Shippori Mincho',serif;
-    font-size:22px;padding:10px 14px;border:1.5px solid var(--sumi);border-radius:10px;
-    width:220px;text-align:center;background:#fff;
+    font-family:'Noto Serif JP',serif;
+    font-size:22px;padding:10px 14px;border:1.5px solid rgba(232,75,122,0.25);border-radius:12px;
+    width:220px;text-align:center;background:var(--bg-soft);color:var(--ink);
+    transition:border-color .2s, box-shadow .2s, background .2s;
   }
-  input#writeInput:focus{outline:2px solid var(--ai);}
+  input#writeInput:focus{outline:none;border-color:var(--pink);background:var(--bg-card);box-shadow:0 0 0 3px var(--pink-glow);}
   button.submitbtn{
-    font-family:inherit;font-weight:700;background:var(--sumi);color:var(--washi);
-    border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-size:14px;
+    font-family:'DM Sans',sans-serif;font-weight:600;
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);color:#fff;
+    border:none;border-radius:12px;padding:10px 20px;cursor:pointer;font-size:14px;
+    box-shadow:0 4px 16px rgba(232,75,122,0.3);transition:opacity .2s, transform .12s;
   }
+  button.submitbtn:hover{opacity:.9;}
+  button.submitbtn:active{transform:scale(.97);}
   .write-feedback{text-align:center;margin-top:16px;font-size:15px;min-height:24px;}
-  .write-feedback.ok{color:var(--ok);font-weight:700;}
-  .write-feedback.bad{color:var(--bad);font-weight:700;}
+  .write-feedback.ok{color:var(--sage);font-weight:700;}
+  .write-feedback.bad{color:var(--pink);font-weight:700;}
 
   /* MATCH */
   .match-grid{
@@ -211,14 +239,15 @@
   }
   .match-col{display:flex;flex-direction:column;gap:8px;}
   .match-item{
-    font-family:'Shippori Mincho',serif;
-    border:1.5px solid var(--sumi);border-radius:10px;
-    padding:10px;text-align:center;cursor:pointer;background:#fff;font-size:18px;
-    transition:background .15s,color .15s;
+    font-family:'Noto Serif JP',serif;
+    border:1.5px solid rgba(232,75,122,0.2);border-radius:12px;
+    padding:10px;text-align:center;cursor:pointer;background:var(--bg-card);font-size:18px;
+    color:var(--ink2);
+    transition:background .15s,color .15s,border-color .15s;
   }
-  .match-item.kanji{font-size:24px;}
-  .match-item.selected{background:var(--ai);color:#fff;border-color:var(--ai);}
-  .match-item.solved{background:var(--ok);color:#fff;border-color:var(--ok);opacity:.55;cursor:default;}
+  .match-item.kanji{font-size:24px;font-weight:700;}
+  .match-item.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .match-item.solved{background:var(--sage);color:#fff;border-color:var(--sage);opacity:.55;cursor:default;}
   .match-item.shake{animation:shake .3s;}
   @keyframes shake{
     0%,100%{transform:translateX(0);}
@@ -227,38 +256,41 @@
   }
 
   .end-screen{text-align:center;padding:30px 10px;}
-  .end-screen .big{font-family:'Shippori Mincho',serif;font-size:40px;margin-bottom:6px;}
-  .end-screen p{color:#6b6255;font-size:14px;}
+  .end-screen .big{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:38px;margin-bottom:6px;color:var(--pink);}
+  .end-screen p{color:var(--ink2);font-size:14px;}
   .end-screen button{
-    margin-top:16px;font-family:inherit;font-weight:700;background:var(--sumi);color:var(--washi);
-    border:none;border-radius:10px;padding:12px 24px;cursor:pointer;font-size:14px;
+    margin-top:16px;font-family:'DM Sans',sans-serif;font-weight:600;
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);color:#fff;
+    border:none;border-radius:12px;padding:12px 24px;cursor:pointer;font-size:14px;
+    box-shadow:0 4px 16px rgba(232,75,122,0.3);transition:opacity .2s;
   }
+  .end-screen button:hover{opacity:.9;}
 
   .history-box{
-    margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);
+    margin-top:20px;padding-top:16px;border-top:1px dashed var(--border);
     text-align:left;
   }
   .history-title{
-    font-size:12.5px;color:#8a8070;margin:0 0 8px;text-align:center;
-    letter-spacing:.03em;
+    font-size:12px;color:var(--pink);margin:0 0 8px;text-align:center;
+    letter-spacing:.1em;text-transform:uppercase;
   }
   .history-row{
     display:flex;justify-content:space-between;
-    font-size:13px;padding:5px 4px;color:#5c5346;
+    font-size:13px;padding:5px 8px;color:var(--ink2);
   }
-  .history-row:nth-child(even){background:rgba(0,0,0,0.025);border-radius:6px;}
+  .history-row:nth-child(even){background:var(--bg-soft);border-radius:8px;}
   .history-score{font-weight:700;}
-  .history-score.good{color:var(--ok);}
+  .history-score.good{color:var(--sage);}
   .history-score.mid{color:var(--gold);}
-  .history-score.low{color:var(--bad);}
+  .history-score.low{color:var(--pink);}
 
   .session-score{
-    font-size:15px;color:#5c5346;margin:6px 0 0;
+    font-size:15px;color:var(--ink2);margin:6px 0 0;
   }
-  .session-score b{font-family:'Shippori Mincho',serif;font-size:22px;color:var(--sumi);}
+  .session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
 
   footer{
-    text-align:center;margin-top:26px;font-size:11.5px;color:#a89d88;letter-spacing:.04em;
+    text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;
   }
 
   @media (max-width:420px){
@@ -275,7 +307,7 @@
     <div class="hanko">漢</div>
     <div>
       <h1>特訓 — 漢字れんしゅう</h1>
-      <p>家族の語彙 · 全24語</p>
+      <p id="headerSub">家族の語彙</p>
     </div>
   </header>
 
@@ -300,44 +332,46 @@
 <script>
 /* ---------- DATA ---------- */
 const VOCAB = [
-  {k:"夫",     r:"おっと",       kd:["天","未","末"],           rd:["おとと","おっとう","おうと"]},
-  {k:"会社員", r:"かいしゃいん", kd:["会杜員","会社因","会祉員"], rd:["かいしゃにん","がいしゃいん","かいしゃいむ"]},
-  {k:"妻",     r:"つま",         kd:["妾","要","委"],           rd:["つぎ","づま","とま"]},
-  {k:"毎日",   r:"まいにち",     kd:["毎目","母日","毎白"],     rd:["まえにち","まいにつ","まいび"]},
-  {k:"料理",   r:"りょうり",     kd:["科理","料里","料理り"],   rd:["りょり","りか","りりょ"]},
-  {k:"作ります", r:"つくります", kd:["昨ります","作リます","佐ります"], rd:["つづります","づくります","つくれます"]},
-  {k:"家内",   r:"かない",       kd:["家丙","冢内","家肉"],     rd:["かうち","いえない","やない"]},
-  {k:"行く",   r:"いく",         kd:["衍く","彳く","仃く"],     rd:["いき","いこ","えく"]},
-  {k:"祖父",   r:"そふ",         kd:["祖文","租父","祖夫"],     rd:["そぶ","そう","とふ"]},
-  {k:"祖母",   r:"そぼ",         kd:["祖毋","租母","祖姆"],     rd:["そほ","そも","とぼ"]},
-  {k:"今年",   r:"ことし",       kd:["令年","今牛","合年"],     rd:["こんねん","こんとし","ごとし"]},
-  {k:"八十歳", r:"はたち",       kd:["八千歳","八十才","八十蔵"], rd:["はちじゅっさい","はちじっさい","やそじ"]},
-  {k:"花",     r:"はな",         kd:["芯","芽","苦"],           rd:["ばな","はの","かな"]},
-  {k:"大好き", r:"だいすき",     kd:["犬好き","大好ぎ","太好き"], rd:["たいすき","だいすぎ","だいずき"]},
-  {k:"今日",   r:"きょう",       kd:["令日","今目","今曰"],     rd:["きゅう","きょお","ぎょう"]},
-  {k:"帰る",   r:"かえる",       kd:["婦る","掃る","帚る"],     rd:["かへる","がえる","かいる"]},
-  {k:"息子",   r:"むすこ",       kd:["息了","憩子","息孑"],     rd:["むすご","むすう","むうこ"]},
-  {k:"娘",     r:"むすめ",       kd:["嬢","娠","嫁"],           rd:["むずめ","むすべ","むうめ"]},
-  {k:"赤ちゃん", r:"あかちゃん", kd:["赤ちやん","亦ちゃん","赤ぢゃん"], rd:["あがちゃん","あかじゃん","あっかちゃん"]},
-  {k:"元気",   r:"げんき",       kd:["完気","元汽","元器"],     rd:["けんき","げんぎ","げんこ"]},
-  {k:"公園",   r:"こうえん",     kd:["公薗","公囲","広園"],     rd:["こおえん","こうおん","ごうえん"]},
-  {k:"泣く",   r:"なく",         kd:["拉く","位く","泪く"],     rd:["なぐ","なあく","ねく"]},
-  {k:"運動",   r:"うんどう",     kd:["運働","運同","連動"],     rd:["うんとう","うんどお","うんど"]},
-  {k:"彼女",   r:"かのじょ",     kd:["彼安","波女","彼汝"],     rd:["かのじよ","かなじょ","がのじょ"]},
-  {k:"読書",   r:"どくしょ",     kd:["読著","読暑","詠書"],     rd:["どくじょ","とくしょ","どうしょ"]},
-  {k:"男性",   r:"だんせい",     kd:["男姓","男牲","勇性"],     rd:["たんせい","だんぜい","だんせえ"]},
-  {k:"女性",   r:"じょせい",     kd:["女姓","女牲","汝性"],     rd:["じょせえ","しょせい","じょぜい"]},
-  {k:"少ない", r:"すくない",     kd:["小ない","少い","省ない"], rd:["すこない","すぐない","しゅくない"]},
+  {k:"夫",     r:"おっと",       kd:["天","未","末"],           rd:["おとと","おっとう","おうと"], en:"husband", vi:"chồng"},
+  {k:"会社員", r:"かいしゃいん", kd:["会杜員","会社因","会祉員"], rd:["かいしゃにん","がいしゃいん","かいしゃいむ"], en:"company employee", vi:"nhân viên công ty"},
+  {k:"妻",     r:"つま",         kd:["妾","要","委"],           rd:["つぎ","づま","とま"], en:"wife", vi:"vợ"},
+  {k:"毎日",   r:"まいにち",     kd:["毎目","母日","毎白"],     rd:["まえにち","まいにつ","まいび"], en:"every day", vi:"mỗi ngày"},
+  {k:"料理",   r:"りょうり",     kd:["科理","料里","料理り"],   rd:["りょり","りか","りりょ"], en:"cooking / cuisine", vi:"nấu ăn / ẩm thực"},
+  {k:"作ります", r:"つくります", kd:["昨ります","作リます","佐ります"], rd:["つづります","づくります","つくれます"], en:"to make", vi:"làm / chế biến"},
+  {k:"家内",   r:"かない",       kd:["家丙","冢内","家肉"],     rd:["かうち","いえない","やない"], en:"(my) wife", vi:"vợ (của tôi)"},
+  {k:"行く",   r:"いく",         kd:["衍く","彳く","仃く"],     rd:["いき","いこ","えく"], en:"to go", vi:"đi"},
+  {k:"祖父",   r:"そふ",         kd:["祖文","租父","祖夫"],     rd:["そぶ","そう","とふ"], en:"grandfather", vi:"ông"},
+  {k:"祖母",   r:"そぼ",         kd:["祖毋","租母","祖姆"],     rd:["そほ","そも","とぼ"], en:"grandmother", vi:"bà"},
+  {k:"今年",   r:"ことし",       kd:["令年","今牛","合年"],     rd:["こんねん","こんとし","ごとし"], en:"this year", vi:"năm nay"},
+  {k:"八十歳", r:"はちじゅっさい", kd:["八千歳","八十才","八十蔵"], rd:["はたち","はちじっさい","やそじ"], en:"80 years old", vi:"80 tuổi"},
+  {k:"二十歳", r:"はたち",       kd:["二十才","二十歳っ","廿歳"], rd:["にじゅっさい","にじっさい","はだち"], en:"20 years old", vi:"20 tuổi"},
+  {k:"花",     r:"はな",         kd:["芯","芽","苦"],           rd:["ばな","はの","かな"], en:"flower", vi:"hoa"},
+  {k:"大好き", r:"だいすき",     kd:["犬好き","大好ぎ","太好き"], rd:["たいすき","だいすぎ","だいずき"], en:"to love / favorite", vi:"rất thích"},
+  {k:"今日",   r:"きょう",       kd:["令日","今目","今曰"],     rd:["きゅう","きょお","ぎょう"], en:"today", vi:"hôm nay"},
+  {k:"帰る",   r:"かえる",       kd:["婦る","掃る","帚る"],     rd:["かへる","がえる","かいる"], en:"to go home / return", vi:"về nhà / trở về"},
+  {k:"息子",   r:"むすこ",       kd:["息了","憩子","息孑"],     rd:["むすご","むすう","むうこ"], en:"son", vi:"con trai"},
+  {k:"娘",     r:"むすめ",       kd:["嬢","娠","嫁"],           rd:["むずめ","むすべ","むうめ"], en:"daughter", vi:"con gái"},
+  {k:"赤ちゃん", r:"あかちゃん", kd:["赤ちやん","亦ちゃん","赤ぢゃん"], rd:["あがちゃん","あかじゃん","あっかちゃん"], en:"baby", vi:"em bé"},
+  {k:"元気",   r:"げんき",       kd:["完気","元汽","元器"],     rd:["けんき","げんぎ","げんこ"], en:"healthy / energetic", vi:"khỏe mạnh"},
+  {k:"公園",   r:"こうえん",     kd:["公薗","公囲","広園"],     rd:["こおえん","こうおん","ごうえん"], en:"park", vi:"công viên"},
+  {k:"泣く",   r:"なく",         kd:["拉く","位く","泪く"],     rd:["なぐ","なあく","ねく"], en:"to cry", vi:"khóc"},
+  {k:"運動",   r:"うんどう",     kd:["運働","運同","連動"],     rd:["うんとう","うんどお","うんど"], en:"exercise", vi:"vận động / thể dục"},
+  {k:"彼女",   r:"かのじょ",     kd:["彼安","波女","彼汝"],     rd:["かのじよ","かなじょ","がのじょ"], en:"she / girlfriend", vi:"cô ấy / bạn gái"},
+  {k:"読書",   r:"どくしょ",     kd:["読著","読暑","詠書"],     rd:["どくじょ","とくしょ","どうしょ"], en:"reading (books)", vi:"đọc sách"},
+  {k:"男性",   r:"だんせい",     kd:["男姓","男牲","勇性"],     rd:["たんせい","だんぜい","だんせえ"], en:"male / man", vi:"nam giới"},
+  {k:"女性",   r:"じょせい",     kd:["女姓","女牲","汝性"],     rd:["じょせえ","しょせい","じょぜい"], en:"female / woman", vi:"nữ giới"},
+  {k:"少ない", r:"すくない",     kd:["小ない","少い","省ない"], rd:["すこない","すぐない","しゅくない"], en:"few / little", vi:"ít"},
 ];
 
 const STORAGE_KEY = "kanji_famille_progress_v1";
 function loadProgress(){
+  let p = {};
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw) p = JSON.parse(raw);
   }catch(e){}
-  const p = {};
-  VOCAB.forEach(v=> p[v.k] = {known:false});
+  // Ajoute les mots manquants (ex: nouveaux mots ajoutés après une mise à jour)
+  VOCAB.forEach(v=>{ if(!p[v.k]) p[v.k] = {known:false}; });
   return p;
 }
 function saveProgress(){
@@ -408,6 +442,8 @@ function updateStats(){
   document.getElementById('statKnown').textContent = known;
   document.getElementById('statTotal').textContent = VOCAB.length;
   document.getElementById('statStreak').textContent = streak;
+  const sub = document.getElementById('headerSub');
+  if(sub) sub.textContent = `家族の語彙 · 全${VOCAB.length}語`;
 }
 
 /* ---------- NAV ---------- */
@@ -474,7 +510,8 @@ function renderFlash(){
 let quizPool = shuffle(VOCAB);
 let quizIndex = 0;
 let quizCorrect = 0;
-const QUIZ_LEN = 16;
+const QUIZ_LEN = 18;
+const QUIZ_TYPES = ['toReading','toKanji','toMeaning'];
 
 function renderQuiz(){
   if(quizIndex >= QUIZ_LEN){
@@ -483,46 +520,65 @@ function renderQuiz(){
     return;
   }
   const item = quizPool[quizIndex % quizPool.length];
-  const askKanji = Math.random() < 0.5; // true: montre kanji, choisir lecture / false: montre lecture, choisir kanji
-  const prompt = askKanji ? item.k : item.r;
-  const promptLabel = askKanji ? "正しい読み方を選んでください" : "正しい漢字を選んでください";
+  const qType = QUIZ_TYPES[Math.floor(Math.random()*QUIZ_TYPES.length)];
 
-  // Distracteurs proches (piégeux) définis pour chaque mot : kd = kanji proches, rd = lectures proches.
-  // On complète avec d'autres mots du vocabulaire si jamais il n'y a pas assez de distracteurs proches.
-  const closeDistractors = askKanji ? (item.rd || []) : (item.kd || []);
-  let pool = closeDistractors.slice(0,3);
-  if(pool.length < 3){
-    const filler = shuffle(VOCAB.filter(v=>v.k!==item.k)).map(v=> askKanji ? v.r : v.k);
-    for(const f of filler){
-      if(pool.length>=3) break;
-      if(!pool.includes(f)) pool.push(f);
+  let prompt, promptLabel, optionItems, promptClass = '', optClass = '';
+
+  if(qType === 'toReading'){
+    prompt = item.k;
+    promptLabel = "正しい読み方を選んでください";
+    const close = (item.rd || []).slice(0,3);
+    let pool = close.slice();
+    if(pool.length < 3){
+      const filler = shuffle(VOCAB).map(v=>v.r).filter(r=> r!==item.r && !pool.includes(r));
+      while(pool.length < 3 && filler.length) pool.push(filler.pop());
     }
+    optionItems = shuffle([item.r, ...pool]).map(v => ({label:v, correct:v===item.r}));
+  } else if(qType === 'toKanji'){
+    prompt = item.r;
+    promptLabel = "正しい漢字を選んでください";
+    const close = (item.kd || []).slice(0,3);
+    let pool = close.slice();
+    if(pool.length < 3){
+      const filler = shuffle(VOCAB).map(v=>v.k).filter(k=> k!==item.k && !pool.includes(k));
+      while(pool.length < 3 && filler.length) pool.push(filler.pop());
+    }
+    optionItems = shuffle([item.k, ...pool]).map(v => ({label:v, correct:v===item.k}));
+  } else { // toMeaning
+    prompt = item.k;
+    promptLabel = "正しい意味を選んでください（EN / VI）";
+    optClass = 'meaning-opt';
+    const correctLabel = `${item.en} / ${item.vi}`;
+    const others = shuffle(VOCAB.filter(v=>v.k!==item.k)).slice(0,3);
+    optionItems = shuffle([
+      {label: correctLabel, correct:true},
+      ...others.map(v => ({label:`${v.en} / ${v.vi}`, correct:false}))
+    ]);
   }
-  const correctVal = askKanji ? item.r : item.k;
-  let options = shuffle([correctVal, ...pool]);
 
   panel.innerHTML = `
     <p class="panel-title">クイズ <span class="count">${quizIndex+1} / ${QUIZ_LEN}</span></p>
-    <div class="quiz-prompt">${prompt}</div>
+    <div class="quiz-prompt ${promptClass}">${prompt}</div>
     <p class="quiz-sub">${promptLabel}</p>
     <div class="options">
-      ${options.map(o=>`<button class="opt" data-val="${o}">${o}</button>`).join('')}
+      ${optionItems.map((o,i)=>`<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
     </div>
   `;
 
   panel.querySelectorAll('.opt').forEach(btn=>{
     btn.addEventListener('click', ()=>{
+      const chosen = optionItems[Number(btn.dataset.idx)];
       panel.querySelectorAll('.opt').forEach(b=>b.disabled=true);
-      if(btn.dataset.val === correctVal){
+      if(chosen.correct){
         btn.classList.add('correct');
         progress[item.k].known = true; streak++; quizCorrect++;
       } else {
         btn.classList.add('wrong');
-        panel.querySelectorAll('.opt').forEach(b=>{ if(b.dataset.val===correctVal) b.classList.add('correct'); });
+        panel.querySelectorAll('.opt').forEach((b,i)=>{ if(optionItems[i].correct) b.classList.add('correct'); });
         progress[item.k].known = false; streak=0;
       }
       saveProgress(); updateStats();
-      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 900);
+      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1000);
     });
   });
 }
