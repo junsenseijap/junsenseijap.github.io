@@ -1763,13 +1763,20 @@
           <button class="btn-sync-step" id="btn-sync-5" onclick="runSyncStep(5)" data-i="syncRun">Lancer</button>
         </div>
 
-        <div style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid var(--border)">
+        <div style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:0.4rem">
           <button class="btn-sync-step" id="btn-delete-dups" onclick="doDeleteDuplicates()"
             style="background:var(--bg-soft);color:var(--ink2);font-size:0.75rem;padding:0.5rem 0.8rem;border:1px solid var(--border);width:100%;text-align:left">
             🗑️ Supprimer les doublons
           </button>
-          <div style="font-size:0.7rem;color:var(--gray);margin-top:0.3rem;line-height:1.3">
+          <div style="font-size:0.7rem;color:var(--gray);margin-bottom:0.2rem;line-height:1.3">
             Pour chaque Drive_Link en doublon, garde la ligne configurée et supprime les autres.
+          </div>
+          <button class="btn-sync-step" id="btn-clean-form-sheets" onclick="doCleanFormSheets()"
+            style="background:var(--bg-soft);color:var(--ink2);font-size:0.75rem;padding:0.5rem 0.8rem;border:1px solid var(--border);width:100%;text-align:left">
+            🧹 Nettoyer les onglets Form Responses
+          </button>
+          <div style="font-size:0.7rem;color:var(--gray);line-height:1.3">
+            Supprime les onglets non liés, masque les onglets actifs.
           </div>
         </div>
 
@@ -2193,6 +2200,18 @@ async function doSyncExercisesSheetTabs() {
 }
 
 async function doRecoverDuplicateContent() {} // gardé pour compatibilité
+
+async function doCleanFormSheets() {
+  var btn = document.getElementById("btn-clean-form-sheets");
+  if(btn) { btn.disabled=true; btn.textContent="⏳ Nettoyage..."; }
+  try {
+    var r = await api({ action:"cleanFormSheets", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      toast("🧹 "+r.deleted+" supprimé(s), "+r.hidden+" masqué(s).", "success");
+    } else { toast("❌ "+(r&&r.message||"Erreur"), "error"); }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🧹 Nettoyer les onglets Form Responses"; }
+}
 
 async function doDeleteDuplicates() {
   var btn = document.getElementById("btn-delete-dups");
