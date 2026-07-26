@@ -1594,6 +1594,9 @@
       <button class="btn-save-pin" id="btn-sync-ex-tabs" onclick="doSyncExercisesSheetTabs()" style="background:linear-gradient(135deg,#e67e22,#ca6f1e);margin-top:0.3rem">
         🔧 Étape C — Corriger les exercices étudiants
       </button>
+      <button class="btn-save-pin" id="btn-fix-dup-link" onclick="doFixDuplicatesByDriveLink()" style="background:linear-gradient(135deg,#6c1f1f,#4a0e0e);margin-top:0.3rem">
+        🚨 Corriger les doublons (même Drive_Link)
+      </button>
     </div>
   </div>
 </div>
@@ -2193,6 +2196,24 @@ async function doSyncExercisesSheetTabs() {
 }
 
 async function doRecoverDuplicateContent() {} // gardé pour compatibilité
+
+async function doFixDuplicatesByDriveLink() {
+  var btn = document.getElementById("btn-fix-dup-link");
+  if(btn) { btn.disabled=true; btn.textContent="⏳ Correction en cours..."; }
+  try {
+    var r = await api({ action:"fixDuplicatesByDriveLink", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      _cacheDel(CACHE_ALL_CONTENT_KEY);
+      toast(
+        "✅ "+r.deleted+" doublon(s) supprimé(s) · "+
+        r.sheetTabFixes+" sheetTab(s) corrigé(s) · "+
+        r.exercisesFixed+" exercice(s) aligné(s). Fais un Forcer la synchronisation.",
+        "success"
+      );
+    } else { toast("❌ "+(r&&r.message||"Erreur"), "error"); }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🚨 Corriger les doublons (même Drive_Link)"; }
+}
 
 async function doDeduplicateContent() {
   var btn = document.getElementById("btn-dedup-content");
