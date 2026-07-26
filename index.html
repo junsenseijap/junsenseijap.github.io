@@ -1582,21 +1582,6 @@
       <button class="btn-save-pin" id="btn-force-sync" onclick="forceSync()" style="background:linear-gradient(135deg,#7BAFD4,#5a9ac4)">
         🔄 <span id="sync-btn-label">Forcer la synchronisation</span>
       </button>
-      <button class="btn-save-pin" id="btn-dedup-content" onclick="doDeduplicateContent()" style="background:linear-gradient(135deg,#7B5EA7,#5a3a8a);margin-top:0.6rem">
-        🧹 Supprimer les doublons (CONTENT)
-      </button>
-      <button class="btn-save-pin" id="btn-clean-bad-rows" onclick="doCleanBadContentRows()" style="background:linear-gradient(135deg,#c0392b,#922b21);margin-top:0.6rem">
-        🚑 Étape A — Supprimer les lignes corrompues
-      </button>
-      <button class="btn-save-pin" id="btn-fix-form-tabs" onclick="doFixBrokenFormTabs()" style="background:linear-gradient(135deg,#1a5276,#154360);margin-top:0.3rem">
-        🔗 Relier les forms aux bons onglets
-      </button>
-      <button class="btn-save-pin" id="btn-sync-ex-tabs" onclick="doSyncExercisesSheetTabs()" style="background:linear-gradient(135deg,#e67e22,#ca6f1e);margin-top:0.3rem">
-        🔧 Étape C — Corriger les exercices étudiants
-      </button>
-      <button class="btn-save-pin" id="btn-fix-dup-link" onclick="doFixDuplicatesByDriveLink()" style="background:linear-gradient(135deg,#6c1f1f,#4a0e0e);margin-top:0.3rem">
-        🚨 Corriger les doublons (même Drive_Link)
-      </button>
     </div>
   </div>
 </div>
@@ -1713,7 +1698,8 @@
     </div>
     <div class="admin-sec-body" id="admin-sec-body-sync" style="padding:0.5rem 0.9rem 1rem">
       <div style="font-size:0.75rem;color:var(--gray);line-height:1.4;margin-bottom:0.8rem" data-i="syncDriveHint">
-        Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.
+        Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.<br>
+        <strong style="color:var(--pink)">⚠️ Vérifier le Sheet entre ① et ② avant de lier les forms.</strong>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.6rem">
 
@@ -1721,8 +1707,8 @@
           <div class="sync-step-header">
             <span class="sync-step-num">①</span>
             <div style="flex:1;min-width:0">
-              <div class="sync-step-label" data-i="syncStep1">Synchroniser les contenus</div>
-              <div class="sync-step-desc" data-i="syncDesc1">Scanne Drive et remplit le Sheet avec les nouveaux fichiers</div>
+              <div class="sync-step-label" data-i="syncStep1">Scan Drive → Sheet</div>
+              <div class="sync-step-desc" data-i="syncDesc1">Scanne Drive et ajoute les nouveaux fichiers dans le Sheet. Ne touche pas aux forms.</div>
             </div>
             <span class="sync-step-status" id="sync-status-1"></span>
           </div>
@@ -1733,8 +1719,8 @@
           <div class="sync-step-header">
             <span class="sync-step-num">②</span>
             <div style="flex:1;min-width:0">
-              <div class="sync-step-label" data-i="syncStep2">Configurer les formulaires</div>
-              <div class="sync-step-desc" data-i="syncDesc2">Ajoute Student_ID en position 1 sur tous les Forms + lie au Sheet</div>
+              <div class="sync-step-label" data-i="syncStep2">Lier les forms au Sheet</div>
+              <div class="sync-step-desc" data-i="syncDesc2">Crée les Form Responses pour les nouveaux forms uniquement. Vérifier le Sheet avant !</div>
             </div>
             <span class="sync-step-status" id="sync-status-2"></span>
           </div>
@@ -1746,7 +1732,7 @@
             <span class="sync-step-num">③</span>
             <div style="flex:1;min-width:0">
               <div class="sync-step-label" data-i="syncStep3">Récupérer les Entry IDs</div>
-              <div class="sync-step-desc" data-i="syncDesc3">Lit les vrais IDs des champs Forms pour le pré-remplissage auto</div>
+              <div class="sync-step-desc" data-i="syncDesc3">Lit les IDs des champs Student_ID pour le pré-remplissage automatique</div>
             </div>
             <span class="sync-step-status" id="sync-status-3"></span>
           </div>
@@ -1758,19 +1744,19 @@
             <span class="sync-step-num">④</span>
             <div style="flex:1;min-width:0">
               <div class="sync-step-label" data-i="syncStep4">Recharger les données</div>
-              <div class="sync-step-desc" data-i="syncDesc4">Vide le cache — les élèves verront les nouveaux contenus</div>
+              <div class="sync-step-desc" data-i="syncDesc4">Vide le cache — les élèves verront les nouveaux contenus immédiatement</div>
             </div>
             <span class="sync-step-status" id="sync-status-4"></span>
           </div>
           <button class="btn-sync-step" id="btn-sync-4" onclick="runSyncStep(4)" data-i="syncRun">Lancer</button>
         </div>
 
-        <div class="sync-step" id="sync-step-5">
+        <div class="sync-step" id="sync-step-5" style="border-top:1px solid var(--border);padding-top:0.6rem;margin-top:0.2rem">
           <div class="sync-step-header">
-            <span class="sync-step-num">⑥</span>
+            <span class="sync-step-num" style="font-size:0.9rem">⑤</span>
             <div style="flex:1;min-width:0">
               <div class="sync-step-label" data-i="syncStep5">Forcer import des scores</div>
-              <div class="sync-step-desc" data-i="syncDesc5">Relit tous les Form Responses et importe les scores manquants dans le Sheet Scores</div>
+              <div class="sync-step-desc" data-i="syncDesc5">Relit tous les Form Responses et importe les scores manquants</div>
             </div>
             <span class="sync-step-status" id="sync-status-5"></span>
           </div>
@@ -1778,6 +1764,21 @@
         </div>
 
       </div>
+
+      <!-- Outils de récupération — dépliables -->
+      <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem">
+        <div style="font-size:0.72rem;color:var(--gray);margin-bottom:0.5rem;cursor:pointer;user-select:none"
+             onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
+          🔧 Outils de récupération ▸
+        </div>
+        <div style="display:none;flex-direction:column;gap:0.4rem">
+          <button class="btn-sync-step" id="btn-fix-dup-link" onclick="doFixDuplicatesByDriveLink()"
+            style="background:var(--bg-soft);color:var(--ink2);font-size:0.75rem;padding:0.5rem 0.8rem;border:1px solid var(--border)">
+            🚨 Corriger les doublons (même Drive_Link)
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2196,24 +2197,6 @@ async function doSyncExercisesSheetTabs() {
 }
 
 async function doRecoverDuplicateContent() {} // gardé pour compatibilité
-
-async function doFixDuplicatesByDriveLink() {
-  var btn = document.getElementById("btn-fix-dup-link");
-  if(btn) { btn.disabled=true; btn.textContent="⏳ Correction en cours..."; }
-  try {
-    var r = await api({ action:"fixDuplicatesByDriveLink", adminId:currentUserGlobal.id, pin:getStoredPin() });
-    if(r&&r.success) {
-      _cacheDel(CACHE_ALL_CONTENT_KEY);
-      toast(
-        "✅ "+r.deleted+" doublon(s) supprimé(s) · "+
-        r.sheetTabFixes+" sheetTab(s) corrigé(s) · "+
-        r.exercisesFixed+" exercice(s) aligné(s). Fais un Forcer la synchronisation.",
-        "success"
-      );
-    } else { toast("❌ "+(r&&r.message||"Erreur"), "error"); }
-  } catch(e){ toast("❌ "+e.message,"error"); }
-  if(btn) { btn.disabled=false; btn.textContent="🚨 Corriger les doublons (même Drive_Link)"; }
-}
 
 async function doDeduplicateContent() {
   var btn = document.getElementById("btn-dedup-content");
@@ -4853,16 +4836,16 @@ var TRANSLATIONS = {
     courseTypeOther:     "Khác",
     syncDriveTitle: "Cập nhật nội dung",
     syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
-    syncStep1: "Đồng bộ nội dung",
-    syncDesc1: "Quét Drive và điền vào Sheet các file mới",
-    syncStep2: "Cấu hình biểu mẫu",
-    syncDesc2: "Thêm câu hỏi Student ID vào vị trí 1 trên tất cả các Form",
-    syncStep3: "Lấy Entry ID",
-    syncDesc3: "Đọc ID thật của các trường Form và hoàn thiện Sheet để tự điền Student ID",
-    syncStep4: "Tải lại dữ liệu",
-    syncDesc4: "Xóa cache và tải lại từ Sheet — học viên sẽ thấy nội dung mới",
-    syncStep5: "Nhập điểm từ Form",
-    syncDesc5: "Đọc lại tất cả Form Responses và nhập điểm còn thiếu vào Sheet Scores",
+    syncStep1: "① Quét Drive → Sheet",
+    syncDesc1: "Quét Drive và thêm file mới vào Sheet. Không chạm vào form.",
+    syncStep2: "② Liên kết form với Sheet",
+    syncDesc2: "Tạo Form Responses cho các form mới. Kiểm tra Sheet trước!",
+    syncStep3: "③ Lấy Entry ID",
+    syncDesc3: "Đọc ID của trường Student_ID để tự điền tự động",
+    syncStep4: "④ Tải lại dữ liệu",
+    syncDesc4: "Xóa cache — học viên sẽ thấy nội dung mới ngay lập tức",
+    syncStep5: "⑤ Nhập điểm từ Form",
+    syncDesc5: "Đọc lại tất cả Form Responses và nhập điểm còn thiếu",
     syncRun:   "Khởi động",
     subLecons:    "Bài học",
     subExercices: "Bài tập",
@@ -5062,16 +5045,16 @@ var TRANSLATIONS = {
     courseTypeOther:     "Other",
     syncDriveTitle: "Update Content",
     syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
-    syncStep1: "Sync content",
-    syncDesc1: "Scans Drive and fills the Sheet with new files",
-    syncStep2: "Configure forms",
-    syncDesc2: "Adds the Student ID question at position 1 on all Forms",
-    syncStep3: "Retrieve Entry IDs",
-    syncDesc3: "Reads real Form field IDs and completes the Sheet for auto-fill",
-    syncStep4: "Reload data",
-    syncDesc4: "Clears cache and reloads from the Sheet — students will see new content",
-    syncStep5: "Force score import",
-    syncDesc5: "Re-reads all Form Responses and imports missing scores into the Scores sheet",
+    syncStep1: "① Scan Drive → Sheet",
+    syncDesc1: "Scans Drive and adds new files to the Sheet. Does not touch forms.",
+    syncStep2: "② Link forms to Sheet",
+    syncDesc2: "Creates Form Responses for new forms only. Check the Sheet before!",
+    syncStep3: "③ Fetch Entry IDs",
+    syncDesc3: "Reads Student_ID field IDs for automatic pre-fill",
+    syncStep4: "④ Reload data",
+    syncDesc4: "Clears cache — students will see new content immediately",
+    syncStep5: "⑤ Force score import",
+    syncDesc5: "Re-reads all Form Responses and imports missing scores",
     syncRun:   "Run",
     subLecons:    "Lessons",
     subExercices: "Exercises",
@@ -5271,16 +5254,16 @@ var TRANSLATIONS = {
     courseTypeOther:     "Autre",
     syncDriveTitle: "Mise à jour des contenus",
     syncDriveHint: "Après avoir ajouté du contenu dans Drive, suivre ces 4 étapes dans l'ordre.",
-    syncStep1: "Synchroniser les contenus",
-    syncDesc1: "Scanne Drive et remplit le Sheet avec les nouveaux fichiers",
-    syncStep2: "Configurer les formulaires",
-    syncDesc2: "Ajoute la question Student ID en position 1 sur tous les Forms",
-    syncStep3: "Récupérer les Entry IDs",
-    syncDesc3: "Lit les vrais IDs des champs Forms et complète le Sheet pour le pré-remplissage auto",
-    syncStep4: "Recharger les données",
-    syncDesc4: "Vide le cache et recharge tout depuis le Sheet — les élèves verront les nouveaux contenus",
-    syncStep5: "Forcer import des scores",
-    syncDesc5: "Relit tous les Form Responses et importe les scores manquants dans le Sheet Scores",
+    syncStep1: "① Scan Drive → Sheet",
+    syncDesc1: "Scanne Drive et ajoute les nouveaux fichiers dans le Sheet. Ne touche pas aux forms.",
+    syncStep2: "② Lier les forms au Sheet",
+    syncDesc2: "Crée les Form Responses pour les nouveaux forms uniquement. Vérifier le Sheet avant !",
+    syncStep3: "③ Récupérer les Entry IDs",
+    syncDesc3: "Lit les IDs des champs Student_ID pour le pré-remplissage automatique",
+    syncStep4: "④ Recharger les données",
+    syncDesc4: "Vide le cache — les élèves verront les nouveaux contenus immédiatement",
+    syncStep5: "⑤ Forcer import des scores",
+    syncDesc5: "Relit tous les Form Responses et importe les scores manquants",
     syncRun:   "Lancer",
     subLecons:    "Leçons",
     subExercices: "Exercices",
