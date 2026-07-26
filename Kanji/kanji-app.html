@@ -27,7 +27,7 @@
       radial-gradient(circle at -10% 110%, rgba(44,74,94,0.08), transparent 45%),
       var(--washi);
     color:var(--sumi);
-    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-family:'Shippori Mincho', serif;
     min-height:100vh;
     padding:24px 16px 60px;
   }
@@ -234,6 +234,29 @@
     border:none;border-radius:10px;padding:12px 24px;cursor:pointer;font-size:14px;
   }
 
+  .history-box{
+    margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);
+    text-align:left;
+  }
+  .history-title{
+    font-size:12.5px;color:#8a8070;margin:0 0 8px;text-align:center;
+    letter-spacing:.03em;
+  }
+  .history-row{
+    display:flex;justify-content:space-between;
+    font-size:13px;padding:5px 4px;color:#5c5346;
+  }
+  .history-row:nth-child(even){background:rgba(0,0,0,0.025);border-radius:6px;}
+  .history-score{font-weight:700;}
+  .history-score.good{color:var(--ok);}
+  .history-score.mid{color:var(--gold);}
+  .history-score.low{color:var(--bad);}
+
+  .session-score{
+    font-size:15px;color:#5c5346;margin:6px 0 0;
+  }
+  .session-score b{font-family:'Shippori Mincho',serif;font-size:22px;color:var(--sumi);}
+
   footer{
     text-align:center;margin-top:26px;font-size:11.5px;color:#a89d88;letter-spacing:.04em;
   }
@@ -277,34 +300,34 @@
 <script>
 /* ---------- DATA ---------- */
 const VOCAB = [
-  {k:"夫", r:"おっと"},
-  {k:"会社員", r:"かいしゃいん"},
-  {k:"妻", r:"つま"},
-  {k:"毎日", r:"まいにち"},
-  {k:"料理", r:"りょうり"},
-  {k:"作ります", r:"つくります"},
-  {k:"家内", r:"かない"},
-  {k:"行く", r:"いく"},
-  {k:"祖父", r:"そふ"},
-  {k:"祖母", r:"そぼ"},
-  {k:"今年", r:"ことし"},
-  {k:"八十歳", r:"はたち"},
-  {k:"花", r:"はな"},
-  {k:"大好き", r:"だいすき"},
-  {k:"今日", r:"きょう"},
-  {k:"帰る", r:"かえる"},
-  {k:"息子", r:"むすこ"},
-  {k:"娘", r:"むすめ"},
-  {k:"赤ちゃん", r:"あかちゃん"},
-  {k:"元気", r:"げんき"},
-  {k:"公園", r:"こうえん"},
-  {k:"泣く", r:"なく"},
-  {k:"運動", r:"うんどう"},
-  {k:"彼女", r:"かのじょ"},
-  {k:"読書", r:"どくしょ"},
-  {k:"男性", r:"だんせい"},
-  {k:"女性", r:"じょせい"},
-  {k:"少ない", r:"すくない"},
+  {k:"夫",     r:"おっと",       kd:["天","未","末"],           rd:["おとと","おっとう","おうと"]},
+  {k:"会社員", r:"かいしゃいん", kd:["会杜員","会社因","会祉員"], rd:["かいしゃにん","がいしゃいん","かいしゃいむ"]},
+  {k:"妻",     r:"つま",         kd:["妾","要","委"],           rd:["つぎ","づま","とま"]},
+  {k:"毎日",   r:"まいにち",     kd:["毎目","母日","毎白"],     rd:["まえにち","まいにつ","まいび"]},
+  {k:"料理",   r:"りょうり",     kd:["科理","料里","料理り"],   rd:["りょり","りか","りりょ"]},
+  {k:"作ります", r:"つくります", kd:["昨ります","作リます","佐ります"], rd:["つづります","づくります","つくれます"]},
+  {k:"家内",   r:"かない",       kd:["家丙","冢内","家肉"],     rd:["かうち","いえない","やない"]},
+  {k:"行く",   r:"いく",         kd:["衍く","彳く","仃く"],     rd:["いき","いこ","えく"]},
+  {k:"祖父",   r:"そふ",         kd:["祖文","租父","祖夫"],     rd:["そぶ","そう","とふ"]},
+  {k:"祖母",   r:"そぼ",         kd:["祖毋","租母","祖姆"],     rd:["そほ","そも","とぼ"]},
+  {k:"今年",   r:"ことし",       kd:["令年","今牛","合年"],     rd:["こんねん","こんとし","ごとし"]},
+  {k:"八十歳", r:"はたち",       kd:["八千歳","八十才","八十蔵"], rd:["はちじゅっさい","はちじっさい","やそじ"]},
+  {k:"花",     r:"はな",         kd:["芯","芽","苦"],           rd:["ばな","はの","かな"]},
+  {k:"大好き", r:"だいすき",     kd:["犬好き","大好ぎ","太好き"], rd:["たいすき","だいすぎ","だいずき"]},
+  {k:"今日",   r:"きょう",       kd:["令日","今目","今曰"],     rd:["きゅう","きょお","ぎょう"]},
+  {k:"帰る",   r:"かえる",       kd:["婦る","掃る","帚る"],     rd:["かへる","がえる","かいる"]},
+  {k:"息子",   r:"むすこ",       kd:["息了","憩子","息孑"],     rd:["むすご","むすう","むうこ"]},
+  {k:"娘",     r:"むすめ",       kd:["嬢","娠","嫁"],           rd:["むずめ","むすべ","むうめ"]},
+  {k:"赤ちゃん", r:"あかちゃん", kd:["赤ちやん","亦ちゃん","赤ぢゃん"], rd:["あがちゃん","あかじゃん","あっかちゃん"]},
+  {k:"元気",   r:"げんき",       kd:["完気","元汽","元器"],     rd:["けんき","げんぎ","げんこ"]},
+  {k:"公園",   r:"こうえん",     kd:["公薗","公囲","広園"],     rd:["こおえん","こうおん","ごうえん"]},
+  {k:"泣く",   r:"なく",         kd:["拉く","位く","泪く"],     rd:["なぐ","なあく","ねく"]},
+  {k:"運動",   r:"うんどう",     kd:["運働","運同","連動"],     rd:["うんとう","うんどお","うんど"]},
+  {k:"彼女",   r:"かのじょ",     kd:["彼安","波女","彼汝"],     rd:["かのじよ","かなじょ","がのじょ"]},
+  {k:"読書",   r:"どくしょ",     kd:["読著","読暑","詠書"],     rd:["どくじょ","とくしょ","どうしょ"]},
+  {k:"男性",   r:"だんせい",     kd:["男姓","男牲","勇性"],     rd:["たんせい","だんぜい","だんせえ"]},
+  {k:"女性",   r:"じょせい",     kd:["女姓","女牲","汝性"],     rd:["じょせえ","しょせい","じょぜい"]},
+  {k:"少ない", r:"すくない",     kd:["小ない","少い","省ない"], rd:["すこない","すぐない","しゅくない"]},
 ];
 
 const STORAGE_KEY = "kanji_famille_progress_v1";
@@ -322,6 +345,54 @@ function saveProgress(){
 }
 let progress = loadProgress();
 let streak = Number(localStorage.getItem(STORAGE_KEY+"_streak") || 0);
+
+/* ---------- HISTORIQUE DES LEÇONS ---------- */
+const HISTORY_KEY = "kanji_famille_history_v1";
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return [];
+}
+function saveHistory(){
+  try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }catch(e){}
+}
+let history = loadHistory();
+
+const MODE_LABEL = {flash:"単語帳", quiz:"クイズ", write:"記入", match:"対戦"};
+
+function recordSession(mode, correct, total){
+  history.unshift({
+    mode, correct, total,
+    date: new Date().toISOString()
+  });
+  history = history.slice(0, 30); // garde les 30 dernières sessions
+  saveHistory();
+}
+
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + ' ' +
+         d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+
+function historyListHTML(mode){
+  const entries = history.filter(h=>h.mode===mode).slice(0,5);
+  if(entries.length===0) return '';
+  return `
+    <div class="history-box">
+      <p class="history-title">前回までの結果 · Historique</p>
+      ${entries.map(h=>{
+        const pct = Math.round((h.correct/h.total)*100);
+        return `<div class="history-row">
+          <span>${formatDate(h.date)}</span>
+          <span class="history-score ${pct>=80?'good':pct>=50?'mid':'low'}">${h.correct}/${h.total} (${pct}%)</span>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
 
 function shuffle(arr){
   const a = arr.slice();
@@ -359,12 +430,12 @@ function render(mode){
 /* ---------- FLASHCARDS ---------- */
 let flashOrder = shuffle(VOCAB);
 let flashIndex = 0;
+let flashCorrect = 0;
 
 function renderFlash(){
   if(flashIndex >= flashOrder.length){
-    panel.innerHTML = endScreen("単語帳 終了", "全部見ました！", ()=>{
-      flashOrder = shuffle(VOCAB); flashIndex = 0; renderFlash();
-    });
+    if(flashOrder.length>0) recordSession('flash', flashCorrect, flashOrder.length);
+    panel.innerHTML = endScreen("単語帳 終了", "全部見ました！", 'flash', flashCorrect, flashOrder.length);
     return;
   }
   const item = flashOrder[flashIndex];
@@ -390,7 +461,7 @@ function renderFlash(){
   card.addEventListener('click', ()=> card.classList.toggle('flipped'));
 
   panel.querySelector('.know').addEventListener('click', ()=>{
-    progress[item.k].known = true; saveProgress(); streak++; updateStats();
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++; updateStats();
     flashIndex++; renderFlash();
   });
   panel.querySelector('.dontknow').addEventListener('click', ()=>{
@@ -402,22 +473,33 @@ function renderFlash(){
 /* ---------- QCM ---------- */
 let quizPool = shuffle(VOCAB);
 let quizIndex = 0;
-const QUIZ_LEN = 12;
+let quizCorrect = 0;
+const QUIZ_LEN = 16;
 
 function renderQuiz(){
   if(quizIndex >= QUIZ_LEN){
-    panel.innerHTML = endScreen("クイズ 終了", "クイズ終了！", ()=>{
-      quizPool = shuffle(VOCAB); quizIndex = 0; renderQuiz();
-    });
+    recordSession('quiz', quizCorrect, QUIZ_LEN);
+    panel.innerHTML = endScreen("クイズ 終了", "クイズ終了！", 'quiz', quizCorrect, QUIZ_LEN);
     return;
   }
   const item = quizPool[quizIndex % quizPool.length];
   const askKanji = Math.random() < 0.5; // true: montre kanji, choisir lecture / false: montre lecture, choisir kanji
   const prompt = askKanji ? item.k : item.r;
-  const promptLabel = askKanji ? "読み方は？" : "漢字は？";
+  const promptLabel = askKanji ? "正しい読み方を選んでください" : "正しい漢字を選んでください";
 
-  let distractors = shuffle(VOCAB.filter(v=>v.k!==item.k)).slice(0,3);
-  let options = shuffle([item, ...distractors]).map(v => askKanji ? v.r : v.k);
+  // Distracteurs proches (piégeux) définis pour chaque mot : kd = kanji proches, rd = lectures proches.
+  // On complète avec d'autres mots du vocabulaire si jamais il n'y a pas assez de distracteurs proches.
+  const closeDistractors = askKanji ? (item.rd || []) : (item.kd || []);
+  let pool = closeDistractors.slice(0,3);
+  if(pool.length < 3){
+    const filler = shuffle(VOCAB.filter(v=>v.k!==item.k)).map(v=> askKanji ? v.r : v.k);
+    for(const f of filler){
+      if(pool.length>=3) break;
+      if(!pool.includes(f)) pool.push(f);
+    }
+  }
+  const correctVal = askKanji ? item.r : item.k;
+  let options = shuffle([correctVal, ...pool]);
 
   panel.innerHTML = `
     <p class="panel-title">クイズ <span class="count">${quizIndex+1} / ${QUIZ_LEN}</span></p>
@@ -428,20 +510,19 @@ function renderQuiz(){
     </div>
   `;
 
-  const correctVal = askKanji ? item.r : item.k;
   panel.querySelectorAll('.opt').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       panel.querySelectorAll('.opt').forEach(b=>b.disabled=true);
       if(btn.dataset.val === correctVal){
         btn.classList.add('correct');
-        progress[item.k].known = true; streak++;
+        progress[item.k].known = true; streak++; quizCorrect++;
       } else {
         btn.classList.add('wrong');
         panel.querySelectorAll('.opt').forEach(b=>{ if(b.dataset.val===correctVal) b.classList.add('correct'); });
         progress[item.k].known = false; streak=0;
       }
       saveProgress(); updateStats();
-      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 800);
+      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 900);
     });
   });
 }
@@ -449,12 +530,12 @@ function renderQuiz(){
 /* ---------- ECRITURE ---------- */
 let writeOrder = shuffle(VOCAB);
 let writeIndex = 0;
+let writeCorrect = 0;
 
 function renderWrite(){
   if(writeIndex >= writeOrder.length){
-    panel.innerHTML = endScreen("記入 終了", "終了しました！", ()=>{
-      writeOrder = shuffle(VOCAB); writeIndex = 0; renderWrite();
-    });
+    if(writeOrder.length>0) recordSession('write', writeCorrect, writeOrder.length);
+    panel.innerHTML = endScreen("記入 終了", "終了しました！", 'write', writeCorrect, writeOrder.length);
     return;
   }
   const item = writeOrder[writeIndex];
@@ -478,7 +559,7 @@ function renderWrite(){
     if(val === item.r){
       feedback.textContent = "正解！";
       feedback.className = "write-feedback ok";
-      progress[item.k].known = true; streak++;
+      progress[item.k].known = true; streak++; writeCorrect++;
     } else {
       feedback.textContent = `残念、正解は ${item.r}`;
       feedback.className = "write-feedback bad";
@@ -498,20 +579,22 @@ let matchSet = [];
 let matchSelectedLeft = null;
 let matchSelectedRight = null;
 let matchSolved = new Set();
+let matchMistakes = 0;
 
 function newMatchRound(){
   matchSet = shuffle(VOCAB).slice(0,6);
   matchSelectedLeft = null;
   matchSelectedRight = null;
   matchSolved = new Set();
+  matchMistakes = 0;
 }
 
 function renderMatch(){
   if(matchSet.length===0) newMatchRound();
   if(matchSolved.size === matchSet.length){
-    panel.innerHTML = endScreen("対戦 終了", "全部そろいました！", ()=>{
-      newMatchRound(); renderMatch();
-    });
+    const total = matchSet.length + matchMistakes;
+    recordSession('match', matchSet.length, total);
+    panel.innerHTML = endScreen("対戦 終了", "全部そろいました！", 'match', matchSet.length, total);
     return;
   }
   const leftItems = matchSet;
@@ -558,7 +641,7 @@ function renderMatch(){
         renderMatch();
       } else {
         const badKey = matchSelectedLeft;
-        streak = 0; updateStats();
+        streak = 0; matchMistakes++; updateStats();
         const leftEl = panel.querySelector(`.match-item.kanji[data-k="${matchSelectedLeft}"]`);
         const rightEl = panel.querySelector(`.match-item.reading[data-k="${matchSelectedRight}"]`);
         [leftEl,rightEl].forEach(e=> e && e.classList.add('shake'));
@@ -574,14 +657,17 @@ function renderMatch(){
 }
 
 /* ---------- END SCREEN ---------- */
-function endScreen(title, subtitle){
+function endScreen(title, subtitle, mode, sessionCorrect, sessionTotal){
   const known = Object.values(progress).filter(p=>p.known).length;
+  const pct = sessionTotal ? Math.round((sessionCorrect/sessionTotal)*100) : null;
   return `
     <div class="end-screen">
       <div class="big">${title}</div>
       <p>${subtitle}</p>
+      ${pct!==null ? `<p class="session-score">今回のスコア <b>${sessionCorrect} / ${sessionTotal}</b> （${pct}%）</p>` : ''}
       <p>${known} / ${VOCAB.length} 語 習得済み</p>
       <button id="restartBtn">もう一度</button>
+      ${historyListHTML(mode)}
     </div>
   `;
 }
@@ -591,9 +677,9 @@ panel.addEventListener('click', (e)=>{
     // find active mode
     const activeBtn = document.querySelector('nav.modes button.active');
     const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
-    if(mode==='flash'){ flashOrder = shuffle(VOCAB); flashIndex = 0; }
-    if(mode==='quiz'){ quizPool = shuffle(VOCAB); quizIndex = 0; }
-    if(mode==='write'){ writeOrder = shuffle(VOCAB); writeIndex = 0; }
+    if(mode==='flash'){ flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if(mode==='quiz'){ quizPool = shuffle(VOCAB); quizIndex = 0; quizCorrect = 0; }
+    if(mode==='write'){ writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
     if(mode==='match'){ newMatchRound(); }
     render(mode);
   }
