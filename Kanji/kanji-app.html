@@ -106,14 +106,16 @@
     border:1.5px solid var(--border);
     border-radius:12px;
     padding:10px 4px;
-    font-size:12.5px;
+    font-size:10px;
     font-weight:500;
     cursor:pointer;
     color:var(--ink2);
     transition:transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
     box-shadow:0 2px 10px var(--shadow-pink);
+    line-height:1.35;
   }
-  nav.modes button .jp{display:block;font-family:'Zen Antique Soft',serif;font-size:17px;margin-bottom:2px;color:inherit;}
+  nav.modes button .jp{display:block;font-family:'Zen Antique Soft',serif;font-size:17px;margin-bottom:3px;color:inherit;}
+  nav.modes button .sub{display:block;opacity:.85;letter-spacing:.01em;}
   nav.modes button:hover{transform:translateY(-2px);border-color:var(--pink-soft);}
   nav.modes button.active{
     background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
@@ -144,7 +146,7 @@
   /* FLASHCARDS */
   .card-stage{display:flex;flex-direction:column;align-items:center;gap:20px;}
   .flashcard{
-    width:100%;max-width:340px;height:230px;
+    width:100%;max-width:340px;height:260px;
     perspective:1200px;
     cursor:pointer;
   }
@@ -171,7 +173,9 @@
     border-color:transparent;
   }
   .face.back .reading{font-size:34px;font-family:'Noto Serif JP',serif;font-weight:700;}
-  .face.back .hint{font-size:12px;opacity:.85;margin-top:8px;letter-spacing:.05em;}
+  .face.back .meaning{font-size:14px;font-family:'DM Sans',sans-serif;font-weight:500;margin-top:10px;padding:0 20px;text-align:center;line-height:1.5;}
+  .face.back .meaning .sep{opacity:.6;margin:0 4px;}
+  .face.back .hint{font-size:12px;opacity:.85;margin-top:10px;letter-spacing:.05em;}
   .flash-controls{display:flex;gap:10px;}
   .flash-controls button{
     font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;
@@ -279,6 +283,10 @@
     font-size:13px;padding:5px 8px;color:var(--ink2);
   }
   .history-row:nth-child(even){background:var(--bg-soft);border-radius:8px;}
+  .history-row.history-total{
+    margin-top:6px;padding-top:10px;border-top:1px solid var(--border);
+    font-weight:700;color:var(--ink);
+  }
   .history-score{font-weight:700;}
   .history-score.good{color:var(--sage);}
   .history-score.mid{color:var(--gold);}
@@ -318,10 +326,10 @@
   </div>
 
   <nav class="modes">
-    <button data-mode="flash" class="active"><span class="jp">単語帳</span>単語帳</button>
-    <button data-mode="quiz"><span class="jp">選択</span>クイズ</button>
-    <button data-mode="write"><span class="jp">記入</span>記入</button>
-    <button data-mode="match"><span class="jp">対戦</span>対戦</button>
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards · Thẻ từ</span></button>
+    <button data-mode="quiz"><span class="jp">選択</span><span class="sub">Quiz · Trắc nghiệm</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing · Viết đáp án</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match · Nối từ</span></button>
   </nav>
 
   <section class="panel" id="panel"></section>
@@ -405,25 +413,39 @@ function recordSession(mode, correct, total){
   saveHistory();
 }
 
-function formatDate(iso){
+function formatTime(iso){
   const d = new Date(iso);
-  return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + ' ' +
-         d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  return d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
 }
 
-function historyListHTML(mode){
-  const entries = history.filter(h=>h.mode===mode).slice(0,5);
-  if(entries.length===0) return '';
+function isSameDay(iso){
+  const d = new Date(iso);
+  const now = new Date();
+  return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+}
+
+// Rassemble les résultats de TOUS les exercices faits aujourd'hui (tous modes confondus),
+// affiché à la fin de chaque activité pour donner une vue d'ensemble de la leçon.
+function lessonSummaryHTML(){
+  const today = history.filter(h=>isSameDay(h.date)).slice().reverse(); // ordre chronologique
+  if(today.length===0) return '';
+  let totalCorrect = 0, totalQuestions = 0;
+  today.forEach(h=>{ totalCorrect+=h.correct; totalQuestions+=h.total; });
+  const overallPct = totalQuestions ? Math.round((totalCorrect/totalQuestions)*100) : 0;
   return `
     <div class="history-box">
-      <p class="history-title">前回までの結果 · Historique</p>
-      ${entries.map(h=>{
+      <p class="history-title">今日のレッスンまとめ · Today's results · Kết quả hôm nay</p>
+      ${today.map(h=>{
         const pct = Math.round((h.correct/h.total)*100);
         return `<div class="history-row">
-          <span>${formatDate(h.date)}</span>
+          <span>${formatTime(h.date)} — ${MODE_LABEL[h.mode]}</span>
           <span class="history-score ${pct>=80?'good':pct>=50?'mid':'low'}">${h.correct}/${h.total} (${pct}%)</span>
         </div>`;
       }).join('')}
+      <div class="history-row history-total">
+        <span>合計 · Total</span>
+        <span class="history-score ${overallPct>=80?'good':overallPct>=50?'mid':'low'}">${totalCorrect}/${totalQuestions} (${overallPct}%)</span>
+      </div>
     </div>
   `;
 }
@@ -483,6 +505,7 @@ function renderFlash(){
           <div class="face front">${item.k}</div>
           <div class="face back">
             <div class="reading">${item.r}</div>
+            <div class="meaning">${item.en} <span class="sep">/</span> ${item.vi}</div>
             <div class="hint">タップして戻る</div>
           </div>
         </div>
@@ -723,7 +746,7 @@ function endScreen(title, subtitle, mode, sessionCorrect, sessionTotal){
       ${pct!==null ? `<p class="session-score">今回のスコア <b>${sessionCorrect} / ${sessionTotal}</b> （${pct}%）</p>` : ''}
       <p>${known} / ${VOCAB.length} 語 習得済み</p>
       <button id="restartBtn">もう一度</button>
-      ${historyListHTML(mode)}
+      ${lessonSummaryHTML()}
     </div>
   `;
 }
