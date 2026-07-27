@@ -3894,7 +3894,7 @@ function drawSparkline(wrapId, byCat, catsObj) {
   });
 }
 
-async function openStudentChart(studentId, studentName, level) {
+async function openStudentChart(studentId, studentName, level, preloadedData) {
   document.getElementById("student-chart-modal")?.remove();
   const overlay = document.createElement("div");
   overlay.id = "student-chart-modal";
@@ -3920,29 +3920,39 @@ async function openStudentChart(studentId, studentName, level) {
   document.body.appendChild(overlay);
 
   try {
-    const [scData, exData] = await Promise.all([
-      api({ action:"getMyScores", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() }),
-      api({ action:"getMyExercises", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() })
-    ]);
-    const scMap = {};
-    (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
+    let rawEntries = [];
 
-    // Collecter les entrées [TEST] avec catégorie (japonais via titre, SPEAKING via courseT)
-    const rawEntries = [];
-    const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
-    (exData.exercises||[])
-      .filter(e=>e.title&&e.title.includes("[TEST]")&&(!level||e.level===level))
-      .forEach(e=>{
-        const cat = getTestCat(e.title) || (e.level==="SPEAKING" ? getSpeakingCat(e.courseT) : null);
-        if (!cat) return;
-        const sc = scMap[String(e.id)];
-        if (!sc || !sc.maxScore) return;
-        const d = e.assignedDate ? parseDate(e.assignedDate) : null;
-        const ts = d ? d.getTime() : 0;
-        rawEntries.push({ cat, title: e.title, ts, pct: Math.round((sc.score/sc.maxScore)*100) });
+    if (preloadedData) {
+      // Utiliser directement les données de la sparkline — même source, même résultat garanti
+      document.getElementById("scm-loading").style.display="none";
+      Object.entries(preloadedData).forEach(function([cat, pts]) {
+        (pts||[]).forEach(function(pt) {
+          rawEntries.push({ cat, title: pt.title||"", ts: pt.ts||0, pct: pt.pct });
+        });
       });
+    } else {
+      // Fallback : appel API (depuis la vue élève)
+      const [scData, exData] = await Promise.all([
+        api({ action:"getMyScores", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() }),
+        api({ action:"getMyExercises", studentId, adminId:currentUserGlobal.id, pin:getStoredPin() })
+      ]);
+      const scMap = {};
+      (scData.scores||[]).forEach(s=>{ scMap[String(s.exerciseId)]=s; });
+      const locale = currentLang==="vi"?"vi-VN":currentLang==="en"?"en-US":"fr-FR";
+      (exData.exercises||[])
+        .filter(e=>e.title&&e.title.includes("[TEST]")&&(!level||e.level===level))
+        .forEach(e=>{
+          const cat = getTestCat(e.title) || (e.level==="SPEAKING" ? getSpeakingCat(e.courseT) : null);
+          if (!cat) return;
+          const sc = scMap[String(e.id)];
+          if (!sc || !sc.maxScore) return;
+          const d = e.assignedDate ? parseDate(e.assignedDate) : null;
+          const ts = d ? d.getTime() : 0;
+          rawEntries.push({ cat, title: e.title, ts, pct: Math.round((sc.score/sc.maxScore)*100) });
+        });
+      document.getElementById("scm-loading").style.display="none";
+    }
 
-    document.getElementById("scm-loading").style.display="none";
     if (!rawEntries.length) { document.getElementById("scm-empty").style.display="block"; return; }
 
     // Axe X groupé par session (JLPT fusionné, SPEAKING individuel)
@@ -5792,7 +5802,7 @@ async function loadAdminStats(forceRefresh) {
         return '<div class="dash-avg-student-row">'+
           '<span class="dash-avg-student-name">'+name+'</span>'+
           '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;min-width:100px;justify-content:center">'+
-            (hasTests?'<div id="spark-wrap-'+spId+'" style="width:70px;height:24px;flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+sid+'\',\''+name+'\',\''+lvl+'\')" title="Voir progression"></div>':'<span style="width:70px;display:inline-block"></span>')+
+            (hasTests?'<div id="spark-wrap-'+spId+'" style="width:70px;height:24px;flex-shrink:0;cursor:pointer" onclick="openStudentChart(\''+sid+'\',\''+name+'\',\''+lvl+'\',window._stuTestScores&&window._stuTestScores[\''+sid+'_'+lvl+'\'])" title="Voir progression"></div>':'<span style="width:70px;display:inline-block"></span>')+
             '<span style="font-size:10px;color:#E84B7A;font-weight:500;min-width:28px;text-align:right">'+(avgTestPct!==null?avgTestPct+'%':'—')+'</span>'+
           '</div>'+
           '<span style="width:1px;height:18px;background:rgba(44,26,34,0.08);flex-shrink:0"></span>'+
