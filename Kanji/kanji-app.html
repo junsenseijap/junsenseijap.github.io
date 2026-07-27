@@ -165,7 +165,12 @@
     background:var(--bg-card);
     box-shadow:0 4px 24px var(--shadow-pink);
   }
-  .face.front{font-size:64px;font-family:'Noto Serif JP',serif;font-weight:700;color:var(--ink);}
+  .face.front{font-family:'Noto Serif JP',serif;font-weight:700;color:var(--ink);}
+  .front-kanji{font-size:60px;line-height:1.1;}
+  .front-hv{
+    margin-top:12px;font-family:'DM Sans',sans-serif;font-weight:700;
+    font-size:15px;letter-spacing:.14em;color:var(--pink);text-transform:uppercase;
+  }
   .face.back{
     transform:rotateY(180deg);
     background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
@@ -340,35 +345,35 @@
 <script>
 /* ---------- DATA ---------- */
 const VOCAB = [
-  {k:"夫",     r:"おっと",       kd:["天","未","末"],           rd:["おとと","おっとう","おうと"], en:"husband", vi:"chồng"},
-  {k:"会社員", r:"かいしゃいん", kd:["会杜員","会社因","会祉員"], rd:["かいしゃにん","がいしゃいん","かいしゃいむ"], en:"company employee", vi:"nhân viên công ty"},
-  {k:"妻",     r:"つま",         kd:["妾","要","委"],           rd:["つぎ","づま","とま"], en:"wife", vi:"vợ"},
-  {k:"毎日",   r:"まいにち",     kd:["毎目","母日","毎白"],     rd:["まえにち","まいにつ","まいび"], en:"every day", vi:"mỗi ngày"},
-  {k:"料理",   r:"りょうり",     kd:["科理","料里","料理り"],   rd:["りょり","りか","りりょ"], en:"cooking / cuisine", vi:"nấu ăn / ẩm thực"},
-  {k:"作ります", r:"つくります", kd:["昨ります","作リます","佐ります"], rd:["つづります","づくります","つくれます"], en:"to make", vi:"làm / chế biến"},
-  {k:"家内",   r:"かない",       kd:["家丙","冢内","家肉"],     rd:["かうち","いえない","やない"], en:"(my) wife", vi:"vợ (của tôi)"},
-  {k:"行く",   r:"いく",         kd:["衍く","彳く","仃く"],     rd:["いき","いこ","えく"], en:"to go", vi:"đi"},
-  {k:"祖父",   r:"そふ",         kd:["祖文","租父","祖夫"],     rd:["そぶ","そう","とふ"], en:"grandfather", vi:"ông"},
-  {k:"祖母",   r:"そぼ",         kd:["祖毋","租母","祖姆"],     rd:["そほ","そも","とぼ"], en:"grandmother", vi:"bà"},
-  {k:"今年",   r:"ことし",       kd:["令年","今牛","合年"],     rd:["こんねん","こんとし","ごとし"], en:"this year", vi:"năm nay"},
-  {k:"八十歳", r:"はちじゅっさい", kd:["八千歳","八十才","八十蔵"], rd:["はたち","はちじっさい","やそじ"], en:"80 years old", vi:"80 tuổi"},
-  {k:"二十歳", r:"はたち",       kd:["二十才","二十歳っ","廿歳"], rd:["にじゅっさい","にじっさい","はだち"], en:"20 years old", vi:"20 tuổi"},
-  {k:"花",     r:"はな",         kd:["芯","芽","苦"],           rd:["ばな","はの","かな"], en:"flower", vi:"hoa"},
-  {k:"大好き", r:"だいすき",     kd:["犬好き","大好ぎ","太好き"], rd:["たいすき","だいすぎ","だいずき"], en:"to love / favorite", vi:"rất thích"},
-  {k:"今日",   r:"きょう",       kd:["令日","今目","今曰"],     rd:["きゅう","きょお","ぎょう"], en:"today", vi:"hôm nay"},
-  {k:"帰る",   r:"かえる",       kd:["婦る","掃る","帚る"],     rd:["かへる","がえる","かいる"], en:"to go home / return", vi:"về nhà / trở về"},
-  {k:"息子",   r:"むすこ",       kd:["息了","憩子","息孑"],     rd:["むすご","むすう","むうこ"], en:"son", vi:"con trai"},
-  {k:"娘",     r:"むすめ",       kd:["嬢","娠","嫁"],           rd:["むずめ","むすべ","むうめ"], en:"daughter", vi:"con gái"},
-  {k:"赤ちゃん", r:"あかちゃん", kd:["赤ちやん","亦ちゃん","赤ぢゃん"], rd:["あがちゃん","あかじゃん","あっかちゃん"], en:"baby", vi:"em bé"},
-  {k:"元気",   r:"げんき",       kd:["完気","元汽","元器"],     rd:["けんき","げんぎ","げんこ"], en:"healthy / energetic", vi:"khỏe mạnh"},
-  {k:"公園",   r:"こうえん",     kd:["公薗","公囲","広園"],     rd:["こおえん","こうおん","ごうえん"], en:"park", vi:"công viên"},
-  {k:"泣く",   r:"なく",         kd:["拉く","位く","泪く"],     rd:["なぐ","なあく","ねく"], en:"to cry", vi:"khóc"},
-  {k:"運動",   r:"うんどう",     kd:["運働","運同","連動"],     rd:["うんとう","うんどお","うんど"], en:"exercise", vi:"vận động / thể dục"},
-  {k:"彼女",   r:"かのじょ",     kd:["彼安","波女","彼汝"],     rd:["かのじよ","かなじょ","がのじょ"], en:"she / girlfriend", vi:"cô ấy / bạn gái"},
-  {k:"読書",   r:"どくしょ",     kd:["読著","読暑","詠書"],     rd:["どくじょ","とくしょ","どうしょ"], en:"reading (books)", vi:"đọc sách"},
-  {k:"男性",   r:"だんせい",     kd:["男姓","男牲","勇性"],     rd:["たんせい","だんぜい","だんせえ"], en:"male / man", vi:"nam giới"},
-  {k:"女性",   r:"じょせい",     kd:["女姓","女牲","汝性"],     rd:["じょせえ","しょせい","じょぜい"], en:"female / woman", vi:"nữ giới"},
-  {k:"少ない", r:"すくない",     kd:["小ない","少い","省ない"], rd:["すこない","すぐない","しゅくない"], en:"few / little", vi:"ít"},
+  {k:"夫",     r:"おっと",       hv:"PHU",               kd:["天","未","末"],           rd:["おとと","おっとう","おうと"], en:"husband", vi:"chồng"},
+  {k:"会社員", r:"かいしゃいん", hv:"HỘI XÃ VIÊN",       kd:["会杜員","会社因","会祉員"], rd:["かいしゃにん","がいしゃいん","かいしゃいむ"], en:"company employee", vi:"nhân viên công ty"},
+  {k:"妻",     r:"つま",         hv:"THÊ",               kd:["妾","要","委"],           rd:["つぎ","づま","とま"], en:"wife", vi:"vợ"},
+  {k:"毎日",   r:"まいにち",     hv:"MỖI NHẬT",          kd:["毎目","母日","毎白"],     rd:["まえにち","まいにつ","まいび"], en:"every day", vi:"mỗi ngày"},
+  {k:"料理",   r:"りょうり",     hv:"LIỆU LÝ",           kd:["科理","料里","料理り"],   rd:["りょり","りか","りりょ"], en:"cooking / cuisine", vi:"nấu ăn / ẩm thực"},
+  {k:"作ります", r:"つくります", hv:"TÁC",               kd:["昨ります","作リます","佐ります"], rd:["つづります","づくります","つくれます"], en:"to make", vi:"làm / chế biến"},
+  {k:"家内",   r:"かない",       hv:"GIA NỘI",           kd:["家丙","冢内","家肉"],     rd:["かうち","いえない","やない"], en:"(my) wife", vi:"vợ (của tôi)"},
+  {k:"行く",   r:"いく",         hv:"HÀNH",              kd:["衍く","彳く","仃く"],     rd:["いき","いこ","えく"], en:"to go", vi:"đi"},
+  {k:"祖父",   r:"そふ",         hv:"TỔ PHỤ",            kd:["祖文","租父","祖夫"],     rd:["そぶ","そう","とふ"], en:"grandfather", vi:"ông"},
+  {k:"祖母",   r:"そぼ",         hv:"TỔ MẪU",            kd:["祖毋","租母","祖姆"],     rd:["そほ","そも","とぼ"], en:"grandmother", vi:"bà"},
+  {k:"今年",   r:"ことし",       hv:"KIM NIÊN",          kd:["令年","今牛","合年"],     rd:["こんねん","こんとし","ごとし"], en:"this year", vi:"năm nay"},
+  {k:"八十歳", r:"はちじゅっさい", hv:"BÁT THẬP TUẾ",    kd:["八千歳","八十才","八十蔵"], rd:["はたち","はちじっさい","やそじ"], en:"80 years old", vi:"80 tuổi"},
+  {k:"二十歳", r:"はたち",       hv:"NHỊ THẬP TUẾ",      kd:["二十才","二十歳っ","廿歳"], rd:["にじゅっさい","にじっさい","はだち"], en:"20 years old", vi:"20 tuổi"},
+  {k:"花",     r:"はな",         hv:"HOA",               kd:["芯","芽","苦"],           rd:["ばな","はの","かな"], en:"flower", vi:"hoa"},
+  {k:"大好き", r:"だいすき",     hv:"ĐẠI HẢO",           kd:["犬好き","大好ぎ","太好き"], rd:["たいすき","だいすぎ","だいずき"], en:"to love / favorite", vi:"rất thích"},
+  {k:"今日",   r:"きょう",       hv:"KIM NHẬT",          kd:["令日","今目","今曰"],     rd:["きゅう","きょお","ぎょう"], en:"today", vi:"hôm nay"},
+  {k:"帰る",   r:"かえる",       hv:"QUY",               kd:["婦る","掃る","帚る"],     rd:["かへる","がえる","かいる"], en:"to go home / return", vi:"về nhà / trở về"},
+  {k:"息子",   r:"むすこ",       hv:"TỨC TỬ",            kd:["息了","憩子","息孑"],     rd:["むすご","むすう","むうこ"], en:"son", vi:"con trai"},
+  {k:"娘",     r:"むすめ",       hv:"NƯƠNG",             kd:["嬢","娠","嫁"],           rd:["むずめ","むすべ","むうめ"], en:"daughter", vi:"con gái"},
+  {k:"赤ちゃん", r:"あかちゃん", hv:"XÍCH",              kd:["赤ちやん","亦ちゃん","赤ぢゃん"], rd:["あがちゃん","あかじゃん","あっかちゃん"], en:"baby", vi:"em bé"},
+  {k:"元気",   r:"げんき",       hv:"NGUYÊN KHÍ",        kd:["完気","元汽","元器"],     rd:["けんき","げんぎ","げんこ"], en:"healthy / energetic", vi:"khỏe mạnh"},
+  {k:"公園",   r:"こうえん",     hv:"CÔNG VIÊN",         kd:["公薗","公囲","広園"],     rd:["こおえん","こうおん","ごうえん"], en:"park", vi:"công viên"},
+  {k:"泣く",   r:"なく",         hv:"KHẤP",              kd:["拉く","位く","泪く"],     rd:["なぐ","なあく","ねく"], en:"to cry", vi:"khóc"},
+  {k:"運動",   r:"うんどう",     hv:"VẬN ĐỘNG",          kd:["運働","運同","連動"],     rd:["うんとう","うんどお","うんど"], en:"exercise", vi:"vận động / thể dục"},
+  {k:"彼女",   r:"かのじょ",     hv:"BỈ NỮ",             kd:["彼安","波女","彼汝"],     rd:["かのじよ","かなじょ","がのじょ"], en:"she / girlfriend", vi:"cô ấy / bạn gái"},
+  {k:"読書",   r:"どくしょ",     hv:"ĐỘC THƯ",           kd:["読著","読暑","詠書"],     rd:["どくじょ","とくしょ","どうしょ"], en:"reading (books)", vi:"đọc sách"},
+  {k:"男性",   r:"だんせい",     hv:"NAM TÍNH",          kd:["男姓","男牲","勇性"],     rd:["たんせい","だんぜい","だんせえ"], en:"male / man", vi:"nam giới"},
+  {k:"女性",   r:"じょせい",     hv:"NỮ TÍNH",           kd:["女姓","女牲","汝性"],     rd:["じょせえ","しょせい","じょぜい"], en:"female / woman", vi:"nữ giới"},
+  {k:"少ない", r:"すくない",     hv:"THIỂU",             kd:["小ない","少い","省ない"], rd:["すこない","すぐない","しゅくない"], en:"few / little", vi:"ít"},
 ];
 
 const STORAGE_KEY = "kanji_famille_progress_v1";
@@ -502,7 +507,10 @@ function renderFlash(){
     <div class="card-stage">
       <div class="flashcard" id="flashcard">
         <div class="flashcard-inner">
-          <div class="face front">${item.k}</div>
+          <div class="face front">
+            <div class="front-kanji">${item.k}</div>
+            <div class="front-hv">${item.hv}</div>
+          </div>
           <div class="face back">
             <div class="reading">${item.r}</div>
             <div class="meaning">${item.en} <span class="sep">/</span> ${item.vi}</div>
