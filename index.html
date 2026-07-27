@@ -3819,8 +3819,30 @@ function fmtLvlBadge(lvl) {
 
 function getTestGroupKey(title) {
   if (!title) return "?";
+  // Pour JLPT : extraire le courseN (= dossier parent = partie entre [CAT]_ et le 2ème _)
+  // ex: "[TEST][JLPT]VO_ĐỀ ÔN 1_直前6回目_N5" → courseN = "ĐỀ ÔN 1"
+  // ex: "[TEST][JLPT]RE_ĐỀ ÔN 1_SPEED MOGI 1_N5" → courseN = "ĐỀ ÔN 1"
+  // Toutes les matières d'une session partagent le même courseN → même position X
   var jlpt = title.match(/\[JLPT\](?:GR|VO|LI|RE)[_\s]?(.*)$/i);
-  if (jlpt) return "JLPT_" + jlpt[1].trim();
+  if (jlpt) {
+    var rest = jlpt[1].trim(); // "ĐỀ ÔN 1_直前6回目_N5" ou "ĐỀ ÔN 1_SPEED MOGI 1_N5"
+    // Supprimer le suffixe _NX (niveau) en fin
+    rest = rest.replace(/_N[1-5]$/i, "").trim();
+    // Prendre uniquement la première partie avant le dernier segment (le nom du test individuel)
+    // "ĐỀ ÔN 1_直前6回目" → on veut juste "ĐỀ ÔN 1"
+    // Stratégie : prendre tout jusqu'au premier _ qui suit un espace ou caractère non-ASCII
+    // Plus simple : prendre les N premiers caractères jusqu'au 2ème _
+    var parts = rest.split("_");
+    // Si au moins 2 parties : la 1ère est le courseN (ex: "ĐỀ ÔN 1"), la 2ème est le sous-test
+    // Mais courseN peut contenir des espaces (ex: "ĐỀ ÔN 1") donc on split sur _ et prend le début
+    // Le courseN est tout ce qui précède le dernier segment
+    if (parts.length >= 2) {
+      // Retirer le dernier segment (nom du test individuel) → garder le courseN
+      var courseN = parts.slice(0, parts.length - 1).join("_");
+      return "JLPT_" + courseN;
+    }
+    return "JLPT_" + rest;
+  }
   // Test non-JLPT : enlever préfixe numérique + tags pour obtenir clé stable
   var s = title.replace(/^\d+_/, "").replace(/^((?:\[[^\]]+\])+)\s*/i, "").replace(/^\d+_/, "");
   return s || title;
