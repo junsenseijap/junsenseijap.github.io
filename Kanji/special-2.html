@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPÉCIAL 2 — 仕事 (Topic 19)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+
+  :root{
+    /* Palette Hanami — reprise du style Jun Sensei */
+    --pink:        #E84B7A;
+    --pink-mid:    #F07099;
+    --pink-soft:   #F9C0D0;
+    --pink-pale:   #FDE8EF;
+    --pink-glow:   rgba(232,75,122,0.15);
+    --blue:        #7BAFD4;
+    --blue-pale:   #D6EBF7;
+    --sage:        #4a8a55;
+    --sage-pale:   rgba(158,196,160,0.22);
+    --gold:        #C89B3C;
+    --bg:          #FAFAFA;
+    --bg-card:     #FFFFFF;
+    --bg-soft:     #F5F0F3;
+    --border:      rgba(232,75,122,0.16);
+    --border-blue: rgba(123,175,212,0.3);
+    --ink:         #2C1A22;
+    --ink2:        #5A3D4A;
+    --gray:        #9A8590;
+    --shadow:      rgba(44,26,34,0.08);
+    --shadow-pink: rgba(232,75,122,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 60% 40% at 5% 0%, rgba(249,192,208,0.35) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 35% at 98% 5%, rgba(123,175,212,0.20) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 50% 110%, rgba(249,192,208,0.20) 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'DM Sans', sans-serif;
+    min-height:100vh;
+    padding:24px 16px 60px;
+    position:relative;
+  }
+  .wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+
+  /* header */
+  header{
+    display:flex;align-items:center;gap:16px;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--border);
+  }
+  .hanko{
+    width:56px;height:56px;flex:none;
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
+    color:#fff;
+    border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Noto Serif JP',serif;
+    font-size:26px;font-weight:700;
+    box-shadow: 0 4px 16px rgba(232,75,122,0.35);
+  }
+  header h1{
+    font-family:'Zen Antique Soft',serif;
+    font-size:28px;font-weight:400;
+    margin:0;
+    line-height:1.2;
+    letter-spacing:.04em;
+    color:var(--ink);
+  }
+  header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+
+  /* progress */
+  .stats{
+    display:flex;gap:10px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    background:var(--bg-card);
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:8px 14px;
+    font-size:13px;
+    display:flex;align-items:baseline;gap:6px;
+    box-shadow:0 2px 10px var(--shadow-pink);
+    color:var(--ink2);
+  }
+  .stat b{font-size:18px;font-family:'Zen Antique Soft',serif;font-weight:400;}
+  .stat.ok b{color:var(--sage);}
+  .stat.pending b{color:var(--gold);}
+
+  /* nav modes */
+  nav.modes{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:26px;
+  }
+  nav.modes button{
+    font-family:'DM Sans', sans-serif;
+    background:var(--bg-card);
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:10px 4px;
+    font-size:10px;
+    font-weight:500;
+    cursor:pointer;
+    color:var(--ink2);
+    transition:transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+    box-shadow:0 2px 10px var(--shadow-pink);
+    line-height:1.35;
+  }
+  nav.modes button .jp{display:block;font-family:'Zen Antique Soft',serif;font-size:17px;margin-bottom:3px;color:inherit;}
+  nav.modes button .sub{display:block;opacity:.85;letter-spacing:.01em;}
+  nav.modes button:hover{transform:translateY(-2px);border-color:var(--pink-soft);}
+  nav.modes button.active{
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 6px 20px rgba(232,75,122,0.35);
+  }
+
+  section.panel{
+    background:var(--bg-card);
+    border:1.5px solid var(--border);
+    border-radius:18px;
+    padding:26px 22px;
+    box-shadow:0 4px 30px var(--shadow-pink), 0 1px 4px var(--shadow);
+    min-height:340px;
+    position:relative;
+  }
+  .panel-title{
+    font-family:'Zen Antique Soft',serif;
+    font-size:16px;
+    color:var(--pink);
+    margin:0 0 18px;
+    display:flex;justify-content:space-between;align-items:center;
+    letter-spacing:.04em;
+  }
+  .panel-title .count{font-size:12px;color:var(--gray);font-family:'DM Sans',sans-serif;letter-spacing:0;}
+
+  /* FLASHCARDS */
+  .card-stage{display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .flashcard{
+    width:100%;max-width:340px;height:320px;
+    perspective:1200px;
+    cursor:pointer;
+  }
+  .flashcard-inner{
+    position:relative;width:100%;height:100%;
+    transition:transform .5s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    border:1.5px solid var(--border);
+    border-radius:16px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:var(--bg-card);
+    box-shadow:0 4px 24px var(--shadow-pink);
+    overflow-y:auto;
+    padding:14px 8px;
+  }
+  .face.front{font-family:'Noto Serif JP',serif;font-weight:700;color:var(--ink);}
+  .front-kanji{font-size:60px;line-height:1.15;text-align:center;padding:0 10px;}
+  .front-kanji.mid{font-size:42px;}
+  .front-kanji.long{font-size:30px;}
+  .front-hv{
+    margin-top:12px;font-family:'DM Sans',sans-serif;font-weight:700;
+    font-size:15px;letter-spacing:.14em;color:var(--pink);text-transform:uppercase;
+  }
+  .face.back{
+    transform:rotateY(180deg);
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);
+    color:#fff;
+    border-color:transparent;
+  }
+  .face.back .reading{font-size:34px;font-family:'Noto Serif JP',serif;font-weight:700;}
+  .face.back .meaning{font-size:14px;font-family:'DM Sans',sans-serif;font-weight:500;margin-top:10px;padding:0 20px;text-align:center;line-height:1.5;}
+  .face.back .meaning .sep{opacity:.6;margin:0 4px;}
+  .face.back .example{
+    font-size:13px;font-family:'Noto Serif JP',serif;font-weight:500;
+    margin-top:12px;padding:8px 16px 0;text-align:center;line-height:1.5;
+    border-top:1px solid rgba(255,255,255,0.3);opacity:.95;max-width:90%;
+  }
+  .face.back .hint{font-size:12px;opacity:.85;margin-top:10px;letter-spacing:.05em;}
+  .flash-controls{display:flex;gap:10px;}
+  .flash-controls button{
+    font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;
+    border-radius:24px;padding:10px 20px;border:1.5px solid var(--border);
+    background:var(--bg-card);cursor:pointer;transition:all .15s;
+  }
+  .flash-controls button.know{border-color:var(--sage);color:var(--sage);}
+  .flash-controls button.know:hover{background:var(--sage-pale);}
+  .flash-controls button.dontknow{border-color:var(--pink);color:var(--pink);}
+  .flash-controls button.dontknow:hover{background:var(--pink-pale);}
+  .flash-controls button:active{transform:scale(.96);}
+
+  /* QUIZ */
+  .quiz-prompt{
+    text-align:center;
+    font-family:'Noto Serif JP',serif;font-weight:700;
+    font-size:48px;
+    margin:6px 0 6px;
+    color:var(--ink);
+  }
+  .quiz-prompt.meaning-mode{font-size:34px;}
+  .quiz-sub{text-align:center;font-size:12.5px;color:var(--pink);margin-top:0;margin-bottom:22px;text-transform:uppercase;letter-spacing:.14em;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{
+    font-family:'Noto Serif JP',serif;font-weight:500;
+    background:var(--pink-pale);border:1.5px solid rgba(232,75,122,0.25);border-radius:12px;
+    padding:16px 10px;font-size:20px;cursor:pointer;color:var(--ink2);
+    transition:background .15s, color .15s, border-color .15s, box-shadow .15s;
+  }
+  .opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;line-height:1.4;}
+  .opt:hover{background:linear-gradient(135deg, var(--pink), var(--pink-mid));color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(232,75,122,0.3);}
+  .opt.correct{background:var(--sage);border-color:var(--sage);color:#fff;}
+  .opt.wrong{background:var(--pink);border-color:var(--pink);color:#fff;}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{box-shadow:none;}
+
+  /* ECRITURE */
+  .write-kanji{
+    text-align:center;font-family:'Noto Serif JP',serif;font-weight:700;font-size:66px;margin-bottom:8px;color:var(--ink);
+  }
+  .write-sub{text-align:center;font-size:12.5px;color:var(--pink);margin-bottom:22px;text-transform:uppercase;letter-spacing:.14em;}
+  .write-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  input#writeInput{
+    font-family:'Noto Serif JP',serif;
+    font-size:22px;padding:10px 14px;border:1.5px solid rgba(232,75,122,0.25);border-radius:12px;
+    width:220px;text-align:center;background:var(--bg-soft);color:var(--ink);
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  input#writeInput:focus{outline:none;border-color:var(--pink);background:var(--bg-card);box-shadow:0 0 0 3px var(--pink-glow);}
+  button.submitbtn{
+    font-family:'DM Sans',sans-serif;font-weight:600;
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);color:#fff;
+    border:none;border-radius:12px;padding:10px 20px;cursor:pointer;font-size:14px;
+    box-shadow:0 4px 16px rgba(232,75,122,0.3);transition:opacity .2s, transform .12s;
+  }
+  button.submitbtn:hover{opacity:.9;}
+  button.submitbtn:active{transform:scale(.97);}
+  .write-feedback{text-align:center;margin-top:16px;font-size:15px;min-height:24px;}
+  .write-feedback.ok{color:var(--sage);font-weight:700;}
+  .write-feedback.bad{color:var(--pink);font-weight:700;}
+
+  /* MATCH */
+  .match-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  }
+  .match-col{display:flex;flex-direction:column;gap:8px;}
+  .match-item{
+    font-family:'Noto Serif JP',serif;
+    border:1.5px solid rgba(232,75,122,0.2);border-radius:12px;
+    padding:10px;text-align:center;cursor:pointer;background:var(--bg-card);font-size:18px;
+    color:var(--ink2);
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .match-item.kanji{font-size:24px;font-weight:700;}
+  .match-item.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .match-item.solved{background:var(--sage);color:#fff;border-color:var(--sage);opacity:.55;cursor:default;}
+  .match-item.shake{animation:shake .3s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+
+  .end-screen{text-align:center;padding:30px 10px;}
+  .end-screen .big{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:38px;margin-bottom:6px;color:var(--pink);}
+  .end-screen p{color:var(--ink2);font-size:14px;}
+  .end-screen button{
+    margin-top:16px;font-family:'DM Sans',sans-serif;font-weight:600;
+    background:linear-gradient(135deg, var(--pink) 0%, var(--pink-mid) 100%);color:#fff;
+    border:none;border-radius:12px;padding:12px 24px;cursor:pointer;font-size:14px;
+    box-shadow:0 4px 16px rgba(232,75,122,0.3);transition:opacity .2s;
+  }
+  .end-screen button:hover{opacity:.9;}
+
+  .history-box{
+    margin-top:20px;padding-top:16px;border-top:1px dashed var(--border);
+    text-align:left;
+  }
+  .history-title{
+    font-size:12px;color:var(--pink);margin:0 0 8px;text-align:center;
+    letter-spacing:.1em;text-transform:uppercase;
+  }
+  .history-row{
+    display:flex;justify-content:space-between;
+    font-size:13px;padding:5px 8px;color:var(--ink2);
+  }
+  .history-row:nth-child(even){background:var(--bg-soft);border-radius:8px;}
+  .history-row.history-total{
+    margin-top:6px;padding-top:10px;border-top:1px solid var(--border);
+    font-weight:700;color:var(--ink);
+  }
+  .history-score{font-weight:700;}
+  .history-score.good{color:var(--sage);}
+  .history-score.mid{color:var(--gold);}
+  .history-score.low{color:var(--pink);}
+
+  .session-score{
+    font-size:15px;color:var(--ink2);margin:6px 0 0;
+  }
+  .session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+
+  footer{
+    text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;
+  }
+
+  @media (max-width:420px){
+    nav.modes{grid-template-columns:repeat(2,1fr);}
+    .options{grid-template-columns:1fr;}
+    .match-grid{gap:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">漢</div>
+    <div>
+      <h1>SPÉCIAL 2 — 仕事</h1>
+      <p id="headerSub">仕事 の語彙</p>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">24</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards · Thẻ từ</span></button>
+    <button data-mode="quiz"><span class="jp">選択</span><span class="sub">Quiz · Trắc nghiệm</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing · Viết đáp án</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match · Nối từ</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>日本語クラスのために作成</footer>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const VOCAB = [
+  {k:"会社員", r:"かいしゃいん", hv:"HỘI XÃ VIÊN", en:"company employee", vi:"nhân viên công ty", kd:["会杜員","会社因","会祉員"]},
+  {k:"教師", r:"きょうし", hv:"GIÁO SƯ", en:"teacher", vi:"giáo viên", kd:["教帥","孝師","教師゛"]},
+  {k:"商品", r:"しょうひん", hv:"THƯƠNG PHẨM", en:"product / merchandise", vi:"hàng hóa, sản phẩm", kd:["商晶","啇品","商品゛"]},
+  {k:"店員", r:"てんいん", hv:"ĐIẾM VIÊN", en:"store clerk", vi:"nhân viên cửa hàng", kd:["店因","占員","店員゛"]},
+  {k:"店長", r:"てんちょう", hv:"ĐIẾM TRƯỞNG", en:"store manager", vi:"cửa hàng trưởng", kd:["店張","占長","店長゛"]},
+  {k:"店", r:"みせ", hv:"ĐIẾM", en:"store / shop", vi:"cửa hàng", kd:["占","店゛","坫"]},
+  {k:"客", r:"きゃく", hv:"KHÁCH", en:"customer", vi:"khách hàng", kd:["容","客゛","露"]},
+  {k:"働きます", r:"はたらきます", hv:"ĐỘNG", en:"to work", vi:"làm việc", kd:["動きます","働きまず","慟きます"]},
+  {k:"事務所", r:"じむしょ", hv:"SỰ VỤ SỞ", en:"office", vi:"văn phòng", kd:["事努所","事務听","事務所゛"]},
+  {k:"仕事", r:"しごと", hv:"SĨ SỰ", en:"job / work", vi:"công việc", kd:["仕亊","任事","仕事゛"]},
+  {k:"受付", r:"うけつけ", hv:"THỤ PHÓ", en:"reception", vi:"quầy lễ tân, tiếp tân", kd:["愛付","受咐","受付゛"]},
+  {k:"並びます", r:"ならびます", hv:"TỊNH", en:"to line up (polite)", vi:"xếp hàng", kd:["竝びます","並びまず","並ぴます"]},
+  {k:"社長", r:"しゃちょう", hv:"XÃ TRƯỞNG", en:"company president", vi:"giám đốc công ty", kd:["祉長","社張","社長゛"]},
+  {k:"医者", r:"いしゃ", hv:"Y GIẢ", en:"doctor", vi:"bác sĩ", kd:["匜者","医老","医者゛"]},
+  {k:"勤めます", r:"つとめます", hv:"CẦN", en:"to work for / be employed at", vi:"làm việc, công tác tại", kd:["勒めます","勤めまず","勤ぬます"]},
+  {k:"並ぶ", r:"ならぶ", hv:"TỊNH", en:"to line up (plain)", vi:"xếp hàng", kd:["竝ぶ","並ぷ","並ぶ゛"]},
+  {k:"並べる", r:"ならべる", hv:"TỊNH", en:"to arrange / line up (things)", vi:"sắp xếp, bày ra", kd:["竝べる","並ぺる","並べゐ"]},
+];
+
+const STORAGE_KEY = "kanji_special2_progress_v1";
+function loadProgress(){
+  let p = {};
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) p = JSON.parse(raw);
+  }catch(e){}
+  // Ajoute les mots manquants (ex: nouveaux mots ajoutés après une mise à jour)
+  VOCAB.forEach(v=>{ if(!p[v.k]) p[v.k] = {known:false}; });
+  return p;
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+let progress = loadProgress();
+let streak = Number(localStorage.getItem(STORAGE_KEY+"_streak") || 0);
+
+/* ---------- HISTORIQUE DES LEÇONS ---------- */
+const HISTORY_KEY = "kanji_special2_history_v1";
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return [];
+}
+function saveHistory(){
+  try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }catch(e){}
+}
+let history = loadHistory();
+
+const MODE_LABEL = {flash:"単語帳", quiz:"クイズ", write:"記入", match:"対戦"};
+
+function recordSession(mode, correct, total){
+  history.unshift({
+    mode, correct, total,
+    date: new Date().toISOString()
+  });
+  history = history.slice(0, 30); // garde les 30 dernières sessions
+  saveHistory();
+}
+
+function formatTime(iso){
+  const d = new Date(iso);
+  return d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+
+function isSameDay(iso){
+  const d = new Date(iso);
+  const now = new Date();
+  return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+}
+
+// Rassemble les résultats de TOUS les exercices faits aujourd'hui (tous modes confondus),
+// affiché à la fin de chaque activité pour donner une vue d'ensemble de la leçon.
+function lessonSummaryHTML(){
+  const today = history.filter(h=>isSameDay(h.date)).slice().reverse(); // ordre chronologique
+  if(today.length===0) return '';
+  let totalCorrect = 0, totalQuestions = 0;
+  today.forEach(h=>{ totalCorrect+=h.correct; totalQuestions+=h.total; });
+  const overallPct = totalQuestions ? Math.round((totalCorrect/totalQuestions)*100) : 0;
+  return `
+    <div class="history-box">
+      <p class="history-title">今日のレッスンまとめ · Today's results · Kết quả hôm nay</p>
+      ${today.map(h=>{
+        const pct = Math.round((h.correct/h.total)*100);
+        return `<div class="history-row">
+          <span>${formatTime(h.date)} — ${MODE_LABEL[h.mode]}</span>
+          <span class="history-score ${pct>=80?'good':pct>=50?'mid':'low'}">${h.correct}/${h.total} (${pct}%)</span>
+        </div>`;
+      }).join('')}
+      <div class="history-row history-total">
+        <span>合計 · Total</span>
+        <span class="history-score ${overallPct>=80?'good':overallPct>=50?'mid':'low'}">${totalCorrect}/${totalQuestions} (${overallPct}%)</span>
+      </div>
+    </div>
+  `;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function updateStats(){
+  const known = Object.values(progress).filter(p=>p.known).length;
+  document.getElementById('statKnown').textContent = known;
+  document.getElementById('statTotal').textContent = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+  const sub = document.getElementById('headerSub');
+  if(sub) sub.textContent = `仕事 の語彙 · 全${VOCAB.length}語`;
+}
+
+/* ---------- NAV ---------- */
+const panel = document.getElementById('panel');
+document.querySelectorAll('nav.modes button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.modes button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode){
+  if(mode==='flash') renderFlash();
+  else if(mode==='quiz') renderQuiz();
+  else if(mode==='write') renderWrite();
+  else if(mode==='match') renderMatch();
+}
+
+/* ---------- FLASHCARDS ---------- */
+let flashOrder = shuffle(VOCAB);
+let flashIndex = 0;
+let flashCorrect = 0;
+
+function renderFlash(){
+  if(flashIndex >= flashOrder.length){
+    if(flashOrder.length>0) recordSession('flash', flashCorrect, flashOrder.length);
+    panel.innerHTML = endScreen("単語帳 終了", "全部見ました！", 'flash', flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex+1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${item.k.length>5?'long':item.k.length>3?'mid':''}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+          </div>
+          <div class="face back">
+            <div class="reading">${item.r}</div>
+            <div class="meaning">${item.en} <span class="sep">/</span> ${item.vi}</div>
+            ${item.ex ? `<div class="example">${item.ex}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="dontknow">✗ もう一度</button>
+        <button class="know">✓ わかる</button>
+      </div>
+    </div>
+  `;
+  const card = document.getElementById('flashcard');
+  card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+
+  panel.querySelector('.know').addEventListener('click', ()=>{
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++; updateStats();
+    flashIndex++; renderFlash();
+  });
+  panel.querySelector('.dontknow').addEventListener('click', ()=>{
+    progress[item.k].known = false; saveProgress(); streak=0; updateStats();
+    flashIndex++; renderFlash();
+  });
+}
+
+/* ---------- QCM ---------- */
+let quizPool = shuffle(VOCAB);
+let quizIndex = 0;
+let quizCorrect = 0;
+const QUIZ_LEN = 18;
+const QUIZ_TYPES = ['toReading','toKanji','toMeaning'];
+
+function renderQuiz(){
+  if(quizIndex >= QUIZ_LEN){
+    recordSession('quiz', quizCorrect, QUIZ_LEN);
+    panel.innerHTML = endScreen("クイズ 終了", "クイズ終了！", 'quiz', quizCorrect, QUIZ_LEN);
+    return;
+  }
+  const item = quizPool[quizIndex % quizPool.length];
+  const qType = QUIZ_TYPES[Math.floor(Math.random()*QUIZ_TYPES.length)];
+
+  let prompt, promptLabel, optionItems, promptClass = '', optClass = '';
+
+  if(qType === 'toReading'){
+    prompt = item.k;
+    promptLabel = "正しい読み方を選んでください";
+    const close = (item.rd || []).slice(0,3);
+    let pool = close.slice();
+    if(pool.length < 3){
+      const filler = shuffle(VOCAB).map(v=>v.r).filter(r=> r!==item.r && !pool.includes(r));
+      while(pool.length < 3 && filler.length) pool.push(filler.pop());
+    }
+    optionItems = shuffle([item.r, ...pool]).map(v => ({label:v, correct:v===item.r}));
+  } else if(qType === 'toKanji'){
+    prompt = item.r;
+    promptLabel = "正しい漢字を選んでください";
+    const close = (item.kd || []).slice(0,3);
+    let pool = close.slice();
+    if(pool.length < 3){
+      const filler = shuffle(VOCAB).map(v=>v.k).filter(k=> k!==item.k && !pool.includes(k));
+      while(pool.length < 3 && filler.length) pool.push(filler.pop());
+    }
+    optionItems = shuffle([item.k, ...pool]).map(v => ({label:v, correct:v===item.k}));
+  } else { // toMeaning
+    prompt = item.k;
+    promptLabel = "正しい意味を選んでください（EN / VI）";
+    optClass = 'meaning-opt';
+    const correctLabel = `${item.en} / ${item.vi}`;
+    const others = shuffle(VOCAB.filter(v=>v.k!==item.k)).slice(0,3);
+    optionItems = shuffle([
+      {label: correctLabel, correct:true},
+      ...others.map(v => ({label:`${v.en} / ${v.vi}`, correct:false}))
+    ]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex+1} / ${QUIZ_LEN}</span></p>
+    <div class="quiz-prompt ${promptClass}">${prompt}</div>
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o,i)=>`<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>
+  `;
+
+  panel.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const chosen = optionItems[Number(btn.dataset.idx)];
+      panel.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+      if(chosen.correct){
+        btn.classList.add('correct');
+        progress[item.k].known = true; streak++; quizCorrect++;
+      } else {
+        btn.classList.add('wrong');
+        panel.querySelectorAll('.opt').forEach((b,i)=>{ if(optionItems[i].correct) b.classList.add('correct'); });
+        progress[item.k].known = false; streak=0;
+      }
+      saveProgress(); updateStats();
+      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1000);
+    });
+  });
+}
+
+/* ---------- ECRITURE ---------- */
+let writeOrder = shuffle(VOCAB);
+let writeIndex = 0;
+let writeCorrect = 0;
+
+function renderWrite(){
+  if(writeIndex >= writeOrder.length){
+    if(writeOrder.length>0) recordSession('write', writeCorrect, writeOrder.length);
+    panel.innerHTML = endScreen("記入 終了", "終了しました！", 'write', writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex+1} / ${writeOrder.length}</span></p>
+    <div class="write-kanji">${item.k}</div>
+    <p class="write-sub">読み方をひらがなで入力</p>
+    <div class="write-row">
+      <input id="writeInput" type="text" autocomplete="off" autocapitalize="off" placeholder="ひらがな">
+      <button class="submitbtn" id="writeSubmit">確認</button>
+    </div>
+    <div class="write-feedback" id="writeFeedback"></div>
+  `;
+  const input = document.getElementById('writeInput');
+  const feedback = document.getElementById('writeFeedback');
+  input.focus();
+
+  function check(){
+    const val = input.value.trim();
+    if(!val) return;
+    if(val === item.r){
+      feedback.textContent = "正解！";
+      feedback.className = "write-feedback ok";
+      progress[item.k].known = true; streak++; writeCorrect++;
+    } else {
+      feedback.textContent = `残念、正解は ${item.r}`;
+      feedback.className = "write-feedback bad";
+      progress[item.k].known = false; streak=0;
+    }
+    saveProgress(); updateStats();
+    input.disabled = true;
+    document.getElementById('writeSubmit').disabled = true;
+    setTimeout(()=>{ writeIndex++; renderWrite(); }, 1100);
+  }
+  document.getElementById('writeSubmit').addEventListener('click', check);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') check(); });
+}
+
+/* ---------- ASSOCIATION ---------- */
+let matchSet = [];
+let matchSelectedLeft = null;
+let matchSelectedRight = null;
+let matchSolved = new Set();
+let matchMistakes = 0;
+
+function newMatchRound(){
+  matchSet = shuffle(VOCAB).slice(0,6);
+  matchSelectedLeft = null;
+  matchSelectedRight = null;
+  matchSolved = new Set();
+  matchMistakes = 0;
+}
+
+function renderMatch(){
+  if(matchSet.length===0) newMatchRound();
+  if(matchSolved.size === matchSet.length){
+    const total = matchSet.length + matchMistakes;
+    recordSession('match', matchSet.length, total);
+    panel.innerHTML = endScreen("対戦 終了", "全部そろいました！", 'match', matchSet.length, total);
+    return;
+  }
+  const leftItems = matchSet;
+  const rightItems = shuffle(matchSet);
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchSolved.size} / ${matchSet.length} 組</span></p>
+    <div class="match-grid">
+      <div class="match-col" id="matchLeft">
+        ${leftItems.map(v=>`<div class="match-item kanji ${matchSolved.has(v.k)?'solved':''}" data-k="${v.k}">${v.k}</div>`).join('')}
+      </div>
+      <div class="match-col" id="matchRight">
+        ${rightItems.map(v=>`<div class="match-item reading ${matchSolved.has(v.k)?'solved':''}" data-k="${v.k}">${v.r}</div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  panel.querySelectorAll('.match-item.kanji').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.kanji').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      matchSelectedLeft = el.dataset.k;
+      tryMatch();
+    });
+  });
+  panel.querySelectorAll('.match-item.reading').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.reading').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      matchSelectedRight = el.dataset.k;
+      tryMatch();
+    });
+  });
+
+  function tryMatch(){
+    if(matchSelectedLeft && matchSelectedRight){
+      if(matchSelectedLeft === matchSelectedRight){
+        matchSolved.add(matchSelectedLeft);
+        progress[matchSelectedLeft].known = true; streak++;
+        saveProgress(); updateStats();
+        matchSelectedLeft = null; matchSelectedRight = null;
+        renderMatch();
+      } else {
+        const badKey = matchSelectedLeft;
+        streak = 0; matchMistakes++; updateStats();
+        const leftEl = panel.querySelector(`.match-item.kanji[data-k="${matchSelectedLeft}"]`);
+        const rightEl = panel.querySelector(`.match-item.reading[data-k="${matchSelectedRight}"]`);
+        [leftEl,rightEl].forEach(e=> e && e.classList.add('shake'));
+        setTimeout(()=>{
+          [leftEl,rightEl].forEach(e=>{
+            if(e){ e.classList.remove('shake'); e.classList.remove('selected'); }
+          });
+          matchSelectedLeft = null; matchSelectedRight = null;
+        }, 350);
+      }
+    }
+  }
+}
+
+/* ---------- END SCREEN ---------- */
+function endScreen(title, subtitle, mode, sessionCorrect, sessionTotal){
+  const known = Object.values(progress).filter(p=>p.known).length;
+  const pct = sessionTotal ? Math.round((sessionCorrect/sessionTotal)*100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct!==null ? `<p class="session-score">今回のスコア <b>${sessionCorrect} / ${sessionTotal}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <button id="restartBtn">もう一度</button>
+      ${lessonSummaryHTML()}
+    </div>
+  `;
+}
+
+panel.addEventListener('click', (e)=>{
+  if(e.target && e.target.id === 'restartBtn'){
+    // find active mode
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if(mode==='flash'){ flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if(mode==='quiz'){ quizPool = shuffle(VOCAB); quizIndex = 0; quizCorrect = 0; }
+    if(mode==='write'){ writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if(mode==='match'){ newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ---------- INIT ---------- */
+updateStats();
+render('flash');
+</script>
+</body>
+</html>
