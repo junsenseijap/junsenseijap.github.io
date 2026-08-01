@@ -2999,6 +2999,7 @@ function translateCourseT(raw) {
   if (r.includes("listen") || r.includes("écoute"))      return { label: t("courseTypeListening"),  icon: "🔊" };
   if (r.includes("read") || r.includes("lecture"))       return { label: t("courseTypeReading"),    icon: "👁️" };
   if (r.includes("jlpt"))                                return { label: t("courseTypeJLPT"),       icon: "🏆" };
+  if (r.includes("kanji"))                               return { label: "Kanji",                     icon: "✍️" };
   if (r.includes("advanced"))                            return { label: t("courseTypeAdvanced"),   icon: "🏅" };
   if (r.includes("lower"))                               return { label: t("courseTypeLowerInter"), icon: "🌿" };
   if (r.includes("intermediate"))                        return { label: t("courseTypeInter"),      icon: "🌳" };
@@ -4424,7 +4425,7 @@ function _buildExTree(exList, sm, isStudent, studentId, sectionKey) {
   });
 
   const LEVEL_ICONS  = { N4:"\u{1F4D8}", N5:"\u{1F4D7}", N3:"\u{1F4D9}", N2:"\u{1F4D5}", N1:"\u{1F4D4}" };
-  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F", Beginner:"🌱", "Lower Intermediate":"🌿", Intermediate:"🌳", Advanced:"🏅" };
+  const COURSE_ICONS = { Grammar:"\u{1F4D6}", Vocabulary:"\u{1F4AC}", Listening:"\u{1F50A}", Reading:"\u{1F441}\uFE0F", JLPT:"\u{1F3C6}", Kanji:"✍️", Grammaire:"\u{1F4D6}", Vocabulaire:"\u{1F4AC}", "\u00C9coute":"\u{1F50A}", Lecture:"\u{1F441}\uFE0F", Beginner:"🌱", "Lower Intermediate":"🌿", Intermediate:"🌳", Advanced:"🏅" };
 
   let html = "";
   Object.keys(tree).sort().forEach(lvl => {
@@ -6031,10 +6032,10 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     return;
   }
 
-  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt","beginner","lower","intermediate","advanced"];
+  const MAIN_SUBJECTS = ["grammar","vocabulary","listening","reading","jlpt","kanji","beginner","lower","intermediate","advanced"];
   const LEVELS = ["N5","N4","N3","N2","N1","SPEAKING"];
   // Fixed order: 1=Grammar/Beginner, 2=Vocabulary/Lower, 3=Listening/Inter, 4=Reading/Advanced
-  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5, beginner: 1, lower: 2, intermediate: 3, advanced: 4 };
+  const SUBJECT_ORDER = { grammar: 1, vocabulary: 2, listening: 3, reading: 4, jlpt: 5, kanji: 6, beginner: 1, lower: 2, intermediate: 3, advanced: 4 };
   function getSubjectOrderKey(ct) {
     const ctL = (ct||"").toLowerCase();
     if (ctL.includes("gram")) return 1;
