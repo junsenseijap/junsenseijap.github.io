@@ -1771,6 +1771,13 @@
           <div style="font-size:0.7rem;color:var(--gray);margin-bottom:0.2rem;line-height:1.3">
             Pour chaque Drive_Link en doublon, garde la ligne configurée et supprime les autres.
           </div>
+          <button class="btn-sync-step" id="btn-generate-tokens" onclick="doGenerateTokens()"
+            style="background:var(--bg-soft);color:var(--ink2);font-size:0.75rem;padding:0.5rem 0.8rem;border:1px solid var(--border);width:100%;text-align:left">
+            🔑 Générer les tokens élèves
+          </button>
+          <div style="font-size:0.7rem;color:var(--gray);line-height:1.3;margin-bottom:0.4rem">
+            Génère un token unique pour chaque élève sans token (pour les exercices HTML interactifs).
+          </div>
           <button class="btn-sync-step" id="btn-clean-form-sheets" onclick="doCleanFormSheets()"
             style="background:var(--bg-soft);color:var(--ink2);font-size:0.75rem;padding:0.5rem 0.8rem;border:1px solid var(--border);width:100%;text-align:left">
             🧹 Nettoyer les onglets Form Responses
@@ -2042,7 +2049,7 @@
 <script>
 var FORM_ENTRY_ID = "entry.8401610"; // fallback si Entry_ID absent dans CONTENT
 
-var API_URL = "https://script.google.com/macros/s/AKfycbx6oSNxNUcQ5YjwkL6FtUKDNmzrRUJmnC4OZGmvizJb665VbpVhIX6zRfiOPOUQ9uQt/exec"; // TEST
+var API_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
 var SESSION_KEY = "jun_session";
 var SESSION_DAYS = 90;
 var DARK_KEY = "jun_dark_mode";
@@ -2200,6 +2207,18 @@ async function doSyncExercisesSheetTabs() {
 }
 
 async function doRecoverDuplicateContent() {} // gardé pour compatibilité
+
+async function doGenerateTokens() {
+  var btn = document.getElementById("btn-generate-tokens");
+  if(btn) { btn.disabled=true; btn.textContent="⏳ Génération..."; }
+  try {
+    var r = await api({ action:"generateTokens", adminId:currentUserGlobal.id, pin:getStoredPin() });
+    if(r&&r.success) {
+      toast("🔑 "+r.generated+" token(s) généré(s).", "success");
+    } else { toast("❌ "+(r&&r.message||"Erreur"), "error"); }
+  } catch(e){ toast("❌ "+e.message,"error"); }
+  if(btn) { btn.disabled=false; btn.textContent="🔑 Générer les tokens élèves"; }
+}
 
 async function doCleanFormSheets() {
   var btn = document.getElementById("btn-clean-form-sheets");
@@ -2463,6 +2482,7 @@ document.getElementById("input-pin").addEventListener("keydown", e => {
 
 function initUser(user) {
   currentUserGlobal = user;
+  if (user && user.token) localStorage.setItem('jun_token_' + user.id, user.token);
   document.getElementById("header-name").textContent = user.name + " " + (user.familyName || "");
   const roleEl = document.getElementById("header-role");
   roleEl.textContent = user.role;
@@ -2952,6 +2972,11 @@ async function selectStudent(id, name, familyName) {
     console.error("selectStudent error:", e);
     panel.innerHTML += '<div style="padding:1rem;color:var(--gray)">'+t("errConn")+'</div>';
   }
+}
+
+function getStoredToken(userId) {
+  if (!userId) return "";
+  return localStorage.getItem('jun_token_' + userId) || (currentUserGlobal && currentUserGlobal.token) || "";
 }
 
 function getStoredPin() {
