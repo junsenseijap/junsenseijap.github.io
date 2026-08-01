@@ -134,12 +134,13 @@
 <script>
 /* ── CONFIG ── */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxPRA0FTiy1OISMrWXZ_dCf_N4hTWYwKhOA369g_YU5198ejgDzb9-KQHLMyISxCXW0/exec";
-const EXERCISE_ID = "testkanji_special1"; // ID unique de cet exercice dans le Sheet EXERCISES
 
-/* ── AUTH — récupérer studentId + token depuis l'URL ── */
-const urlParams  = new URLSearchParams(window.location.search);
-const STUDENT_ID = urlParams.get("studentId") || "";
-const TOKEN      = urlParams.get("token")     || "";
+/* ── AUTH — récupérer studentId + token + exerciseId depuis l'URL ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+// EXERCISE_ID vient de l'URL — passé par l'app lors du partage
+const EXERCISE_ID = urlParams.get("exerciseId") || "testkanji_special1";
 
 if (!STUDENT_ID || !TOKEN) {
   document.getElementById("authBanner").style.display = "block";
@@ -165,6 +166,12 @@ async function loadStudentName() {
     }
   } catch(e) {}
 }
+
+/* ── SCORE GLOBAL DE SESSION ── */
+// Cumule les scores de tous les modes joués dans la session
+// À chaque fin de mode, on envoie le total cumulé au GAS (écrase le précédent)
+var sessionTotalCorrect = 0;
+var sessionTotalQuestions = 0;
 
 /* ── ENVOYER LE SCORE AU GAS ── */
 async function submitScore(score, maxScore) {
@@ -429,12 +436,27 @@ function endScreen(title, subtitle, mode, sessionCorrect, sessionTotal){
 }
 
 async function sendScoreForMode(mode, correct, total) {
+  // Cumuler le score global de session
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+
   const statusEl = document.getElementById('submitStatus');
   if (!statusEl) return;
   if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
   statusEl.innerHTML = submitStatusHTML('sending');
-  const result = await submitScore(correct, total);
-  statusEl.innerHTML = result.ok ? submitStatusHTML('ok') : submitStatusHTML('err', result.msg);
+  // Envoyer le score CUMULÉ (écrase le précédent dans SCORES)
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    // Afficher le score cumulé
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect/sessionTotalQuestions)*100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : '+sessionTotalCorrect+'/'+sessionTotalQuestions+' ('+pct+'%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
 }
 
 function submitStatusHTML(state, msg) {
