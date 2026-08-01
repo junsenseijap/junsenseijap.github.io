@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Kanji — 趣味</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+  :root{
+    --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+    --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+    --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+    --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+    --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+    --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+    --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),var(--bg);
+    color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+  .hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+  header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+  header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+  .stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+  .stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+  .stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+  .stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+  .stat.ok b{color:var(--sage);}
+  .stat.pending b{color:var(--blue);}
+  nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+  nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+  nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+  nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+  nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+  nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+  .panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+  .panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+  .count{color:var(--pink);font-weight:700;}
+  .card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+  .flashcard{width:100%;max-width:380px;height:200px;perspective:900px;cursor:pointer;}
+  .flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+  .face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+  .face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+  .front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+  .front-kanji.mid{font-size:48px;}.front-kanji.long{font-size:36px;}
+  .front-hv{font-size:12px;color:var(--gray);letter-spacing:.14em;margin-top:8px;}
+  .reading{font-family:'Noto Serif JP',serif;font-size:32px;color:var(--ink);font-weight:500;}
+  .meaning{font-size:15px;color:var(--ink2);margin-top:8px;text-align:center;}
+  .hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+  .flash-controls{display:flex;gap:12px;width:100%;max-width:380px;}
+  .flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+  .flash-controls .dontknow{background:var(--bg-soft);color:var(--gray);}
+  .flash-controls .know{background:var(--sage);color:#fff;}
+  .quiz-prompt{font-family:'Noto Serif JP',serif;font-size:56px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;}
+  .quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+  .opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+  .opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+  .opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+  .opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+  .write-prompt{font-family:'Noto Serif JP',serif;font-size:56px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;}
+  .write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+  .write-input:focus{border-color:var(--pink);}
+  .write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+  .write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+  .write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+  .write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .match-col{display:flex;flex-direction:column;gap:10px;}
+  .match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+  .match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+  .match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+  .match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+  .match-item.shake{animation:shake .3s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .end-screen{text-align:center;padding:16px 0;}
+  .end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+  #restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+  .session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+  .session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+  .submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+  .submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+  .submit-status.err{background:#fff0f0;color:var(--pink);}
+  .submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+  .auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+  footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+  @media(max-width:420px){nav.modes{grid-template-columns:repeat(2,1fr);}.options{grid-template-columns:1fr;}.match-grid{gap:12px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">漢</div>
+    <div>
+      <h1>Test Kanji — 趣味</h1>
+      <p id="headerSub">趣味 の語彙</p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">5</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">選択</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — Test Kanji</footer>
+</div>
+
+<script>
+/* ── CONFIG ── */
+const GAS_URL     = "https://script.google.com/macros/s/AKfycbx6oSNxNUcQ5YjwkL6FtUKDNmzrRUJmnC4OZGmvizJb665VbpVhIX6zRfiOPOUQ9uQt/exec";
+const EXERCISE_ID = "testkanji_special1"; // ID unique de cet exercice dans le Sheet EXERCISES
+
+/* ── AUTH — récupérer studentId + token depuis l'URL ── */
+const urlParams  = new URLSearchParams(window.location.search);
+const STUDENT_ID = urlParams.get("studentId") || "";
+const TOKEN      = urlParams.get("token")     || "";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── ENVOYER LE SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN)
+      + "&exerciseId="+ encodeURIComponent(EXERCISE_ID)
+      + "&score="     + score
+      + "&maxScore="  + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) {
+    return { ok: false, msg: e.message };
+  }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+/* ── DONNÉES — 5 mots ── */
+const VOCAB = [
+  {k:"野球", r:"やきゅう", hv:"DÃ CẦU",    en:"baseball",     vi:"bóng chày",  kd:["里球","野珠","野毬"]},
+  {k:"水泳", r:"すいえい", hv:"THỦY VỊNH", en:"swimming",     vi:"bơi lội",    kd:["氷泳","水永","水泳゛"]},
+  {k:"音楽", r:"おんがく", hv:"ÂM NHẠC",   en:"music",        vi:"âm nhạc",    kd:["音薬","音楽゛","章楽"]},
+  {k:"映画", r:"えいが",   hv:"ẢNH HỌA",   en:"movie",        vi:"phim ảnh",   kd:["映書","暎画","映画゛"]},
+  {k:"練習", r:"れんしゅう",hv:"LUYỆN TẬP", en:"practice",     vi:"luyện tập",  kd:["練羽","湅習","練習゛"]},
+];
+
+const STORAGE_KEY = "testkanji_progress_v1";
+function loadProgress(){
+  let p = {};
+  try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) p = JSON.parse(raw); }catch(e){}
+  VOCAB.forEach(v=>{ if(!p[v.k]) p[v.k]={known:false}; });
+  return p;
+}
+function saveProgress(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){} }
+let progress = loadProgress();
+let streak = Number(localStorage.getItem(STORAGE_KEY+"_streak") || 0);
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function updateStats(){
+  const known = Object.values(progress).filter(p=>p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+const panel = document.getElementById('panel');
+document.querySelectorAll('nav.modes button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.modes button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+function render(mode){
+  if(mode==='flash') renderFlash();
+  else if(mode==='quiz') renderQuiz();
+  else if(mode==='write') renderWrite();
+  else if(mode==='match') renderMatch();
+}
+
+/* ── FLASHCARDS ── */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+function renderFlash(){
+  if(flashIndex >= flashOrder.length){
+    panel.innerHTML = endScreen("単語帳 終了","全部見ました！",'flash',flashCorrect,flashOrder.length);
+    sendScoreForMode('flash', flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex+1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${item.k.length>5?'long':item.k.length>3?'mid':''}">${item.k}</div>
+            ${item.hv?`<div class="front-hv">${item.hv}</div>`:''}
+          </div>
+          <div class="face back">
+            <div class="reading">${item.r}</div>
+            <div class="meaning">${item.en} / ${item.vi}</div>
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="dontknow">✗ もう一度</button>
+        <button class="know">✓ わかる</button>
+      </div>
+    </div>`;
+  const card = document.getElementById('flashcard');
+  card.addEventListener('click', ()=>card.classList.toggle('flipped'));
+  panel.querySelector('.know').addEventListener('click', ()=>{
+    progress[item.k].known=true; saveProgress(); streak++; flashCorrect++; updateStats(); flashIndex++; renderFlash();
+  });
+  panel.querySelector('.dontknow').addEventListener('click', ()=>{
+    progress[item.k].known=false; saveProgress(); streak=0; updateStats(); flashIndex++; renderFlash();
+  });
+}
+
+/* ── QCM ── */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+const QUIZ_LEN = VOCAB.length;
+const QUIZ_TYPES = ['toReading','toKanji','toMeaning'];
+function renderQuiz(){
+  if(quizIndex >= QUIZ_LEN){
+    panel.innerHTML = endScreen("クイズ 終了","クイズ終了！",'quiz',quizCorrect,QUIZ_LEN);
+    sendScoreForMode('quiz', quizCorrect, QUIZ_LEN);
+    return;
+  }
+  const item = quizPool[quizIndex % quizPool.length];
+  const qType = QUIZ_TYPES[Math.floor(Math.random()*QUIZ_TYPES.length)];
+  let prompt, promptLabel, optionItems, optClass='';
+  if(qType==='toReading'){
+    prompt=item.k; promptLabel="正しい読み方を選んでください";
+    const close=(item.rd||[]).slice(0,3); let pool=close.slice();
+    if(pool.length<3){ const filler=shuffle(VOCAB).map(v=>v.r).filter(r=>r!==item.r&&!pool.includes(r)); while(pool.length<3&&filler.length)pool.push(filler.pop()); }
+    optionItems=shuffle([item.r,...pool]).map(v=>({label:v,correct:v===item.r}));
+  } else if(qType==='toKanji'){
+    prompt=item.r; promptLabel="正しい漢字を選んでください";
+    const close=(item.kd||[]).slice(0,3); let pool=close.slice();
+    if(pool.length<3){ const filler=shuffle(VOCAB).map(v=>v.k).filter(k=>k!==item.k&&!pool.includes(k)); while(pool.length<3&&filler.length)pool.push(filler.pop()); }
+    optionItems=shuffle([item.k,...pool]).map(v=>({label:v,correct:v===item.k}));
+  } else {
+    prompt=item.k; promptLabel="正しい意味を選んでください（EN / VI）"; optClass='meaning-opt';
+    const correctLabel=`${item.en} / ${item.vi}`;
+    const others=shuffle(VOCAB.filter(v=>v.k!==item.k)).slice(0,3);
+    optionItems=shuffle([{label:correctLabel,correct:true},...others.map(v=>({label:`${v.en} / ${v.vi}`,correct:false}))]);
+  }
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex+1} / ${QUIZ_LEN}</span></p>
+    <div class="quiz-prompt">${prompt}</div>
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o,i)=>`<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+  panel.querySelectorAll('.opt').forEach((btn,i)=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect?'correct':'wrong');
+      if(!isCorrect){ panel.querySelectorAll('.opt').forEach((b,j)=>{ if(optionItems[j].correct) b.classList.add('correct'); }); }
+      if(isCorrect){ progress[item.k].known=true; saveProgress(); streak++; quizCorrect++; }
+      else streak=0;
+      updateStats();
+      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 800);
+    });
+  });
+}
+
+/* ── ÉCRITURE ── */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+function renderWrite(){
+  if(writeIndex >= writeOrder.length){
+    panel.innerHTML = endScreen("記入 終了","お疲れさまでした！",'write',writeCorrect,writeOrder.length);
+    sendScoreForMode('write', writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex+1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+  const input = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+  function check(){
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok?'correct':'wrong');
+    submit.disabled = true;
+    if(ok){ progress[item.k].known=true; saveProgress(); streak++; writeCorrect++; }
+    else streak=0;
+    updateStats();
+    if(!ok){ const hint = document.querySelector('.write-hint'); hint.textContent = "正解："+item.r; hint.style.color='var(--pink)'; }
+    setTimeout(()=>{ writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') check(); });
+}
+
+/* ── MATCH ── */
+let matchSet = [], matchSolved = new Set(), matchSelectedLeft = null, matchSelectedRight = null, matchMistakes = 0;
+function newMatchRound(){ matchSet=shuffle(VOCAB).slice(0,Math.min(VOCAB.length,5)); matchSolved=new Set(); matchSelectedLeft=null; matchSelectedRight=null; matchMistakes=0; }
+function renderMatch(){
+  if(matchSet.length===0) newMatchRound();
+  if(matchSolved.size===matchSet.length){
+    const total=matchSet.length+matchMistakes;
+    panel.innerHTML = endScreen("対戦 終了","全部そろいました！",'match',matchSet.length,total);
+    sendScoreForMode('match', matchSet.length, total);
+    return;
+  }
+  const leftItems=matchSet, rightItems=shuffle(matchSet);
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchSolved.size} / ${matchSet.length} 組</span></p>
+    <div class="match-grid">
+      <div class="match-col" id="matchLeft">
+        ${leftItems.map(v=>`<div class="match-item kanji ${matchSolved.has(v.k)?'solved':''}" data-k="${v.k}">${v.k}</div>`).join('')}
+      </div>
+      <div class="match-col" id="matchRight">
+        ${rightItems.map(v=>`<div class="match-item reading ${matchSolved.has(v.k)?'solved':''}" data-k="${v.k}">${v.r}</div>`).join('')}
+      </div>
+    </div>`;
+  panel.querySelectorAll('.match-item.kanji').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.kanji').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected'); matchSelectedLeft=el.dataset.k; tryMatch();
+    });
+  });
+  panel.querySelectorAll('.match-item.reading').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.reading').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected'); matchSelectedRight=el.dataset.k; tryMatch();
+    });
+  });
+  function tryMatch(){
+    if(matchSelectedLeft&&matchSelectedRight){
+      if(matchSelectedLeft===matchSelectedRight){
+        matchSolved.add(matchSelectedLeft); progress[matchSelectedLeft].known=true; streak++;
+        saveProgress(); updateStats(); matchSelectedLeft=null; matchSelectedRight=null; renderMatch();
+      } else {
+        streak=0; matchMistakes++; updateStats();
+        const lEl=panel.querySelector(`.match-item.kanji[data-k="${matchSelectedLeft}"]`);
+        const rEl=panel.querySelector(`.match-item.reading[data-k="${matchSelectedRight}"]`);
+        [lEl,rEl].forEach(e=>e&&e.classList.add('shake'));
+        setTimeout(()=>{ [lEl,rEl].forEach(e=>{ if(e){e.classList.remove('shake');e.classList.remove('selected');} }); matchSelectedLeft=null; matchSelectedRight=null; },350);
+      }
+    }
+  }
+}
+
+/* ── END SCREEN + ENVOI SCORE ── */
+function endScreen(title, subtitle, mode, sessionCorrect, sessionTotal){
+  const known = Object.values(progress).filter(p=>p.known).length;
+  const pct   = sessionTotal ? Math.round((sessionCorrect/sessionTotal)*100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct!==null?`<p class="session-score">今回のスコア <b>${sessionCorrect} / ${sessionTotal}</b> （${pct}%）</p>`:''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+async function sendScoreForMode(mode, correct, total) {
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(correct, total);
+  statusEl.innerHTML = result.ok ? submitStatusHTML('ok') : submitStatusHTML('err', result.msg);
+}
+
+function submitStatusHTML(state, msg) {
+  if(state==='sending') return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if(state==='ok')      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if(state==='noauth')  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+panel.addEventListener('click', e=>{
+  if(e.target&&e.target.id==='restartBtn'){
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if(mode==='flash'){ flashOrder=shuffle(VOCAB); flashIndex=0; flashCorrect=0; }
+    if(mode==='quiz'){  quizPool=shuffle(VOCAB);   quizIndex=0;  quizCorrect=0; }
+    if(mode==='write'){ writeOrder=shuffle(VOCAB); writeIndex=0; writeCorrect=0; }
+    if(mode==='match'){ newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ── INIT ── */
+updateStats();
+render('flash');
+</script>
+</body>
+</html>
