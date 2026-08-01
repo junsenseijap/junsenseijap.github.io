@@ -103,6 +103,9 @@
     <div>
       <h1>Test Kanji — 趣味</h1>
       <p id="headerSub">趣味 の語彙</p>
+      <p id="studentName" style="font-size:12px;color:var(--ink2);margin:3px 0 0;display:none">
+        👤 <span id="studentNameText"></span>
+      </p>
     </div>
   </header>
 
@@ -140,6 +143,27 @@ const TOKEN      = urlParams.get("token")     || "";
 
 if (!STUDENT_ID || !TOKEN) {
   document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── CHARGER LE NOM DE L'ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL
+      + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
 }
 
 /* ── ENVOYER LE SCORE AU GAS ── */
@@ -435,6 +459,7 @@ panel.addEventListener('click', e=>{
 /* ── INIT ── */
 updateStats();
 render('flash');
+loadStudentName();
 </script>
 </body>
 </html>
