@@ -6069,7 +6069,8 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     const isMain = MAIN_SUBJECTS.some(function(s){ return ctL.includes(s); }) || ctL.includes("vocabular");
     if (isMain) {
       if (!byLevel[lvl][ct]) byLevel[lvl][ct] = { lessons:[], exercises:[], tests:[], order: subjectOrder[ct] || getSubjectOrderKey(ct) };
-      if (subType==="exercise") byLevel[lvl][ct].exercises.push(c);
+      // interactive = toujours un exercice
+      if (subType==="exercise" || (c.type||"").toLowerCase()==="interactive") byLevel[lvl][ct].exercises.push(c);
       else if (subType==="test") byLevel[lvl][ct].tests.push(c);
       else byLevel[lvl][ct].lessons.push(c);
     } else if (ctL.includes("exerc")) {
@@ -6097,7 +6098,22 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
     // Supprimer aussi l'extension .pdf/.mp3 etc. si présente (cas SPEAKING direct files)
     dispTitle = dispTitle.replace(/\.(pdf|mp3|mp4|m4a|wav|ogg|docx?|pptx?)$/i, "").trim();
     const isForm = (c.type||"").toLowerCase()==="form";
+    const isInteractive = (c.type||"").toLowerCase()==="interactive";
     const isUnlocked = isEffectivelyUnlocked(c);
+    if (isInteractive) {
+      // Exercice HTML interactif — bouton Assigner comme un form
+      const alreadySent = window._assignedContentIds && window._assignedContentIds.has(String(c.id));
+      const btnStyle = alreadySent ? 'background:rgba(74,138,85,0.15);border-color:rgba(74,138,85,0.4);color:#4a8a55' : '';
+      const btnText  = alreadySent ? '✓' : '+';
+      return '<div class="content-manage-item">'+
+        '<div class="unlock-status" style="background:rgba(232,75,122,0.5)"></div>'+
+        '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
+        '<div class="content-manage-title">'+dispTitle+
+        (alreadySent?'<span style="font-size:0.55rem;background:rgba(74,138,85,0.15);color:#4a8a55;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:600">✅ '+t("formSent")+'</span>':'')+
+        '</div><div class="content-manage-meta"><span class="card-type type-interactive" style="font-size:0.5rem;padding:0.1rem 0.35rem">🎮 INTERACTIVE</span></div></div>'+
+        '<button class="btn-assign-content" id="btn-assign-'+c.id+'" style="'+btnStyle+'"'+
+        ' onclick="toggleContent('+studentId+',\''+c.id+'\',false)">'+btnText+'</button></div>';
+    }
     if (isForm) {
       const alreadySent = window._assignedContentIds && window._assignedContentIds.has(String(c.id));
       const btnStyle = alreadySent ? 'background:rgba(74,138,85,0.15);border-color:rgba(74,138,85,0.4);color:#4a8a55' : '';
