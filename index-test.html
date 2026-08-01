@@ -390,6 +390,7 @@
     .type-video { background: var(--blue-pale);        color: #3a7aaa; border: 1px solid var(--border-blue); }
     .type-pdf   { background: var(--pink-pale);        color: var(--pink); border: 1px solid rgba(232,75,122,0.25); }
     .type-link  { background: rgba(20,180,160,0.12);   color: #0ea891; border: 1px solid rgba(20,180,160,0.3); }
+    .type-interactive { background: rgba(232,75,122,0.12); color: #E84B7A; border: 1px solid rgba(232,75,122,0.3); }
     .type-image { background: #ede8f5;                 color: #7a5aa0; border: 1px solid #c8b8e0; }
 
     .card-title {
@@ -2712,7 +2713,7 @@ async function loadStudentContent(user) {
           const typeRaw=(c.type||"pdf").toLowerCase();
           const badgeLabel = prefix
             ? (prefix.startsWith("TEST") ? prefix : "EXERCICE")
-            : typeRaw === "link" ? "🔗 LINK" : typeRaw.toUpperCase();
+            : typeRaw === "link" ? "🔗 LINK" : typeRaw === "interactive" ? "🎮 INTERACTIVE" : typeRaw.toUpperCase();
           const dispTitle = prefix ? cleanTitle : (c.title||"");
           return '<div class="tree-item" onclick="if(event.target.classList.contains(\'btn-star\'))return;window.open(\''+url+'\',\'_blank\')">'+
             '<span class="tree-item-type card-type '+tc+'" style="font-size:0.55rem;padding:0.1rem 0.35rem">'+badgeLabel+'</span>'+
@@ -4105,7 +4106,7 @@ function renderFavorites(userId) {
       const tc = "type-" + ftype;
       const badgeLabel = prefix
         ? (prefix.startsWith("TEST") ? prefix : "EXERCICE")
-        : ftype === "pdf" ? "PDF" : ftype === "video" ? "VIDEO" : ftype === "audio" ? "AUDIO" : ftype === "link" ? "🔗 LINK" : "FORM";
+        : ftype === "pdf" ? "PDF" : ftype === "video" ? "VIDEO" : ftype === "audio" ? "AUDIO" : ftype === "link" ? "🔗 LINK" : ftype === "interactive" ? "🎮 INTERACTIVE" : "FORM";
       const dispTitle = prefix ? cleanTitle : (f.title || "");
       return '<div class="tree-item">'+
         '<span class="tree-item-type card-type '+tc+'" style="font-size:0.5rem;padding:0.1rem 0.35rem;flex-shrink:0">'+badgeLabel+'</span>'+
@@ -6115,7 +6116,7 @@ function renderContentManage(studentId, name, familyName, unlocked, contentList)
       '<div class="unlock-status '+(isUnlocked?"on":"off")+'"></div>'+
       '<div class="content-manage-info" '+(c.driveLink?'onclick="window.open(\''+c.driveLink+'\',\'_blank\')" style="cursor:pointer"':'')+'>'+
       '<div class="content-manage-title">'+dispTitle+'</div>'+
-      '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type==="link"?"🔗 LINK":(c.type||"").toUpperCase())+'</span></div></div>'+
+      '<div class="content-manage-meta"><span class="card-type '+typeClass+'" style="font-size:0.5rem;padding:0.1rem 0.35rem">'+(c.type==="link"?"🔗 LINK":c.type==="interactive"?"🎮 INTERACTIVE":(c.type||"").toUpperCase())+'</span></div></div>'+
       '<button class="btn-unlock '+(isUnlocked?"unlocked":"locked")+'" id="btn-c-'+c.id+'"'+
       ' onclick="toggleContent('+studentId+',\''+c.id+'\','+isUnlocked+')">'+
       (isUnlocked?t("btnLock"):t("btnUnlock"))+'</button></div>';
