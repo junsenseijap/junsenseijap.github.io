@@ -200,6 +200,7 @@ async function loadStudentName() {
       + "&token="     + encodeURIComponent(TOKEN);
     const res  = await fetch(url);
     const data = await res.json();
+    console.log("getStudentName réponse:", data);
     if (data.success) {
       const nameEl = document.getElementById('studentName');
       const textEl = document.getElementById('studentNameText');
@@ -208,7 +209,7 @@ async function loadStudentName() {
         nameEl.style.display = "block";
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error("loadStudentName erreur:", e); }
 }
 
 /* ── ENVOYER SCORE AU GAS ── */
