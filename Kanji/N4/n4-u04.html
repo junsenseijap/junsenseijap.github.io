@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N4 · U4 — 範囲・位置・方向</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&family=Noto+Serif+JP:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#E84B7A;--pink-light:#fde8ef;--sky:#5BB8F5;--sky-light:#e8f5fd;--ink:#2D2030;--ink2:#7A6878;--bg:#FDFAF8;--white:#FFFFFF;--radius:16px;--shadow:0 4px 20px rgba(232,75,122,0.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+header{background:var(--white);border-bottom:2px solid var(--pink-light);padding:14px 20px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+header h1{font-family:'Zen Antique Soft',serif;font-size:20px;color:var(--pink);letter-spacing:.05em}
+header p{font-size:12px;color:var(--ink2);margin-top:2px}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:block}
+nav{display:flex;justify-content:center;gap:8px;padding:16px 12px;flex-wrap:wrap}
+.nav-btn{background:var(--white);border:2px solid var(--pink-light);border-radius:50px;padding:8px 20px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--ink2);transition:all .2s;font-weight:500}
+.nav-btn.active,.nav-btn:hover{background:var(--pink);border-color:var(--pink);color:#fff}
+.screen{display:none;padding:20px;max-width:680px;margin:0 auto}
+.screen.active{display:block}
+.prog-wrap{background:var(--pink-light);border-radius:50px;height:8px;margin:12px 0}
+.prog-bar{background:var(--pink);height:8px;border-radius:50px;transition:width .4s}
+.prog-label{font-size:12px;color:var(--ink2);text-align:right;margin-top:4px}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 24px;text-align:center;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;border:2px solid transparent}
+.card:hover{transform:translateY(-2px)}
+.card.flipped{border-color:var(--pink)}
+.card-kanji{font-family:'Noto Serif JP',serif;font-size:52px;color:var(--ink);line-height:1.2}
+.card-kanji.long{font-size:36px}
+.card-kanji.xlong{font-size:24px}
+.card-reading{font-size:18px;color:var(--pink);margin-top:8px;font-family:'Noto Serif JP',serif}
+.card-hint{font-size:12px;color:var(--ink2);margin-top:16px}
+.card-back{font-size:15px;color:var(--ink);line-height:1.6}
+.card-hv{font-size:13px;color:var(--sky);margin-top:4px;font-style:italic}
+.card-nav{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.btn{border:none;border-radius:50px;padding:10px 28px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--pink);color:#fff}
+.btn-primary:hover{background:#d03d6a}
+.btn-secondary{background:var(--pink-light);color:var(--pink)}
+.btn-sky{background:var(--sky-light);color:var(--sky)}
+.quiz-question{font-family:'Noto Serif JP',serif;font-size:36px;text-align:center;margin:24px 0;color:var(--ink);white-space:pre-line}
+.quiz-question.long{font-size:24px}
+.quiz-question.xlong{font-size:17px}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.opt-btn{background:var(--white);border:2px solid var(--pink-light);border-radius:12px;padding:14px 10px;font-size:14px;font-family:'Noto Serif JP',serif;cursor:pointer;transition:all .2s;color:var(--ink)}
+.opt-btn:hover:not(:disabled){background:var(--pink-light)}
+.opt-btn.correct{background:#e8f5e9;border-color:#4CAF50;color:#2e7d32}
+.opt-btn.wrong{background:#fde8ef;border-color:var(--pink);color:var(--pink)}
+.opt-btn:disabled{cursor:default}
+.quiz-feedback{text-align:center;margin-top:16px;font-size:14px;font-weight:600;min-height:24px}
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:36px;text-align:center;margin:20px 0;color:var(--ink)}
+.write-prompt.long{font-size:24px}
+.write-input{width:100%;border:2px solid var(--pink-light);border-radius:12px;padding:14px;font-size:18px;font-family:'Noto Serif JP',serif;text-align:center;outline:none;transition:border-color .2s}
+.write-input:focus{border-color:var(--pink)}
+.write-result{margin-top:12px;font-size:14px;text-align:center;min-height:24px;font-weight:600}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match-btn{background:var(--white);border:2px solid var(--pink-light);border-radius:12px;padding:12px 8px;font-size:14px;font-family:'Noto Serif JP',serif;cursor:pointer;transition:all .2s;color:var(--ink);text-align:center}
+.match-btn:hover{background:var(--pink-light)}
+.match-btn.selected{background:var(--pink-light);border-color:var(--pink)}
+.match-btn.matched{background:#e8f5e9;border-color:#4CAF50;color:#2e7d32;cursor:default}
+.match-btn.wrong-flash{background:#fde8ef;border-color:var(--pink)}
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center}
+.submit-status.ok{background:rgba(74,138,85,0.15);color:#4a8a55}
+.submit-status.err{background:#fff0f0;color:#E84B7A}
+.submit-status.sending{background:#f5f0f3;color:#9A8590}
+</style>
+</head>
+<body>
+<header>
+  <h1>N4 · U4 — 範囲・位置・方向</h1>
+  <p>Vocabulaire · 30 mots</p>
+  <p id="studentName"></p>
+</header>
+<nav>
+  <button class="nav-btn active" onclick="showScreen('flash')">単語帳</button>
+  <button class="nav-btn" onclick="showScreen('quiz')">クイズ</button>
+  <button class="nav-btn" onclick="showScreen('write')">記入</button>
+  <button class="nav-btn" onclick="showScreen('match')">対戦</button>
+</nav>
+
+<div class="screen active" id="screen-flash">
+  <div class="prog-wrap"><div class="prog-bar" id="flash-prog"></div></div>
+  <div class="prog-label" id="flash-label"></div>
+  <div class="card" id="flash-card" onclick="flipCard()">
+    <div id="flash-front">
+      <div class="card-kanji" id="flash-kanji"></div>
+      <div class="card-reading" id="flash-reading"></div>
+      <div class="card-hint">タップして意味を見る</div>
+    </div>
+    <div id="flash-back" style="display:none">
+      <div class="card-back" id="flash-meaning"></div>
+      <div class="card-hv" id="flash-hv"></div>
+    </div>
+  </div>
+  <div class="card-nav">
+    <button class="btn btn-secondary" onclick="flashNav(-1)">← 前</button>
+    <button class="btn btn-primary" onclick="flashNav(1)">次 →</button>
+  </div>
+  <div style="text-align:center;margin-top:16px">
+    <button class="btn btn-sky" onclick="endFlash()">完了 ✓</button>
+  </div>
+  <div id="submitStatus-flash"></div>
+</div>
+
+<div class="screen" id="screen-quiz">
+  <div class="prog-wrap"><div class="prog-bar" id="quiz-prog"></div></div>
+  <div class="prog-label" id="quiz-label"></div>
+  <div class="quiz-question" id="quiz-q"></div>
+  <div style="font-size:13px;color:var(--ink2);text-align:center;margin-bottom:8px" id="quiz-type-label"></div>
+  <div class="quiz-options" id="quiz-opts"></div>
+  <div class="quiz-feedback" id="quiz-feedback"></div>
+  <div style="text-align:center;margin-top:16px">
+    <button class="btn btn-primary" id="quiz-next" onclick="nextQuiz()" style="display:none">次へ →</button>
+  </div>
+  <div id="submitStatus-quiz"></div>
+</div>
+
+<div class="screen" id="screen-write">
+  <div class="prog-wrap"><div class="prog-bar" id="write-prog"></div></div>
+  <div class="prog-label" id="write-label"></div>
+  <div style="font-size:13px;color:var(--ink2);text-align:center;margin-bottom:4px">読み方を入力してください</div>
+  <div class="write-prompt" id="write-q"></div>
+  <input class="write-input" id="write-input" type="text" placeholder="ひらがなで入力…" onkeydown="if(event.key==='Enter')checkWrite()">
+  <div class="write-result" id="write-result"></div>
+  <div class="card-nav">
+    <button class="btn btn-primary" onclick="checkWrite()">確認</button>
+    <button class="btn btn-secondary" onclick="skipWrite()">スキップ</button>
+  </div>
+  <div id="submitStatus-write"></div>
+</div>
+
+<div class="screen" id="screen-match">
+  <div style="font-size:13px;color:var(--ink2);text-align:center;margin-bottom:12px">漢字と読み方をマッチング！</div>
+  <div class="match-grid" id="match-grid"></div>
+  <div style="text-align:center;margin-top:16px;font-size:14px;color:var(--ink2)" id="match-feedback"></div>
+  <div id="submitStatus-match"></div>
+</div>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReBQXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n4-u4";
+
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+async function sendScoreForMode(correct, total, statusId) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById(statusId || 'submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) {
+    statusEl.innerHTML = '<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>'; return;
+  }
+  statusEl.innerHTML = '<div class="submit-status sending">⏳ Envoi du score…</div>';
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect/sessionTotalQuestions)*100) : 0;
+    statusEl.innerHTML = '<div class="submit-status ok">✅ Score enregistré — '+sessionTotalCorrect+'/'+sessionTotalQuestions+' ('+pct+'%)</div>';
+  } else {
+    statusEl.innerHTML = '<div class="submit-status err">❌ ' + result.msg + '</div>';
+  }
+}
+
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const el = document.getElementById('studentName');
+      if (el) el.textContent = '👤 ' + data.name + ' ' + data.familyName;
+    }
+  } catch(e) {}
+}
+loadStudentName();
+
+const VOCAB = [
+  {k:"電車",    r:"でんしゃ",     hv:"Điện xa",       en:"train",                   vi:"tàu điện"},
+  {k:"間",      r:"あいだ",       hv:"Gian",          en:"between / gap",           vi:"khoảng giữa"},
+  {k:"封筒",    r:"ふうとう",     hv:"Phong thống",   en:"envelope",                vi:"phong bì"},
+  {k:"表",      r:"おもて",       hv:"Biểu",          en:"front side / surface",    vi:"mặt trước / bề mặt"},
+  {k:"裏",      r:"うら",         hv:"Lý",            en:"back side / reverse",     vi:"mặt sau / phía sau"},
+  {k:"部屋",    r:"へや",         hv:"Bộ ốc",         en:"room",                    vi:"phòng"},
+  {k:"周り",    r:"まわり",       hv:"Chu",           en:"surroundings / around",   vi:"xung quanh"},
+  {k:"学校",    r:"がっこう",     hv:"Học hiệu",      en:"school",                  vi:"trường học"},
+  {k:"真ん中",  r:"まんなか",     hv:"Chân trung",    en:"center / middle",         vi:"chính giữa"},
+  {k:"家",      r:"いえ",         hv:"Gia",           en:"house / home",            vi:"nhà"},
+  {k:"近所",    r:"きんじょ",     hv:"Cận sở",        en:"neighborhood",            vi:"hàng xóm / khu vực"},
+  {k:"遠く",    r:"とおく",       hv:"Viễn",          en:"far away / in the distance",vi:"xa"},
+  {k:"近く",    r:"ちかく",       hv:"Cận",           en:"nearby / close",          vi:"gần"},
+  {k:"町",      r:"まち",         hv:"Đinh",          en:"town / city street",      vi:"phố / thị trấn"},
+  {k:"出かける",r:"でかける",     hv:"",              en:"to go out",               vi:"ra ngoài"},
+  {k:"席",      r:"せき",         hv:"Tịch",          en:"seat",                    vi:"chỗ ngồi"},
+  {k:"以上",    r:"いじょう",     hv:"Dĩ thượng",     en:"or more / above",         vi:"trở lên"},
+  {k:"以下",    r:"いか",         hv:"Dĩ hạ",         en:"or less / below",         vi:"trở xuống"},
+  {k:"以内",    r:"いない",       hv:"Dĩ nội",        en:"within / inside (limit)", vi:"trong vòng"},
+  {k:"以外",    r:"いがい",       hv:"Dĩ ngoại",      en:"except / other than",     vi:"ngoài ra / trừ"},
+  {k:"両方",    r:"りょうほう",   hv:"Lưỡng phương",  en:"both",                    vi:"cả hai"},
+  {k:"欲しい",  r:"ほしい",       hv:"",              en:"want (something)",        vi:"muốn (có)"},
+  {k:"荷物",    r:"にもつ",       hv:"Hà vật",        en:"luggage / baggage",       vi:"hành lý / đồ vật"},
+  {k:"運ぶ",    r:"はこぶ",       hv:"Vận",           en:"to carry / transport",    vi:"vận chuyển / mang"},
+  {k:"向かう",  r:"むかう",       hv:"Hướng",         en:"to head toward / face",   vi:"hướng về / đối mặt"},
+  {k:"思う",    r:"おもう",       hv:"Tư",            en:"to think / feel",         vi:"nghĩ / cảm thấy"},
+  {k:"答える",  r:"こたえる",     hv:"Đáp",           en:"to answer",               vi:"trả lời"},
+  {k:"男",      r:"おとこ",       hv:"Nam",           en:"man / male",              vi:"đàn ông / nam"},
+  {k:"3人目",   r:"さんにんめ",   hv:"",              en:"the third person",        vi:"người thứ ba"},
+  {k:"二つ目",  r:"ふたつめ",     hv:"",              en:"the second one",          vi:"cái thứ hai"},
+  {k:"3つ",     r:"みっつ",       hv:"",              en:"three (things)",          vi:"ba cái"},
+  {k:"2日",     r:"ふつか",       hv:"",              en:"2nd (date) / two days",   vi:"ngày 2 / hai ngày"},
+  {k:"九区",    r:"きゅうく",     hv:"Cửu khu",       en:"District 9",              vi:"Quận 9"},
+];
+
+const STORAGE_KEY='kanji_n4u4_progress_v1';
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch(e){return{};}}
+function saveProgress(p){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(p));}catch(e){}}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='flash')initFlash();
+  if(id==='quiz')initQuiz();
+  if(id==='write')initWrite();
+  if(id==='match')initMatch();
+}
+
+let flashIdx=0,flashFlipped=false;
+function initFlash(){flashIdx=0;renderFlash();}
+function renderFlash(){
+  flashFlipped=false;
+  const v=VOCAB[flashIdx];
+  const kEl=document.getElementById('flash-kanji');
+  kEl.textContent=v.k;
+  kEl.className='card-kanji'+(v.k.length>6?' xlong':v.k.length>4?' long':'');
+  document.getElementById('flash-reading').textContent=v.r;
+  document.getElementById('flash-meaning').innerHTML='<strong>'+v.en+'</strong><br>'+v.vi;
+  document.getElementById('flash-hv').textContent=v.hv?'🔤 '+v.hv:'';
+  document.getElementById('flash-front').style.display='';
+  document.getElementById('flash-back').style.display='none';
+  document.getElementById('flash-card').classList.remove('flipped');
+  const pct=Math.round((flashIdx+1)/VOCAB.length*100);
+  document.getElementById('flash-prog').style.width=pct+'%';
+  document.getElementById('flash-label').textContent=(flashIdx+1)+' / '+VOCAB.length;
+}
+function flipCard(){
+  flashFlipped=!flashFlipped;
+  document.getElementById('flash-front').style.display=flashFlipped?'none':'';
+  document.getElementById('flash-back').style.display=flashFlipped?'':'none';
+  document.getElementById('flash-card').classList.toggle('flipped',flashFlipped);
+}
+function flashNav(d){flashIdx=(flashIdx+d+VOCAB.length)%VOCAB.length;renderFlash();}
+function endFlash(){sendScoreForMode(VOCAB.length,VOCAB.length,'submitStatus-flash');}
+
+let quizQueue=[],quizIdx=0,quizCorrect=0,quizAnswered=false;
+function initQuiz(){
+  quizQueue=[...VOCAB].sort(()=>Math.random()-.5).map((v,i)=>({v,mode:i%2===0?'r2m':'m2r'}));
+  quizIdx=0;quizCorrect=0;quizAnswered=false;
+  document.getElementById('submitStatus-quiz').innerHTML='';
+  renderQuiz();
+}
+function getDistractors(target,mode,count){
+  return[...VOCAB].filter(v=>v.k!==target.k).sort(()=>Math.random()-.5).slice(0,count).map(v=>mode==='r2m'?v.vi:v.r);
+}
+function renderQuiz(){
+  if(quizIdx>=quizQueue.length){endQuiz();return;}
+  const{v,mode}=quizQueue[quizIdx];
+  const pct=Math.round(quizIdx/quizQueue.length*100);
+  document.getElementById('quiz-prog').style.width=pct+'%';
+  document.getElementById('quiz-label').textContent=(quizIdx+1)+' / '+quizQueue.length;
+  document.getElementById('quiz-feedback').textContent='';
+  document.getElementById('quiz-next').style.display='none';
+  quizAnswered=false;
+  let question,correct,distractors;
+  if(mode==='r2m'){question=v.k+'\n'+v.r;correct=v.vi;distractors=getDistractors(v,'r2m',3);document.getElementById('quiz-type-label').textContent='↓ 意味は？';}
+  else{question=v.vi;correct=v.r;distractors=getDistractors(v,'m2r',3);document.getElementById('quiz-type-label').textContent='↓ 読み方は？';}
+  const qEl=document.getElementById('quiz-q');
+  qEl.textContent=question;
+  qEl.className='quiz-question'+(question.length>20?' xlong':question.length>10?' long':'');
+  const opts=[correct,...distractors].sort(()=>Math.random()-.5);
+  const optsEl=document.getElementById('quiz-opts');
+  optsEl.innerHTML='';
+  opts.forEach(opt=>{
+    const b=document.createElement('button');
+    b.className='opt-btn';b.textContent=opt;
+    b.onclick=()=>answerQuiz(opt,correct,b);
+    optsEl.appendChild(b);
+  });
+}
+function answerQuiz(chosen,correct,btn){
+  if(quizAnswered)return;
+  quizAnswered=true;
+  const isOk=chosen===correct;
+  if(isOk){quizCorrect++;document.getElementById('quiz-feedback').textContent='⭕ 正解！';}
+  else{document.getElementById('quiz-feedback').textContent='❌ 正解: '+correct;}
+  document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===correct)b.classList.add('correct');});
+  btn.classList.add(isOk?'correct':'wrong');
+  document.getElementById('quiz-next').style.display='';
+  quizIdx++;
+}
+function nextQuiz(){renderQuiz();}
+function endQuiz(){
+  document.getElementById('quiz-q').textContent='🎉 完了！ '+quizCorrect+' / '+quizQueue.length;
+  document.getElementById('quiz-opts').innerHTML='';
+  document.getElementById('quiz-type-label').textContent='';
+  document.getElementById('quiz-feedback').textContent='';
+  document.getElementById('quiz-next').style.display='none';
+  sendScoreForMode(quizCorrect,quizQueue.length,'submitStatus-quiz');
+}
+
+let writeQueue=[],writeIdx=0,writeCorrect=0;
+function initWrite(){
+  writeQueue=[...VOCAB].sort(()=>Math.random()-.5);
+  writeIdx=0;writeCorrect=0;
+  document.getElementById('write-input').style.display='';
+  document.getElementById('submitStatus-write').innerHTML='';
+  renderWrite();
+}
+function renderWrite(){
+  if(writeIdx>=writeQueue.length){endWrite();return;}
+  const v=writeQueue[writeIdx];
+  const pct=Math.round(writeIdx/writeQueue.length*100);
+  document.getElementById('write-prog').style.width=pct+'%';
+  document.getElementById('write-label').textContent=(writeIdx+1)+' / '+writeQueue.length;
+  const qEl=document.getElementById('write-q');
+  qEl.textContent=v.k;
+  qEl.className='write-prompt'+(v.k.length>6?' long':'');
+  document.getElementById('write-input').value='';
+  document.getElementById('write-result').textContent='';
+  document.getElementById('write-input').focus();
+}
+function checkWrite(){
+  const v=writeQueue[writeIdx];
+  const ans=document.getElementById('write-input').value.trim();
+  const ok=ans===v.r;
+  if(ok){writeCorrect++;document.getElementById('write-result').innerHTML='⭕ <span style="color:#4CAF50">正解！</span>';}
+  else{document.getElementById('write-result').innerHTML='❌ 正解: <strong>'+v.r+'</strong>';}
+  writeIdx++;
+  setTimeout(renderWrite,1200);
+}
+function skipWrite(){writeIdx++;renderWrite();}
+function endWrite(){
+  document.getElementById('write-q').textContent='🎉 完了！ '+writeCorrect+' / '+writeQueue.length;
+  document.getElementById('write-input').style.display='none';
+  document.getElementById('write-result').textContent='';
+  sendScoreForMode(writeCorrect,writeQueue.length,'submitStatus-write');
+}
+
+let matchPairs=[],matchSel=null,matchCorrect=0,matchTotal=0;
+function initMatch(){
+  matchPairs=[...VOCAB].sort(()=>Math.random()-.5).slice(0,6);
+  matchSel=null;matchCorrect=0;matchTotal=0;
+  document.getElementById('submitStatus-match').innerHTML='';
+  renderMatch();
+}
+function renderMatch(){
+  const grid=document.getElementById('match-grid');
+  grid.innerHTML='';
+  const lefts=matchPairs.map(v=>({text:v.k,type:'k',pair:v.r}));
+  const rights=matchPairs.map(v=>({text:v.r,type:'r',pair:v.k}));
+  [...lefts,...rights].sort(()=>Math.random()-.5).forEach(item=>{
+    const b=document.createElement('button');
+    b.className='match-btn';b.textContent=item.text;
+    b.dataset.type=item.type;b.dataset.pair=item.pair;b.dataset.text=item.text;
+    b.onclick=()=>selectMatch(b);
+    grid.appendChild(b);
+  });
+  document.getElementById('match-feedback').textContent='';
+}
+function selectMatch(btn){
+  if(btn.classList.contains('matched'))return;
+  if(!matchSel){matchSel=btn;btn.classList.add('selected');}
+  else{
+    const a=matchSel,b=btn;
+    if(a===b){a.classList.remove('selected');matchSel=null;return;}
+    const ok=(a.dataset.type!==b.dataset.type)&&(a.dataset.pair===b.dataset.text||b.dataset.pair===a.dataset.text);
+    if(ok){
+      matchCorrect++;matchTotal++;
+      [a,b].forEach(x=>{x.classList.remove('selected');x.classList.add('matched');x.onclick=null;});
+      document.getElementById('match-feedback').textContent='⭕ マッチ！';
+      matchSel=null;
+      if(document.querySelectorAll('.match-btn:not(.matched)').length===0){
+        setTimeout(()=>{matchTotal=matchPairs.length;document.getElementById('match-feedback').textContent='🎉 完了！ '+matchCorrect+'/'+matchTotal;sendScoreForMode(matchCorrect,matchTotal,'submitStatus-match');},400);
+      }
+    }else{
+      matchTotal++;
+      [a,b].forEach(x=>x.classList.add('wrong-flash'));
+      document.getElementById('match-feedback').textContent='❌ もう一度！';
+      setTimeout(()=>{[a,b].forEach(x=>{x.classList.remove('wrong-flash','selected');});matchSel=null;document.getElementById('match-feedback').textContent='';},700);
+    }
+  }
+}
+
+initFlash();
+</script>
+</body>
+</html>
