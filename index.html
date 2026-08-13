@@ -2106,6 +2106,26 @@ function invalidateAdminCache() {
 
 // Sync admin uniquement — recharge élèves + contenu sans reload complet
 // ── Workflow Sync Drive → CONTENT ────────────────────────────
+// Interroge getScanStatus toutes les ~4s jusqu'à 'done' ou 'error', avec limite de 3 min
+async function pollScanStatus() {
+  const MAX_WAIT_MS   = 3 * 60 * 1000;
+  const POLL_EVERY_MS = 4000;
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < MAX_WAIT_MS) {
+    await new Promise(r => setTimeout(r, POLL_EVERY_MS));
+    try {
+      const s = await api({ action: "getScanStatus", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (s && s.state === "done")  return { state: "done", added: s.added, skipped: s.skipped };
+      if (s && s.state === "error") return { state: "error", message: s.message };
+      // state === "running" ou "idle" → on continue à attendre
+    } catch(e) {
+      // erreur réseau ponctuelle pendant le polling → on retente au prochain cycle
+    }
+  }
+  return { state: "timeout" };
+}
+
 async function runSyncStep(step) {
   const btn    = document.getElementById("btn-sync-" + step);
   const status = document.getElementById("sync-status-" + step);
@@ -2115,17 +2135,25 @@ async function runSyncStep(step) {
 
   try {
     if (step === 1) {
-      // Scan Drive → remplit CONTENT (sans toucher les Forms)
-      const r = await api({ action: "syncDriveContent", adminId: currentUserGlobal.id, pin: getStoredPin() });
-      if (r && r.success) {
-        // Invalider le cache allContent pour forcer rechargement après sync Drive
-        _cacheDel(CACHE_ALL_CONTENT_KEY);
-        allContent = []; // vider en mémoire aussi
-        _studentContentCache = {}; // vider le cache par élève
-        if (status) status.textContent = "✅ " + (r.added || 0) + " ajoutés";
-        if (stepEl) stepEl.classList.add("done");
+      // Scan Drive asynchrone — évite le timeout navigateur sur les gros scans.
+      // Le scan tourne en tâche de fond côté GAS ; on interroge le statut en polling.
+      const start = await api({ action: "startDriveScan", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      if (!start || !start.success) {
+        if (status) status.textContent = "❌ " + (start && start.message ? start.message : "Erreur");
       } else {
-        if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
+        if (status) status.textContent = "⏳ Scan en cours…";
+        const result = await pollScanStatus();
+        if (result.state === "done") {
+          _cacheDel(CACHE_ALL_CONTENT_KEY);
+          allContent = [];
+          _studentContentCache = {};
+          if (status) status.textContent = "✅ " + (result.added || 0) + " ajoutés";
+          if (stepEl) stepEl.classList.add("done");
+        } else if (result.state === "timeout") {
+          if (status) status.textContent = "⏳ Toujours en cours — revérifiez dans 1 min";
+        } else {
+          if (status) status.textContent = "❌ " + (result.message || "Erreur");
+        }
       }
     } else if (step === 2) {
       // Ajoute Student_ID + lie Forms au Sheet
