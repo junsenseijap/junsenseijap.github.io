@@ -1055,6 +1055,13 @@
       gap: 0.5rem;
       min-width: 0;
     }
+    /* Étape avec plusieurs boutons : empiler verticalement au lieu d'aligner en ligne */
+    .sync-step.sync-step-col {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+    .sync-step.sync-step-col .sync-step-header { width: 100%; }
     .sync-step-num {
       font-size: 1.1rem;
       flex-shrink: 0;
@@ -1694,15 +1701,15 @@
   <div class="admin-section-card" id="admin-sec-health">
     <div class="admin-sec-header" onclick="toggleAdminSec('health')">
       <span class="admin-sec-icon">🩺</span>
-      <span class="admin-sec-label">Santé du système</span>
+      <span class="admin-sec-label" data-i="healthTitle">Santé du système</span>
       <span id="health-badge" style="display:none;background:var(--pink);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;font-weight:700;margin-left:0.35rem"></span>
       <span class="admin-sec-arrow">▼</span>
     </div>
     <div class="admin-sec-body" id="admin-sec-body-health" style="padding:0.5rem 0.9rem 1rem">
-      <div style="font-size:0.75rem;color:var(--gray);line-height:1.4;margin-bottom:0.7rem">
+      <div data-i="healthDesc" style="font-size:0.75rem;color:var(--gray);line-height:1.4;margin-bottom:0.7rem">
         Vérifie la cohérence entre Drive, le Sheet et les élèves. À lancer après un import ou en cas de doute.
       </div>
-      <button class="btn-sync-step" id="btn-health-check" onclick="runHealthCheck(true)" style="width:100%">🩺 Vérifier</button>
+      <button class="btn-sync-step" id="btn-health-check" onclick="runHealthCheck(true)" data-i="healthBtn" style="width:100%">🩺 Vérifier</button>
       <div id="health-result" style="margin-top:0.7rem"></div>
     </div>
   </div>
@@ -1721,7 +1728,7 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:0.6rem">
 
-        <div class="sync-step" id="sync-step-1">
+        <div class="sync-step sync-step-col" id="sync-step-1">
           <div class="sync-step-header">
             <span class="sync-step-num">①</span>
             <div style="flex:1;min-width:0">
@@ -1731,10 +1738,10 @@
             <span class="sync-step-status" id="sync-status-1"></span>
           </div>
           <div style="display:flex;gap:0.4rem">
-            <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1,'new')" style="flex:2">⚡ Nouveautés</button>
-            <button class="btn-sync-step" id="btn-sync-1-all" onclick="runSyncStep(1,'all')" style="flex:1;background:var(--bg-soft);color:var(--gray)">🔄 Tout</button>
+            <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1,'new')" data-i="scanNew" style="flex:2">⚡ Nouveautés</button>
+            <button class="btn-sync-step" id="btn-sync-1-all" onclick="runSyncStep(1,'all')" data-i="scanAll" style="flex:1;background:var(--bg-soft);color:var(--gray)">🔄 Tout</button>
           </div>
-          <div style="font-size:0.68rem;color:var(--gray);margin-top:0.35rem;line-height:1.3">
+          <div id="scan-hint" data-i-html="scanHint" style="font-size:0.68rem;color:var(--gray);line-height:1.35">
             <strong>Nouveautés</strong> : rapide, fichiers modifiés depuis le dernier scan.<br>
             <strong>Tout</strong> : lent, rescanne tout le Drive (après réorganisation des dossiers).
           </div>
@@ -2135,7 +2142,7 @@ function invalidateAdminCache() {
 async function runHealthCheck(force) {
   const btn = document.getElementById("btn-health-check");
   const box = document.getElementById("health-result");
-  if (btn) { btn.disabled = true; btn.textContent = "⏳ Analyse en cours…"; }
+  if (btn) { btn.disabled = true; btn.textContent = t("healthRun"); }
   if (box) box.innerHTML = "";
 
   try {
@@ -2156,7 +2163,7 @@ async function runHealthCheck(force) {
     if (box) box.innerHTML = '<div style="color:var(--pink);font-size:0.8rem">❌ ' + e.message + '</div>';
   }
 
-  if (btn) { btn.disabled = false; btn.textContent = "🩺 Vérifier"; }
+  if (btn) { btn.disabled = false; btn.textContent = t("healthBtn"); }
 }
 
 function updateHealthBadge(highCount) {
@@ -2176,20 +2183,22 @@ function renderHealthReport(r) {
   let html = "";
 
   // Totaux
-  const t = r.totals || {};
+  const tot = r.totals || {};
   html += '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.7rem">';
-  html += healthStat(t.content,        "contenus");
-  html += healthStat(t.activeStudents, "élèves actifs");
-  html += healthStat(t.pending,        "en attente");
+  html += healthStat(tot.content,        t("hStatContent"));
+  html += healthStat(tot.activeStudents, t("hStatStudent"));
+  html += healthStat(tot.pending,        t("hStatPending"));
   html += '</div>';
 
   if (!r.issues || r.issues.length === 0) {
-    html += '<div style="background:rgba(158,196,160,0.22);color:#4a8a55;border-radius:10px;padding:0.7rem;font-size:0.82rem;text-align:center">✅ Aucun problème détecté</div>';
+    html += '<div style="background:rgba(158,196,160,0.22);color:#4a8a55;border-radius:10px;padding:0.7rem;font-size:0.82rem;text-align:center">' + escapeHtmlSafe(t("healthNone")) + '</div>';
   } else {
     r.issues.forEach(function(it) {
       const c = COLORS[it.severity] || "#9A8590";
       html += '<div style="border-left:3px solid ' + c + ';background:var(--bg-soft);border-radius:8px;padding:0.55rem 0.7rem;margin-bottom:0.45rem">';
-      html += '<div style="font-size:0.8rem;font-weight:600;color:var(--ink)">' + (ICONS[it.severity] || "") + ' ' + it.count + ' — ' + escapeHtmlSafe(it.label) + '</div>';
+      const locLabel = t("iss_" + it.code);
+      const shownLabel = (locLabel && locLabel !== "iss_" + it.code) ? locLabel : it.label;
+      html += '<div style="font-size:0.8rem;font-weight:600;color:var(--ink)">' + (ICONS[it.severity] || "") + ' ' + it.count + ' — ' + escapeHtmlSafe(shownLabel) + '</div>';
       if (it.sample && it.sample.length) {
         html += '<div style="font-size:0.7rem;color:var(--gray);margin-top:0.25rem;line-height:1.4">'
               + it.sample.map(escapeHtmlSafe).join("<br>")
@@ -2202,9 +2211,10 @@ function renderHealthReport(r) {
 
   if (r.checkedAt) {
     const d = new Date(r.checkedAt);
+    const locale = currentLang === "vi" ? "vi-VN" : (currentLang === "en" ? "en-GB" : "fr-FR");
     html += '<div style="font-size:0.68rem;color:var(--gray);margin-top:0.5rem;text-align:right">'
-          + 'Analysé le ' + d.toLocaleString("fr-FR")
-          + (r.fromCache ? ' (cache)' : '') + '</div>';
+          + escapeHtmlSafe(t("healthAt")) + ' ' + d.toLocaleString(locale)
+          + (r.fromCache ? ' ' + escapeHtmlSafe(t("healthCache")) : '') + '</div>';
   }
 
   box.innerHTML = html;
@@ -2264,7 +2274,7 @@ async function runSyncStep(step, mode) {
       if (!start || !start.success) {
         if (status) status.textContent = "❌ " + (start && start.message ? start.message : "Erreur");
       } else {
-        if (status) status.textContent = scanMode === "all" ? "⏳ Scan complet…" : "⏳ Scan rapide…";
+        if (status) status.textContent = scanMode === "all" ? t("scanRunAll") : t("scanRunNew");
         const result = await pollScanStatus();
         if (result.state === "done") {
           _cacheDel(CACHE_ALL_CONTENT_KEY);
@@ -2320,8 +2330,8 @@ async function runSyncStep(step, mode) {
 
   if (step === 1) {
     // Étape ① : réactiver les deux boutons avec leur libellé d'origine
-    if (btn)    { btn.disabled = false;    btn.textContent = "⚡ Nouveautés"; }
-    if (btnAll) { btnAll.disabled = false; btnAll.textContent = "🔄 Tout"; }
+    if (btn)    { btn.disabled = false;    btn.textContent = t("scanNew"); }
+    if (btnAll) { btnAll.disabled = false; btnAll.textContent = t("scanAll"); }
   } else if (btn) {
     btn.disabled = false;
     btn.textContent = step < 4 ? "↻" : "✓";
@@ -4951,6 +4961,11 @@ function applyNavLang() {
     const key = el.getAttribute("data-i");
     if (key) el.textContent = t(key);
   });
+  // Traductions contenant du HTML (gras, retours à la ligne…)
+  document.querySelectorAll("[data-i-html]").forEach(el => {
+    const key = el.getAttribute("data-i-html");
+    if (key) el.innerHTML = t(key);
+  });
 }
 
 // ══════════════════════════════════════════════
@@ -5082,6 +5097,29 @@ var TRANSLATIONS = {
     syncDriveTitle: "Cập nhật nội dung",
     syncDriveHint: "Sau khi thêm nội dung vào Drive, thực hiện 4 bước này theo thứ tự.",
     syncStep1: "① Quét Drive → Sheet",
+    scanNew:   "⚡ File mới",
+    scanAll:   "🔄 Toàn bộ",
+    scanHint:  "<strong>File mới</strong> : nhanh, chỉ file thay đổi từ lần quét trước.<br><strong>Toàn bộ</strong> : chậm, quét lại toàn bộ Drive (sau khi sắp xếp lại thư mục).",
+    scanRunNew:"⏳ Quét nhanh…",
+    scanRunAll:"⏳ Quét toàn bộ…",
+    healthTitle:  "Tình trạng hệ thống",
+    healthDesc:   "Kiểm tra tính nhất quán giữa Drive, Sheet và học viên. Chạy sau khi import hoặc khi nghi ngờ.",
+    healthBtn:    "🩺 Kiểm tra",
+    healthRun:    "⏳ Đang phân tích…",
+    healthNone:   "✅ Không phát hiện vấn đề",
+    healthAt:     "Phân tích lúc",
+    healthCache:  "(bộ nhớ đệm)",
+    hStatContent: "nội dung",
+    hStatStudent: "học viên",
+    hStatPending: "đang chờ",
+    iss_forms_no_entry:    "Form chưa có Entry_ID hợp lệ — chạy bước ③",
+    iss_forms_no_tab:      "Form chưa liên kết tab trả lời — chạy bước ②",
+    iss_students_no_token: "Học viên chưa có token — bấm « Tạo token »",
+    iss_no_link:           "Nội dung không có link Drive",
+    iss_dup_links:         "Link Drive trùng lặp — dùng « Xoá trùng lặp »",
+    iss_orphan_exercises:  "Bài tập liên kết nội dung đã xoá",
+    iss_orphan_access:     "Quyền truy cập liên kết nội dung đã xoá",
+    iss_old_pending:       "Bài tập chờ hơn 30 ngày",
     syncDesc1: "Quét Drive và thêm file mới vào Sheet. Không chạm vào form.",
     syncStep2: "② Liên kết form với Sheet",
     syncDesc2: "Tạo Form Responses cho các form mới. Kiểm tra Sheet trước!",
@@ -5291,6 +5329,52 @@ var TRANSLATIONS = {
     syncDriveTitle: "Update Content",
     syncDriveHint: "After adding content to Drive, follow these 4 steps in order.",
     syncStep1: "① Scan Drive → Sheet",
+    scanNew:   "⚡ Nouveautés",
+    scanAll:   "🔄 Tout",
+    scanHint:  "<strong>Nouveautés</strong> : rapide, fichiers modifiés depuis le dernier scan.<br><strong>Tout</strong> : lent, rescanne tout le Drive (après réorganisation des dossiers).",
+    scanRunNew:"⏳ Scan rapide…",
+    scanRunAll:"⏳ Scan complet…",
+    healthTitle:  "Santé du système",
+    healthDesc:   "Vérifie la cohérence entre Drive, le Sheet et les élèves. À lancer après un import ou en cas de doute.",
+    healthBtn:    "🩺 Vérifier",
+    healthRun:    "⏳ Analyse en cours…",
+    healthNone:   "✅ Aucun problème détecté",
+    healthAt:     "Analysé le",
+    healthCache:  "(cache)",
+    hStatContent: "contenus",
+    hStatStudent: "élèves actifs",
+    hStatPending: "en attente",
+    iss_forms_no_entry:    "Formulaires sans Entry_ID valide — lancez l'étape ③",
+    iss_forms_no_tab:      "Formulaires non liés à un onglet de réponses — lancez l'étape ②",
+    iss_students_no_token: "Élèves sans token — cliquez sur « Générer les tokens »",
+    iss_no_link:           "Contenus sans lien Drive",
+    iss_dup_links:         "Liens Drive en double — utilisez « Supprimer les doublons »",
+    iss_orphan_exercises:  "Exercices liés à un contenu supprimé",
+    iss_orphan_access:     "Accès liés à un contenu supprimé",
+    iss_old_pending:       "Exercices en attente depuis plus de 30 jours",
+    scanNew:   "⚡ New files",
+    scanAll:   "🔄 Full scan",
+    scanHint:  "<strong>New files</strong> : fast, only files changed since last scan.<br><strong>Full scan</strong> : slow, rescans the whole Drive (after reorganising folders).",
+    scanRunNew:"⏳ Quick scan…",
+    scanRunAll:"⏳ Full scan…",
+    healthTitle:  "System health",
+    healthDesc:   "Checks consistency between Drive, the Sheet and students. Run after an import or when in doubt.",
+    healthBtn:    "🩺 Check",
+    healthRun:    "⏳ Analysing…",
+    healthNone:   "✅ No issue detected",
+    healthAt:     "Checked at",
+    healthCache:  "(cached)",
+    hStatContent: "contents",
+    hStatStudent: "active students",
+    hStatPending: "pending",
+    iss_forms_no_entry:    "Forms without a valid Entry_ID — run step ③",
+    iss_forms_no_tab:      "Forms not linked to a response tab — run step ②",
+    iss_students_no_token: "Students without a token — click « Generate tokens »",
+    iss_no_link:           "Contents without a Drive link",
+    iss_dup_links:         "Duplicate Drive links — use « Remove duplicates »",
+    iss_orphan_exercises:  "Exercises linked to deleted content",
+    iss_orphan_access:     "Access rows linked to deleted content",
+    iss_old_pending:       "Exercises pending for over 30 days",
     syncDesc1: "Scans Drive and adds new files to the Sheet. Does not touch forms.",
     syncStep2: "② Link forms to Sheet",
     syncDesc2: "Creates Form Responses for new forms only. Check the Sheet before!",
