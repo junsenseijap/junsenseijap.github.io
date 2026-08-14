@@ -1690,6 +1690,23 @@
     </div>
   </div>
 
+  <!-- ══ SECTION: SANTÉ DU SYSTÈME ══ -->
+  <div class="admin-section-card" id="admin-sec-health">
+    <div class="admin-sec-header" onclick="toggleAdminSec('health')">
+      <span class="admin-sec-icon">🩺</span>
+      <span class="admin-sec-label">Santé du système</span>
+      <span id="health-badge" style="display:none;background:var(--pink);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;font-weight:700;margin-left:0.35rem"></span>
+      <span class="admin-sec-arrow">▼</span>
+    </div>
+    <div class="admin-sec-body" id="admin-sec-body-health" style="padding:0.5rem 0.9rem 1rem">
+      <div style="font-size:0.75rem;color:var(--gray);line-height:1.4;margin-bottom:0.7rem">
+        Vérifie la cohérence entre Drive, le Sheet et les élèves. À lancer après un import ou en cas de doute.
+      </div>
+      <button class="btn-sync-step" id="btn-health-check" onclick="runHealthCheck(true)" style="width:100%">🩺 Vérifier</button>
+      <div id="health-result" style="margin-top:0.7rem"></div>
+    </div>
+  </div>
+
   <!-- ══ SECTION: MISE À JOUR DES CONTENUS ══ -->
   <div class="admin-section-card" id="admin-sec-sync">
     <div class="admin-sec-header" onclick="toggleAdminSec('sync')">
@@ -1713,7 +1730,14 @@
             </div>
             <span class="sync-step-status" id="sync-status-1"></span>
           </div>
-          <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1)" data-i="syncRun">Lancer</button>
+          <div style="display:flex;gap:0.4rem">
+            <button class="btn-sync-step" id="btn-sync-1" onclick="runSyncStep(1,'new')" style="flex:2">⚡ Nouveautés</button>
+            <button class="btn-sync-step" id="btn-sync-1-all" onclick="runSyncStep(1,'all')" style="flex:1;background:var(--bg-soft);color:var(--gray)">🔄 Tout</button>
+          </div>
+          <div style="font-size:0.68rem;color:var(--gray);margin-top:0.35rem;line-height:1.3">
+            <strong>Nouveautés</strong> : rapide, fichiers modifiés depuis le dernier scan.<br>
+            <strong>Tout</strong> : lent, rescanne tout le Drive (après réorganisation des dossiers).
+          </div>
         </div>
 
         <div class="sync-step" id="sync-step-2">
@@ -2106,6 +2130,99 @@ function invalidateAdminCache() {
 
 // Sync admin uniquement — recharge élèves + contenu sans reload complet
 // ── Workflow Sync Drive → CONTENT ────────────────────────────
+// ── SANTÉ DU SYSTÈME ──
+// force=true → relance une analyse fraîche ; sinon le serveur peut renvoyer son cache (10 min)
+async function runHealthCheck(force) {
+  const btn = document.getElementById("btn-health-check");
+  const box = document.getElementById("health-result");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Analyse en cours…"; }
+  if (box) box.innerHTML = "";
+
+  try {
+    const r = await api({
+      action: "healthCheck",
+      force: force ? "1" : "0",
+      adminId: currentUserGlobal.id,
+      pin: getStoredPin()
+    });
+
+    if (!r || !r.success) {
+      if (box) box.innerHTML = '<div style="color:var(--pink);font-size:0.8rem">❌ ' + ((r && r.message) || "Erreur") + '</div>';
+    } else {
+      renderHealthReport(r);
+      updateHealthBadge(r.highCount || 0);
+    }
+  } catch(e) {
+    if (box) box.innerHTML = '<div style="color:var(--pink);font-size:0.8rem">❌ ' + e.message + '</div>';
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = "🩺 Vérifier"; }
+}
+
+function updateHealthBadge(highCount) {
+  const badge = document.getElementById("health-badge");
+  if (!badge) return;
+  if (highCount > 0) { badge.textContent = highCount; badge.style.display = "inline-block"; }
+  else { badge.style.display = "none"; }
+}
+
+function renderHealthReport(r) {
+  const box = document.getElementById("health-result");
+  if (!box) return;
+
+  const COLORS = { high: "#E84B7A", medium: "#C89B3C", low: "#7BAFD4" };
+  const ICONS  = { high: "🔴", medium: "🟡", low: "🔵" };
+
+  let html = "";
+
+  // Totaux
+  const t = r.totals || {};
+  html += '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.7rem">';
+  html += healthStat(t.content,        "contenus");
+  html += healthStat(t.activeStudents, "élèves actifs");
+  html += healthStat(t.pending,        "en attente");
+  html += '</div>';
+
+  if (!r.issues || r.issues.length === 0) {
+    html += '<div style="background:rgba(158,196,160,0.22);color:#4a8a55;border-radius:10px;padding:0.7rem;font-size:0.82rem;text-align:center">✅ Aucun problème détecté</div>';
+  } else {
+    r.issues.forEach(function(it) {
+      const c = COLORS[it.severity] || "#9A8590";
+      html += '<div style="border-left:3px solid ' + c + ';background:var(--bg-soft);border-radius:8px;padding:0.55rem 0.7rem;margin-bottom:0.45rem">';
+      html += '<div style="font-size:0.8rem;font-weight:600;color:var(--ink)">' + (ICONS[it.severity] || "") + ' ' + it.count + ' — ' + escapeHtmlSafe(it.label) + '</div>';
+      if (it.sample && it.sample.length) {
+        html += '<div style="font-size:0.7rem;color:var(--gray);margin-top:0.25rem;line-height:1.4">'
+              + it.sample.map(escapeHtmlSafe).join("<br>")
+              + (it.count > it.sample.length ? '<br><em>… et ' + (it.count - it.sample.length) + ' autre(s)</em>' : '')
+              + '</div>';
+      }
+      html += '</div>';
+    });
+  }
+
+  if (r.checkedAt) {
+    const d = new Date(r.checkedAt);
+    html += '<div style="font-size:0.68rem;color:var(--gray);margin-top:0.5rem;text-align:right">'
+          + 'Analysé le ' + d.toLocaleString("fr-FR")
+          + (r.fromCache ? ' (cache)' : '') + '</div>';
+  }
+
+  box.innerHTML = html;
+}
+
+function healthStat(val, label) {
+  if (val === undefined || val === null) return "";
+  return '<div style="flex:1;min-width:70px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:0.45rem;text-align:center">'
+       + '<div style="font-size:1.05rem;font-weight:700;color:var(--pink)">' + val + '</div>'
+       + '<div style="font-size:0.65rem;color:var(--gray)">' + label + '</div></div>';
+}
+
+function escapeHtmlSafe(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 // Interroge getScanStatus toutes les ~4s jusqu'à 'done' ou 'error', avec limite de 3 min
 async function pollScanStatus() {
   const MAX_WAIT_MS   = 3 * 60 * 1000;
@@ -2126,22 +2243,28 @@ async function pollScanStatus() {
   return { state: "timeout" };
 }
 
-async function runSyncStep(step) {
+async function runSyncStep(step, mode) {
   const btn    = document.getElementById("btn-sync-" + step);
+  const btnAll = document.getElementById("btn-sync-1-all");
   const status = document.getElementById("sync-status-" + step);
   const stepEl = document.getElementById("sync-step-" + step);
-  if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
+  // Étape ① : deux boutons à désactiver ensemble
+  const clicked = (step === 1 && mode === "all") ? btnAll : btn;
+  if (btn)    btn.disabled = true;
+  if (btnAll) btnAll.disabled = true;
+  if (clicked) clicked.textContent = "⏳";
   if (status) status.textContent = "En cours...";
 
   try {
     if (step === 1) {
       // Scan Drive asynchrone — évite le timeout navigateur sur les gros scans.
       // Le scan tourne en tâche de fond côté GAS ; on interroge le statut en polling.
-      const start = await api({ action: "startDriveScan", adminId: currentUserGlobal.id, pin: getStoredPin() });
+      const scanMode = (mode === "all") ? "all" : "new";
+      const start = await api({ action: "startDriveScan", mode: scanMode, adminId: currentUserGlobal.id, pin: getStoredPin() });
       if (!start || !start.success) {
         if (status) status.textContent = "❌ " + (start && start.message ? start.message : "Erreur");
       } else {
-        if (status) status.textContent = "⏳ Scan en cours…";
+        if (status) status.textContent = scanMode === "all" ? "⏳ Scan complet…" : "⏳ Scan rapide…";
         const result = await pollScanStatus();
         if (result.state === "done") {
           _cacheDel(CACHE_ALL_CONTENT_KEY);
@@ -2174,6 +2297,9 @@ async function runSyncStep(step) {
         if (status) status.textContent = "❌ " + (r && r.message ? r.message : "Erreur");
       }
     } else if (step === 4) {
+      // Vider le cache CÔTÉ SERVEUR (GAS) — sinon les étapes ②③ peuvent avoir tourné
+      // sans jamais invalider le cache serveur, qui sert alors des données obsolètes.
+      await api({ action: "clearCache", adminId: currentUserGlobal.id, pin: getStoredPin() });
       clearDataCache();
       invalidateAdminCache();
       await loadAdminPanel(currentUserGlobal);
@@ -2192,7 +2318,11 @@ async function runSyncStep(step) {
     if (status) status.textContent = "❌ " + e.message;
   }
 
-  if (btn) {
+  if (step === 1) {
+    // Étape ① : réactiver les deux boutons avec leur libellé d'origine
+    if (btn)    { btn.disabled = false;    btn.textContent = "⚡ Nouveautés"; }
+    if (btnAll) { btnAll.disabled = false; btnAll.textContent = "🔄 Tout"; }
+  } else if (btn) {
     btn.disabled = false;
     btn.textContent = step < 4 ? "↻" : "✓";
   }
