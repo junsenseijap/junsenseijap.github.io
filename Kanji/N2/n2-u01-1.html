@@ -55,7 +55,7 @@ nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
 
 /* FLASHCARD 3D */
 .card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
-.flashcard{width:100%;max-width:420px;height:265px;perspective:900px;cursor:pointer;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
 .flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
 .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
 .face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
@@ -65,11 +65,19 @@ nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
 .front-kanji.mid{font-size:46px;}
 .front-kanji.long{font-size:34px;}
 .front-kanji.xlong{font-size:24px;}
-.front-reading{font-family:'Noto Serif JP',serif;font-size:20px;color:var(--pink);margin-top:8px;}
 .front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
 .back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
 .back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
 .back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
 .back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
 .back-ex b{color:var(--pink);}
 .back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
@@ -348,6 +356,11 @@ function updateStats() {
   document.getElementById('statStreak').textContent = streak;
 }
 
+// Met en évidence le mot cible dans la phrase d'exemple
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
 function sizeClass(text) {
   const l = text.length;
   if (l > 8) return 'xlong';
@@ -404,7 +417,7 @@ panel.addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════════════════════
-   FLASHCARDS
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
 ══════════════════════════════════════════════════════ */
 let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
 
@@ -415,23 +428,21 @@ function renderFlash() {
     return;
   }
   const item = flashOrder[flashIndex];
-  const sc   = sizeClass(item.k);
   panel.innerHTML = `
     <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
     <div class="card-stage">
       <div class="flashcard" id="flashcard">
         <div class="flashcard-inner">
           <div class="face front">
-            <div class="front-kanji ${sc}">${item.k}</div>
-            <div class="front-reading">${item.r}</div>
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
             ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
-            <div class="hint">タップして意味を見る</div>
+            <div class="hint">タップして読み方を見る</div>
           </div>
           <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
             <div class="back-meaning">${item.en}</div>
             <div class="back-vi">${item.vi}</div>
-            ${item.hv ? `<div class="back-hv">🔤 ${item.hv}</div>` : ''}
-            ${item.ex ? `<div class="back-ex">${item.ex.replace('（　）', '<b>' + item.k + '</b>')}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
             <div class="hint">タップして戻る</div>
           </div>
         </div>
@@ -445,7 +456,6 @@ function renderFlash() {
 
   document.getElementById('flashcard').addEventListener('click', () =>
     document.getElementById('flashcard').classList.toggle('flipped'));
-
   document.getElementById('flashPrev').addEventListener('click', () => {
     if (flashIndex > 0) { flashIndex--; renderFlash(); }
   });
@@ -459,10 +469,39 @@ function renderFlash() {
 }
 
 /* ══════════════════════════════════════════════════════
-   QUIZ — 3 types : kanji→lecture, lecture→kanji, kanji→sens
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
 ══════════════════════════════════════════════════════ */
 let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
-const QUIZ_TYPES = ['toReading', 'toMeaning'];
+
+// Pondération : 3 lecture · 3 kanji · 3 usage · 1 sens
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    // Pas de question d'usage si le mot n'a pas de phrase d'exemple
+    if (w[0] === 'usage' && !item.ex) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Complète une liste de distracteurs jusqu'à 3 en piochant dans la leçon.
+// Défensif : écarte la bonne réponse et les doublons, même si les données
+// fournies en contiennent — une option correcte en double rendrait la
+// question insoluble.
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
 
 function renderQuiz() {
   if (quizIndex >= VOCAB.length) {
@@ -471,39 +510,42 @@ function renderQuiz() {
     return;
   }
   const item  = quizPool[quizIndex % quizPool.length];
-  const qType = QUIZ_TYPES[Math.floor(Math.random() * QUIZ_TYPES.length)];
-  let prompt, promptLabel, optionItems, optClass = '';
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
 
   if (qType === 'toReading') {
-    prompt      = item.k;
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
     promptLabel = '正しい読み方を選んでください';
-    // Distracteurs : lectures piégeuses (rd) si fournies, complétées au besoin
-    // par les lectures d'autres mots de la leçon.
-    let pool = (item.rd || []).slice(0, 3);
-    if (pool.length < 3) {
-      const filler = shuffle(VOCAB).map(v => v.r).filter(r => r !== item.r && pool.indexOf(r) === -1);
-      while (pool.length < 3 && filler.length) pool.push(filler.pop());
-    }
-    optionItems = shuffle([
-      { label: item.r, correct: true },
-      ...pool.map(r => ({ label: r, correct: false }))
-    ]);
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = fillDistractors([], item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
   } else {
-    prompt      = item.k;
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
     promptLabel = '正しい意味を選んでください（EN / VI）';
     optClass    = 'meaning-opt';
-    const correct = `${item.en} / ${item.vi}`;
-    const others  = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
-    optionItems   = shuffle([
-      { label: correct, correct: true },
-      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))
-    ]);
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
   }
 
-  const sc = sizeClass(prompt);
   panel.innerHTML = `
     <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
-    <div class="quiz-prompt ${sc}">${prompt}</div>
+    ${promptHtml}
     <p class="quiz-sub">${promptLabel}</p>
     <div class="options">
       ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
@@ -568,79 +610,69 @@ function renderWrite() {
 }
 
 /* ══════════════════════════════════════════════════════
-   MATCH — 2 colonnes kanji | lecture, 6 paires max
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+   Repli sur l'association kanji ↔ lecture si aucune phrase d'exemple.
 ══════════════════════════════════════════════════════ */
-let matchSet = [], matchSolved = new Set(), matchSelLeft = null, matchSelRight = null, matchMistakes = 0, matchCorrectCount = 0;
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
 
 function newMatchRound() {
-  matchSet       = shuffle(VOCAB).slice(0, Math.min(VOCAB.length, 6));
-  matchSolved    = new Set();
-  matchSelLeft   = null;
-  matchSelRight  = null;
-  matchMistakes  = 0;
-  matchCorrectCount = 0;
+  const withEx = VOCAB.filter(v => v.ex && v.ex.indexOf('（　）') !== -1);
+  matchFallback = withEx.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : withEx).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
 }
 
 function renderMatch() {
-  if (matchSet.length === 0) newMatchRound();
-  if (matchSolved.size === matchSet.length) {
-    const total = matchSet.length + matchMistakes;
-    panel.innerHTML = endScreen('対戦 終了', '全部そろいました！', matchSet.length, total);
-    sendScoreForMode(matchSet.length, total);
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
     return;
   }
-  const rightItems = shuffle(matchSet);
+  const item = matchOrder[matchIndex];
+
+  // Repli : pas de phrases d'exemple dans cette leçon → lecture à choisir
+  const promptHtml = matchFallback
+    ? `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`
+    : `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+  const label   = matchFallback ? '正しい読み方を選んでください' : '（　）に適当な言葉を入れてください';
+  const correct = matchFallback ? item.r : item.k;
+  const getter  = matchFallback ? (v => v.r) : (v => v.k);
+
+  const pool = fillDistractors(
+    matchFallback ? (item.rd || []).slice(0, 3) : [], correct, getter);
+  // Banque de 6 mots : 1 correct + 5 distracteurs
+  const extra = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && pool.indexOf(x) === -1).slice(0, 2);
+  const options = shuffle([correct].concat(pool, extra));
+
   panel.innerHTML = `
-    <p class="panel-title">対戦 <span class="count">${matchSolved.size} / ${matchSet.length} 組</span></p>
-    <div class="match-grid">
-      <div class="match-col" id="matchLeft">
-        ${matchSet.map(v => `<div class="match-item kanji${matchSolved.has(v.k) ? ' solved' : ''}" data-k="${v.k}">${v.k}</div>`).join('')}
-      </div>
-      <div class="match-col" id="matchRight">
-        ${rightItems.map(v => `<div class="match-item reading${matchSolved.has(v.k) ? ' solved' : ''}" data-k="${v.k}">${v.r}</div>`).join('')}
-      </div>
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
     </div>`;
 
-  panel.querySelectorAll('.match-item.kanji').forEach(el => {
-    el.addEventListener('click', () => {
-      if (matchSolved.has(el.dataset.k)) return;
-      panel.querySelectorAll('.match-item.kanji').forEach(e => e.classList.remove('selected'));
-      el.classList.add('selected');
-      matchSelLeft = el.dataset.k;
-      tryMatch();
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const ok = options[i] === correct;
+      if (ok) {
+        panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+        btn.classList.add('solved');
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++; updateStats();
+        setTimeout(() => { matchIndex++; renderMatch(); }, 700);
+      } else {
+        streak = 0; updateStats();
+        btn.classList.add('wrong', 'shake');
+        btn.disabled = true;
+        setTimeout(() => btn.classList.remove('shake'), 350);
+      }
     });
   });
-  panel.querySelectorAll('.match-item.reading').forEach(el => {
-    el.addEventListener('click', () => {
-      if (matchSolved.has(el.dataset.k)) return;
-      panel.querySelectorAll('.match-item.reading').forEach(e => e.classList.remove('selected'));
-      el.classList.add('selected');
-      matchSelRight = el.dataset.k;
-      tryMatch();
-    });
-  });
-
-  function tryMatch() {
-    if (!matchSelLeft || !matchSelRight) return;
-    if (matchSelLeft === matchSelRight) {
-      matchSolved.add(matchSelLeft);
-      matchCorrectCount++;
-      progress[matchSelLeft].known = true;
-      streak++;
-      saveProgress(); updateStats();
-      matchSelLeft = null; matchSelRight = null;
-      renderMatch();
-    } else {
-      streak = 0; matchMistakes++; updateStats();
-      const lEl = panel.querySelector(`.match-item.kanji[data-k="${matchSelLeft}"]`);
-      const rEl = panel.querySelector(`.match-item.reading[data-k="${matchSelRight}"]`);
-      [lEl, rEl].forEach(e => e && e.classList.add('shake'));
-      setTimeout(() => {
-        [lEl, rEl].forEach(e => { if (e) { e.classList.remove('shake', 'selected'); } });
-        matchSelLeft = null; matchSelRight = null;
-      }, 350);
-    }
-  }
 }
 
 /* ══════════════════════════════════════════════════════
