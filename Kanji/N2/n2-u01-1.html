@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 1.1 — 親類・友人・知人</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+
+/* HEADER */
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+
+/* STATS */
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+
+/* NAV MODES */
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+
+/* PANEL */
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+
+/* FLASHCARD 3D */
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:265px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-reading{font-family:'Noto Serif JP',serif;font-size:20px;color:var(--pink);margin-top:8px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+
+/* QUIZ */
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+
+/* WRITING */
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* END SCREEN */
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+
+/* AUTH BANNER */
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+
+/* SUBMIT STATUS */
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">親</div>
+    <div>
+      <h1>N2 · 1.1 — 親類・友人・知人</h1>
+      <p>Vocabulaire · 50 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">50</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 1.1</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u1-1";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   VOCAB — 48 mots N4 U1
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  { k:"親類", r:"しんるい", hv:"Thân loại", en:"relatives", vi:"họ hàng", ex:"（　）が集まって新年を祝った。", exvi:"Họ hàng tụ họp để chúc mừng năm mới.", rd:["しんるり", "しんらい", "しんりい"], kd:["親戚", "新類", "親流"] },
+  { k:"祖先", r:"そせん", hv:"Tổ tiên", en:"ancestors", vi:"tổ tiên", ex:"（　）の墓参りをした。", exvi:"Tôi đi thăm mộ tổ tiên.", rd:["そうせん", "そせい", "そしん"], kd:["祖父", "姐先", "組先"] },
+  { k:"子孫", r:"しそん", hv:"Tử tôn", en:"descendants", vi:"con cháu", ex:"（　）のために環境を守る。", exvi:"Bảo vệ môi trường vì con cháu.", rd:["こそん", "しそう", "しぞん"], kd:["子供", "孫子", "子損"] },
+  { k:"三世代", r:"さんせだい", hv:"Tam thế đại", en:"three generations", vi:"ba thế hệ", ex:"（　）で同じ屋根の下に住んでいる。", exvi:"Ba thế hệ sống cùng dưới một mái nhà.", rd:["さんせいだい", "さんせたい", "さんせかい"], kd:["三世界", "三世大", "三生代"] },
+  { k:"一家", r:"いっか", hv:"Nhất gia", en:"whole family", vi:"cả gia đình", ex:"（　）で旅行に出かけた。", exvi:"Cả gia đình đi du lịch.", rd:["いちか", "いっけ", "いっき"], kd:["一家族", "一化", "一花"] },
+  { k:"集まり", r:"あつまり", hv:"Tập", en:"gathering", vi:"buổi tụ họp", ex:"友人の（　）に参加した。", exvi:"Tôi tham gia buổi tụ họp của bạn bè.", rd:["あつまる", "あずまり", "あつまる"], kd:["集会", "集合", "集まる"] },
+  { k:"親孝行", r:"おやこうこう", hv:"Thân hiếu hành", en:"filial piety", vi:"hiếu thảo", ex:"（　）として両親に旅行をプレゼントした。", exvi:"Để hiếu thảo, tôi tặng cha mẹ chuyến đi du lịch.", rd:["おやこうぎょう", "おやこうこ", "おやこうかう"], kd:["親光行", "親孝幸", "親好行"] },
+  { k:"実家", r:"じっか", hv:"Thực gia", en:"parents' home", vi:"nhà bố mẹ đẻ", ex:"お盆に（　）へ帰った。", exvi:"Tôi về nhà bố mẹ vào dịp Obon.", rd:["じっけ", "じっき", "じつか"], kd:["実家族", "実科", "実化"] },
+  { k:"三人姉妹", r:"さんにんしまい", hv:"Tam nhân tỷ muội", en:"three sisters", vi:"ba chị em gái", ex:"彼女は（　）の末っ子だ。", exvi:"Cô ấy là con út trong ba chị em gái.", rd:["さんにんしまえ", "さんにんじまい", "さんにんしまいい"], kd:["三人姉弟", "三人姊妹", "三人姐妹"] },
+  { k:"末っ子", r:"すえっこ", hv:"Mạt tử", en:"youngest child", vi:"con út", ex:"（　）はいつも甘やかされる。", exvi:"Con út thường hay được nuông chiều.", rd:["すえこ", "すえっご", "すえっき"], kd:["末子", "末っ古", "末子供"] },
+  { k:"一人っ子", r:"ひとりっこ", hv:"Nhất nhân tử", en:"only child", vi:"con một", ex:"（　）なので、親の愛情を独り占めした。", exvi:"Vì là con một nên tôi được độc chiếm tình yêu của cha mẹ.", rd:["ひとりこ", "ひとりっご", "ひとりっくご"], kd:["一人っ古", "一人子", "一人っ個"] },
+  { k:"双子", r:"ふたご", hv:"Song tử", en:"twins", vi:"sinh đôi", ex:"（　）の兄弟は見分けがつかない。", exvi:"Không thể phân biệt được hai anh em sinh đôi.", rd:["ふたこ", "ふたくご", "ふたこども"], kd:["双子供", "雙子", "双古"] },
+  { k:"仲良し", r:"なかよし", hv:"Trung lương", en:"close friends", vi:"thân thiết", ex:"幼稚園からの（　）だ。", exvi:"Chúng tôi thân nhau từ hồi mẫu giáo.", rd:["なかよりし", "なかよく", "なかよさ"], kd:["仲良い", "仲良示", "仲好し"] },
+  { k:"仕事仲間", r:"しごとなかま", hv:"", en:"work colleague", vi:"đồng nghiệp", ex:"（　）と飲みに行った。", exvi:"Tôi đi nhậu cùng đồng nghiệp.", rd:["しごとなかよし", "しごとなかみ", "しごとちゅうま"], kd:["仕事仲侭", "仕事中間", "仕事仲真"] },
+  { k:"勉強仲間", r:"べんきょうなかま", hv:"", en:"study buddy", vi:"bạn học cùng", ex:"図書館で（　）と一緒に復習した。", exvi:"Tôi ôn bài cùng bạn học ở thư viện.", rd:["べんきょうなかよし", "べんきょうなかみ", "べんきょうちゅうま"], kd:["勉強仲侭", "勉強仲真", "勉強中間"] },
+  { k:"飲み仲間", r:"のみなかま", hv:"", en:"drinking buddy", vi:"bạn nhậu", ex:"（　）と週末に居酒屋へ行く。", exvi:"Tôi đi quán izakaya với bạn nhậu vào cuối tuần.", rd:["のみなかよし", "のみなかみ", "のみちゅうま"], kd:["飲み仲侭", "飲仲間", "飮み仲間"] },
+  { k:"同い年", r:"おないどし", hv:"", en:"same age", vi:"cùng tuổi", ex:"彼とは（　）で話が合う。", exvi:"Tôi và anh ấy cùng tuổi nên hợp chuyện.", rd:["おなじどし", "おないとし", "おなどし"], kd:["同い歳", "同い年齢", "同い才"] },
+  { k:"周囲の人々", r:"しゅういのひとびと", hv:"", en:"people around one", vi:"những người xung quanh", ex:"（　）の意見を聞いた。", exvi:"Tôi lắng nghe ý kiến của những người xung quanh.", rd:["しゅうにのひとびと", "しゅうのひとびと", "しゅういのひとと"], kd:["週囲の人々", "周位の人々", "周囲の方々"] },
+  { k:"親しい", r:"したしい", hv:"Thân", en:"close / intimate", vi:"thân thiết", ex:"彼女とは昔から（　）関係だ。", exvi:"Tôi và cô ấy có quan hệ thân thiết từ trước.", rd:["したい", "しんしい", "したかい"], kd:["新しい", "親密い", "親しみ"] },
+  { k:"付き合い", r:"つきあい", hv:"", en:"relationship / association", vi:"quan hệ giao tiếp", ex:"長い（　）の友人がいる。", exvi:"Tôi có người bạn thân từ lâu.", rd:["つきあうい", "つきあわい", "つきあいい"], kd:["付合い", "付き会い", "付き間い"] },
+  { k:"取る", r:"とる", hv:"Thủ", en:"to take / get", vi:"lấy / có", ex:"連絡を（　）のを忘れた。", exvi:"Tôi quên liên lạc.", rd:["とらる", "とこる", "とたる"], kd:["採る", "盗る", "撮る"] },
+  { k:"約束を守る", r:"やくそくをまもる", hv:"", en:"to keep a promise", vi:"giữ lời hứa", ex:"どんなに忙しくても（　）。", exvi:"Dù bận thế nào cũng phải giữ lời hứa.", rd:["やくそくをもどる", "やくそくをまわる", "やくそくをかえる"], kd:["約束を守る", "約束を護る", "約束を見守る"] },
+  { k:"破る", r:"やぶる", hv:"Phá", en:"to break (a rule/promise)", vi:"vi phạm / phá vỡ", ex:"約束を（　）のは良くない。", exvi:"Phá vỡ lời hứa là không tốt.", rd:["やぶれる", "やべる", "やぼる"], kd:["敗る", "破壊る", "破くる"] },
+  { k:"取り消す", r:"とりけす", hv:"", en:"to cancel / undo", vi:"hủy bỏ / rút lại", ex:"注文を（　）たい。", exvi:"Tôi muốn hủy đơn hàng.", rd:["とりかえす", "とりこす", "とりだす"], kd:["取り去す", "取り越す", "取り出す"] },
+  { k:"言葉遣い", r:"ことばづかい", hv:"", en:"word choice / manner of speaking", vi:"cách dùng từ", ex:"目上の人には丁寧な（　）をする。", exvi:"Phải dùng ngôn ngữ lịch sự với người bề trên.", rd:["ことばつかい", "ことばずかい", "ことばたかい"], kd:["言葉使い", "言葉付かい", "言葉遣る"] },
+  { k:"握手する", r:"あくしゅする", hv:"Ác thủ", en:"to shake hands", vi:"bắt tay", ex:"初対面の人と（　）した。", exvi:"Tôi bắt tay với người gặp lần đầu.", rd:["あくしゃする", "あくしょする", "あっしゅする"], kd:["握主する", "握首する", "悪手する"] },
+  { k:"お辞儀", r:"おじぎ", hv:"", en:"bow (greeting)", vi:"cúi chào", ex:"日本では（　）で挨拶をする。", exvi:"Ở Nhật người ta cúi chào để chào hỏi.", rd:["おじき", "おじびき", "おじきき"], kd:["お辞義", "お辞宜", "お辞気"] },
+  { k:"話し合い", r:"はなしあい", hv:"", en:"discussion / talk", vi:"cuộc thảo luận", ex:"問題を解決するために（　）をした。", exvi:"Chúng tôi thảo luận để giải quyết vấn đề.", rd:["はなしあわい", "はなしあうい", "はなしあいい"], kd:["話合い", "話し会い", "話し合える"] },
+  { k:"取り出す", r:"とりだす", hv:"", en:"to take out", vi:"lấy ra", ex:"財布から名刺を（　）した。", exvi:"Tôi lấy danh thiếp ra từ ví.", rd:["とりでる", "とりたす", "とりおろす"], kd:["取出す", "取り放す", "取り出る"] },
+  { k:"取り替える", r:"とりかえる", hv:"", en:"to exchange / replace", vi:"thay / đổi", ex:"古い電池を新しいのに（　）た。", exvi:"Tôi thay pin cũ bằng pin mới.", rd:["とりかわる", "とりかわえる", "とりかわす"], kd:["取り代える", "取り変える", "取替える"] },
+  { k:"金遣い", r:"かねづかい", hv:"", en:"way of spending money", vi:"cách tiêu tiền", ex:"彼は（　）が荒い。", exvi:"Anh ấy tiêu tiền rất phung phí.", rd:["かねつかい", "かねずかい", "かねたかい"], kd:["金使い", "金図解", "金付かい"] },
+  { k:"気遣い", r:"きづかい", hv:"", en:"consideration / thoughtfulness", vi:"sự quan tâm / ân cần", ex:"細かい（　）ができる人だ。", exvi:"Anh ấy là người biết quan tâm chu đáo.", rd:["きつかい", "きずかい", "きたかい"], kd:["気使い", "気図解", "気付かい"] },
+  { k:"ご主人", r:"ごしゅじん", hv:"Chủ nhân", en:"husband (someone else's)", vi:"chồng (người khác, trang trọng)", ex:"（　）はお元気ですか？", exvi:"Chồng của bà có khỏe không?", rd:["ごしゅにん", "ごしゅうじん", "ごしゅじにん"], kd:["ご主人公", "御主人", "ご主刃"] },
+  { k:"夫人", r:"ふじん", hv:"Phu nhân", en:"wife / Mrs. (formal)", vi:"phu nhân", ex:"大使（　）が式典に出席した。", exvi:"Phu nhân đại sứ tham dự lễ kỷ niệm.", rd:["ふにん", "ふうじん", "ふじにん"], kd:["婦人", "夫刃", "夫仁"] },
+  { k:"上司", r:"じょうし", hv:"Thượng ty", en:"superior / boss", vi:"cấp trên", ex:"（　）に報告書を提出した。", exvi:"Tôi nộp báo cáo cho cấp trên.", rd:["じょうしゃ", "じょうじ", "うえし"], kd:["上位", "上市", "上仕"] },
+  { k:"部下", r:"ぶか", hv:"Bộ hạ", en:"subordinate", vi:"cấp dưới", ex:"（　）のミスを上司がカバーした。", exvi:"Cấp trên đã che đỡ lỗi của cấp dưới.", rd:["ぶが", "ぶげ", "ぶこ"], kd:["部化", "武下", "部科"] },
+  { k:"先輩", r:"せんぱい", hv:"Tiên bối", en:"senior", vi:"đàn anh / đàn chị", ex:"（　）に仕事のコツを教えてもらった。", exvi:"Tôi được đàn anh chỉ cho bí quyết làm việc.", rd:["せんばい", "せんぱえ", "せんびゃい"], kd:["先培", "先俳", "先排"] },
+  { k:"後輩", r:"こうはい", hv:"Hậu bối", en:"junior", vi:"đàn em", ex:"（　）の面倒を見るのが好きだ。", exvi:"Tôi thích chăm sóc đàn em.", rd:["こうばい", "こうはえ", "こうびゃい"], kd:["後配", "後俳", "後輩"] },
+  { k:"目上の人", r:"めうえのひと", hv:"", en:"person of higher status", vi:"người trên / bề trên", ex:"（　）には敬語を使う。", exvi:"Phải dùng kính ngữ với người bề trên.", rd:["めうえのかた", "めえのひと", "めうえのもの"], kd:["目上の方", "目上の者", "目下の人"] },
+  { k:"目下の人", r:"めしたのひと", hv:"", en:"person of lower status", vi:"người ở địa vị thấp hơn", ex:"（　）にも礼儀正しく接する。", exvi:"Cũng phải lịch sự với người ở địa vị thấp hơn.", rd:["めしたのかた", "めしたのもの", "めしたのひとびと"], kd:["目下の方", "目下の者", "目上の人"] },
+  { k:"年上の人", r:"としうえのひと", hv:"", en:"older person", vi:"người lớn tuổi hơn", ex:"（　）を敬うのは大切だ。", exvi:"Kính trọng người lớn tuổi hơn là điều quan trọng.", rd:["としうえのかた", "としうえのもの", "としうえのひとびと"], kd:["年上の方", "年上の者", "年下の人"] },
+  { k:"年下の人", r:"としたのひと", hv:"", en:"younger person", vi:"người nhỏ tuổi hơn", ex:"（　）にも優しく接する。", exvi:"Cũng phải đối xử tử tế với người nhỏ tuổi hơn.", rd:["としたのかた", "としたのもの", "としたのひとびと"], kd:["年下の方", "年下の者", "年上の人"] },
+  { k:"お母様", r:"おかあさま", hv:"", en:"mother (very polite)", vi:"mẹ (trang trọng cao)", ex:"（　）はご健在ですか？", exvi:"Mẹ của bạn có khỏe không?", rd:["おかあさん", "おかあさまあ", "おかあさまい"], kd:["お母さま", "御母様", "お母さん"] },
+  { k:"お父様", r:"おとうさま", hv:"", en:"father (very polite)", vi:"bố (trang trọng cao)", ex:"（　）のご意見はいかがですか？", exvi:"Ý kiến của bố bạn như thế nào?", rd:["おとうさん", "おとうさまあ", "おとうさまい"], kd:["お父さま", "御父様", "お父さん"] },
+  { k:"お嬢ちゃん", r:"おじょうちゃん", hv:"", en:"young girl (affectionate)", vi:"cô bé (thân mật)", ex:"かわいい（　）ですね。", exvi:"Cô bé đáng yêu quá nhỉ.", rd:["おじょちゃん", "おじょうさん", "おじょうちゃない"], kd:["お嬢さん", "お上ちゃん", "お嬢さま"] },
+  { k:"お坊ちゃん", r:"おぼっちゃん", hv:"", en:"young boy (affectionate)", vi:"cậu bé (thân mật)", ex:"元気な（　）ですね。", exvi:"Cậu bé khỏe mạnh quá nhỉ.", rd:["おぼちゃん", "おぼうちゃん", "おぼっちゃない"], kd:["お棒ちゃん", "お坊さん", "お坊さま"] },
+  { k:"ご夫妻", r:"ごふさい", hv:"", en:"husband and wife (formal)", vi:"vợ chồng (trang trọng)", ex:"（　）でパーティーに参加した。", exvi:"Hai vợ chồng cùng tham dự bữa tiệc.", rd:["ごふうさい", "ごふざい", "ごふにさい"], kd:["ご夫才", "ご夫斎", "ご夫人"] },
+  { k:"知人", r:"ちじん", hv:"Tri nhân", en:"acquaintance", vi:"người quen", ex:"（　）の紹介で仕事を見つけた。", exvi:"Tôi tìm được việc qua sự giới thiệu của người quen.", rd:["ちにん", "しじん", "ちびと"], kd:["地人", "痴人", "智人"] },
+  { k:"知り合い", r:"しりあい", hv:"", en:"acquaintance", vi:"người quen biết", ex:"パーティーで（　）に会った。", exvi:"Tôi gặp người quen ở bữa tiệc.", rd:["しりあわい", "しりあいい", "しりあうい"], kd:["知合い", "知り会い", "知り合える"] },
+  { k:"奥様", r:"おくさま", hv:"", en:"wife (formal / someone else's)", vi:"vợ (trang trọng)", ex:"（　）によろしくお伝えください。", exvi:"Cho tôi gửi lời hỏi thăm đến vợ anh.", rd:["おくさん", "おくさまあ", "おくさまい"], kd:["奥さま", "奥嵯", "奥さん"] }
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u1-1_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+/* ── END SCREEN ── */
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sc}">${item.k}</div>
+            <div class="front-reading">${item.r}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして意味を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.hv ? `<div class="back-hv">🔤 ${item.hv}</div>` : ''}
+            ${item.ex ? `<div class="back-ex">${item.ex.replace('（　）', '<b>' + item.k + '</b>')}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — 3 types : kanji→lecture, lecture→kanji, kanji→sens
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+const QUIZ_TYPES = ['toReading', 'toMeaning'];
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = QUIZ_TYPES[Math.floor(Math.random() * QUIZ_TYPES.length)];
+  let prompt, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    prompt      = item.k;
+    promptLabel = '正しい読み方を選んでください';
+    // Distracteurs : lectures piégeuses (rd) si fournies, complétées au besoin
+    // par les lectures d'autres mots de la leçon.
+    let pool = (item.rd || []).slice(0, 3);
+    if (pool.length < 3) {
+      const filler = shuffle(VOCAB).map(v => v.r).filter(r => r !== item.r && pool.indexOf(r) === -1);
+      while (pool.length < 3 && filler.length) pool.push(filler.pop());
+    }
+    optionItems = shuffle([
+      { label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))
+    ]);
+  } else {
+    prompt      = item.k;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const correct = `${item.en} / ${item.vi}`;
+    const others  = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems   = shuffle([
+      { label: correct, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))
+    ]);
+  }
+
+  const sc = sizeClass(prompt);
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    <div class="quiz-prompt ${sc}">${prompt}</div>
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   MATCH — 2 colonnes kanji | lecture, 6 paires max
+══════════════════════════════════════════════════════ */
+let matchSet = [], matchSolved = new Set(), matchSelLeft = null, matchSelRight = null, matchMistakes = 0, matchCorrectCount = 0;
+
+function newMatchRound() {
+  matchSet       = shuffle(VOCAB).slice(0, Math.min(VOCAB.length, 6));
+  matchSolved    = new Set();
+  matchSelLeft   = null;
+  matchSelRight  = null;
+  matchMistakes  = 0;
+  matchCorrectCount = 0;
+}
+
+function renderMatch() {
+  if (matchSet.length === 0) newMatchRound();
+  if (matchSolved.size === matchSet.length) {
+    const total = matchSet.length + matchMistakes;
+    panel.innerHTML = endScreen('対戦 終了', '全部そろいました！', matchSet.length, total);
+    sendScoreForMode(matchSet.length, total);
+    return;
+  }
+  const rightItems = shuffle(matchSet);
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchSolved.size} / ${matchSet.length} 組</span></p>
+    <div class="match-grid">
+      <div class="match-col" id="matchLeft">
+        ${matchSet.map(v => `<div class="match-item kanji${matchSolved.has(v.k) ? ' solved' : ''}" data-k="${v.k}">${v.k}</div>`).join('')}
+      </div>
+      <div class="match-col" id="matchRight">
+        ${rightItems.map(v => `<div class="match-item reading${matchSolved.has(v.k) ? ' solved' : ''}" data-k="${v.k}">${v.r}</div>`).join('')}
+      </div>
+    </div>`;
+
+  panel.querySelectorAll('.match-item.kanji').forEach(el => {
+    el.addEventListener('click', () => {
+      if (matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.kanji').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      matchSelLeft = el.dataset.k;
+      tryMatch();
+    });
+  });
+  panel.querySelectorAll('.match-item.reading').forEach(el => {
+    el.addEventListener('click', () => {
+      if (matchSolved.has(el.dataset.k)) return;
+      panel.querySelectorAll('.match-item.reading').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      matchSelRight = el.dataset.k;
+      tryMatch();
+    });
+  });
+
+  function tryMatch() {
+    if (!matchSelLeft || !matchSelRight) return;
+    if (matchSelLeft === matchSelRight) {
+      matchSolved.add(matchSelLeft);
+      matchCorrectCount++;
+      progress[matchSelLeft].known = true;
+      streak++;
+      saveProgress(); updateStats();
+      matchSelLeft = null; matchSelRight = null;
+      renderMatch();
+    } else {
+      streak = 0; matchMistakes++; updateStats();
+      const lEl = panel.querySelector(`.match-item.kanji[data-k="${matchSelLeft}"]`);
+      const rEl = panel.querySelector(`.match-item.reading[data-k="${matchSelRight}"]`);
+      [lEl, rEl].forEach(e => e && e.classList.add('shake'));
+      setTimeout(() => {
+        [lEl, rEl].forEach(e => { if (e) { e.classList.remove('shake', 'selected'); } });
+        matchSelLeft = null; matchSelRight = null;
+      }, 350);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>
