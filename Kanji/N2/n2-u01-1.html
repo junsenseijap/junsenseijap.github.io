@@ -270,56 +270,56 @@ async function sendScoreForMode(correct, total) {
    VOCAB — 48 mots N4 U1
 ══════════════════════════════════════════════════════ */
 const VOCAB = [
-  { k:"親類", r:"しんるい", hv:"Thân loại", en:"relatives", vi:"họ hàng", ex:"（　）が集まって新年を祝った。", exvi:"Họ hàng tụ họp để chúc mừng năm mới.", rd:["しんるり", "しんらい", "しんりい"], kd:["親戚", "新類", "親流"] },
-  { k:"祖先", r:"そせん", hv:"Tổ tiên", en:"ancestors", vi:"tổ tiên", ex:"（　）の墓参りをした。", exvi:"Tôi đi thăm mộ tổ tiên.", rd:["そうせん", "そせい", "そしん"], kd:["祖父", "姐先", "組先"] },
-  { k:"子孫", r:"しそん", hv:"Tử tôn", en:"descendants", vi:"con cháu", ex:"（　）のために環境を守る。", exvi:"Bảo vệ môi trường vì con cháu.", rd:["こそん", "しそう", "しぞん"], kd:["子供", "孫子", "子損"] },
-  { k:"三世代", r:"さんせだい", hv:"Tam thế đại", en:"three generations", vi:"ba thế hệ", ex:"（　）で同じ屋根の下に住んでいる。", exvi:"Ba thế hệ sống cùng dưới một mái nhà.", rd:["さんせいだい", "さんせたい", "さんせかい"], kd:["三世界", "三世大", "三生代"] },
-  { k:"一家", r:"いっか", hv:"Nhất gia", en:"whole family", vi:"cả gia đình", ex:"（　）で旅行に出かけた。", exvi:"Cả gia đình đi du lịch.", rd:["いちか", "いっけ", "いっき"], kd:["一家族", "一化", "一花"] },
-  { k:"集まり", r:"あつまり", hv:"Tập", en:"gathering", vi:"buổi tụ họp", ex:"友人の（　）に参加した。", exvi:"Tôi tham gia buổi tụ họp của bạn bè.", rd:["あつまる", "あずまり", "あつまる"], kd:["集会", "集合", "集まる"] },
-  { k:"親孝行", r:"おやこうこう", hv:"Thân hiếu hành", en:"filial piety", vi:"hiếu thảo", ex:"（　）として両親に旅行をプレゼントした。", exvi:"Để hiếu thảo, tôi tặng cha mẹ chuyến đi du lịch.", rd:["おやこうぎょう", "おやこうこ", "おやこうかう"], kd:["親光行", "親孝幸", "親好行"] },
-  { k:"実家", r:"じっか", hv:"Thực gia", en:"parents' home", vi:"nhà bố mẹ đẻ", ex:"お盆に（　）へ帰った。", exvi:"Tôi về nhà bố mẹ vào dịp Obon.", rd:["じっけ", "じっき", "じつか"], kd:["実家族", "実科", "実化"] },
-  { k:"三人姉妹", r:"さんにんしまい", hv:"Tam nhân tỷ muội", en:"three sisters", vi:"ba chị em gái", ex:"彼女は（　）の末っ子だ。", exvi:"Cô ấy là con út trong ba chị em gái.", rd:["さんにんしまえ", "さんにんじまい", "さんにんしまいい"], kd:["三人姉弟", "三人姊妹", "三人姐妹"] },
-  { k:"末っ子", r:"すえっこ", hv:"Mạt tử", en:"youngest child", vi:"con út", ex:"（　）はいつも甘やかされる。", exvi:"Con út thường hay được nuông chiều.", rd:["すえこ", "すえっご", "すえっき"], kd:["末子", "末っ古", "末子供"] },
-  { k:"一人っ子", r:"ひとりっこ", hv:"Nhất nhân tử", en:"only child", vi:"con một", ex:"（　）なので、親の愛情を独り占めした。", exvi:"Vì là con một nên tôi được độc chiếm tình yêu của cha mẹ.", rd:["ひとりこ", "ひとりっご", "ひとりっくご"], kd:["一人っ古", "一人子", "一人っ個"] },
-  { k:"双子", r:"ふたご", hv:"Song tử", en:"twins", vi:"sinh đôi", ex:"（　）の兄弟は見分けがつかない。", exvi:"Không thể phân biệt được hai anh em sinh đôi.", rd:["ふたこ", "ふたくご", "ふたこども"], kd:["双子供", "雙子", "双古"] },
-  { k:"仲良し", r:"なかよし", hv:"Trung lương", en:"close friends", vi:"thân thiết", ex:"幼稚園からの（　）だ。", exvi:"Chúng tôi thân nhau từ hồi mẫu giáo.", rd:["なかよりし", "なかよく", "なかよさ"], kd:["仲良い", "仲良示", "仲好し"] },
-  { k:"仕事仲間", r:"しごとなかま", hv:"", en:"work colleague", vi:"đồng nghiệp", ex:"（　）と飲みに行った。", exvi:"Tôi đi nhậu cùng đồng nghiệp.", rd:["しごとなかよし", "しごとなかみ", "しごとちゅうま"], kd:["仕事仲侭", "仕事中間", "仕事仲真"] },
-  { k:"勉強仲間", r:"べんきょうなかま", hv:"", en:"study buddy", vi:"bạn học cùng", ex:"図書館で（　）と一緒に復習した。", exvi:"Tôi ôn bài cùng bạn học ở thư viện.", rd:["べんきょうなかよし", "べんきょうなかみ", "べんきょうちゅうま"], kd:["勉強仲侭", "勉強仲真", "勉強中間"] },
-  { k:"飲み仲間", r:"のみなかま", hv:"", en:"drinking buddy", vi:"bạn nhậu", ex:"（　）と週末に居酒屋へ行く。", exvi:"Tôi đi quán izakaya với bạn nhậu vào cuối tuần.", rd:["のみなかよし", "のみなかみ", "のみちゅうま"], kd:["飲み仲侭", "飲仲間", "飮み仲間"] },
-  { k:"同い年", r:"おないどし", hv:"", en:"same age", vi:"cùng tuổi", ex:"彼とは（　）で話が合う。", exvi:"Tôi và anh ấy cùng tuổi nên hợp chuyện.", rd:["おなじどし", "おないとし", "おなどし"], kd:["同い歳", "同い年齢", "同い才"] },
-  { k:"周囲の人々", r:"しゅういのひとびと", hv:"", en:"people around one", vi:"những người xung quanh", ex:"（　）の意見を聞いた。", exvi:"Tôi lắng nghe ý kiến của những người xung quanh.", rd:["しゅうにのひとびと", "しゅうのひとびと", "しゅういのひとと"], kd:["週囲の人々", "周位の人々", "周囲の方々"] },
-  { k:"親しい", r:"したしい", hv:"Thân", en:"close / intimate", vi:"thân thiết", ex:"彼女とは昔から（　）関係だ。", exvi:"Tôi và cô ấy có quan hệ thân thiết từ trước.", rd:["したい", "しんしい", "したかい"], kd:["新しい", "親密い", "親しみ"] },
-  { k:"付き合い", r:"つきあい", hv:"", en:"relationship / association", vi:"quan hệ giao tiếp", ex:"長い（　）の友人がいる。", exvi:"Tôi có người bạn thân từ lâu.", rd:["つきあうい", "つきあわい", "つきあいい"], kd:["付合い", "付き会い", "付き間い"] },
-  { k:"取る", r:"とる", hv:"Thủ", en:"to take / get", vi:"lấy / có", ex:"連絡を（　）のを忘れた。", exvi:"Tôi quên liên lạc.", rd:["とらる", "とこる", "とたる"], kd:["採る", "盗る", "撮る"] },
-  { k:"約束を守る", r:"やくそくをまもる", hv:"", en:"to keep a promise", vi:"giữ lời hứa", ex:"どんなに忙しくても（　）。", exvi:"Dù bận thế nào cũng phải giữ lời hứa.", rd:["やくそくをもどる", "やくそくをまわる", "やくそくをかえる"], kd:["約束を守る", "約束を護る", "約束を見守る"] },
-  { k:"破る", r:"やぶる", hv:"Phá", en:"to break (a rule/promise)", vi:"vi phạm / phá vỡ", ex:"約束を（　）のは良くない。", exvi:"Phá vỡ lời hứa là không tốt.", rd:["やぶれる", "やべる", "やぼる"], kd:["敗る", "破壊る", "破くる"] },
-  { k:"取り消す", r:"とりけす", hv:"", en:"to cancel / undo", vi:"hủy bỏ / rút lại", ex:"注文を（　）たい。", exvi:"Tôi muốn hủy đơn hàng.", rd:["とりかえす", "とりこす", "とりだす"], kd:["取り去す", "取り越す", "取り出す"] },
-  { k:"言葉遣い", r:"ことばづかい", hv:"", en:"word choice / manner of speaking", vi:"cách dùng từ", ex:"目上の人には丁寧な（　）をする。", exvi:"Phải dùng ngôn ngữ lịch sự với người bề trên.", rd:["ことばつかい", "ことばずかい", "ことばたかい"], kd:["言葉使い", "言葉付かい", "言葉遣る"] },
-  { k:"握手する", r:"あくしゅする", hv:"Ác thủ", en:"to shake hands", vi:"bắt tay", ex:"初対面の人と（　）した。", exvi:"Tôi bắt tay với người gặp lần đầu.", rd:["あくしゃする", "あくしょする", "あっしゅする"], kd:["握主する", "握首する", "悪手する"] },
-  { k:"お辞儀", r:"おじぎ", hv:"", en:"bow (greeting)", vi:"cúi chào", ex:"日本では（　）で挨拶をする。", exvi:"Ở Nhật người ta cúi chào để chào hỏi.", rd:["おじき", "おじびき", "おじきき"], kd:["お辞義", "お辞宜", "お辞気"] },
-  { k:"話し合い", r:"はなしあい", hv:"", en:"discussion / talk", vi:"cuộc thảo luận", ex:"問題を解決するために（　）をした。", exvi:"Chúng tôi thảo luận để giải quyết vấn đề.", rd:["はなしあわい", "はなしあうい", "はなしあいい"], kd:["話合い", "話し会い", "話し合える"] },
-  { k:"取り出す", r:"とりだす", hv:"", en:"to take out", vi:"lấy ra", ex:"財布から名刺を（　）した。", exvi:"Tôi lấy danh thiếp ra từ ví.", rd:["とりでる", "とりたす", "とりおろす"], kd:["取出す", "取り放す", "取り出る"] },
-  { k:"取り替える", r:"とりかえる", hv:"", en:"to exchange / replace", vi:"thay / đổi", ex:"古い電池を新しいのに（　）た。", exvi:"Tôi thay pin cũ bằng pin mới.", rd:["とりかわる", "とりかわえる", "とりかわす"], kd:["取り代える", "取り変える", "取替える"] },
-  { k:"金遣い", r:"かねづかい", hv:"", en:"way of spending money", vi:"cách tiêu tiền", ex:"彼は（　）が荒い。", exvi:"Anh ấy tiêu tiền rất phung phí.", rd:["かねつかい", "かねずかい", "かねたかい"], kd:["金使い", "金図解", "金付かい"] },
-  { k:"気遣い", r:"きづかい", hv:"", en:"consideration / thoughtfulness", vi:"sự quan tâm / ân cần", ex:"細かい（　）ができる人だ。", exvi:"Anh ấy là người biết quan tâm chu đáo.", rd:["きつかい", "きずかい", "きたかい"], kd:["気使い", "気図解", "気付かい"] },
-  { k:"ご主人", r:"ごしゅじん", hv:"Chủ nhân", en:"husband (someone else's)", vi:"chồng (người khác, trang trọng)", ex:"（　）はお元気ですか？", exvi:"Chồng của bà có khỏe không?", rd:["ごしゅにん", "ごしゅうじん", "ごしゅじにん"], kd:["ご主人公", "御主人", "ご主刃"] },
-  { k:"夫人", r:"ふじん", hv:"Phu nhân", en:"wife / Mrs. (formal)", vi:"phu nhân", ex:"大使（　）が式典に出席した。", exvi:"Phu nhân đại sứ tham dự lễ kỷ niệm.", rd:["ふにん", "ふうじん", "ふじにん"], kd:["婦人", "夫刃", "夫仁"] },
-  { k:"上司", r:"じょうし", hv:"Thượng ty", en:"superior / boss", vi:"cấp trên", ex:"（　）に報告書を提出した。", exvi:"Tôi nộp báo cáo cho cấp trên.", rd:["じょうしゃ", "じょうじ", "うえし"], kd:["上位", "上市", "上仕"] },
-  { k:"部下", r:"ぶか", hv:"Bộ hạ", en:"subordinate", vi:"cấp dưới", ex:"（　）のミスを上司がカバーした。", exvi:"Cấp trên đã che đỡ lỗi của cấp dưới.", rd:["ぶが", "ぶげ", "ぶこ"], kd:["部化", "武下", "部科"] },
-  { k:"先輩", r:"せんぱい", hv:"Tiên bối", en:"senior", vi:"đàn anh / đàn chị", ex:"（　）に仕事のコツを教えてもらった。", exvi:"Tôi được đàn anh chỉ cho bí quyết làm việc.", rd:["せんばい", "せんぱえ", "せんびゃい"], kd:["先培", "先俳", "先排"] },
-  { k:"後輩", r:"こうはい", hv:"Hậu bối", en:"junior", vi:"đàn em", ex:"（　）の面倒を見るのが好きだ。", exvi:"Tôi thích chăm sóc đàn em.", rd:["こうばい", "こうはえ", "こうびゃい"], kd:["後配", "後俳", "後輩"] },
-  { k:"目上の人", r:"めうえのひと", hv:"", en:"person of higher status", vi:"người trên / bề trên", ex:"（　）には敬語を使う。", exvi:"Phải dùng kính ngữ với người bề trên.", rd:["めうえのかた", "めえのひと", "めうえのもの"], kd:["目上の方", "目上の者", "目下の人"] },
-  { k:"目下の人", r:"めしたのひと", hv:"", en:"person of lower status", vi:"người ở địa vị thấp hơn", ex:"（　）にも礼儀正しく接する。", exvi:"Cũng phải lịch sự với người ở địa vị thấp hơn.", rd:["めしたのかた", "めしたのもの", "めしたのひとびと"], kd:["目下の方", "目下の者", "目上の人"] },
-  { k:"年上の人", r:"としうえのひと", hv:"", en:"older person", vi:"người lớn tuổi hơn", ex:"（　）を敬うのは大切だ。", exvi:"Kính trọng người lớn tuổi hơn là điều quan trọng.", rd:["としうえのかた", "としうえのもの", "としうえのひとびと"], kd:["年上の方", "年上の者", "年下の人"] },
-  { k:"年下の人", r:"としたのひと", hv:"", en:"younger person", vi:"người nhỏ tuổi hơn", ex:"（　）にも優しく接する。", exvi:"Cũng phải đối xử tử tế với người nhỏ tuổi hơn.", rd:["としたのかた", "としたのもの", "としたのひとびと"], kd:["年下の方", "年下の者", "年上の人"] },
-  { k:"お母様", r:"おかあさま", hv:"", en:"mother (very polite)", vi:"mẹ (trang trọng cao)", ex:"（　）はご健在ですか？", exvi:"Mẹ của bạn có khỏe không?", rd:["おかあさん", "おかあさまあ", "おかあさまい"], kd:["お母さま", "御母様", "お母さん"] },
-  { k:"お父様", r:"おとうさま", hv:"", en:"father (very polite)", vi:"bố (trang trọng cao)", ex:"（　）のご意見はいかがですか？", exvi:"Ý kiến của bố bạn như thế nào?", rd:["おとうさん", "おとうさまあ", "おとうさまい"], kd:["お父さま", "御父様", "お父さん"] },
-  { k:"お嬢ちゃん", r:"おじょうちゃん", hv:"", en:"young girl (affectionate)", vi:"cô bé (thân mật)", ex:"かわいい（　）ですね。", exvi:"Cô bé đáng yêu quá nhỉ.", rd:["おじょちゃん", "おじょうさん", "おじょうちゃない"], kd:["お嬢さん", "お上ちゃん", "お嬢さま"] },
-  { k:"お坊ちゃん", r:"おぼっちゃん", hv:"", en:"young boy (affectionate)", vi:"cậu bé (thân mật)", ex:"元気な（　）ですね。", exvi:"Cậu bé khỏe mạnh quá nhỉ.", rd:["おぼちゃん", "おぼうちゃん", "おぼっちゃない"], kd:["お棒ちゃん", "お坊さん", "お坊さま"] },
-  { k:"ご夫妻", r:"ごふさい", hv:"", en:"husband and wife (formal)", vi:"vợ chồng (trang trọng)", ex:"（　）でパーティーに参加した。", exvi:"Hai vợ chồng cùng tham dự bữa tiệc.", rd:["ごふうさい", "ごふざい", "ごふにさい"], kd:["ご夫才", "ご夫斎", "ご夫人"] },
-  { k:"知人", r:"ちじん", hv:"Tri nhân", en:"acquaintance", vi:"người quen", ex:"（　）の紹介で仕事を見つけた。", exvi:"Tôi tìm được việc qua sự giới thiệu của người quen.", rd:["ちにん", "しじん", "ちびと"], kd:["地人", "痴人", "智人"] },
-  { k:"知り合い", r:"しりあい", hv:"", en:"acquaintance", vi:"người quen biết", ex:"パーティーで（　）に会った。", exvi:"Tôi gặp người quen ở bữa tiệc.", rd:["しりあわい", "しりあいい", "しりあうい"], kd:["知合い", "知り会い", "知り合える"] },
-  { k:"奥様", r:"おくさま", hv:"", en:"wife (formal / someone else's)", vi:"vợ (trang trọng)", ex:"（　）によろしくお伝えください。", exvi:"Cho tôi gửi lời hỏi thăm đến vợ anh.", rd:["おくさん", "おくさまあ", "おくさまい"], kd:["奥さま", "奥嵯", "奥さん"] }
+  { k:"親類", r:"しんるい", hv:"Thân loại", en:"relatives", vi:"họ hàng", ex:"（　）が集まって新年を祝った。", exvi:"Họ hàng tụ họp để chúc mừng năm mới.", rd:["しんるり", "しんらい", "しんりい"], kd:["親戚", "新類", "親流"], ud:["洗濯機", "湿度", "在庫"] },
+  { k:"祖先", r:"そせん", hv:"Tổ tiên", en:"ancestors", vi:"tổ tiên", ex:"（　）の墓参りをした。", exvi:"Tôi đi thăm mộ tổ tiên.", rd:["そうせん", "そせい", "そしん"], kd:["祖父", "姐先", "組先"], ud:["冷蔵庫", "為替", "蛍光灯"] },
+  { k:"子孫", r:"しそん", hv:"Tử tôn", en:"descendants", vi:"con cháu", ex:"（　）のために環境を守る。", exvi:"Bảo vệ môi trường vì con cháu.", rd:["こそん", "しそう", "しぞん"], kd:["子供", "孫子", "子損"], ud:["渋滞", "掃除機", "蛇口"] },
+  { k:"三世代", r:"さんせだい", hv:"Tam thế đại", en:"three generations", vi:"ba thế hệ", ex:"（　）で同じ屋根の下に住んでいる。", exvi:"Ba thế hệ sống cùng dưới một mái nhà.", rd:["さんせいだい", "さんせたい", "さんせかい"], kd:["三世界", "三世大", "三生代"], ud:["換気扇", "停電", "洗剤"] },
+  { k:"一家", r:"いっか", hv:"Nhất gia", en:"whole family", vi:"cả gia đình", ex:"（　）で旅行に出かけた。", exvi:"Cả gia đình đi du lịch.", rd:["いちか", "いっけ", "いっき"], kd:["一家族", "一化", "一花"], ud:["冷蔵庫", "領収書", "台所"] },
+  { k:"集まり", r:"あつまり", hv:"Tập", en:"gathering", vi:"buổi tụ họp", ex:"友人の（　）に参加した。", exvi:"Tôi tham gia buổi tụ họp của bạn bè.", rd:["あつまる", "あずまり", "あつまる"], kd:["集会", "集合", "集まる"], ud:["洗濯", "停電", "目次"] },
+  { k:"親孝行", r:"おやこうこう", hv:"Thân hiếu hành", en:"filial piety", vi:"hiếu thảo", ex:"（　）として両親に旅行をプレゼントした。", exvi:"Để hiếu thảo, tôi tặng cha mẹ chuyến đi du lịch.", rd:["おやこうぎょう", "おやこうこ", "おやこうかう"], kd:["親光行", "親孝幸", "親好行"], ud:["節電", "在庫", "換気"] },
+  { k:"実家", r:"じっか", hv:"Thực gia", en:"parents' home", vi:"nhà bố mẹ đẻ", ex:"お盆に（　）へ帰った。", exvi:"Tôi về nhà bố mẹ vào dịp Obon.", rd:["じっけ", "じっき", "じつか"], kd:["実家族", "実科", "実化"], ud:["冷蔵庫", "郵便受け", "蛇口"] },
+  { k:"三人姉妹", r:"さんにんしまい", hv:"Tam nhân tỷ muội", en:"three sisters", vi:"ba chị em gái", ex:"彼女は（　）の末っ子だ。", exvi:"Cô ấy là con út trong ba chị em gái.", rd:["さんにんしまえ", "さんにんじまい", "さんにんしまいい"], kd:["三人姉弟", "三人姊妹", "三人姐妹"], ud:["観光地", "洗面所", "時刻表"] },
+  { k:"末っ子", r:"すえっこ", hv:"Mạt tử", en:"youngest child", vi:"con út", ex:"（　）はいつも甘やかされる。", exvi:"Con út thường hay được nuông chiều.", rd:["すえこ", "すえっご", "すえっき"], kd:["末子", "末っ古", "末子供"], ud:["掃除機", "換気扇", "目覚まし時計"] },
+  { k:"一人っ子", r:"ひとりっこ", hv:"Nhất nhân tử", en:"only child", vi:"con một", ex:"（　）なので、親の愛情を独り占めした。", exvi:"Vì là con một nên tôi được độc chiếm tình yêu của cha mẹ.", rd:["ひとりこ", "ひとりっご", "ひとりっくご"], kd:["一人っ古", "一人子", "一人っ個"], ud:["晴天", "蛍光灯", "定期券"] },
+  { k:"双子", r:"ふたご", hv:"Song tử", en:"twins", vi:"sinh đôi", ex:"（　）の兄弟は見分けがつかない。", exvi:"Không thể phân biệt được hai anh em sinh đôi.", rd:["ふたこ", "ふたくご", "ふたこども"], kd:["双子供", "雙子", "双古"], ud:["冷蔵庫", "観覧車", "領収書"] },
+  { k:"仲良し", r:"なかよし", hv:"Trung lương", en:"close friends", vi:"thân thiết", ex:"幼稚園からの（　）だ。", exvi:"Chúng tôi thân nhau từ hồi mẫu giáo.", rd:["なかよりし", "なかよく", "なかよさ"], kd:["仲良い", "仲良示", "仲好し"], ud:["定期券", "蛍光灯", "洗剤"] },
+  { k:"仕事仲間", r:"しごとなかま", hv:"", en:"work colleague", vi:"đồng nghiệp", ex:"（　）と飲みに行った。", exvi:"Tôi đi nhậu cùng đồng nghiệp.", rd:["しごとなかよし", "しごとなかみ", "しごとちゅうま"], kd:["仕事仲侭", "仕事中間", "仕事仲真"], ud:["洗濯機", "掃除機", "自動販売機"] },
+  { k:"勉強仲間", r:"べんきょうなかま", hv:"", en:"study buddy", vi:"bạn học cùng", ex:"図書館で（　）と一緒に復習した。", exvi:"Tôi ôn bài cùng bạn học ở thư viện.", rd:["べんきょうなかよし", "べんきょうなかみ", "べんきょうちゅうま"], kd:["勉強仲侭", "勉強仲真", "勉強中間"], ud:["消火器", "加湿器", "自動改札"] },
+  { k:"飲み仲間", r:"のみなかま", hv:"", en:"drinking buddy", vi:"bạn nhậu", ex:"（　）と週末に居酒屋へ行く。", exvi:"Tôi đi quán izakaya với bạn nhậu vào cuối tuần.", rd:["のみなかよし", "のみなかみ", "のみちゅうま"], kd:["飲み仲侭", "飲仲間", "飮み仲間"], ud:["冷蔵庫", "洗面器", "扇風機"] },
+  { k:"同い年", r:"おないどし", hv:"", en:"same age", vi:"cùng tuổi", ex:"彼とは（　）で話が合う。", exvi:"Tôi và anh ấy cùng tuổi nên hợp chuyện.", rd:["おなじどし", "おないとし", "おなどし"], kd:["同い歳", "同い年齢", "同い才"], ud:["停電", "節水", "満車"] },
+  { k:"周囲の人々", r:"しゅういのひとびと", hv:"", en:"people around one", vi:"những người xung quanh", ex:"（　）の意見を聞いた。", exvi:"Tôi lắng nghe ý kiến của những người xung quanh.", rd:["しゅうにのひとびと", "しゅうのひとびと", "しゅういのひとと"], kd:["週囲の人々", "周位の人々", "周囲の方々"], ud:["洗濯機", "蛍光灯", "消火器"] },
+  { k:"親しい", r:"したしい", hv:"Thân", en:"close / intimate", vi:"thân thiết", ex:"彼女とは昔から（　）関係だ。", exvi:"Tôi và cô ấy có quan hệ thân thiết từ trước.", rd:["したい", "しんしい", "したかい"], kd:["新しい", "親密い", "親しみ"], ud:["眠い", "甘い", "涼しい"] },
+  { k:"付き合い", r:"つきあい", hv:"", en:"relationship / association", vi:"quan hệ giao tiếp", ex:"長い（　）の友人がいる。", exvi:"Tôi có người bạn thân từ lâu.", rd:["つきあうい", "つきあわい", "つきあいい"], kd:["付合い", "付き会い", "付き間い"], ud:["停電", "渋滞", "行列"] },
+  { k:"取る", r:"とる", hv:"Thủ", en:"to take / get", vi:"lấy / có", ex:"連絡を（　）のを忘れた。", exvi:"Tôi quên liên lạc.", rd:["とらる", "とこる", "とたる"], kd:["採る", "盗る", "撮る"], ud:["沸かす", "耕す", "炒める"] },
+  { k:"約束を守る", r:"やくそくをまもる", hv:"", en:"to keep a promise", vi:"giữ lời hứa", ex:"どんなに忙しくても（　）。", exvi:"Dù bận thế nào cũng phải giữ lời hứa.", rd:["やくそくをもどる", "やくそくをまわる", "やくそくをかえる"], kd:["約束を守る", "約束を護る", "約束を見守る"], ud:["雪が溶ける", "湯が沸く", "電池が切れる"] },
+  { k:"破る", r:"やぶる", hv:"Phá", en:"to break (a rule/promise)", vi:"vi phạm / phá vỡ", ex:"約束を（　）のは良くない。", exvi:"Phá vỡ lời hứa là không tốt.", rd:["やぶれる", "やべる", "やぼる"], kd:["敗る", "破壊る", "破くる"], ud:["沸かす", "干す", "蒸す"] },
+  { k:"取り消す", r:"とりけす", hv:"", en:"to cancel / undo", vi:"hủy bỏ / rút lại", ex:"注文を（　）ことにした。", exvi:"Tôi đã quyết định hủy đơn hàng.", rd:["とりかえす", "とりこす", "とりだす"], kd:["取り去す", "取り越す", "取り出す"], ud:["蒸す", "凍らせる", "耕す"] },
+  { k:"言葉遣い", r:"ことばづかい", hv:"", en:"word choice / manner of speaking", vi:"cách dùng từ", ex:"目上の人には丁寧な（　）をする。", exvi:"Phải dùng ngôn ngữ lịch sự với người bề trên.", rd:["ことばつかい", "ことばずかい", "ことばたかい"], kd:["言葉使い", "言葉付かい", "言葉遣る"], ud:["換気", "洗濯", "検温"] },
+  { k:"握手する", r:"あくしゅする", hv:"Ác thủ", en:"to shake hands", vi:"bắt tay", ex:"初対面の人と（　）。", exvi:"Tôi bắt tay với người gặp lần đầu.", rd:["あくしゃする", "あくしょする", "あっしゅする"], kd:["握主する", "握首する", "悪手する"], ud:["洗濯する", "消灯する", "給油する"] },
+  { k:"お辞儀", r:"おじぎ", hv:"", en:"bow (greeting)", vi:"cúi chào", ex:"日本では（　）で挨拶をする。", exvi:"Ở Nhật người ta cúi chào để chào hỏi.", rd:["おじき", "おじびき", "おじきき"], kd:["お辞義", "お辞宜", "お辞気"], ud:["換気", "停電", "給油"] },
+  { k:"話し合い", r:"はなしあい", hv:"", en:"discussion / talk", vi:"cuộc thảo luận", ex:"問題を解決するために（　）をした。", exvi:"Chúng tôi thảo luận để giải quyết vấn đề.", rd:["はなしあわい", "はなしあうい", "はなしあいい"], kd:["話合い", "話し会い", "話し合える"], ud:["洗濯", "給油", "消灯"] },
+  { k:"取り出す", r:"とりだす", hv:"", en:"to take out", vi:"lấy ra", ex:"財布から名刺を（　）。", exvi:"Tôi lấy danh thiếp ra từ ví.", rd:["とりでる", "とりたす", "とりおろす"], kd:["取出す", "取り放す", "取り出る"], ud:["煮込む", "見上げる", "塗り替える"] },
+  { k:"取り替える", r:"とりかえる", hv:"", en:"to exchange / replace", vi:"thay / đổi", ex:"古い電池を新しいのに（　）。", exvi:"Tôi thay pin cũ bằng pin mới.", rd:["とりかわる", "とりかわえる", "とりかわす"], kd:["取り代える", "取り変える", "取替える"], ud:["見習う", "言い張る", "焼き上げる"] },
+  { k:"金遣い", r:"かねづかい", hv:"", en:"way of spending money", vi:"cách tiêu tiền", ex:"彼は（　）が荒い。", exvi:"Anh ấy tiêu tiền rất phung phí.", rd:["かねつかい", "かねずかい", "かねたかい"], kd:["金使い", "金図解", "金付かい"], ud:["換気扇", "蛍光灯", "洗剤"] },
+  { k:"気遣い", r:"きづかい", hv:"", en:"consideration / thoughtfulness", vi:"sự quan tâm / ân cần", ex:"細かい（　）ができる人だ。", exvi:"Anh ấy là người biết quan tâm chu đáo.", rd:["きつかい", "きずかい", "きたかい"], kd:["気使い", "気図解", "気付かい"], ud:["停電", "給油", "洗車"] },
+  { k:"ご主人", r:"ごしゅじん", hv:"Chủ nhân", en:"husband (someone else's)", vi:"chồng (người khác, trang trọng)", ex:"（　）はお元気ですか？", exvi:"Chồng của bà có khỏe không?", rd:["ごしゅにん", "ごしゅうじん", "ごしゅじにん"], kd:["ご主人公", "御主人", "ご主刃"], ud:["冷蔵庫", "蛍光灯", "掃除機"] },
+  { k:"夫人", r:"ふじん", hv:"Phu nhân", en:"wife / Mrs. (formal)", vi:"phu nhân", ex:"大使（　）が式典に出席した。", exvi:"Phu nhân đại sứ tham dự lễ kỷ niệm.", rd:["ふにん", "ふうじん", "ふじにん"], kd:["婦人", "夫刃", "夫仁"], ud:["制服", "名簿", "会場"] },
+  { k:"上司", r:"じょうし", hv:"Thượng ty", en:"superior / boss", vi:"cấp trên", ex:"（　）に報告書を提出した。", exvi:"Tôi nộp báo cáo cho cấp trên.", rd:["じょうしゃ", "じょうじ", "うえし"], kd:["上位", "上市", "上仕"], ud:["掃除機", "消火器", "自動販売機"] },
+  { k:"部下", r:"ぶか", hv:"Bộ hạ", en:"subordinate", vi:"cấp dưới", ex:"（　）のミスを上司がカバーした。", exvi:"Cấp trên đã che đỡ lỗi của cấp dưới.", rd:["ぶが", "ぶげ", "ぶこ"], kd:["部化", "武下", "部科"], ud:["洗濯機", "蛍光灯", "加湿器"] },
+  { k:"先輩", r:"せんぱい", hv:"Tiên bối", en:"senior", vi:"đàn anh / đàn chị", ex:"（　）に仕事のコツを教えてもらった。", exvi:"Tôi được đàn anh chỉ cho bí quyết làm việc.", rd:["せんばい", "せんぱえ", "せんびゃい"], kd:["先培", "先俳", "先排"], ud:["冷蔵庫", "消火器", "換気扇"] },
+  { k:"後輩", r:"こうはい", hv:"Hậu bối", en:"junior", vi:"đàn em", ex:"（　）の面倒を見るのが好きだ。", exvi:"Tôi thích chăm sóc đàn em.", rd:["こうばい", "こうはえ", "こうびゃい"], kd:["後配", "後俳", "後輩"], ud:["掃除機", "蛍光灯", "自動販売機"] },
+  { k:"目上の人", r:"めうえのひと", hv:"", en:"person of higher status", vi:"người trên / bề trên", ex:"（　）には敬語を使う。", exvi:"Phải dùng kính ngữ với người bề trên.", rd:["めうえのかた", "めえのひと", "めうえのもの"], kd:["目上の方", "目上の者", "目下の人"], ud:["冷蔵庫", "消火器", "洗面台"] },
+  { k:"目下の人", r:"めしたのひと", hv:"", en:"person of lower status", vi:"người ở địa vị thấp hơn", ex:"（　）にも礼儀正しく接する。", exvi:"Cũng phải lịch sự với người ở địa vị thấp hơn.", rd:["めしたのかた", "めしたのもの", "めしたのひとびと"], kd:["目下の方", "目下の者", "目上の人"], ud:["掃除機", "加湿器", "蛍光灯"] },
+  { k:"年上の人", r:"としうえのひと", hv:"", en:"older person", vi:"người lớn tuổi hơn", ex:"（　）を敬うのは大切だ。", exvi:"Kính trọng người lớn tuổi hơn là điều quan trọng.", rd:["としうえのかた", "としうえのもの", "としうえのひとびと"], kd:["年上の方", "年上の者", "年下の人"], ud:["換気扇", "消火器", "自動改札"] },
+  { k:"年下の人", r:"としたのひと", hv:"", en:"younger person", vi:"người nhỏ tuổi hơn", ex:"（　）にも優しく接する。", exvi:"Cũng phải đối xử tử tế với người nhỏ tuổi hơn.", rd:["としたのかた", "としたのもの", "としたのひとびと"], kd:["年下の方", "年下の者", "年上の人"], ud:["洗濯機", "蛍光灯", "電子レンジ"] },
+  { k:"お母様", r:"おかあさま", hv:"", en:"mother (very polite)", vi:"mẹ (trang trọng cao)", ex:"（　）はご健在ですか？", exvi:"Mẹ của bạn có khỏe không?", rd:["おかあさん", "おかあさまあ", "おかあさまい"], kd:["お母さま", "御母様", "お母さん"], ud:["冷蔵庫", "蛍光灯", "洗面台"] },
+  { k:"お父様", r:"おとうさま", hv:"", en:"father (very polite)", vi:"bố (trang trọng cao)", ex:"（　）のご意見はいかがですか？", exvi:"Ý kiến của bố bạn như thế nào?", rd:["おとうさん", "おとうさまあ", "おとうさまい"], kd:["お父さま", "御父様", "お父さん"], ud:["掃除機", "消火器", "加湿器"] },
+  { k:"お嬢ちゃん", r:"おじょうちゃん", hv:"", en:"young girl (affectionate)", vi:"cô bé (thân mật)", ex:"かわいい（　）ですね。", exvi:"Cô bé đáng yêu quá nhỉ.", rd:["おじょちゃん", "おじょうさん", "おじょうちゃない"], kd:["お嬢さん", "お上ちゃん", "お嬢さま"], ud:["換気扇", "消火器", "蛍光灯"] },
+  { k:"お坊ちゃん", r:"おぼっちゃん", hv:"", en:"young boy (affectionate)", vi:"cậu bé (thân mật)", ex:"元気な（　）ですね。", exvi:"Cậu bé khỏe mạnh quá nhỉ.", rd:["おぼちゃん", "おぼうちゃん", "おぼっちゃない"], kd:["お棒ちゃん", "お坊さん", "お坊さま"], ud:["冷蔵庫", "洗濯機", "炊飯器"] },
+  { k:"ご夫妻", r:"ごふさい", hv:"", en:"husband and wife (formal)", vi:"vợ chồng (trang trọng)", ex:"（　）でパーティーに参加した。", exvi:"Hai vợ chồng cùng tham dự bữa tiệc.", rd:["ごふうさい", "ごふざい", "ごふにさい"], kd:["ご夫才", "ご夫斎", "ご夫人"], ud:["蛍光灯", "消火器", "加湿器"] },
+  { k:"知人", r:"ちじん", hv:"Tri nhân", en:"acquaintance", vi:"người quen", ex:"（　）の紹介で仕事を見つけた。", exvi:"Tôi tìm được việc qua sự giới thiệu của người quen.", rd:["ちにん", "しじん", "ちびと"], kd:["地人", "痴人", "智人"], ud:["掃除機", "蛍光灯", "自動販売機"] },
+  { k:"知り合い", r:"しりあい", hv:"", en:"acquaintance", vi:"người quen biết", ex:"パーティーで（　）に会った。", exvi:"Tôi gặp người quen ở bữa tiệc.", rd:["しりあわい", "しりあいい", "しりあうい"], kd:["知合い", "知り会い", "知り合える"], ud:["冷蔵庫", "消火器", "換気扇"] },
+  { k:"奥様", r:"おくさま", hv:"", en:"wife (formal / someone else's)", vi:"vợ (trang trọng)", ex:"（　）によろしくお伝えください。", exvi:"Cho tôi gửi lời hỏi thăm đến vợ anh.", rd:["おくさん", "おくさまあ", "おくさまい"], kd:["奥さま", "奥嵯", "奥さん"], ud:["洗濯機", "蛍光灯", "電子レンジ"] }
 ];
 
 /* ══════════════════════════════════════════════════════
@@ -478,11 +478,16 @@ const QUIZ_WEIGHTS = [
   ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
 ];
 
+// Une question d'usage n'est posée que si la phrase ET des distracteurs
+// dédiés (ud) existent. Sans ud, on ne peut pas garantir une réponse unique.
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
 function pickQuizType(item) {
   let pool = [];
   QUIZ_WEIGHTS.forEach(function(w) {
-    // Pas de question d'usage si le mot n'a pas de phrase d'exemple
-    if (w[0] === 'usage' && !item.ex) return;
+    if (w[0] === 'usage' && !hasUsage(item)) return;
     for (let i = 0; i < w[1]; i++) pool.push(w[0]);
   });
   return pool[Math.floor(Math.random() * pool.length)];
@@ -530,7 +535,9 @@ function renderQuiz() {
   } else if (qType === 'usage') {
     promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
     promptLabel = '（　）に入る言葉を選んでください';
-    const pool  = fillDistractors([], item.k, v => v.k);
+    // Distracteurs `ud` UNIQUEMENT : piocher dans la leçon rendrait la question
+    // ambiguë, les mots d'une même leçon étant thématiquement proches.
+    const pool  = item.ud.slice(0, 3);
     optionItems = shuffle([{ label: item.k, correct: true },
       ...pool.map(k => ({ label: k, correct: false }))]);
 
@@ -611,14 +618,16 @@ function renderWrite() {
 
 /* ══════════════════════════════════════════════════════
    対戦 — かっこに適当な言葉を入れる（穴埋め）
-   Repli sur l'association kanji ↔ lecture si aucune phrase d'exemple.
+   4 options : 1 correcte + 3 distracteurs `ud` incompatibles avec LA phrase.
+   Jamais de mots piochés dans la leçon : ils seraient souvent acceptables aussi.
+   Repli sur un exercice de lecture si la leçon ne fournit pas assez de `ud`.
 ══════════════════════════════════════════════════════ */
 let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
 
 function newMatchRound() {
-  const withEx = VOCAB.filter(v => v.ex && v.ex.indexOf('（　）') !== -1);
-  matchFallback = withEx.length < 4;
-  matchOrder    = shuffle(matchFallback ? VOCAB : withEx).slice(0, 10);
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
   matchIndex    = 0;
   matchCorrect  = 0;
 }
@@ -632,20 +641,20 @@ function renderMatch() {
   }
   const item = matchOrder[matchIndex];
 
-  // Repli : pas de phrases d'exemple dans cette leçon → lecture à choisir
-  const promptHtml = matchFallback
-    ? `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`
-    : `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
-  const label   = matchFallback ? '正しい読み方を選んでください' : '（　）に適当な言葉を入れてください';
-  const correct = matchFallback ? item.r : item.k;
-  const getter  = matchFallback ? (v => v.r) : (v => v.k);
-
-  const pool = fillDistractors(
-    matchFallback ? (item.rd || []).slice(0, 3) : [], correct, getter);
-  // Banque de 6 mots : 1 correct + 5 distracteurs
-  const extra = shuffle(VOCAB).map(getter)
-    .filter(x => x && x !== correct && pool.indexOf(x) === -1).slice(0, 2);
-  const options = shuffle([correct].concat(pool, extra));
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    // Repli : pas de distracteurs d'usage → question de lecture, non ambiguë
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
 
   panel.innerHTML = `
     <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
@@ -658,19 +667,21 @@ function renderMatch() {
   panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
     btn.addEventListener('click', () => {
       if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
       const ok = options[i] === correct;
-      if (ok) {
-        panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
-        btn.classList.add('solved');
-        progress[item.k].known = true; saveProgress();
-        streak++; matchCorrect++; updateStats();
-        setTimeout(() => { matchIndex++; renderMatch(); }, 700);
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
       } else {
-        streak = 0; updateStats();
-        btn.classList.add('wrong', 'shake');
-        btn.disabled = true;
-        setTimeout(() => btn.classList.remove('shake'), 350);
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
       }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
     });
   });
 }
