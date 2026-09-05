@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 7.1 — 行事</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">行</div>
+    <div>
+      <h1>N2 · 7.1 — 行事</h1>
+      <p>Vocabulaire · 65 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">65</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 7.1</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u7-1";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DONNÉES — VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {
+    "k": "年中行事",
+    "r": "ねんじゅうぎょうじ",
+    "hv": "Niên trung hành sự",
+    "en": "annual event",
+    "vi": "sự kiện thường niên",
+    "ex": "お正月はこの町の大切な（　）の一つだ。",
+    "exvi": "Tết là một trong những sự kiện thường niên quan trọng của thị trấn này.",
+    "rd": [
+      "ねんちゅうぎょうじ",
+      "ねんじゅうこうじ",
+      "ねんじゅうぎょじ"
+    ],
+    "kd": [
+      "行事予定",
+      "年間行事",
+      "恒例行事"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "新年",
+    "r": "しんねん",
+    "hv": "Tân niên",
+    "en": "new year",
+    "vi": "năm mới",
+    "ex": "（　）を迎えて神社に初詣に行った。",
+    "exvi": "Đón năm mới, tôi đã đến đền thờ để đi lễ đầu năm.",
+    "rd": [
+      "しねん",
+      "しんとし",
+      "じんねん"
+    ],
+    "kd": [
+      "新春",
+      "元年",
+      "来年"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "祝う",
+    "r": "いわう",
+    "hv": "",
+    "en": "to celebrate",
+    "vi": "chúc mừng, ăn mừng",
+    "ex": "友人の合格を家族で（　）った。",
+    "exvi": "Cả gia đình đã ăn mừng việc bạn tôi đỗ đạt.",
+    "rd": [
+      "しゅくう",
+      "のろう",
+      "いおう"
+    ],
+    "kd": [
+      "祝日",
+      "祈る",
+      "祝福する"
+    ],
+    "ud": [
+      "洗濯する",
+      "予約する",
+      "充電する"
+    ]
+  },
+  {
+    "k": "伝統的な",
+    "r": "でんとうてきな",
+    "hv": "Truyền thống",
+    "en": "traditional",
+    "vi": "mang tính truyền thống",
+    "ex": "この村には（　）祭りが今も残っている。",
+    "exvi": "Ở làng này vẫn còn lưu giữ lễ hội mang tính truyền thống.",
+    "rd": [
+      "でんとおてきな",
+      "てんとうてきな",
+      "でんどうてきな"
+    ],
+    "kd": [
+      "伝説的な",
+      "古典的な",
+      "習慣的な"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "行事",
+    "r": "ぎょうじ",
+    "hv": "Hành sự",
+    "en": "event, function",
+    "vi": "sự kiện, nghi lễ",
+    "ex": "来月、学校で大きな（　）が行われる。",
+    "exvi": "Tháng sau, trường sẽ tổ chức một sự kiện lớn.",
+    "rd": [
+      "こうじ",
+      "ぎょうごと",
+      "ぎょじ"
+    ],
+    "kd": [
+      "行動",
+      "催事",
+      "式典"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "神",
+    "r": "かみ",
+    "hv": "Thần",
+    "en": "god, deity",
+    "vi": "thần, thượng đế",
+    "ex": "この神社は農業の（　）を祀っている。",
+    "exvi": "Đền thờ này thờ vị thần của nông nghiệp.",
+    "rd": [
+      "じん",
+      "しん",
+      "こう"
+    ],
+    "kd": [
+      "神社",
+      "神様",
+      "神話"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "祈る",
+    "r": "いのる",
+    "hv": "",
+    "en": "to pray",
+    "vi": "cầu nguyện",
+    "ex": "家族の健康を（　）った。",
+    "exvi": "Tôi đã cầu nguyện cho sức khỏe của gia đình.",
+    "rd": [
+      "きのる",
+      "いのう",
+      "いろる"
+    ],
+    "kd": [
+      "祈願する",
+      "祝る",
+      "析る"
+    ],
+    "ud": [
+      "掃除する",
+      "運転する",
+      "料理する"
+    ]
+  },
+  {
+    "k": "仏",
+    "r": "ほとけ",
+    "hv": "Phật",
+    "en": "Buddha",
+    "vi": "Phật",
+    "ex": "祖母は毎朝（　）に手を合わせる。",
+    "exvi": "Bà tôi chắp tay trước Phật mỗi sáng.",
+    "rd": [
+      "ぶつ",
+      "ほどけ",
+      "ふつ"
+    ],
+    "kd": [
+      "仏教",
+      "仏壇",
+      "神仏"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "願う",
+    "r": "ねがう",
+    "hv": "",
+    "en": "to wish, to hope",
+    "vi": "mong ước, cầu mong",
+    "ex": "子供の幸せを心から（　）った。",
+    "exvi": "Tôi đã cầu mong hạnh phúc cho con mình từ tận đáy lòng.",
+    "rd": [
+      "がんう",
+      "ねごう",
+      "ねがる"
+    ],
+    "kd": [
+      "願書",
+      "念願",
+      "祈願"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "冠婚葬祭",
+    "r": "かんこんそうさい",
+    "hv": "Quan hôn tang tế",
+    "en": "ceremonial occasions (weddings, funerals etc.)",
+    "vi": "các nghi lễ đời người (cưới, tang...)",
+    "ex": "日本の（　）には独特のマナーがある。",
+    "exvi": "Các nghi lễ đời người ở Nhật có những phép tắc riêng biệt.",
+    "rd": [
+      "かんこんぞうさい",
+      "がんこんそうさい",
+      "かんこんそうざい"
+    ],
+    "kd": [
+      "婚礼行事",
+      "葬儀",
+      "礼儀作法"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "結婚相手",
+    "r": "けっこんあいて",
+    "hv": "Kết hôn tương thủ",
+    "en": "marriage partner",
+    "vi": "đối tượng kết hôn",
+    "ex": "彼女はようやく理想の（　）を見つけた。",
+    "exvi": "Cuối cùng cô ấy đã tìm được đối tượng kết hôn lý tưởng.",
+    "rd": [
+      "けっこんあて",
+      "けつこんあいて",
+      "けっこんあいで"
+    ],
+    "kd": [
+      "交際相手",
+      "相談相手",
+      "結婚式"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "託児所",
+    "r": "たくじしょ",
+    "hv": "Thác nhi sở",
+    "en": "daycare center",
+    "vi": "nhà trẻ",
+    "ex": "共働きなので子供を（　）に預けている。",
+    "exvi": "Vì cả hai vợ chồng đều đi làm nên gửi con ở nhà trẻ.",
+    "rd": [
+      "たくじじょ",
+      "だくじしょ",
+      "たっくじしょ"
+    ],
+    "kd": [
+      "保育所",
+      "託送する",
+      "児童"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "出会う",
+    "r": "であう",
+    "hv": "",
+    "en": "to meet, to encounter",
+    "vi": "gặp gỡ",
+    "ex": "二人は大学時代に（　）った。",
+    "exvi": "Hai người đã gặp nhau vào thời sinh viên.",
+    "rd": [
+      "しゅつあう",
+      "でおう",
+      "であるう"
+    ],
+    "kd": [
+      "出合う",
+      "会う",
+      "出迎える"
+    ],
+    "ud": [
+      "洗濯する",
+      "予約する",
+      "充電する"
+    ]
+  },
+  {
+    "k": "交際",
+    "r": "こうさい",
+    "hv": "Giao tế",
+    "en": "dating, relationship",
+    "vi": "hẹn hò, giao tiếp",
+    "ex": "二人は三年間の（　）を経て結婚した。",
+    "exvi": "Hai người đã kết hôn sau ba năm hẹn hò.",
+    "rd": [
+      "こうざい",
+      "こおさい",
+      "きょうさい"
+    ],
+    "kd": [
+      "交流",
+      "国際",
+      "社交"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "申し込む",
+    "r": "もうしこむ",
+    "hv": "",
+    "en": "to apply, to propose",
+    "vi": "đăng ký, ngỏ lời",
+    "ex": "彼は彼女に結婚を（　）んだ。",
+    "exvi": "Anh ấy đã ngỏ lời cầu hôn với cô ấy.",
+    "rd": [
+      "もうしごむ",
+      "しんしこむ",
+      "もしこむ"
+    ],
+    "kd": [
+      "申し出る",
+      "申請する",
+      "組み込む"
+    ],
+    "ud": [
+      "掃除する",
+      "運転する",
+      "料理する"
+    ]
+  },
+  {
+    "k": "交際を申し込む",
+    "r": "こうさいをもうしこむ",
+    "hv": "",
+    "en": "to ask someone out",
+    "vi": "ngỏ lời hẹn hò",
+    "ex": "彼は勇気を出して（　）んだ。",
+    "exvi": "Anh ấy đã lấy hết can đảm để ngỏ lời hẹn hò.",
+    "rd": [
+      "こうさいをもうしごむ",
+      "こうざいをもうしこむ",
+      "こうさいをもしこむ"
+    ],
+    "kd": [
+      "交際を断る",
+      "結婚を申し込む",
+      "告白する"
+    ],
+    "ud": [
+      "登山する",
+      "収穫する",
+      "給油する"
+    ]
+  },
+  {
+    "k": "告白する",
+    "r": "こくはくする",
+    "hv": "Cáo bạch",
+    "en": "to confess (feelings)",
+    "vi": "tỏ tình, thú nhận",
+    "ex": "彼は長年の思いを（　）した。",
+    "exvi": "Anh ấy đã thổ lộ tình cảm mà mình ấp ủ bấy lâu.",
+    "rd": [
+      "こうはくする",
+      "こくばくする",
+      "こっくはくする"
+    ],
+    "kd": [
+      "白状する",
+      "告知する",
+      "独白する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "打ち明ける",
+    "r": "うちあける",
+    "hv": "",
+    "en": "to confide, to reveal",
+    "vi": "thổ lộ, thú nhận",
+    "ex": "彼女は悩みを親友に（　）けた。",
+    "exvi": "Cô ấy đã thổ lộ nỗi lo lắng với người bạn thân.",
+    "rd": [
+      "だちあける",
+      "うちあかける",
+      "うちあげる"
+    ],
+    "kd": [
+      "打ち上げる",
+      "明ける",
+      "告げる"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "結婚を申し込む",
+    "r": "けっこんをもうしこむ",
+    "hv": "",
+    "en": "to propose marriage",
+    "vi": "cầu hôn",
+    "ex": "彼はレストランで彼女に（　）んだ。",
+    "exvi": "Anh ấy đã cầu hôn cô ấy tại nhà hàng.",
+    "rd": [
+      "けっこんをもうしごむ",
+      "けつこんをもうしこむ",
+      "けっこんをもしこむ"
+    ],
+    "kd": [
+      "結婚式を挙げる",
+      "婚約する",
+      "求婚する"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "申し込みを受ける",
+    "r": "もうしこみをうける",
+    "hv": "",
+    "en": "to accept a proposal/application",
+    "vi": "chấp nhận lời đề nghị",
+    "ex": "彼女は彼のプロポーズの（　）た。",
+    "exvi": "Cô ấy đã chấp nhận lời cầu hôn của anh ấy.",
+    "rd": [
+      "もうしごみをうける",
+      "もうしこみをうげる",
+      "もうしこみをうかる"
+    ],
+    "kd": [
+      "申し出を断る",
+      "受け入れる",
+      "承諾する"
+    ],
+    "ud": [
+      "重い",
+      "狭い",
+      "苦い"
+    ]
+  },
+  {
+    "k": "承諾する",
+    "r": "しょうだくする",
+    "hv": "Thừa nặc",
+    "en": "to consent, to accept",
+    "vi": "đồng ý, chấp thuận",
+    "ex": "彼は転勤の話を（　）した。",
+    "exvi": "Anh ấy đã đồng ý với chuyện chuyển công tác.",
+    "rd": [
+      "しょうたくする",
+      "しょうだいくする",
+      "じょうだくする"
+    ],
+    "kd": [
+      "承知する",
+      "許諾する",
+      "説得する"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "断る",
+    "r": "ことわる",
+    "hv": "",
+    "en": "to refuse, to decline",
+    "vi": "từ chối",
+    "ex": "急な誘いだったので（　）った。",
+    "exvi": "Vì là lời mời đột ngột nên tôi đã từ chối.",
+    "rd": [
+      "だんわる",
+      "ことおわる",
+      "たちわる"
+    ],
+    "kd": [
+      "断念する",
+      "断言する",
+      "拒否する"
+    ],
+    "ud": [
+      "新鮮な",
+      "丈夫な",
+      "派手な"
+    ]
+  },
+  {
+    "k": "家庭",
+    "r": "かてい",
+    "hv": "Gia đình",
+    "en": "family, household",
+    "vi": "gia đình",
+    "ex": "彼は温かい（　）で育った。",
+    "exvi": "Anh ấy đã lớn lên trong một gia đình ấm áp.",
+    "rd": [
+      "かてえ",
+      "がてい",
+      "かってい"
+    ],
+    "kd": [
+      "過程",
+      "仮定",
+      "家族"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "強化する",
+    "r": "きょうかする",
+    "hv": "Cường hóa",
+    "en": "to strengthen, to reinforce",
+    "vi": "tăng cường",
+    "ex": "会社はセキュリティを（　）することにした。",
+    "exvi": "Công ty đã quyết định tăng cường bảo mật.",
+    "rd": [
+      "きょうげする",
+      "ごうかする",
+      "きょうがする"
+    ],
+    "kd": [
+      "強調する",
+      "悪化する",
+      "変化する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "築く",
+    "r": "きずく",
+    "hv": "",
+    "en": "to build, to establish",
+    "vi": "xây dựng, gây dựng",
+    "ex": "二人は長い年月をかけて信頼関係を（　）いた。",
+    "exvi": "Hai người đã dành nhiều năm để xây dựng mối quan hệ tin tưởng.",
+    "rd": [
+      "きづく",
+      "ちくく",
+      "きすく"
+    ],
+    "kd": [
+      "築城",
+      "構築する",
+      "気づく"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "婚約する",
+    "r": "こんやくする",
+    "hv": "Hôn ước",
+    "en": "to get engaged",
+    "vi": "đính hôn",
+    "ex": "二人は先月（　）した。",
+    "exvi": "Hai người đã đính hôn vào tháng trước.",
+    "rd": [
+      "こんやっくする",
+      "こんにゃくする",
+      "こんやくずる"
+    ],
+    "kd": [
+      "婚約者",
+      "予約する",
+      "契約する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "解消する",
+    "r": "かいしょうする",
+    "hv": "Giải tiêu",
+    "en": "to cancel, to resolve (e.g. an engagement)",
+    "vi": "hủy bỏ, giải tỏa",
+    "ex": "二人は話し合いの末、婚約を（　）した。",
+    "exvi": "Hai người đã hủy hôn ước sau khi bàn bạc.",
+    "rd": [
+      "かいしょする",
+      "がいしょうする",
+      "かいしょうずる"
+    ],
+    "kd": [
+      "解消法",
+      "解約する",
+      "消滅する"
+    ],
+    "ud": [
+      "洗濯する",
+      "予約する",
+      "充電する"
+    ]
+  },
+  {
+    "k": "既婚者",
+    "r": "きこんしゃ",
+    "hv": "Ký hôn giả",
+    "en": "married person",
+    "vi": "người đã kết hôn",
+    "ex": "社員の半数は（　）だ。",
+    "exvi": "Một nửa số nhân viên là người đã kết hôn.",
+    "rd": [
+      "きこんじゃ",
+      "ぎこんしゃ",
+      "きこんさ"
+    ],
+    "kd": [
+      "未婚者",
+      "独身者",
+      "配偶者"
+    ],
+    "ud": [
+      "掃除する",
+      "運転する",
+      "料理する"
+    ]
+  },
+  {
+    "k": "離婚する",
+    "r": "りこんする",
+    "hv": "Ly hôn",
+    "en": "to divorce",
+    "vi": "ly hôn",
+    "ex": "彼らは三年前に（　）した。",
+    "exvi": "Họ đã ly hôn ba năm trước.",
+    "rd": [
+      "りこんずる",
+      "りっこんする",
+      "りごんする"
+    ],
+    "kd": [
+      "離婚届",
+      "結婚する",
+      "離脱する"
+    ],
+    "ud": [
+      "登山する",
+      "収穫する",
+      "給油する"
+    ]
+  },
+  {
+    "k": "独身",
+    "r": "どくしん",
+    "hv": "Độc thân",
+    "en": "single (unmarried)",
+    "vi": "độc thân",
+    "ex": "彼は40歳になっても（　）だ。",
+    "exvi": "Anh ấy đã 40 tuổi mà vẫn độc thân.",
+    "rd": [
+      "どくじん",
+      "とくしん",
+      "どっくしん"
+    ],
+    "kd": [
+      "独身者",
+      "独立",
+      "単身"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "手続き",
+    "r": "てつづき",
+    "hv": "",
+    "en": "procedure, formalities",
+    "vi": "thủ tục",
+    "ex": "結婚の（　）は思ったより簡単だった。",
+    "exvi": "Thủ tục kết hôn đơn giản hơn tôi tưởng.",
+    "rd": [
+      "てつずき",
+      "しゅぞくき",
+      "てつづぎ"
+    ],
+    "kd": [
+      "続き",
+      "手順",
+      "申請書"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "済ませる",
+    "r": "すませる",
+    "hv": "",
+    "en": "to finish, to get done",
+    "vi": "hoàn thành, xong việc",
+    "ex": "役所での手続きを午前中に（　）た。",
+    "exvi": "Tôi đã hoàn thành thủ tục ở cơ quan hành chính vào buổi sáng.",
+    "rd": [
+      "すまさる",
+      "さいませる",
+      "すすめる"
+    ],
+    "kd": [
+      "済む",
+      "終える",
+      "仕上げる"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "親戚",
+    "r": "しんせき",
+    "hv": "Thân thích",
+    "en": "relative(s)",
+    "vi": "người thân, họ hàng",
+    "ex": "お盆には（　）が皆集まる。",
+    "exvi": "Vào lễ Obon, tất cả họ hàng đều tụ họp.",
+    "rd": [
+      "しんせぎ",
+      "しんしゃく",
+      "おやせき"
+    ],
+    "kd": [
+      "親族",
+      "身内",
+      "知人"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "招待する",
+    "r": "しょうたいする",
+    "hv": "Thiệu đãi",
+    "en": "to invite",
+    "vi": "mời",
+    "ex": "結婚式に友人を大勢（　）した。",
+    "exvi": "Tôi đã mời rất nhiều bạn bè đến dự tiệc cưới.",
+    "rd": [
+      "しょうだいする",
+      "しょうたいずる",
+      "しょうてぃする"
+    ],
+    "kd": [
+      "招待状",
+      "接待する",
+      "歓迎する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "同僚",
+    "r": "どうりょう",
+    "hv": "Đồng liêu",
+    "en": "colleague, coworker",
+    "vi": "đồng nghiệp",
+    "ex": "彼女は会社の（　）と結婚した。",
+    "exvi": "Cô ấy đã kết hôn với đồng nghiệp công ty.",
+    "rd": [
+      "どうりゅう",
+      "とうりょう",
+      "どりょう"
+    ],
+    "kd": [
+      "同期",
+      "上司",
+      "仲間"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "花嫁",
+    "r": "はなよめ",
+    "hv": "",
+    "en": "bride",
+    "vi": "cô dâu",
+    "ex": "（　）は白いウェディングドレスを着ていた。",
+    "exvi": "Cô dâu mặc một chiếc váy cưới màu trắng.",
+    "rd": [
+      "かよめ",
+      "はなよみ",
+      "はなむめ"
+    ],
+    "kd": [
+      "花婿",
+      "新婦",
+      "花束"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "花婿",
+    "r": "はなむこ",
+    "hv": "",
+    "en": "bridegroom",
+    "vi": "chú rể",
+    "ex": "（　）は緊張した様子で式に出席していた。",
+    "exvi": "Chú rể có vẻ hồi hộp khi tham dự buổi lễ.",
+    "rd": [
+      "かむこ",
+      "はなむご",
+      "はなむき"
+    ],
+    "kd": [
+      "花嫁",
+      "新郎",
+      "娘婿"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "永遠",
+    "r": "えいえん",
+    "hv": "Vĩnh viễn",
+    "en": "eternity, forever",
+    "vi": "vĩnh viễn",
+    "ex": "二人は（　）の愛を誓った。",
+    "exvi": "Hai người đã thề nguyện tình yêu vĩnh viễn.",
+    "rd": [
+      "えいおん",
+      "ようえん",
+      "えいけん"
+    ],
+    "kd": [
+      "永久",
+      "永続",
+      "恒久"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "愛",
+    "r": "あい",
+    "hv": "Ái",
+    "en": "love",
+    "vi": "tình yêu",
+    "ex": "彼らの（　）は今も変わらない。",
+    "exvi": "Tình yêu của họ đến giờ vẫn không thay đổi.",
+    "rd": [
+      "あき",
+      "えい",
+      "がい"
+    ],
+    "kd": [
+      "恋愛",
+      "愛情",
+      "慈愛"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "誓う",
+    "r": "ちかう",
+    "hv": "",
+    "en": "to vow, to swear",
+    "vi": "thề nguyện",
+    "ex": "二人は神の前で永遠の愛を（　）った。",
+    "exvi": "Hai người đã thề nguyện tình yêu vĩnh viễn trước thần linh.",
+    "rd": [
+      "せいう",
+      "ちかまう",
+      "ちがう"
+    ],
+    "kd": [
+      "誓約",
+      "誓い",
+      "祈る"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "豪華な",
+    "r": "ごうかな",
+    "hv": "豪華",
+    "en": "luxurious, gorgeous",
+    "vi": "lộng lẫy, sang trọng",
+    "ex": "彼らは（　）披露宴を開いた。",
+    "exvi": "Họ đã tổ chức một buổi tiệc cưới sang trọng.",
+    "rd": [
+      "こうかな",
+      "ごうがな",
+      "ごおかな"
+    ],
+    "kd": [
+      "豪快な",
+      "華麗な",
+      "贅沢な"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "盛大な",
+    "r": "せいだいな",
+    "hv": "Thịnh đại",
+    "en": "grand, magnificent",
+    "vi": "long trọng, hoành tráng",
+    "ex": "町を挙げて（　）祭りが開かれた。",
+    "exvi": "Một lễ hội hoành tráng đã được tổ chức cho toàn thị trấn.",
+    "rd": [
+      "せいたいな",
+      "じょうだいな",
+      "せいだいの"
+    ],
+    "kd": [
+      "盛況",
+      "拡大な",
+      "隆盛"
+    ],
+    "ud": [
+      "新鮮な",
+      "丈夫な",
+      "派手な"
+    ]
+  },
+  {
+    "k": "華やかな",
+    "r": "はなやかな",
+    "hv": "",
+    "en": "glamorous, splendid",
+    "vi": "rực rỡ, hào nhoáng",
+    "ex": "式場は花で（　）に飾られていた。",
+    "exvi": "Địa điểm tổ chức được trang trí rực rỡ bằng hoa.",
+    "rd": [
+      "かやかな",
+      "はなやがな",
+      "はなやかい"
+    ],
+    "kd": [
+      "賑やかな",
+      "豪華な",
+      "鮮やかな"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "成長",
+    "r": "せいちょう",
+    "hv": "Thành trưởng",
+    "en": "growth",
+    "vi": "sự trưởng thành",
+    "ex": "子供の（　）を見るのは何よりの喜びだ。",
+    "exvi": "Được nhìn con trưởng thành là niềm vui lớn nhất.",
+    "rd": [
+      "せいじょう",
+      "せいちょ",
+      "せいっちょう"
+    ],
+    "kd": [
+      "成人",
+      "発育",
+      "生長"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "成人式",
+    "r": "せいじんしき",
+    "hv": "Thành nhân thức",
+    "en": "coming-of-age ceremony",
+    "vi": "lễ trưởng thành",
+    "ex": "妹は先週、（　）に出席した。",
+    "exvi": "Em gái tôi đã tham dự lễ trưởng thành tuần trước.",
+    "rd": [
+      "せいにんしき",
+      "せいじんじき",
+      "じょうじんしき"
+    ],
+    "kd": [
+      "成人",
+      "入学式",
+      "儀式"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "育つ",
+    "r": "そだつ",
+    "hv": "",
+    "en": "to grow up, to be raised",
+    "vi": "được nuôi dưỡng, lớn lên",
+    "ex": "彼は田舎で自然に囲まれて（　）った。",
+    "exvi": "Anh ấy đã lớn lên ở nông thôn, được thiên nhiên bao bọc.",
+    "rd": [
+      "いくつ",
+      "そだづ",
+      "そたつ"
+    ],
+    "kd": [
+      "育てる",
+      "成育",
+      "発育する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "役目",
+    "r": "やくめ",
+    "hv": "Dịch mục",
+    "en": "role, duty",
+    "vi": "vai trò, nhiệm vụ",
+    "ex": "親としての（　）を果たそうと努めている。",
+    "exvi": "Tôi đang cố gắng làm tròn vai trò của một người cha mẹ.",
+    "rd": [
+      "やくもく",
+      "えきめ",
+      "やくめい"
+    ],
+    "kd": [
+      "役割",
+      "任務",
+      "責務"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "役割",
+    "r": "やくわり",
+    "hv": "Dịch cắt",
+    "en": "role, function",
+    "vi": "vai trò, chức trách",
+    "ex": "披露宴で司会の（　）を任された。",
+    "exvi": "Tôi được giao vai trò làm người dẫn chương trình tại tiệc cưới.",
+    "rd": [
+      "やくかつ",
+      "えきわり",
+      "やくわりい"
+    ],
+    "kd": [
+      "役目",
+      "分担",
+      "配役"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "資金",
+    "r": "しきん",
+    "hv": "Tư kim",
+    "en": "funds, capital",
+    "vi": "vốn, tiền quỹ",
+    "ex": "結婚式のために二人で（　）を貯めた。",
+    "exvi": "Hai người đã tiết kiệm tiền quỹ để tổ chức đám cưới.",
+    "rd": [
+      "ざきん",
+      "しぎん",
+      "しきむ"
+    ],
+    "kd": [
+      "基金",
+      "資産",
+      "貯金"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "果たす",
+    "r": "はたす",
+    "hv": "",
+    "en": "to fulfill, to accomplish",
+    "vi": "hoàn thành, thực hiện",
+    "ex": "彼は約束をしっかり（　）した。",
+    "exvi": "Anh ấy đã thực hiện lời hứa một cách chắc chắn.",
+    "rd": [
+      "かたす",
+      "はだす",
+      "はたつ"
+    ],
+    "kd": [
+      "果たし合い",
+      "達成する",
+      "実行する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "四歳児",
+    "r": "よんさいじ",
+    "hv": "",
+    "en": "four-year-old child",
+    "vi": "trẻ bốn tuổi",
+    "ex": "この幼稚園には（　）のクラスがある。",
+    "exvi": "Trường mẫu giáo này có lớp cho trẻ bốn tuổi.",
+    "rd": [
+      "よさいじ",
+      "よんざいじ",
+      "しさいじ"
+    ],
+    "kd": [
+      "幼稚園児",
+      "三歳児",
+      "乳児"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "幼稚園",
+    "r": "ようちえん",
+    "hv": "",
+    "en": "kindergarten",
+    "vi": "trường mẫu giáo",
+    "ex": "娘は来年から（　）に通う。",
+    "exvi": "Con gái tôi sẽ đi học mẫu giáo từ năm sau.",
+    "rd": [
+      "ようちえい",
+      "よちえん",
+      "ようじえん"
+    ],
+    "kd": [
+      "幼稚園児",
+      "保育園",
+      "小学校"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "預ける",
+    "r": "あずける",
+    "hv": "",
+    "en": "to leave in someone's care, to deposit",
+    "vi": "gửi, ký gửi",
+    "ex": "仕事中は子供を託児所に（　）ける。",
+    "exvi": "Trong khi làm việc, tôi gửi con ở nhà trẻ.",
+    "rd": [
+      "よける",
+      "あづける",
+      "あずかる"
+    ],
+    "kd": [
+      "預金する",
+      "任せる",
+      "託す"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "奮闘する",
+    "r": "ふんとうする",
+    "hv": "Phẫn đấu",
+    "en": "to struggle hard, to fight",
+    "vi": "nỗ lực đấu tranh",
+    "ex": "彼は仕事と育児の両立に（　）している。",
+    "exvi": "Anh ấy đang nỗ lực đấu tranh để cân bằng công việc và nuôi con.",
+    "rd": [
+      "ふんどうする",
+      "ぶんとうする",
+      "ふんとおする"
+    ],
+    "kd": [
+      "奮起する",
+      "戦闘する",
+      "苦闘する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "葬式をする",
+    "r": "そうしきをする",
+    "hv": "",
+    "en": "to hold a funeral",
+    "vi": "tổ chức tang lễ",
+    "ex": "祖父が亡くなり、家族で（　）した。",
+    "exvi": "Ông tôi qua đời nên gia đình đã tổ chức tang lễ.",
+    "rd": [
+      "そうじきをする",
+      "そしきをする",
+      "そうしぎをする"
+    ],
+    "kd": [
+      "法事をする",
+      "葬儀費用",
+      "告別式"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "法事をする",
+    "r": "ほうじをする",
+    "hv": "",
+    "en": "to hold a Buddhist memorial service",
+    "vi": "tổ chức lễ giỗ",
+    "ex": "毎年、祖母の（　）している。",
+    "exvi": "Mỗi năm chúng tôi tổ chức lễ giỗ cho bà.",
+    "rd": [
+      "ほうしをする",
+      "ほおじをする",
+      "ほうじゅをする"
+    ],
+    "kd": [
+      "葬式をする",
+      "法要",
+      "仏事"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "葬儀費用",
+    "r": "そうぎひよう",
+    "hv": "Táng nghi phí dụng",
+    "en": "funeral expenses",
+    "vi": "chi phí tang lễ",
+    "ex": "（　）は思いのほか高額だった。",
+    "exvi": "Chi phí tang lễ cao hơn dự tính nhiều.",
+    "rd": [
+      "そうぎひうよ",
+      "そうきひよう",
+      "そうぎびよう"
+    ],
+    "kd": [
+      "出産費用",
+      "葬式代",
+      "儀式費"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "出産費用",
+    "r": "しゅっさんひよう",
+    "hv": "",
+    "en": "childbirth expenses",
+    "vi": "chi phí sinh nở",
+    "ex": "（　）の一部は保険でカバーされる。",
+    "exvi": "Một phần chi phí sinh nở được bảo hiểm chi trả.",
+    "rd": [
+      "しゅうさんひよう",
+      "しゅつざんひよう",
+      "しゅっさんびよう"
+    ],
+    "kd": [
+      "葬儀費用",
+      "出産予定",
+      "分娩"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "独身者",
+    "r": "どくしんしゃ",
+    "hv": "Độc thân giả",
+    "en": "unmarried person",
+    "vi": "người độc thân",
+    "ex": "このマンションは（　）向けの部屋が多い。",
+    "exvi": "Chung cư này có nhiều phòng dành cho người độc thân.",
+    "rd": [
+      "どくしんじゃ",
+      "どっくしんしゃ",
+      "とくしんしゃ"
+    ],
+    "kd": [
+      "未婚者",
+      "既婚者",
+      "単身者"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "未婚者",
+    "r": "みこんしゃ",
+    "hv": "Vị hôn giả",
+    "en": "unmarried person",
+    "vi": "người chưa kết hôn",
+    "ex": "調査によると（　）の割合が増えている。",
+    "exvi": "Theo khảo sát, tỷ lệ người chưa kết hôn đang tăng lên.",
+    "rd": [
+      "みこんじゃ",
+      "びこんしゃ",
+      "みっこんしゃ"
+    ],
+    "kd": [
+      "既婚者",
+      "独身者",
+      "未成年"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "入学式",
+    "r": "にゅうがくしき",
+    "hv": "Nhập học thức",
+    "en": "school entrance ceremony",
+    "vi": "lễ nhập học",
+    "ex": "息子の（　）に両親も出席した。",
+    "exvi": "Cha mẹ cũng đã tham dự lễ nhập học của con trai tôi.",
+    "rd": [
+      "にゅがくしき",
+      "にゅうがくじき",
+      "にゆうがくしき"
+    ],
+    "kd": [
+      "卒業式",
+      "成人式",
+      "入社式"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "園児",
+    "r": "えんじ",
+    "hv": "Viên nhi",
+    "en": "kindergarten/nursery child",
+    "vi": "trẻ mẫu giáo",
+    "ex": "（　）たちは元気に園庭で遊んでいる。",
+    "exvi": "Các bé mẫu giáo đang chơi vui vẻ trong sân trường.",
+    "rd": [
+      "えんじゅ",
+      "おんじ",
+      "えいじ"
+    ],
+    "kd": [
+      "幼稚園児",
+      "児童",
+      "園長"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "幼稚園児",
+    "r": "ようちえんじ",
+    "hv": "",
+    "en": "kindergartener",
+    "vi": "trẻ học mẫu giáo",
+    "ex": "（　）たちが遠足で動物園に行った。",
+    "exvi": "Các bé mẫu giáo đã đi sở thú trong buổi đi dã ngoại.",
+    "rd": [
+      "ようちえんに",
+      "よちえんじ",
+      "ようちえんぢ"
+    ],
+    "kd": [
+      "園児",
+      "小学生",
+      "幼児"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "動物園",
+    "r": "どうぶつえん",
+    "hv": "Động vật viên",
+    "en": "zoo",
+    "vi": "sở thú",
+    "ex": "週末、家族で（　）へ行った。",
+    "exvi": "Cuối tuần, gia đình tôi đã đi sở thú.",
+    "rd": [
+      "どうぶつえいん",
+      "どうぶつおん",
+      "どぶつえん"
+    ],
+    "kd": [
+      "植物園",
+      "遊園地",
+      "水族館"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "保育所",
+    "r": "ほいくしょ",
+    "hv": "Bảo dục sở",
+    "en": "nursery school",
+    "vi": "nhà trẻ",
+    "ex": "この地域は（　）が不足している。",
+    "exvi": "Khu vực này thiếu nhà trẻ.",
+    "rd": [
+      "ほいくじょ",
+      "ほういくしょ",
+      "ほいくそ"
+    ],
+    "kd": [
+      "託児所",
+      "保育園",
+      "保健所"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u7-1_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>

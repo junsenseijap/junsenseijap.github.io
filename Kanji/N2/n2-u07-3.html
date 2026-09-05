@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 7.3 — 経済・産業</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">経</div>
+    <div>
+      <h1>N2 · 7.3 — 経済・産業</h1>
+      <p>Vocabulaire · 79 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">79</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 7.3</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u7-3";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DONNÉES — VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {
+    "k": "経済",
+    "r": "けいざい",
+    "hv": "Kinh tế",
+    "en": "economy",
+    "vi": "kinh tế",
+    "ex": "この国の（　）は急速に成長している。",
+    "exvi": "Nền kinh tế của đất nước này đang phát triển nhanh chóng.",
+    "rd": [
+      "けえざい",
+      "けいさい",
+      "きょうざい"
+    ],
+    "kd": [
+      "経営",
+      "経費",
+      "財政"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "経済危機",
+    "r": "けいざいきき",
+    "hv": "Kinh tế nguy cơ",
+    "en": "economic crisis",
+    "vi": "khủng hoảng kinh tế",
+    "ex": "1990年代、この国は深刻な（　）に陥った。",
+    "exvi": "Vào những năm 1990, đất nước này đã rơi vào khủng hoảng kinh tế nghiêm trọng.",
+    "rd": [
+      "けいざいぎき",
+      "けいさいきき",
+      "けいざいきぎ"
+    ],
+    "kd": [
+      "金融危機",
+      "財政危機",
+      "経済成長"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "金融危機",
+    "r": "きんゆうきき",
+    "hv": "Kim dung nguy cơ",
+    "en": "financial crisis",
+    "vi": "khủng hoảng tài chính",
+    "ex": "2008年の（　）は世界中に影響を与えた。",
+    "exvi": "Khủng hoảng tài chính năm 2008 đã ảnh hưởng đến toàn thế giới.",
+    "rd": [
+      "きんゆきき",
+      "きんようきき",
+      "きんゆうぎき"
+    ],
+    "kd": [
+      "経済危機",
+      "金融機関",
+      "財政難"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "世界的な",
+    "r": "せかいてきな",
+    "hv": "Thế giới",
+    "en": "global, worldwide",
+    "vi": "mang tính toàn cầu",
+    "ex": "このブランドは（　）人気を誇っている。",
+    "exvi": "Thương hiệu này tự hào có sự nổi tiếng mang tính toàn cầu.",
+    "rd": [
+      "せいかいてきな",
+      "せかいでんな",
+      "せがいてきな"
+    ],
+    "kd": [
+      "国際的な",
+      "世界観",
+      "国家的な"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "不景気",
+    "r": "ふけいき",
+    "hv": "Bất cảnh khí",
+    "en": "recession, economic downturn",
+    "vi": "suy thoái kinh tế",
+    "ex": "長引く（　）で失業者が増えた。",
+    "exvi": "Do suy thoái kinh tế kéo dài, số người thất nghiệp đã tăng lên.",
+    "rd": [
+      "ふけいぎ",
+      "ぶけいき",
+      "ふげいき"
+    ],
+    "kd": [
+      "好景気",
+      "景気",
+      "不況"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "国内",
+    "r": "こくない",
+    "hv": "Quốc nội",
+    "en": "domestic",
+    "vi": "trong nước, quốc nội",
+    "ex": "この製品は（　）だけでなく海外でも人気だ。",
+    "exvi": "Sản phẩm này không chỉ nổi tiếng trong nước mà còn ở nước ngoài.",
+    "rd": [
+      "こくだい",
+      "こくうち",
+      "こくうない"
+    ],
+    "kd": [
+      "国外",
+      "国産",
+      "国内総生産"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "景気",
+    "r": "けいき",
+    "hv": "Cảnh khí",
+    "en": "economic conditions, business climate",
+    "vi": "tình hình kinh tế",
+    "ex": "最近、（　）が少しずつ回復してきた。",
+    "exvi": "Gần đây, tình hình kinh tế đã dần dần phục hồi.",
+    "rd": [
+      "けえき",
+      "けいぎ",
+      "けいけ"
+    ],
+    "kd": [
+      "景色",
+      "不景気",
+      "天気"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "回復する",
+    "r": "かいふくする",
+    "hv": "Hồi phục",
+    "en": "to recover",
+    "vi": "phục hồi",
+    "ex": "日本経済は徐々に（　）している。",
+    "exvi": "Nền kinh tế Nhật Bản đang dần dần phục hồi.",
+    "rd": [
+      "かいふぐする",
+      "がいふくする",
+      "かいふくずる"
+    ],
+    "kd": [
+      "快復する",
+      "復活する",
+      "復旧する"
+    ],
+    "ud": [
+      "洗濯する",
+      "予約する",
+      "充電する"
+    ]
+  },
+  {
+    "k": "無駄な",
+    "r": "むだな",
+    "hv": "",
+    "en": "wasteful, useless",
+    "vi": "lãng phí, vô ích",
+    "ex": "会社は（　）コストを削減した。",
+    "exvi": "Công ty đã cắt giảm những chi phí lãng phí.",
+    "rd": [
+      "むたな",
+      "むだの",
+      "ぶだな"
+    ],
+    "kd": [
+      "無理な",
+      "無用な",
+      "浪費"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "コスト",
+    "r": "コスト",
+    "hv": "",
+    "en": "cost",
+    "vi": "chi phí",
+    "ex": "新しい機械を導入して（　）を削減した。",
+    "exvi": "Đã giới thiệu máy móc mới để cắt giảm chi phí.",
+    "rd": [
+      "コースト",
+      "コストゥ",
+      "コスタ"
+    ],
+    "kd": [
+      "経費",
+      "費用",
+      "予算"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "削減する",
+    "r": "さくげんする",
+    "hv": "Tước giảm",
+    "en": "to cut, to reduce",
+    "vi": "cắt giảm",
+    "ex": "政府は予算を大幅に（　）した。",
+    "exvi": "Chính phủ đã cắt giảm ngân sách một cách đáng kể.",
+    "rd": [
+      "さくがんする",
+      "さっけんする",
+      "さくげんずる"
+    ],
+    "kd": [
+      "削除する",
+      "減少する",
+      "縮減する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "人員削減",
+    "r": "じんいんさくげん",
+    "hv": "Nhân viên tước giảm",
+    "en": "staff reduction, layoffs",
+    "vi": "cắt giảm nhân sự",
+    "ex": "経営難で会社は（　）を発表した。",
+    "exvi": "Do khó khăn trong kinh doanh, công ty đã công bố cắt giảm nhân sự.",
+    "rd": [
+      "じんいんさっけん",
+      "じんえんさくげん",
+      "じんいんさくげい"
+    ],
+    "kd": [
+      "人員配置",
+      "経費削減",
+      "リストラ"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "物価",
+    "r": "ぶっか",
+    "hv": "Vật giá",
+    "en": "prices (of goods)",
+    "vi": "vật giá, giá cả",
+    "ex": "最近、（　）がどんどん上昇している。",
+    "exvi": "Gần đây, giá cả đang liên tục tăng lên.",
+    "rd": [
+      "ぶつか",
+      "もつか",
+      "ぶっが"
+    ],
+    "kd": [
+      "物価指数",
+      "地価",
+      "定価"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "上昇する",
+    "r": "じょうしょうする",
+    "hv": "Thượng thăng",
+    "en": "to rise, to increase",
+    "vi": "tăng lên",
+    "ex": "今年に入って株価が急速に（　）した。",
+    "exvi": "Từ đầu năm nay, giá cổ phiếu đã tăng nhanh chóng.",
+    "rd": [
+      "じょうしょする",
+      "じょうじょうする",
+      "しょうしょうする"
+    ],
+    "kd": [
+      "下降する",
+      "急上昇",
+      "向上する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "価格",
+    "r": "かかく",
+    "hv": "Giá cách",
+    "en": "price",
+    "vi": "giá cả",
+    "ex": "原油の（　）が高騰している。",
+    "exvi": "Giá dầu thô đang tăng vọt.",
+    "rd": [
+      "かがく",
+      "かかっく",
+      "がかく"
+    ],
+    "kd": [
+      "価値",
+      "定価",
+      "相場"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "下降する",
+    "r": "かこうする",
+    "hv": "Hạ giáng",
+    "en": "to decline, to fall",
+    "vi": "giảm xuống",
+    "ex": "株価が急に（　）した。",
+    "exvi": "Giá cổ phiếu đã đột ngột giảm xuống.",
+    "rd": [
+      "げこうする",
+      "かごうする",
+      "かこうずる"
+    ],
+    "kd": [
+      "低下する",
+      "上昇する",
+      "降下する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "石油",
+    "r": "せきゆ",
+    "hv": "Thạch du",
+    "en": "petroleum, oil",
+    "vi": "dầu mỏ",
+    "ex": "この国の経済は（　）に大きく依存している。",
+    "exvi": "Nền kinh tế của đất nước này phụ thuộc lớn vào dầu mỏ.",
+    "rd": [
+      "せきあぶら",
+      "せきゆう",
+      "せきゆい"
+    ],
+    "kd": [
+      "原油",
+      "石炭",
+      "燃料"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "値上がりする",
+    "r": "ねあがりする",
+    "hv": "",
+    "en": "to rise in price",
+    "vi": "tăng giá",
+    "ex": "ガソリンがまた（　）した。",
+    "exvi": "Xăng lại tăng giá nữa rồi.",
+    "rd": [
+      "ねうえがりする",
+      "ねあがりずる",
+      "ちあがりする"
+    ],
+    "kd": [
+      "値下がりする",
+      "値上げする",
+      "高騰する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "値下がりする",
+    "r": "ねさがりする",
+    "hv": "",
+    "en": "to fall in price",
+    "vi": "giảm giá",
+    "ex": "不況で株が大きく（　）した。",
+    "exvi": "Do suy thoái, cổ phiếu đã giảm giá mạnh.",
+    "rd": [
+      "ねしたがりする",
+      "ねさがりずる",
+      "ちさがりする"
+    ],
+    "kd": [
+      "値上がりする",
+      "値下げする",
+      "下落する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "経営",
+    "r": "けいえい",
+    "hv": "Kinh doanh",
+    "en": "management, business operation",
+    "vi": "kinh doanh, quản lý",
+    "ex": "父は小さな会社を（　）している。",
+    "exvi": "Bố tôi đang quản lý một công ty nhỏ.",
+    "rd": [
+      "けえいえい",
+      "けいえ",
+      "けいけい"
+    ],
+    "kd": [
+      "経営者",
+      "運営",
+      "経済"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "赤字",
+    "r": "あかじ",
+    "hv": "Xích tự",
+    "en": "deficit, being in the red",
+    "vi": "thâm hụt, lỗ",
+    "ex": "今期の決算は（　）になった。",
+    "exvi": "Quyết toán kỳ này đã bị lỗ.",
+    "rd": [
+      "せきじ",
+      "あかじい",
+      "あかっじ"
+    ],
+    "kd": [
+      "黒字",
+      "負債",
+      "赤字国債"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "現金",
+    "r": "げんきん",
+    "hv": "Hiện kim",
+    "en": "cash",
+    "vi": "tiền mặt",
+    "ex": "この店では（　）しか使えない。",
+    "exvi": "Cửa hàng này chỉ dùng được tiền mặt.",
+    "rd": [
+      "げんぎん",
+      "けんきん",
+      "げんこん"
+    ],
+    "kd": [
+      "預金",
+      "貯金",
+      "現物"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "銀行口座",
+    "r": "ぎんこうこうざ",
+    "hv": "Ngân hàng khẩu tọa",
+    "en": "bank account",
+    "vi": "tài khoản ngân hàng",
+    "ex": "給料は（　）に振り込まれる。",
+    "exvi": "Lương được chuyển vào tài khoản ngân hàng.",
+    "rd": [
+      "ぎんこうこうさ",
+      "ぎんごうこうざ",
+      "ぎんこうごうざ"
+    ],
+    "kd": [
+      "預金口座",
+      "銀行員",
+      "口座番号"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "転じる",
+    "r": "てんじる",
+    "hv": "Chuyển",
+    "en": "to turn, to change (into)",
+    "vi": "chuyển sang, biến đổi",
+    "ex": "赤字が黒字に（　）た。",
+    "exvi": "Từ lỗ đã chuyển sang có lãi.",
+    "rd": [
+      "でんじる",
+      "てんずる",
+      "てんしる"
+    ],
+    "kd": [
+      "転換する",
+      "転じ",
+      "変じる"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "黒字",
+    "r": "くろじ",
+    "hv": "Hắc tự",
+    "en": "surplus, being in the black",
+    "vi": "có lãi, thặng dư",
+    "ex": "今年度はついに（　）に転じた。",
+    "exvi": "Năm tài chính này cuối cùng đã chuyển sang có lãi.",
+    "rd": [
+      "こくじ",
+      "くろうじ",
+      "くろっじ"
+    ],
+    "kd": [
+      "赤字",
+      "黒字倒産",
+      "収支"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "下ろす",
+    "r": "おろす",
+    "hv": "",
+    "en": "to withdraw (money), to take down",
+    "vi": "rút (tiền)",
+    "ex": "ATMで現金を（　）した。",
+    "exvi": "Tôi đã rút tiền mặt tại máy ATM.",
+    "rd": [
+      "おとす",
+      "さげろす",
+      "おろせる"
+    ],
+    "kd": [
+      "降ろす",
+      "卸す",
+      "下がる"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "外国企業",
+    "r": "がいこくきぎょう",
+    "hv": "Ngoại quốc企業",
+    "en": "foreign company",
+    "vi": "doanh nghiệp nước ngoài",
+    "ex": "彼は（　）に就職した。",
+    "exvi": "Anh ấy đã xin việc vào một doanh nghiệp nước ngoài.",
+    "rd": [
+      "がいこくきぎょ",
+      "がいこくぎぎょう",
+      "かいこくきぎょう"
+    ],
+    "kd": [
+      "国内企業",
+      "外資系",
+      "多国籍企業"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "借金",
+    "r": "しゃっきん",
+    "hv": "Tá kim",
+    "en": "debt, borrowed money",
+    "vi": "nợ, tiền vay",
+    "ex": "彼は事業に失敗し、多額の（　）を抱えた。",
+    "exvi": "Anh ấy thất bại trong kinh doanh và mang khoản nợ lớn.",
+    "rd": [
+      "しゃくきん",
+      "しゃっぎん",
+      "しゃきん"
+    ],
+    "kd": [
+      "負債",
+      "貸金",
+      "借入金"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "返済する",
+    "r": "へんさいする",
+    "hv": "Hoàn tế",
+    "en": "to repay",
+    "vi": "trả nợ, hoàn trả",
+    "ex": "彼はローンを毎月少しずつ（　）している。",
+    "exvi": "Anh ấy đang trả khoản vay từng chút mỗi tháng.",
+    "rd": [
+      "へんざいする",
+      "へんせいする",
+      "へんさいずる"
+    ],
+    "kd": [
+      "返却する",
+      "弁済する",
+      "返金する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "取引する",
+    "r": "とりひきする",
+    "hv": "",
+    "en": "to trade, to do business",
+    "vi": "giao dịch",
+    "ex": "当社は多くの海外企業と（　）している。",
+    "exvi": "Công ty chúng tôi giao dịch với nhiều doanh nghiệp nước ngoài.",
+    "rd": [
+      "とりびきする",
+      "とりひきずる",
+      "とりひぎする"
+    ],
+    "kd": [
+      "取引先",
+      "商取引",
+      "売買する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "取引先",
+    "r": "とりひきさき",
+    "hv": "",
+    "en": "business partner, client",
+    "vi": "đối tác kinh doanh",
+    "ex": "今日は大切な（　）と会議がある。",
+    "exvi": "Hôm nay tôi có cuộc họp với một đối tác kinh doanh quan trọng.",
+    "rd": [
+      "とりひきざき",
+      "とりびきさき",
+      "とりひきさぎ"
+    ],
+    "kd": [
+      "取引する",
+      "仕入れ先",
+      "得意先"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "天然資源",
+    "r": "てんねんしげん",
+    "hv": "Thiên nhiên tư nguyên",
+    "en": "natural resources",
+    "vi": "tài nguyên thiên nhiên",
+    "ex": "この国は豊富な（　）に恵まれている。",
+    "exvi": "Đất nước này được thiên nhiên ban tặng nguồn tài nguyên phong phú.",
+    "rd": [
+      "てんぜんしげん",
+      "てんねんじげん",
+      "てんねんしけん"
+    ],
+    "kd": [
+      "天然ガス",
+      "地下資源",
+      "資源国"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "天然ガス",
+    "r": "てんねんガス",
+    "hv": "",
+    "en": "natural gas",
+    "vi": "khí đốt tự nhiên",
+    "ex": "この地域は（　）の産地として有名だ。",
+    "exvi": "Khu vực này nổi tiếng là nơi sản xuất khí đốt tự nhiên.",
+    "rd": [
+      "てんぜんガス",
+      "てんねんかす",
+      "てんねんガース"
+    ],
+    "kd": [
+      "石油",
+      "天然資源",
+      "液化ガス"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "発電所",
+    "r": "はつでんしょ",
+    "hv": "Phát điện sở",
+    "en": "power plant",
+    "vi": "nhà máy điện",
+    "ex": "この地域には大きな（　）がある。",
+    "exvi": "Khu vực này có một nhà máy điện lớn.",
+    "rd": [
+      "はってんしょ",
+      "はつでんじょ",
+      "はつてんしょ"
+    ],
+    "kd": [
+      "変電所",
+      "発電機",
+      "電力会社"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "安定した",
+    "r": "あんていした",
+    "hv": "An định",
+    "en": "stable",
+    "vi": "ổn định",
+    "ex": "彼は（　）収入を得るために公務員になった。",
+    "exvi": "Anh ấy đã trở thành công chức để có được thu nhập ổn định.",
+    "rd": [
+      "あんでいした",
+      "あんじょうした",
+      "あんきした"
+    ],
+    "kd": [
+      "安全な",
+      "固定した",
+      "不安定な"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "電力",
+    "r": "でんりょく",
+    "hv": "Điện lực",
+    "en": "electric power",
+    "vi": "điện lực",
+    "ex": "夏は（　）の需要が増える。",
+    "exvi": "Vào mùa hè, nhu cầu điện lực tăng lên.",
+    "rd": [
+      "でんりょうく",
+      "てんりょく",
+      "でんりき"
+    ],
+    "kd": [
+      "電気",
+      "発電力",
+      "動力"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "供給する",
+    "r": "きょうきゅうする",
+    "hv": "Cung cấp",
+    "en": "to supply",
+    "vi": "cung cấp",
+    "ex": "このダムは周辺地域に電力を（　）している。",
+    "exvi": "Đập nước này cung cấp điện lực cho khu vực xung quanh.",
+    "rd": [
+      "きょうぎゅうする",
+      "きょきゅうする",
+      "きょうきゅうずる"
+    ],
+    "kd": [
+      "需要",
+      "支給する",
+      "提供する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "需要",
+    "r": "じゅよう",
+    "hv": "Nhu yếu",
+    "en": "demand",
+    "vi": "nhu cầu",
+    "ex": "夏場はエアコンの（　）が高まる。",
+    "exvi": "Vào mùa hè, nhu cầu máy điều hòa tăng cao.",
+    "rd": [
+      "じゅうよう",
+      "しゅよう",
+      "じゅよ"
+    ],
+    "kd": [
+      "需給",
+      "重要",
+      "要求"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "出荷する",
+    "r": "しゅっかする",
+    "hv": "Xuất hà",
+    "en": "to ship (goods)",
+    "vi": "xuất hàng",
+    "ex": "この工場は毎日大量の製品を（　）している。",
+    "exvi": "Nhà máy này xuất một lượng lớn sản phẩm mỗi ngày.",
+    "rd": [
+      "しゅつかする",
+      "しゅっがする",
+      "しゅうかする"
+    ],
+    "kd": [
+      "出港する",
+      "入荷する",
+      "出品する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "製造技術",
+    "r": "せいぞうぎじゅつ",
+    "hv": "Chế tạo kỹ thuật",
+    "en": "manufacturing technology",
+    "vi": "công nghệ sản xuất",
+    "ex": "日本の（　）は世界的に高く評価されている。",
+    "exvi": "Công nghệ sản xuất của Nhật Bản được đánh giá cao trên toàn thế giới.",
+    "rd": [
+      "せいぞうきじゅつ",
+      "せいそうぎじゅつ",
+      "せいぞうぎしゅつ"
+    ],
+    "kd": [
+      "製造業",
+      "生産技術",
+      "技術力"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "向上する",
+    "r": "こうじょうする",
+    "hv": "Hướng thượng",
+    "en": "to improve, to rise",
+    "vi": "nâng cao, cải thiện",
+    "ex": "新しい設備の導入で生産性が（　）した。",
+    "exvi": "Nhờ đưa vào thiết bị mới, năng suất đã được nâng cao.",
+    "rd": [
+      "こうしょうする",
+      "ごうじょうする",
+      "こうじょうずる"
+    ],
+    "kd": [
+      "向上心",
+      "上昇する",
+      "改善する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "不足する",
+    "r": "ふそくする",
+    "hv": "Bất túc",
+    "en": "to be insufficient, to lack",
+    "vi": "thiếu hụt",
+    "ex": "この地域では労働力が（　）している。",
+    "exvi": "Ở khu vực này, lực lượng lao động đang thiếu hụt.",
+    "rd": [
+      "ぶそくする",
+      "ふぞくする",
+      "ふそくずる"
+    ],
+    "kd": [
+      "不足分",
+      "過剰する",
+      "欠乏する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "農業",
+    "r": "のうぎょう",
+    "hv": "Nông nghiệp",
+    "en": "agriculture",
+    "vi": "nông nghiệp",
+    "ex": "この地域の主な産業は（　）だ。",
+    "exvi": "Ngành công nghiệp chính của khu vực này là nông nghiệp.",
+    "rd": [
+      "のぎょう",
+      "のうごう",
+      "のうきょう"
+    ],
+    "kd": [
+      "工業",
+      "農作物",
+      "農地"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "農作業をする",
+    "r": "のうさぎょうをする",
+    "hv": "",
+    "en": "to do farm work",
+    "vi": "làm việc đồng áng",
+    "ex": "祖父母は毎朝畑で（　）する。",
+    "exvi": "Ông bà tôi làm việc đồng áng ở ruộng mỗi sáng.",
+    "rd": [
+      "のさぎょうをする",
+      "のうざぎょうをする",
+      "のうさぎょをする"
+    ],
+    "kd": [
+      "農業をする",
+      "畑仕事",
+      "農作物"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "畑",
+    "r": "はたけ",
+    "hv": "",
+    "en": "field (for crops)",
+    "vi": "ruộng, cánh đồng",
+    "ex": "祖父の家には広い（　）がある。",
+    "exvi": "Nhà ông tôi có một cánh đồng rộng lớn.",
+    "rd": [
+      "はたけい",
+      "たはけ",
+      "はだけ"
+    ],
+    "kd": [
+      "田",
+      "畑地",
+      "農地"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "田",
+    "r": "た",
+    "hv": "",
+    "en": "rice field",
+    "vi": "ruộng lúa",
+    "ex": "秋になると（　）が黄金色に染まる。",
+    "exvi": "Vào mùa thu, ruộng lúa nhuộm một màu vàng óng.",
+    "rd": [
+      "でん",
+      "たん",
+      "たあ"
+    ],
+    "kd": [
+      "畑",
+      "田んぼ",
+      "水田"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "耕す",
+    "r": "たがやす",
+    "hv": "",
+    "en": "to cultivate, to plow",
+    "vi": "cày cấy",
+    "ex": "農家の人々は朝早くから畑を（　）す。",
+    "exvi": "Người nông dân cày ruộng từ sáng sớm.",
+    "rd": [
+      "こうす",
+      "たがやせる",
+      "たがやう"
+    ],
+    "kd": [
+      "耕作する",
+      "開墾する",
+      "農作業"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "種",
+    "r": "たね",
+    "hv": "",
+    "en": "seed",
+    "vi": "hạt giống",
+    "ex": "春になったら野菜の（　）をまく。",
+    "exvi": "Khi mùa xuân đến, tôi sẽ gieo hạt giống rau.",
+    "rd": [
+      "しゅ",
+      "たに",
+      "たあね"
+    ],
+    "kd": [
+      "種類",
+      "種子",
+      "品種"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "作物",
+    "r": "さくもつ",
+    "hv": "Tác vật",
+    "en": "crop",
+    "vi": "nông sản, cây trồng",
+    "ex": "この土地では様々な（　）が育てられている。",
+    "exvi": "Ở vùng đất này, nhiều loại cây trồng khác nhau được canh tác.",
+    "rd": [
+      "さくぶつ",
+      "さっくもつ",
+      "さくもの"
+    ],
+    "kd": [
+      "農作物",
+      "産物",
+      "穀物"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "まく",
+    "r": "まく",
+    "hv": "",
+    "en": "to sow (seeds)",
+    "vi": "gieo (hạt)",
+    "ex": "畑に大根の種を（　）いた。",
+    "exvi": "Tôi đã gieo hạt củ cải xuống ruộng.",
+    "rd": [
+      "まぐ",
+      "まいく",
+      "まけ"
+    ],
+    "kd": [
+      "蒔く",
+      "巻く",
+      "撒く"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "市場",
+    "r": "しじょう",
+    "hv": "Thị trường",
+    "en": "market",
+    "vi": "thị trường",
+    "ex": "この製品は国内（　）で高いシェアを持つ。",
+    "exvi": "Sản phẩm này chiếm thị phần cao trên thị trường trong nước.",
+    "rd": [
+      "いちば",
+      "しじょ",
+      "しばじょう"
+    ],
+    "kd": [
+      "市場調査",
+      "市街",
+      "相場"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "納税",
+    "r": "のうぜい",
+    "hv": "Nạp thuế",
+    "en": "tax payment",
+    "vi": "nộp thuế",
+    "ex": "国民には（　）の義務がある。",
+    "exvi": "Người dân có nghĩa vụ nộp thuế.",
+    "rd": [
+      "のうせい",
+      "のぜい",
+      "のうざい"
+    ],
+    "kd": [
+      "納付",
+      "税金",
+      "課税"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "義務",
+    "r": "ぎむ",
+    "hv": "Nghĩa vụ",
+    "en": "duty, obligation",
+    "vi": "nghĩa vụ",
+    "ex": "教育を受けさせることは親の（　）だ。",
+    "exvi": "Cho con đi học là nghĩa vụ của cha mẹ.",
+    "rd": [
+      "ぎう",
+      "ぎぶ",
+      "ぎいむ"
+    ],
+    "kd": [
+      "権利",
+      "責務",
+      "任務"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "支払う",
+    "r": "しはらう",
+    "hv": "",
+    "en": "to pay",
+    "vi": "thanh toán, chi trả",
+    "ex": "家賃は毎月末に（　）う。",
+    "exvi": "Tiền thuê nhà được thanh toán vào cuối mỗi tháng.",
+    "rd": [
+      "しばらう",
+      "しはろう",
+      "しはらる"
+    ],
+    "kd": [
+      "支払い",
+      "支出する",
+      "納入する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "支払い",
+    "r": "しはらい",
+    "hv": "",
+    "en": "payment",
+    "vi": "việc thanh toán",
+    "ex": "カードでの（　）も可能だ。",
+    "exvi": "Cũng có thể thanh toán bằng thẻ.",
+    "rd": [
+      "しばらい",
+      "しはらえ",
+      "しほらい"
+    ],
+    "kd": [
+      "支払う",
+      "収入",
+      "納入"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "預金する",
+    "r": "よきんする",
+    "hv": "Dự kim",
+    "en": "to deposit (money)",
+    "vi": "gửi tiền tiết kiệm",
+    "ex": "毎月一定額を銀行に（　）している。",
+    "exvi": "Mỗi tháng tôi đều gửi một khoản tiền cố định vào ngân hàng.",
+    "rd": [
+      "よぎんする",
+      "よきんずる",
+      "ようきんする"
+    ],
+    "kd": [
+      "貯金する",
+      "入金する",
+      "積立する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "貯金する",
+    "r": "ちょきんする",
+    "hv": "Trữ kim",
+    "en": "to save money",
+    "vi": "tiết kiệm tiền",
+    "ex": "将来のために毎月（　）している。",
+    "exvi": "Tôi tiết kiệm tiền mỗi tháng cho tương lai.",
+    "rd": [
+      "ちょぎんする",
+      "ちょきんずる",
+      "ちよきんする"
+    ],
+    "kd": [
+      "預金する",
+      "貯蓄する",
+      "積立"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "貯める",
+    "r": "ためる",
+    "hv": "",
+    "en": "to save up, to accumulate",
+    "vi": "tích lũy",
+    "ex": "旅行のためにお金を（　）めている。",
+    "exvi": "Tôi đang tích lũy tiền để đi du lịch.",
+    "rd": [
+      "たてる",
+      "たまる",
+      "ためう"
+    ],
+    "kd": [
+      "溜める",
+      "貯まる",
+      "蓄える"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "貯蓄する",
+    "r": "ちょちくする",
+    "hv": "Trữ súc",
+    "en": "to save (money)",
+    "vi": "tiết kiệm, để dành",
+    "ex": "老後のために少しずつ（　）している。",
+    "exvi": "Tôi đang để dành một chút tiền cho tuổi già.",
+    "rd": [
+      "ちょちぐする",
+      "ちょうちくする",
+      "ちょちくずる"
+    ],
+    "kd": [
+      "貯金する",
+      "蓄積する",
+      "節約する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "収める",
+    "r": "おさめる",
+    "hv": "",
+    "en": "to obtain, to pay (dues), to store",
+    "vi": "thu được, nộp",
+    "ex": "彼はビジネスで大きな成功を（　）めた。",
+    "exvi": "Anh ấy đã đạt được thành công lớn trong kinh doanh.",
+    "rd": [
+      "おさまる",
+      "おざめる",
+      "おさめう"
+    ],
+    "kd": [
+      "納める",
+      "治める",
+      "修める"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "財産",
+    "r": "ざいさん",
+    "hv": "Tài sản",
+    "en": "property, assets",
+    "vi": "tài sản",
+    "ex": "彼は父から多額の（　）を相続した。",
+    "exvi": "Anh ấy đã thừa kế một khoản tài sản lớn từ cha.",
+    "rd": [
+      "さいさん",
+      "ざいざん",
+      "ざいさい"
+    ],
+    "kd": [
+      "資産",
+      "財政",
+      "遺産"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "負担",
+    "r": "ふたん",
+    "hv": "Phụ đảm",
+    "en": "burden, cost borne",
+    "vi": "gánh nặng, chi phí gánh chịu",
+    "ex": "医療費の（　）が家計を圧迫している。",
+    "exvi": "Gánh nặng chi phí y tế đang gây áp lực lên tài chính gia đình.",
+    "rd": [
+      "ふだん",
+      "ふたい",
+      "ぶたん"
+    ],
+    "kd": [
+      "負債",
+      "担当",
+      "分担"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "強いる",
+    "r": "しいる",
+    "hv": "",
+    "en": "to force, to compel",
+    "vi": "ép buộc",
+    "ex": "会社は社員に長時間労働を（　）いていた。",
+    "exvi": "Công ty đã ép buộc nhân viên làm việc trong thời gian dài.",
+    "rd": [
+      "きょういる",
+      "つよいる",
+      "しえる"
+    ],
+    "kd": [
+      "強制する",
+      "強要する",
+      "要求する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "引き出す",
+    "r": "ひきだす",
+    "hv": "",
+    "en": "to withdraw (money), to draw out",
+    "vi": "rút (tiền)",
+    "ex": "ATMで現金を（　）した。",
+    "exvi": "Tôi đã rút tiền mặt từ máy ATM.",
+    "rd": [
+      "ひきいだす",
+      "ひきたす",
+      "いんきだす"
+    ],
+    "kd": [
+      "引き出し",
+      "抽出する",
+      "取り出す"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "産業",
+    "r": "さんぎょう",
+    "hv": "Sản nghiệp",
+    "en": "industry",
+    "vi": "ngành công nghiệp",
+    "ex": "この地域は観光（　）で発展してきた。",
+    "exvi": "Khu vực này đã phát triển nhờ ngành công nghiệp du lịch.",
+    "rd": [
+      "さんきょう",
+      "さんごう",
+      "さんぎょ"
+    ],
+    "kd": [
+      "産業界",
+      "工業",
+      "事業"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "工業",
+    "r": "こうぎょう",
+    "hv": "Công nghiệp",
+    "en": "manufacturing industry",
+    "vi": "ngành công nghiệp",
+    "ex": "この町はかつて（　）で栄えた。",
+    "exvi": "Thị trấn này từng thịnh vượng nhờ ngành công nghiệp.",
+    "rd": [
+      "こうきょう",
+      "こうごう",
+      "こうぎょ"
+    ],
+    "kd": [
+      "農業",
+      "産業",
+      "工場"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "電気メーカー",
+    "r": "でんきメーカー",
+    "hv": "",
+    "en": "electronics manufacturer",
+    "vi": "hãng sản xuất đồ điện",
+    "ex": "彼は大手（　）に就職した。",
+    "exvi": "Anh ấy đã xin việc vào một hãng sản xuất đồ điện lớn.",
+    "rd": [
+      "でんぎメーカー",
+      "てんきメーカー",
+      "でんきメイカー"
+    ],
+    "kd": [
+      "自動車メーカー",
+      "電気製品",
+      "家電量販店"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "エネルギー資源",
+    "r": "エネルギーしげん",
+    "hv": "",
+    "en": "energy resources",
+    "vi": "tài nguyên năng lượng",
+    "ex": "この国は（　）を輸入に頼っている。",
+    "exvi": "Đất nước này phụ thuộc vào nhập khẩu tài nguyên năng lượng.",
+    "rd": [
+      "エネルギしげん",
+      "エネルギーじげん",
+      "エネルギーしけん"
+    ],
+    "kd": [
+      "天然資源",
+      "エネルギー政策",
+      "資源国"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "輸送する",
+    "r": "ゆそうする",
+    "hv": "Du tống",
+    "en": "to transport",
+    "vi": "vận chuyển",
+    "ex": "製品はトラックで各地に（　）される。",
+    "exvi": "Sản phẩm được vận chuyển đến các nơi bằng xe tải.",
+    "rd": [
+      "ゆうそうする",
+      "ゆぞうする",
+      "ゆそうずる"
+    ],
+    "kd": [
+      "輸出する",
+      "運送する",
+      "移送する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "大手",
+    "r": "おおて",
+    "hv": "",
+    "en": "major company, big player",
+    "vi": "công ty lớn",
+    "ex": "彼女は（　）の広告代理店で働いている。",
+    "exvi": "Cô ấy đang làm việc tại một công ty quảng cáo lớn.",
+    "rd": [
+      "だいしゅ",
+      "おおしゅ",
+      "おおで"
+    ],
+    "kd": [
+      "大企業",
+      "中小企業",
+      "老舗"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "自動車メーカー",
+    "r": "じどうしゃメーカー",
+    "hv": "",
+    "en": "automobile manufacturer",
+    "vi": "hãng sản xuất ô tô",
+    "ex": "彼は有名な（　）で技術者として働いている。",
+    "exvi": "Anh ấy đang làm kỹ sư tại một hãng sản xuất ô tô nổi tiếng.",
+    "rd": [
+      "じどしゃメーカー",
+      "じどうしゃメイカー",
+      "じどうしゃマーカー"
+    ],
+    "kd": [
+      "電気メーカー",
+      "自動車工業",
+      "部品メーカー"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "部品",
+    "r": "ぶひん",
+    "hv": "Bộ phẩm",
+    "en": "parts, components",
+    "vi": "linh kiện, phụ tùng",
+    "ex": "この工場は自動車の（　）を製造している。",
+    "exvi": "Nhà máy này sản xuất linh kiện ô tô.",
+    "rd": [
+      "ぶびん",
+      "ぶうひん",
+      "ぶぴん"
+    ],
+    "kd": [
+      "部品表",
+      "製品",
+      "組立"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "普通預金",
+    "r": "ふつうよきん",
+    "hv": "Phổ thông dự kim",
+    "en": "ordinary savings account",
+    "vi": "tài khoản tiết kiệm thông thường",
+    "ex": "給料は（　）口座に振り込まれる。",
+    "exvi": "Lương được chuyển vào tài khoản tiết kiệm thông thường.",
+    "rd": [
+      "ふつうよぎん",
+      "ふつよきん",
+      "ふうつうよきん"
+    ],
+    "kd": [
+      "定期預金",
+      "普通口座",
+      "貯蓄預金"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "定期預金",
+    "r": "ていきよきん",
+    "hv": "Định kỳ dự kim",
+    "en": "fixed-term deposit",
+    "vi": "tiền gửi có kỳ hạn",
+    "ex": "金利が良いので（　）にした。",
+    "exvi": "Vì lãi suất tốt nên tôi đã chọn tiền gửi có kỳ hạn.",
+    "rd": [
+      "ていきよぎん",
+      "ていぎよきん",
+      "でいきよきん"
+    ],
+    "kd": [
+      "普通預金",
+      "定期券",
+      "積立預金"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "利子がつく",
+    "r": "りしがつく",
+    "hv": "",
+    "en": "interest accrues",
+    "vi": "phát sinh lãi",
+    "ex": "この口座は（　）ので便利だ。",
+    "exvi": "Tài khoản này tiện lợi vì có phát sinh lãi.",
+    "rd": [
+      "りこがつく",
+      "りしがづく",
+      "りっしがつく"
+    ],
+    "kd": [
+      "利息がつく",
+      "利子率",
+      "金利"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "利息がつく",
+    "r": "りそくがつく",
+    "hv": "",
+    "en": "interest is added",
+    "vi": "có lãi suất",
+    "ex": "定期預金は（　）ので得だ。",
+    "exvi": "Tiền gửi có kỳ hạn có lãi suất nên có lợi.",
+    "rd": [
+      "りいそくがつく",
+      "りそくがづく",
+      "りぞくがつく"
+    ],
+    "kd": [
+      "利子がつく",
+      "利息",
+      "元金"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "資産",
+    "r": "しさん",
+    "hv": "Tư sản",
+    "en": "assets",
+    "vi": "tài sản",
+    "ex": "彼は不動産を主な（　）としている。",
+    "exvi": "Anh ấy coi bất động sản là tài sản chính của mình.",
+    "rd": [
+      "しざん",
+      "じさん",
+      "しさい"
+    ],
+    "kd": [
+      "財産",
+      "資本",
+      "負債"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "料金",
+    "r": "りょうきん",
+    "hv": "Liệu kim",
+    "en": "fee, charge",
+    "vi": "cước phí, tiền phí",
+    "ex": "電気の（　）が来月から値上がりする。",
+    "exvi": "Tiền điện sẽ tăng giá từ tháng sau.",
+    "rd": [
+      "りょきん",
+      "りょうぎん",
+      "りようきん"
+    ],
+    "kd": [
+      "料金表",
+      "賃金",
+      "代金"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "給料",
+    "r": "きゅうりょう",
+    "hv": "Cấp liệu",
+    "en": "salary",
+    "vi": "lương",
+    "ex": "今月の（　）はいつもより多かった。",
+    "exvi": "Lương tháng này nhiều hơn thường lệ.",
+    "rd": [
+      "きゅりょう",
+      "きゅうりょ",
+      "ぎゅうりょう"
+    ],
+    "kd": [
+      "給与",
+      "報酬",
+      "賃金"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u7-3_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>

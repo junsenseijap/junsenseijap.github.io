@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 6.2 — コンピューター</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">情</div>
+    <div>
+      <h1>N2 · 6.2 — コンピューター</h1>
+      <p>Vocabulaire · 32 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">32</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 6.2</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u6-2";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DONNÉES — VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {
+    "k": "文書",
+    "r": "ぶんしょ",
+    "hv": "Văn thư",
+    "en": "document",
+    "vi": "văn bản, tài liệu",
+    "ex": "この（　）はパスワードで保護されている。",
+    "exvi": "Văn bản này được bảo vệ bằng mật khẩu.",
+    "rd": [
+      "ぶんじょ",
+      "もんしょ",
+      "ぶんしゅ"
+    ],
+    "kd": [
+      "文章",
+      "証書",
+      "文献"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "洗濯ばさみ"
+    ]
+  },
+  {
+    "k": "削除する",
+    "r": "さくじょする",
+    "hv": "Tước trừ",
+    "en": "to delete",
+    "vi": "xóa",
+    "ex": "間違えて大事なファイルを（　）してしまった。",
+    "exvi": "Tôi đã lỡ xóa mất một tập tin quan trọng.",
+    "rd": [
+      "さくじょうする",
+      "さっきょする",
+      "けずりじょする"
+    ],
+    "kd": [
+      "削減する",
+      "消除する",
+      "控除する"
+    ],
+    "ud": [
+      "料理する",
+      "洗濯する",
+      "登山する"
+    ]
+  },
+  {
+    "k": "消去する",
+    "r": "しょうきょする",
+    "hv": "Tiêu khứ",
+    "en": "to erase",
+    "vi": "xóa bỏ",
+    "ex": "このデータはバックアップの後で（　）してください。",
+    "exvi": "Hãy xóa bỏ dữ liệu này sau khi đã sao lưu.",
+    "rd": [
+      "しょうこする",
+      "しょきょする",
+      "しょうぎょする"
+    ],
+    "kd": [
+      "消却する",
+      "除去する",
+      "消耗する"
+    ],
+    "ud": [
+      "収穫する",
+      "給油する",
+      "掃除する"
+    ]
+  },
+  {
+    "k": "作成する",
+    "r": "さくせいする",
+    "hv": "Tác thành",
+    "en": "to create (a document)",
+    "vi": "tạo, soạn thảo",
+    "ex": "来週の会議までに資料を（　）しなければならない。",
+    "exvi": "Tôi phải soạn thảo tài liệu trước cuộc họp tuần sau.",
+    "rd": [
+      "さくじょうする",
+      "さっせいする",
+      "さくなりする"
+    ],
+    "kd": [
+      "作製する",
+      "製作する",
+      "制作する"
+    ],
+    "ud": [
+      "運転する",
+      "洗顔する",
+      "散歩する"
+    ]
+  },
+  {
+    "k": "送信する",
+    "r": "そうしんする",
+    "hv": "Tống tín",
+    "en": "to send (data/mail)",
+    "vi": "gửi (dữ liệu)",
+    "ex": "添付ファイルを付けてメールを（　）した。",
+    "exvi": "Tôi đã gửi email kèm theo tệp đính kèm.",
+    "rd": [
+      "そうじんする",
+      "しょうしんする",
+      "そうしんずる"
+    ],
+    "kd": [
+      "送金する",
+      "通信する",
+      "発信する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "受信する",
+    "r": "じゅしんする",
+    "hv": "Thụ tín",
+    "en": "to receive (data/mail)",
+    "vi": "nhận (dữ liệu)",
+    "ex": "このアプリはメッセージをリアルタイムで（　）できる。",
+    "exvi": "Ứng dụng này có thể nhận tin nhắn theo thời gian thực.",
+    "rd": [
+      "じゅうしんする",
+      "じゅしんずる",
+      "うけしんする"
+    ],
+    "kd": [
+      "受診する",
+      "受賞する",
+      "着信する"
+    ],
+    "ud": [
+      "扇風機",
+      "歯ブラシ",
+      "毛布"
+    ]
+  },
+  {
+    "k": "送受信する",
+    "r": "そうじゅしんする",
+    "hv": "Tống thụ tín",
+    "en": "to send and receive",
+    "vi": "gửi và nhận",
+    "ex": "このソフトはデータを高速で（　）できる。",
+    "exvi": "Phần mềm này có thể gửi và nhận dữ liệu với tốc độ cao.",
+    "rd": [
+      "そうじゅうしんする",
+      "しょうじゅしんする",
+      "そうじゅしんずる"
+    ],
+    "kd": [
+      "送受話器",
+      "通信販売",
+      "交信する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "添付する",
+    "r": "てんぷする",
+    "hv": "Thiêm phụ",
+    "en": "to attach",
+    "vi": "đính kèm",
+    "ex": "履歴書のPDFをメールに（　）してください。",
+    "exvi": "Hãy đính kèm file PDF sơ yếu lý lịch vào email.",
+    "rd": [
+      "てんぶする",
+      "てんぷうする",
+      "そえふする"
+    ],
+    "kd": [
+      "添加する",
+      "貼付する",
+      "付属する"
+    ],
+    "ud": [
+      "料理する",
+      "洗濯する",
+      "登山する"
+    ]
+  },
+  {
+    "k": "設定",
+    "r": "せってい",
+    "hv": "Thiết định",
+    "en": "settings, configuration",
+    "vi": "cài đặt",
+    "ex": "パソコンの（　）を変更したら画面が明るくなった。",
+    "exvi": "Sau khi thay đổi cài đặt máy tính, màn hình đã sáng hơn.",
+    "rd": [
+      "せつてい",
+      "せいてい",
+      "せってん"
+    ],
+    "kd": [
+      "設置",
+      "制定",
+      "設備"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "洗濯ばさみ"
+    ]
+  },
+  {
+    "k": "変更する",
+    "r": "へんこうする",
+    "hv": "Biến canh",
+    "en": "to change, to modify",
+    "vi": "thay đổi",
+    "ex": "予約の日程を来週に（　）した。",
+    "exvi": "Tôi đã thay đổi lịch đặt chỗ sang tuần sau.",
+    "rd": [
+      "へんごうする",
+      "へんこする",
+      "べんこうする"
+    ],
+    "kd": [
+      "変更届",
+      "変換する",
+      "更新する"
+    ],
+    "ud": [
+      "収穫する",
+      "給油する",
+      "掃除する"
+    ]
+  },
+  {
+    "k": "種類",
+    "r": "しゅるい",
+    "hv": "Chủng loại",
+    "en": "type, kind",
+    "vi": "loại, chủng loại",
+    "ex": "このソフトには様々な（　）のフォントがある。",
+    "exvi": "Phần mềm này có nhiều loại phông chữ khác nhau.",
+    "rd": [
+      "しゅうるい",
+      "しゅうい",
+      "じゅるい"
+    ],
+    "kd": [
+      "種目",
+      "部類",
+      "類似"
+    ],
+    "ud": [
+      "扇風機",
+      "歯ブラシ",
+      "毛布"
+    ]
+  },
+  {
+    "k": "表",
+    "r": "おもて",
+    "hv": "Biểu",
+    "en": "front side, surface",
+    "vi": "mặt trước, bảng",
+    "ex": "紙の（　）に名前を書いてください。",
+    "exvi": "Hãy viết tên lên mặt trước của tờ giấy.",
+    "rd": [
+      "ひょう",
+      "うら",
+      "たびょう"
+    ],
+    "kd": [
+      "裏",
+      "面",
+      "表紙"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "挿入する",
+    "r": "そうにゅうする",
+    "hv": "Sáp nhập",
+    "en": "to insert",
+    "vi": "chèn vào",
+    "ex": "文書に画像を（　）する方法を教えてください。",
+    "exvi": "Hãy chỉ cho tôi cách chèn hình ảnh vào văn bản.",
+    "rd": [
+      "そうにゅする",
+      "しょうにゅうする",
+      "そうにゅうずる"
+    ],
+    "kd": [
+      "挿絵",
+      "侵入する",
+      "注入する"
+    ],
+    "ud": [
+      "料理する",
+      "洗濯する",
+      "登山する"
+    ]
+  },
+  {
+    "k": "ウイルス対策",
+    "r": "ウイルスたいさく",
+    "hv": "",
+    "en": "virus countermeasure/protection",
+    "vi": "biện pháp phòng chống virus",
+    "ex": "会社のパソコンには必ず（　）ソフトを入れる。",
+    "exvi": "Máy tính công ty nhất định phải cài phần mềm phòng chống virus.",
+    "rd": [
+      "ウイルスだいさく",
+      "ウィルスたいさく",
+      "ウイルスたいざく"
+    ],
+    "kd": [
+      "対策本部",
+      "防犯対策",
+      "防止策"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "図",
+    "r": "ず",
+    "hv": "Đồ",
+    "en": "figure, diagram",
+    "vi": "hình, sơ đồ",
+    "ex": "レポートに分かりやすい（　）を入れた。",
+    "exvi": "Tôi đã đưa vào báo cáo một sơ đồ dễ hiểu.",
+    "rd": [
+      "と",
+      "づ",
+      "ど"
+    ],
+    "kd": [
+      "絵",
+      "地図",
+      "図表"
+    ],
+    "ud": [
+      "扇風機",
+      "歯ブラシ",
+      "毛布"
+    ]
+  },
+  {
+    "k": "拡大する",
+    "r": "かくだいする",
+    "hv": "Khuếch đại",
+    "en": "to enlarge",
+    "vi": "phóng to",
+    "ex": "文字が小さいので画面を（　）した。",
+    "exvi": "Vì chữ nhỏ nên tôi đã phóng to màn hình.",
+    "rd": [
+      "こうだいする",
+      "かくたいする",
+      "がくだいする"
+    ],
+    "kd": [
+      "拡張する",
+      "増大する",
+      "肥大する"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "縮小する",
+    "r": "しゅくしょうする",
+    "hv": "Súc tiểu",
+    "en": "to shrink, to reduce",
+    "vi": "thu nhỏ",
+    "ex": "印刷する前に画像を（　）してください。",
+    "exvi": "Hãy thu nhỏ hình ảnh trước khi in.",
+    "rd": [
+      "しゅうくしょうする",
+      "しゅくしょする",
+      "じゅくしょうする"
+    ],
+    "kd": [
+      "縮図",
+      "短縮する",
+      "削減する"
+    ],
+    "ud": [
+      "重い",
+      "狭い",
+      "苦い"
+    ]
+  },
+  {
+    "k": "印刷する",
+    "r": "いんさつする",
+    "hv": "Ấn loát",
+    "en": "to print",
+    "vi": "in ấn",
+    "ex": "この資料は両面で（　）してください。",
+    "exvi": "Hãy in tài liệu này ở cả hai mặt.",
+    "rd": [
+      "いんさっする",
+      "いんずつする",
+      "いんさとする"
+    ],
+    "kd": [
+      "印刷所",
+      "印象",
+      "刷新する"
+    ],
+    "ud": [
+      "運転する",
+      "洗顔する",
+      "散歩する"
+    ]
+  },
+  {
+    "k": "中古",
+    "r": "ちゅうこ",
+    "hv": "Trung cổ",
+    "en": "secondhand, used",
+    "vi": "đồ cũ, đã qua sử dụng",
+    "ex": "学生の頃、（　）のパソコンを買った。",
+    "exvi": "Hồi còn là sinh viên, tôi đã mua một chiếc máy tính đã qua sử dụng.",
+    "rd": [
+      "ちゅうご",
+      "ちゅうこう",
+      "じゅうこ"
+    ],
+    "kd": [
+      "新品",
+      "中身",
+      "古着"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "接続する",
+    "r": "せつぞくする",
+    "hv": "Tiếp tục",
+    "en": "to connect",
+    "vi": "kết nối",
+    "ex": "このケーブルでプリンターと（　）します。",
+    "exvi": "Kết nối với máy in bằng dây cáp này.",
+    "rd": [
+      "せつぞうする",
+      "せっそくする",
+      "せつずくする"
+    ],
+    "kd": [
+      "接続詞",
+      "連続する",
+      "続出する"
+    ],
+    "ud": [
+      "料理する",
+      "洗濯する",
+      "登山する"
+    ]
+  },
+  {
+    "k": "検索する",
+    "r": "けんさくする",
+    "hv": "Kiểm sách",
+    "en": "to search",
+    "vi": "tìm kiếm",
+    "ex": "インターネットで店の場所を（　）した。",
+    "exvi": "Tôi đã tìm kiếm địa điểm cửa hàng trên internet.",
+    "rd": [
+      "けんざくする",
+      "げんさくする",
+      "けんそうする"
+    ],
+    "kd": [
+      "検討する",
+      "探索する",
+      "捜索する"
+    ],
+    "ud": [
+      "収穫する",
+      "給油する",
+      "掃除する"
+    ]
+  },
+  {
+    "k": "通信速度",
+    "r": "つうしんそくど",
+    "hv": "Thông tín tốc độ",
+    "en": "communication speed",
+    "vi": "tốc độ truyền thông",
+    "ex": "この地域は（　）が遅くて困る。",
+    "exvi": "Khu vực này có tốc độ truyền thông chậm nên rất bất tiện.",
+    "rd": [
+      "つうしんそくと",
+      "つしんそくど",
+      "つうじんそくど"
+    ],
+    "kd": [
+      "通信網",
+      "速度計",
+      "伝送速度"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "洗濯ばさみ"
+    ]
+  },
+  {
+    "k": "通信機能",
+    "r": "つうしんきのう",
+    "hv": "Thông tín cơ năng",
+    "en": "communication function",
+    "vi": "chức năng truyền thông",
+    "ex": "このカメラには無線の（　）が付いている。",
+    "exvi": "Chiếc máy ảnh này có chức năng truyền thông không dây.",
+    "rd": [
+      "つうしんきの",
+      "つうじんきのう",
+      "つうしんぎのう"
+    ],
+    "kd": [
+      "機能性",
+      "通信手段",
+      "性能"
+    ],
+    "ud": [
+      "扇風機",
+      "歯ブラシ",
+      "毛布"
+    ]
+  },
+  {
+    "k": "楽しむ",
+    "r": "たのしむ",
+    "hv": "",
+    "en": "to enjoy",
+    "vi": "tận hưởng, thưởng thức",
+    "ex": "週末は家族で音楽を（　）んでいる。",
+    "exvi": "Vào cuối tuần, cả gia đình tôi cùng tận hưởng âm nhạc.",
+    "rd": [
+      "らくしむ",
+      "たのしめる",
+      "たのしぶ"
+    ],
+    "kd": [
+      "楽しい",
+      "娯楽",
+      "楽観"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "通信販売",
+    "r": "つうしんはんばい",
+    "hv": "Thông tín phán mại",
+    "en": "mail order, online shopping",
+    "vi": "bán hàng qua mạng/thư tín",
+    "ex": "最近は（　）で服を買う人が増えた。",
+    "exvi": "Gần đây số người mua quần áo qua bán hàng trực tuyến đã tăng lên.",
+    "rd": [
+      "つうしんはんまい",
+      "つしんはんばい",
+      "つうじんはんばい"
+    ],
+    "kd": [
+      "通信教育",
+      "販売店",
+      "市販"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "起動する",
+    "r": "きどうする",
+    "hv": "Khởi động",
+    "en": "to start up (a device)",
+    "vi": "khởi động",
+    "ex": "このパソコンは（　）するのに時間がかかる。",
+    "exvi": "Chiếc máy tính này mất nhiều thời gian để khởi động.",
+    "rd": [
+      "きどする",
+      "きとうする",
+      "きろうする"
+    ],
+    "kd": [
+      "起工する",
+      "始動する",
+      "稼働する"
+    ],
+    "ud": [
+      "料理する",
+      "洗濯する",
+      "登山する"
+    ]
+  },
+  {
+    "k": "立ち上げる",
+    "r": "たちあげる",
+    "hv": "",
+    "en": "to launch, to boot up",
+    "vi": "khởi chạy, thành lập",
+    "ex": "新しいプロジェクトを来月（　）予定だ。",
+    "exvi": "Dự kiến sẽ khởi chạy dự án mới vào tháng sau.",
+    "rd": [
+      "たちあがる",
+      "りつじょうげる",
+      "たちさげる"
+    ],
+    "kd": [
+      "立ち上がる",
+      "持ち上げる",
+      "仕上げる"
+    ],
+    "ud": [
+      "収穫する",
+      "給油する",
+      "掃除する"
+    ]
+  },
+  {
+    "k": "再起動する",
+    "r": "さいきどうする",
+    "hv": "Tái khởi động",
+    "en": "to restart (a device)",
+    "vi": "khởi động lại",
+    "ex": "エラーが出たのでパソコンを（　）した。",
+    "exvi": "Vì có lỗi nên tôi đã khởi động lại máy tính.",
+    "rd": [
+      "さいきとうする",
+      "さいぎどうする",
+      "さいきどする"
+    ],
+    "kd": [
+      "再開する",
+      "再度",
+      "作動する"
+    ],
+    "ud": [
+      "眠い",
+      "甘い",
+      "涼しい"
+    ]
+  },
+  {
+    "k": "終了する",
+    "r": "しゅうりょうする",
+    "hv": "Chung liễu",
+    "en": "to end, to finish",
+    "vi": "kết thúc",
+    "ex": "このアプリは自動で（　）する設定になっている。",
+    "exvi": "Ứng dụng này được cài đặt để tự động kết thúc.",
+    "rd": [
+      "しゅうりょする",
+      "じゅうりょうする",
+      "しゅりょうする"
+    ],
+    "kd": [
+      "終了時刻",
+      "修了する",
+      "完了する"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "新鮮な"
+    ]
+  },
+  {
+    "k": "操作する",
+    "r": "そうさする",
+    "hv": "Thao tác",
+    "en": "to operate",
+    "vi": "thao tác, vận hành",
+    "ex": "このリモコンは簡単に（　）できる。",
+    "exvi": "Chiếc điều khiển từ xa này có thể thao tác dễ dàng.",
+    "rd": [
+      "そうざする",
+      "そさする",
+      "そうさくする"
+    ],
+    "kd": [
+      "操縦する",
+      "動作する",
+      "捜査する"
+    ],
+    "ud": [
+      "運転する",
+      "洗顔する",
+      "散歩する"
+    ]
+  },
+  {
+    "k": "修理に出す",
+    "r": "しゅうりにだす",
+    "hv": "Tu lý",
+    "en": "to send for repair",
+    "vi": "mang đi sửa",
+    "ex": "壊れたパソコンを（　）ことにした。",
+    "exvi": "Tôi đã quyết định mang chiếc máy tính hỏng đi sửa.",
+    "rd": [
+      "しゅりにだす",
+      "しゅうりにたす",
+      "しゅりょうにだす"
+    ],
+    "kd": [
+      "修理費",
+      "修繕する",
+      "調整する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "洗濯ばさみ"
+    ]
+  },
+  {
+    "k": "通信教育",
+    "r": "つうしんきょういく",
+    "hv": "Thông tín giáo dục",
+    "en": "correspondence education",
+    "vi": "giáo dục từ xa/hàm thụ",
+    "ex": "働きながら（　）で資格を取った。",
+    "exvi": "Vừa đi làm vừa lấy chứng chỉ qua giáo dục từ xa.",
+    "rd": [
+      "つうしんきょういぐ",
+      "つしんきょういく",
+      "つうじんきょういく"
+    ],
+    "kd": [
+      "通信講座",
+      "教育機関",
+      "遠隔教育"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u6-2_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>
