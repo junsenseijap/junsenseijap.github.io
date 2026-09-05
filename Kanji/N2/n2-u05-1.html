@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 5.1 — 学校</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+
+/* HEADER */
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+
+/* STATS */
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+
+/* NAV MODES */
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+
+/* PANEL */
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+
+/* FLASHCARD 3D */
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+
+/* QUIZ */
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+
+/* WRITING */
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* END SCREEN */
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+
+/* AUTH BANNER */
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+
+/* SUBMIT STATUS */
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">学</div>
+    <div>
+      <h1>N2 · 5.1 — 学校</h1>
+      <p>Vocabulaire · 64 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">64</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 5.1</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u5-1";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {k:"児童",r:"じどう",hv:"Nhi đồng",en:"child / pupil",vi:"nhi đồng / học sinh nhỏ",
+    ex:"この本は（　）向けに書かれている。",exvi:"Cuốn sách này được viết dành cho trẻ em.",
+    rd:["じとう","にどう","じいどう"],kd:["児童館","生徒","幼児"],ud:["台風","砂漠","切符"]},
+  {k:"生徒",r:"せいと",hv:"Sinh đồ",en:"student (school)",vi:"học sinh",
+    ex:"この高校には千人の（　）がいる。",exvi:"Trường trung học này có một nghìn học sinh.",
+    rd:["せえと","せいど","せいとう"],kd:["児童","生徒会","学生"],ud:["台風","砂漠","切符"]},
+  {k:"大学院",r:"だいがくいん",hv:"Đại học viện",en:"graduate school",vi:"trường sau đại học",
+    ex:"彼女は卒業後、（　）に進んだ。",exvi:"Sau khi tốt nghiệp, cô ấy đã học lên cao học.",
+    rd:["だいがぐいん","たいがくいん","だいがくえん"],kd:["大学院生","大学","学院"],ud:["台風","砂漠","切符"]},
+  {k:"進学する",r:"しんがくする",hv:"Tiến học",en:"to advance to higher education",vi:"lên học cấp cao hơn",
+    ex:"彼は来年、大学に（　）予定だ。",exvi:"Anh ấy dự định lên đại học vào năm sau.",
+    rd:["しんがくずる","じんがくする","しんかくする"],kd:["進学率","進級する","入学する"],ud:["旅行する","出発する","到着する"]},
+  {k:"転校する",r:"てんこうする",hv:"Chuyển hiệu",en:"to transfer schools",vi:"chuyển trường",
+    ex:"父の転勤で（　）ことになった。",exvi:"Vì bố chuyển công tác nên tôi phải chuyển trường.",
+    rd:["てんこうずる","でんこうする","てんごうする"],kd:["転校生","転職する","転勤する"],ud:["旅行する","出発する","到着する"]},
+  {k:"国立大学",r:"こくりつだいがく",hv:"Quốc lập đại học",en:"national university",vi:"đại học quốc lập",
+    ex:"彼は（　）に合格した。",exvi:"Anh ấy đã đỗ vào trường đại học quốc lập.",
+    rd:["こくりつたいがく","こくりだいがく","こうくりつだいがく"],kd:["私立大学","公立大学","国立"],ud:["台風","砂漠","切符"]},
+  {k:"在学中",r:"ざいがくちゅう",hv:"",en:"while enrolled",vi:"trong thời gian học",
+    ex:"大学（　）にアルバイトをしていた。",exvi:"Trong thời gian học đại học tôi đã đi làm thêm.",
+    rd:["ざいがくじゅう","さいがくちゅう","ざいかくちゅう"],kd:["在学中に","卒業後","在校生"],ud:["温暖な","陽気な","地味な"]},
+  {k:"私立大学",r:"しりつだいがく",hv:"Tư lập đại học",en:"private university",vi:"đại học tư thục",
+    ex:"彼女は（　）で経済学を学んでいる。",exvi:"Cô ấy đang học kinh tế học ở trường đại học tư thục.",
+    rd:["しりつたいがく","わたくしりつだいがく","しりだいがく"],kd:["国立大学","私立高校","私立"],ud:["台風","砂漠","切符"]},
+  {k:"演習",r:"えんしゅう",hv:"Diễn tập",en:"seminar / drill",vi:"thực hành / bài tập",
+    ex:"大学の（　）でグループ発表をした。",exvi:"Trong buổi hội thảo ở đại học tôi đã thuyết trình nhóm.",
+    rd:["えんじゅう","いんしゅう","えんしゅお"],kd:["練習","講義","実習"],ud:["台風","砂漠","切符"]},
+  {k:"単位",r:"たんい",hv:"Đơn vị",en:"credit (academic)",vi:"tín chỉ",
+    ex:"卒業には124（　）が必要だ。",exvi:"Để tốt nghiệp cần 124 tín chỉ.",
+    rd:["だんい","たんいつ","たにい"],kd:["単位数","単位取得","単価"],ud:["台風","砂漠","切符"]},
+  {k:"休講",r:"きゅうこう",hv:"Hưu giảng",en:"class cancellation",vi:"nghỉ giờ học",
+    ex:"今日の授業は（　）になった。",exvi:"Tiết học hôm nay đã bị hủy.",
+    rd:["きゅこう","きゅうごう","きゅうこお"],kd:["休校","休講日","休憩"],ud:["台風","砂漠","切符"]},
+  {k:"自習する",r:"じしゅうする",hv:"Tự học",en:"to study independently",vi:"tự học",
+    ex:"放課後は図書館で（　）ている。",exvi:"Sau giờ học tôi tự học ở thư viện.",
+    rd:["じしゅずる","しじゅうする","じしゅうずる"],kd:["自習室","予習する","復習する"],ud:["旅行する","出発する","到着する"]},
+  {k:"今学期",r:"こんがっき",hv:"",en:"this semester",vi:"học kỳ này",
+    ex:"（　）は難しい授業が多い。",exvi:"Học kỳ này có nhiều môn học khó.",
+    rd:["こんがくき","こんかっき","いまがっき"],kd:["来学期","前学期","新学期"],ud:["台風","砂漠","切符"]},
+  {k:"時間割",r:"じかんわり",hv:"",en:"timetable / schedule",vi:"thời khóa biểu",
+    ex:"新学期の（　）が配られた。",exvi:"Thời khóa biểu học kỳ mới đã được phát.",
+    rd:["じかんわい","じがんわり","しかんわり"],kd:["時間割表","日程表","割り当て"],ud:["台風","砂漠","切符"]},
+  {k:"1時間目",r:"いちじかんめ",hv:"",en:"first period",vi:"tiết học thứ nhất",
+    ex:"（　）の授業は数学だ。",exvi:"Tiết học thứ nhất là môn toán.",
+    rd:["いちじかんめえ","いつじかんめ","いちじがんめ"],kd:["二時間目","最後の時間","一限目"],ud:["台風","砂漠","切符"]},
+  {k:"科目",r:"かもく",hv:"Khoa mục",en:"subject / course",vi:"môn học",
+    ex:"好きな（　）は何ですか。",exvi:"Môn học bạn thích là gì?",
+    rd:["かぼく","がもく","かもぐ"],kd:["必修科目","選択科目","課目"],ud:["台風","砂漠","切符"]},
+  {k:"国語",r:"こくご",hv:"Quốc ngữ",en:"Japanese language (subject)",vi:"môn quốc ngữ",
+    ex:"（　）のテストで満点を取った。",exvi:"Tôi đã đạt điểm tuyệt đối trong bài kiểm tra môn quốc ngữ.",
+    rd:["こくこ","こうこご","こっこご"],kd:["国語辞典","外国語","日本語"],ud:["台風","砂漠","切符"]},
+  {k:"教師",r:"きょうし",hv:"Giáo sư",en:"teacher",vi:"giáo viên",
+    ex:"彼女は中学校の（　）だ。",exvi:"Cô ấy là giáo viên trung học cơ sở.",
+    rd:["きょおし","ぎょうし","きょうじ"],kd:["教員","教授","講師"],ud:["台風","砂漠","切符"]},
+  {k:"教員",r:"きょういん",hv:"Giáo viên",en:"teaching staff",vi:"nhân viên giảng dạy",
+    ex:"この学校には50人の（　）がいる。",exvi:"Trường này có 50 nhân viên giảng dạy.",
+    rd:["きょおいん","きょういむ","ぎょういん"],kd:["教師","教員免許","職員"],ud:["台風","砂漠","切符"]},
+  {k:"教授",r:"きょうじゅ",hv:"Giáo thụ",en:"professor",vi:"giáo sư",
+    ex:"あの（　）の授業はとても人気がある。",exvi:"Buổi học của giáo sư đó rất được yêu thích.",
+    rd:["きょうじゅう","ぎょうじゅ","きょうしゅ"],kd:["准教授","講師","教師"],ud:["台風","砂漠","切符"]},
+  {k:"講師",r:"こうし",hv:"Giảng sư",en:"lecturer",vi:"giảng viên",
+    ex:"彼は非常勤の（　）として働いている。",exvi:"Anh ấy làm việc với tư cách giảng viên thỉnh giảng.",
+    rd:["こおし","ごうし","こうじ"],kd:["教授","講義","講師料"],ud:["台風","砂漠","切符"]},
+  {k:"担当する",r:"たんとうする",hv:"Đảm đương",en:"to be in charge of",vi:"phụ trách",
+    ex:"彼女はこのクラスを（　）ている。",exvi:"Cô ấy phụ trách lớp học này.",
+    rd:["たんどうする","だんとうする","たんとおする"],kd:["担当者","担う","受け持つ"],ud:["旅行する","出発する","到着する"]},
+  {k:"受け持つ",r:"うけもつ",hv:"",en:"to be responsible for",vi:"chịu trách nhiệm",
+    ex:"新任の先生が3年生のクラスを（　）ことになった。",exvi:"Giáo viên mới sẽ phụ trách lớp năm thứ ba.",
+    rd:["うけもづ","うげもつ","うけまつ"],kd:["担当する","受け取る","持つ"],ud:["旅行する","出発する","到着する"]},
+  {k:"教育実習",r:"きょういくじっしゅう",hv:"",en:"student teaching",vi:"thực tập giảng dạy",
+    ex:"大学四年生の時に（　）を経験した。",exvi:"Vào năm thứ tư đại học tôi đã trải qua thực tập giảng dạy.",
+    rd:["きょういくじつしゅう","きょういぐじっしゅう","きょおいくじっしゅう"],kd:["教員免許","実習生","教育課程"],ud:["台風","砂漠","切符"]},
+  {k:"採点する",r:"さいてんする",hv:"Thải điểm",en:"to grade / mark",vi:"chấm điểm",
+    ex:"先生はテストを（　）ている。",exvi:"Giáo viên đang chấm điểm bài kiểm tra.",
+    rd:["さいでんする","さえてんする","さいてんずる"],kd:["採点基準","得点する","評価する"],ud:["旅行する","出発する","到着する"]},
+  {k:"中間試験",r:"ちゅうかんしけん",hv:"",en:"midterm exam",vi:"thi giữa kỳ",
+    ex:"来週から（　）が始まる。",exvi:"Từ tuần sau kỳ thi giữa kỳ sẽ bắt đầu.",
+    rd:["ちゅうがんしけん","ちゅかんしけん","ちゅうかんじけん"],kd:["期末試験","中間発表","試験"],ud:["台風","砂漠","切符"]},
+  {k:"期末試験",r:"きまつしけん",hv:"",en:"final exam",vi:"thi cuối kỳ",
+    ex:"（　）の結果で成績が決まる。",exvi:"Điểm số được quyết định bởi kết quả thi cuối kỳ.",
+    rd:["きまづしけん","きばつしけん","きまつじけん"],kd:["中間試験","期末レポート","学期末"],ud:["台風","砂漠","切符"]},
+  {k:"筆記試験",r:"ひっきしけん",hv:"Bút ký thí nghiệm",en:"written exam",vi:"thi viết",
+    ex:"面接の前に（　）がある。",exvi:"Trước phỏng vấn có bài thi viết.",
+    rd:["ひつきしけん","ひっぎしけん","ひっきじけん"],kd:["実技試験","筆記用具","面接試験"],ud:["台風","砂漠","切符"]},
+  {k:"答案",r:"とうあん",hv:"Đáp án",en:"answer sheet",vi:"bài làm / tờ trả lời",
+    ex:"試験の（　）を提出した。",exvi:"Tôi đã nộp bài làm của kỳ thi.",
+    rd:["とおあん","どうあん","とうあむ"],kd:["答案用紙","答え","解答"],ud:["台風","砂漠","切符"]},
+  {k:"教科書",r:"きょうかしょ",hv:"Giáo khoa thư",en:"textbook",vi:"sách giáo khoa",
+    ex:"新しい（　）を買った。",exvi:"Tôi đã mua sách giáo khoa mới.",
+    rd:["きょうがしょ","きょおかしょ","きょうかしょう"],kd:["参考書","教科書会社","副教材"],ud:["台風","砂漠","切符"]},
+  {k:"暗記する",r:"あんきする",hv:"Ám ký",en:"to memorize",vi:"học thuộc lòng",
+    ex:"単語を（　）のは大変だ。",exvi:"Việc học thuộc lòng từ vựng thật vất vả.",
+    rd:["あんぎする","あんきずる","あんこする"],kd:["暗記力","記憶する","覚える"],ud:["旅行する","出発する","到着する"]},
+  {k:"問い",r:"とい",hv:"Vấn",en:"question / problem",vi:"câu hỏi",
+    ex:"この（　）に答えなさい。",exvi:"Hãy trả lời câu hỏi này.",
+    rd:["とうい","といい","とえ"],kd:["問題","質問","問い合わせ"],ud:["台風","砂漠","切符"]},
+  {k:"成績",r:"せいせき",hv:"Thành tích",en:"grades / results",vi:"thành tích / điểm số",
+    ex:"今学期の（　）が良かった。",exvi:"Điểm số học kỳ này tốt.",
+    rd:["せえせき","せいぜき","せいせぎ"],kd:["成績表","業績","実績"],ud:["台風","砂漠","切符"]},
+  {k:"学力",r:"がくりょく",hv:"Học lực",en:"academic ability",vi:"năng lực học tập",
+    ex:"この試験は基礎（　）を測るものだ。",exvi:"Bài thi này đo lường năng lực học tập cơ bản.",
+    rd:["がくりょぐ","がくりき","かくりょく"],kd:["学力テスト","実力","能力"],ud:["台風","砂漠","切符"]},
+  {k:"評価する",r:"ひょうかする",hv:"Bình giá",en:"to evaluate",vi:"đánh giá",
+    ex:"先生は生徒の努力を高く（　）た。",exvi:"Giáo viên đã đánh giá cao nỗ lực của học sinh.",
+    rd:["ひょおかする","びょうかする","ひょうがする"],kd:["評価基準","評判","批評する"],ud:["旅行する","出発する","到着する"]},
+  {k:"優れている",r:"すぐれている",hv:"Ưu",en:"to be excellent / superior",vi:"xuất sắc / vượt trội",
+    ex:"彼の作品は非常に（　）。",exvi:"Tác phẩm của anh ấy vô cùng xuất sắc.",
+    rd:["すくれている","すぐれてえる","すぐれいる"],kd:["優れる","優秀な","劣っている"],ud:["温暖な","陽気な","地味な"]},
+  {k:"学問",r:"がくもん",hv:"Học vấn",en:"learning / scholarship",vi:"học thuật / học vấn",
+    ex:"彼は生涯（　）に打ち込んだ。",exvi:"Anh ấy đã dành cả đời cho việc học thuật.",
+    rd:["がぐもん","かくもん","がくむん"],kd:["学識","学者","勉学"],ud:["台風","砂漠","切符"]},
+  {k:"自然科学",r:"しぜんかがく",hv:"Tự nhiên khoa học",en:"natural science",vi:"khoa học tự nhiên",
+    ex:"大学で（　）を専攻している。",exvi:"Tôi đang chuyên ngành khoa học tự nhiên ở đại học.",
+    rd:["しぜんがかく","じぜんかがく","しぜんかがぐ"],kd:["社会科学","人文科学","自然現象"],ud:["台風","砂漠","切符"]},
+  {k:"物理学",r:"ぶつりがく",hv:"Vật lý học",en:"physics",vi:"vật lý",
+    ex:"（　）は自然現象を数学的に説明する学問だ。",exvi:"Vật lý học là môn học giải thích các hiện tượng tự nhiên bằng toán học.",
+    rd:["ぶつりがぐ","ぶっりがく","ぶつりかく"],kd:["化学","生物学","物理"],ud:["台風","砂漠","切符"]},
+  {k:"化学",r:"かがく",hv:"Hóa học",en:"chemistry",vi:"hóa học",
+    ex:"（　）の実験室で薬品を混ぜた。",exvi:"Tôi đã pha trộn hóa chất trong phòng thí nghiệm hóa học.",
+    rd:["かがぐ","がかく","かかく"],kd:["科学","化学式","生化学"],ud:["台風","砂漠","切符"]},
+  {k:"生物学",r:"せいぶつがく",hv:"Sinh vật học",en:"biology",vi:"sinh học",
+    ex:"高校で（　）を学んだ。",exvi:"Tôi đã học sinh học ở trung học phổ thông.",
+    rd:["せいぶつがぐ","せいぶづがく","せえぶつがく"],kd:["物理学","化学","生態学"],ud:["台風","砂漠","切符"]},
+  {k:"社会科学",r:"しゃかいかがく",hv:"Xã hội khoa học",en:"social science",vi:"khoa học xã hội",
+    ex:"経済学は（　）の一分野だ。",exvi:"Kinh tế học là một nhánh của khoa học xã hội.",
+    rd:["しゃかいがかく","じゃかいかがく","しゃかいかがぐ"],kd:["自然科学","人文科学","社会学"],ud:["台風","砂漠","切符"]},
+  {k:"経済学",r:"けいざいがく",hv:"Kinh tế học",en:"economics",vi:"kinh tế học",
+    ex:"彼女は大学で（　）を学んでいる。",exvi:"Cô ấy đang học kinh tế học ở đại học.",
+    rd:["けえざいがく","けいさいがく","けいざいがぐ"],kd:["政治学","社会学","経営学"],ud:["台風","砂漠","切符"]},
+  {k:"政治学",r:"せいじがく",hv:"Chính trị học",en:"political science",vi:"chính trị học",
+    ex:"（　）を学んで政治家になった。",exvi:"Anh ấy học chính trị học rồi trở thành chính trị gia.",
+    rd:["せいじがぐ","せいちがく","せえじがく"],kd:["経済学","社会学","政治"],ud:["台風","砂漠","切符"]},
+  {k:"社会学",r:"しゃかいがく",hv:"Xã hội học",en:"sociology",vi:"xã hội học",
+    ex:"彼は現代社会の問題を（　）の視点から研究している。",exvi:"Anh ấy nghiên cứu các vấn đề xã hội hiện đại từ góc độ xã hội học.",
+    rd:["しゃかいがぐ","じゃかいがく","しゃがいがく"],kd:["社会科学","心理学","経済学"],ud:["台風","砂漠","切符"]},
+  {k:"人文科学",r:"じんぶんかがく",hv:"Nhân văn khoa học",en:"humanities",vi:"khoa học nhân văn",
+    ex:"哲学や文学は（　）に含まれる。",exvi:"Triết học và văn học thuộc về khoa học nhân văn.",
+    rd:["じんぶんがかく","にんぶんかがく","じんぶんかがぐ"],kd:["自然科学","社会科学","人文学"],ud:["台風","砂漠","切符"]},
+  {k:"文学",r:"ぶんがく",hv:"Văn học",en:"literature",vi:"văn học",
+    ex:"大学で日本（　）を専攻している。",exvi:"Tôi đang chuyên ngành văn học Nhật Bản ở đại học.",
+    rd:["ぶんがぐ","ふんがく","ぶんかく"],kd:["文学部","哲学","文化"],ud:["台風","砂漠","切符"]},
+  {k:"哲学",r:"てつがく",hv:"Triết học",en:"philosophy",vi:"triết học",
+    ex:"彼は大学で（　）を研究している。",exvi:"Anh ấy nghiên cứu triết học ở đại học.",
+    rd:["てつがぐ","でつがく","てづがく"],kd:["哲学者","文学","倫理学"],ud:["台風","砂漠","切符"]},
+  {k:"言語学",r:"げんごがく",hv:"Ngôn ngữ học",en:"linguistics",vi:"ngôn ngữ học",
+    ex:"（　）は言葉の構造を研究する学問だ。",exvi:"Ngôn ngữ học là môn học nghiên cứu cấu trúc của ngôn ngữ.",
+    rd:["げんごがぐ","けんごがく","げんこがく"],kd:["言語","文学","音声学"],ud:["台風","砂漠","切符"]},
+  {k:"文学部",r:"ぶんがくぶ",hv:"Văn học bộ",en:"faculty of literature",vi:"khoa văn",
+    ex:"彼女は（　）に所属している。",exvi:"Cô ấy thuộc khoa văn.",
+    rd:["ぶんがぐぶ","ぶんがくふ","ふんがくぶ"],kd:["文学","法学部","経済学部"],ud:["台風","砂漠","切符"]},
+  {k:"英文学科",r:"えいぶんがっか",hv:"",en:"department of English literature",vi:"khoa văn học Anh",
+    ex:"彼は（　）に入学した。",exvi:"Anh ấy đã nhập học khoa văn học Anh.",
+    rd:["えいぶんかっか","えいぶんがつか","えいふんがっか"],kd:["国文学科","文学部","英語学科"],ud:["台風","砂漠","切符"]},
+  {k:"専攻する",r:"せんこうする",hv:"Chuyên công",en:"to major in",vi:"chuyên ngành",
+    ex:"大学で心理学を（　）ている。",exvi:"Tôi đang chuyên ngành tâm lý học ở đại học.",
+    rd:["せんごうする","せんこおする","ぜんこうする"],kd:["専攻","専門","専念する"],ud:["旅行する","出発する","到着する"]},
+  {k:"研究",r:"けんきゅう",hv:"Nghiên cứu",en:"research",vi:"nghiên cứu",
+    ex:"彼は長年、この分野の（　）を続けている。",exvi:"Anh ấy đã tiếp tục nghiên cứu lĩnh vực này trong nhiều năm.",
+    rd:["げんきゅう","けんきゅお","けんきゅ"],kd:["研究者","研修","研究室"],ud:["台風","砂漠","切符"]},
+  {k:"参考文献",r:"さんこうぶんけん",hv:"",en:"references / bibliography",vi:"tài liệu tham khảo",
+    ex:"論文の最後に（　）を記載する。",exvi:"Ghi tài liệu tham khảo ở cuối luận văn.",
+    rd:["さんこうぶんげん","さんごうぶんけん","さんこうぶんげ"],kd:["参考書","文献","出典"],ud:["台風","砂漠","切符"]},
+  {k:"引用する",r:"いんようする",hv:"Dẫn dụng",en:"to quote / cite",vi:"trích dẫn",
+    ex:"レポートで有名な学者の言葉を（　）た。",exvi:"Trong báo cáo tôi đã trích dẫn lời của một học giả nổi tiếng.",
+    rd:["いにょうする","いんようずる","いんにょうする"],kd:["引用文","引き出す","参照する"],ud:["旅行する","出発する","到着する"]},
+  {k:"まとめる",r:"まとめる",hv:"",en:"to summarize / compile",vi:"tóm tắt / tổng hợp",
+    ex:"レポートの内容を簡潔に（　）た。",exvi:"Tôi đã tóm tắt nội dung báo cáo một cách ngắn gọn.",
+    rd:["まとべる","またもる","まとめろ"],kd:["まとまる","集める","要約する"],ud:["旅行する","出発する","到着する"]},
+  {k:"説",r:"せつ",hv:"Thuyết",en:"theory / opinion",vi:"thuyết / quan điểm",
+    ex:"この現象については様々な（　）がある。",exvi:"Về hiện tượng này có nhiều thuyết khác nhau.",
+    rd:["せづ","ぜつ","せいつ"],kd:["学説","仮説","説明"],ud:["台風","砂漠","切符"]},
+  {k:"証明する",r:"しょうめいする",hv:"Chứng minh",en:"to prove",vi:"chứng minh",
+    ex:"彼はその理論を実験で（　）た。",exvi:"Anh ấy đã chứng minh lý thuyết đó bằng thực nghiệm.",
+    rd:["しょうめえする","しょめいする","じょうめいする"],kd:["証明書","立証する","実証する"],ud:["旅行する","出発する","到着する"]},
+  {k:"論文",r:"ろんぶん",hv:"Luận văn",en:"thesis / paper",vi:"luận văn",
+    ex:"卒業（　）を書き終えた。",exvi:"Tôi đã viết xong luận văn tốt nghiệp.",
+    rd:["ろんふん","ろうんぶん","ろんぶむ"],kd:["論文集","評論","報告書"],ud:["台風","砂漠","切符"]},
+  {k:"学会",r:"がっかい",hv:"Học hội",en:"academic society / conference",vi:"hội học thuật",
+    ex:"来月、国際（　）で発表する予定だ。",exvi:"Tháng sau tôi dự định phát biểu tại hội nghị học thuật quốc tế.",
+    rd:["がくかい","がっがい","かっかい"],kd:["学会誌","学界","研究会"],ud:["台風","砂漠","切符"]},
+  {k:"今年度",r:"こんねんど",hv:"",en:"this fiscal / school year",vi:"năm học này",
+    ex:"（　）の予算はすでに決まっている。",exvi:"Ngân sách năm nay đã được quyết định.",
+    rd:["こんねんと","こんえんど","いまねんど"],kd:["来年度","前年度","今年"],ud:["台風","砂漠","切符"]},
+  {k:"三日目",r:"みっかめ",hv:"",en:"third day",vi:"ngày thứ ba",
+    ex:"旅行の（　）に観光地を訪れた。",exvi:"Vào ngày thứ ba của chuyến du lịch tôi đã đến thăm điểm du lịch.",
+    rd:["みっかめえ","さんにちめ","みかめ"],kd:["二日目","四日目","初日"],ud:["台風","砂漠","切符"]},
+  {k:"五番目",r:"ごばんめ",hv:"",en:"fifth",vi:"thứ năm",
+    ex:"彼は列の（　）に並んでいた。",exvi:"Anh ấy đứng ở vị trí thứ năm trong hàng.",
+    rd:["ごばんめえ","ごうばんめ","ごばんめい"],kd:["四番目","六番目","第五番目"],ud:["台風","砂漠","切符"]},
+  {k:"必死に",r:"ひっしに",hv:"Tất tử",en:"desperately / with all one's might",vi:"tuyệt vọng / cố hết sức",
+    ex:"彼は試験に合格するため（　）勉強した。",exvi:"Anh ấy đã học hành cật lực để đỗ kỳ thi.",
+    rd:["ひつしに","ひっじに","ひしっに"],kd:["必死で","一生懸命に","必死さ"],ud:["徐々に","突然に","次第に"]},
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u5-1_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>

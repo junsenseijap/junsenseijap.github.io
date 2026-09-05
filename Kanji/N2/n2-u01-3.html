@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 1.3 — 人に対する感情・行動</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+
+/* HEADER */
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+
+/* STATS */
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+
+/* NAV MODES */
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+
+/* PANEL */
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+
+/* FLASHCARD 3D */
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+
+/* QUIZ */
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+
+/* WRITING */
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* END SCREEN */
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+
+/* AUTH BANNER */
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+
+/* SUBMIT STATUS */
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">情</div>
+    <div>
+      <h1>N2 · 1.3 — 人に対する感情・行動</h1>
+      <p>Vocabulaire · 61 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">61</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 1.3</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u1-3";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {k:"感情",r:"かんじょう",hv:"Cảm tình",en:"emotion / feeling",vi:"cảm xúc",
+    ex:"彼は自分の（　）を素直に表現するのが苦手だ。",exvi:"Anh ấy vụng về trong việc thể hiện cảm xúc của mình một cách chân thật.",
+    rd:["かんじょ","がんじょう","かんじゅう"],kd:["感情的","勘定","感傷"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"羨む",r:"うらやむ",hv:"",en:"to envy",vi:"ghen tị / thèm muốn",
+    ex:"彼の成功を（　）人も少なくない。",exvi:"Không ít người ghen tị với thành công của anh ấy.",
+    rd:["うらやも","うやらむ","うらやむう"],kd:["羨ましい","恨む","妬む"],ud:["沸かす","干す","蒸す"]},
+  {k:"尊敬する",r:"そんけいする",hv:"Tôn kính",en:"to respect",vi:"tôn trọng / kính trọng",
+    ex:"私は父をとても（　）。",exvi:"Tôi rất kính trọng cha mình.",
+    rd:["そんきょうする","そんげいする","そうけいする"],kd:["尊重する","敬愛する","尊敬語"],ud:["沸かす","干す","蒸す"]},
+  {k:"敬う",r:"うやまう",hv:"",en:"to revere / honor",vi:"kính trọng",
+    ex:"年上の人を（　）のは大切なことだ。",exvi:"Kính trọng người lớn tuổi hơn là điều quan trọng.",
+    rd:["けいう","うやまむ","うやう"],kd:["敬意","敬愛する","尊敬する"],ud:["沸かす","干す","蒸す"]},
+  {k:"疑う",r:"うたがう",hv:"Nghi",en:"to doubt / suspect",vi:"nghi ngờ",
+    ex:"彼は友人の言葉を（　）ことはなかった。",exvi:"Anh ấy chưa bao giờ nghi ngờ lời nói của bạn mình.",
+    rd:["うたがふ","うだがう","うたごう"],kd:["疑問","疑い","疑わしい"],ud:["沸かす","干す","蒸す"]},
+  {k:"恐れる",r:"おそれる",hv:"Khủng",en:"to fear",vi:"sợ hãi",
+    ex:"彼は失敗を（　）あまり、挑戦しない。",exvi:"Vì quá sợ thất bại nên anh ấy không dám thử thách.",
+    rd:["おそろえる","おそれろ","おうそれる"],kd:["恐ろしい","恐怖","畏れる"],ud:["沸かす","干す","蒸す"]},
+  {k:"憎む",r:"にくむ",hv:"Tăng",en:"to hate",vi:"căm ghét",
+    ex:"彼を（　）気持ちはもうない。",exvi:"Tôi không còn cảm giác căm ghét anh ấy nữa.",
+    rd:["にぐむ","にくもう","にっくむ"],kd:["憎い","憎らしい","嫌う"],ud:["沸かす","干す","蒸す"]},
+  {k:"憎い",r:"にくい",hv:"Tăng",en:"hateful / detestable",vi:"đáng ghét",
+    ex:"あの態度が実に（　）。",exvi:"Cái thái độ đó thật đáng ghét.",
+    rd:["にぐい","にくき","にっくい"],kd:["憎らしい","憎む","悔しい"],ud:["眠い","甘い","涼しい"]},
+  {k:"憎らしい",r:"にくらしい",hv:"",en:"hateful / detestable (feeling)",vi:"đáng ghét / bực bội",
+    ex:"あの子の生意気な態度が（　）。",exvi:"Thái độ hỗn xược của đứa trẻ đó thật đáng ghét.",
+    rd:["にくらしくい","にぐらしい","にくらし"],kd:["憎い","恨めしい","忌々しい"],ud:["眠い","甘い","涼しい"]},
+  {k:"羨ましい",r:"うらやましい",hv:"",en:"envious / jealous",vi:"thèm muốn / ghen tị",
+    ex:"彼の才能が本当に（　）。",exvi:"Tài năng của anh ấy thực sự đáng ghen tị.",
+    rd:["うやらましい","うらやまし","うらやめしい"],kd:["羨む","妬ましい","望ましい"],ud:["眠い","甘い","涼しい"]},
+  {k:"恨む",r:"うらむ",hv:"Hận",en:"to resent / bear a grudge",vi:"oán giận / thù hận",
+    ex:"彼は裏切った友人を今も（　）。",exvi:"Anh ấy vẫn còn oán hận người bạn đã phản bội mình.",
+    rd:["うんらむ","うらも","うらんむ"],kd:["恨み","羨む","憎む"],ud:["沸かす","干す","蒸す"]},
+  {k:"嫌う",r:"きらう",hv:"Hiềm",en:"to dislike / hate",vi:"không thích / ghét",
+    ex:"彼女は嘘をつく人を最も（　）。",exvi:"Cô ấy ghét nhất những người nói dối.",
+    rd:["きろう","きらお","けらう"],kd:["嫌がる","嫌い","嫌悪"],ud:["沸かす","干す","蒸す"]},
+  {k:"嫌がる",r:"いやがる",hv:"",en:"to be reluctant / show dislike",vi:"tỏ ra không thích / miễn cưỡng",
+    ex:"子供は病院に行くのを（　）。",exvi:"Đứa trẻ tỏ ra không thích đi bệnh viện.",
+    rd:["いやかる","いあがる","いやがろ"],kd:["嫌う","嫌がらせ","嫌気"],ud:["沸かす","干す","蒸す"]},
+  {k:"憧れる",r:"あこがれる",hv:"",en:"to yearn for / admire",vi:"ngưỡng mộ / ao ước",
+    ex:"多くの若者がそのスターに（　）。",exvi:"Nhiều bạn trẻ ngưỡng mộ ngôi sao đó.",
+    rd:["あこかれる","あごがれる","あこがれろ"],kd:["憧れ","尊敬する","恋する"],ud:["沸かす","干す","蒸す"]},
+  {k:"恩を感じる",r:"おんをかんじる",hv:"",en:"to feel gratitude / be grateful",vi:"cảm thấy ơn nghĩa",
+    ex:"育ててくれた両親に（　）。",exvi:"Tôi cảm thấy biết ơn cha mẹ đã nuôi dạy mình.",
+    rd:["おんをかんじろ","おんをかんじゆ","おんおかんじる"],kd:["恩返しをする","恩恵を受ける","恩を感じさせる"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"失望する",r:"しつぼうする",hv:"Thất vọng",en:"to be disappointed",vi:"thất vọng",
+    ex:"期待していた結果が出ず、彼は（　）。",exvi:"Vì kết quả không như mong đợi, anh ấy đã thất vọng.",
+    rd:["しつぼうずる","しつぼする","しっぼうする"],kd:["絶望する","失望感","希望する"],ud:["沸かす","干す","蒸す"]},
+  {k:"哀れ",r:"あわれ",hv:"Ai",en:"pity / pathos",vi:"thương hại / bi ai",
+    ex:"その姿はあまりにも（　）だった。",exvi:"Hình ảnh đó thật đáng thương.",
+    rd:["あいれ","あわれい","あばれ"],kd:["哀れみ","気の毒","悲しい"],ud:["便利な","新鮮な","高価な"]},
+  {k:"気の毒",r:"きのどく",hv:"",en:"pitiful / feel sorry for",vi:"tội nghiệp / đáng thương",
+    ex:"事故に遭った彼はとても（　）だ。",exvi:"Anh ấy gặp tai nạn thật tội nghiệp.",
+    rd:["きのどぐ","きのとく","きんのどく"],kd:["気の毒さ","毒気","哀れ"],ud:["便利な","新鮮な","高価な"]},
+  {k:"申し訳ないと思う",r:"もうしわけないとおもう",hv:"",en:"to feel sorry / apologetic",vi:"cảm thấy xin lỗi / áy náy",
+    ex:"約束を守れなかったことを（　）。",exvi:"Tôi cảm thấy xin lỗi vì đã không giữ được lời hứa.",
+    rd:["もうしわけないとおもお","もしわけないとおもう","もうしわげないとおもう"],kd:["申し訳ないと感じる","済まないと思う","申し訳がないと思う"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"済まないと思う",r:"すまないとおもう",hv:"",en:"to feel bad about",vi:"cảm thấy ngại / tội lỗi",
+    ex:"忙しい時に手伝わせてしまって（　）。",exvi:"Tôi cảm thấy áy náy vì đã nhờ giúp đỡ lúc bận rộn.",
+    rd:["すまないとおもお","すまねいとおもう","すまわないとおもう"],kd:["申し訳ないと思う","済まされないと思う","済む"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"敬意を払う",r:"けいいをはらう",hv:"",en:"to show respect",vi:"thể hiện sự kính trọng",
+    ex:"目上の人には（　）べきだ。",exvi:"Nên thể hiện sự kính trọng đối với người bề trên.",
+    rd:["けいいをはろう","けえいをはらう","けいいおはらう"],kd:["敬意を表す","敬意を示す","注意を払う"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"行動",r:"こうどう",hv:"Hành động",en:"action / behavior",vi:"hành động / hành vi",
+    ex:"彼の（　）にはいつも意味がある。",exvi:"Hành động của anh ấy luôn có ý nghĩa.",
+    rd:["こうとう","ごうどう","こうどお"],kd:["行動力","公道","行動的"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"慰める",r:"なぐさめる",hv:"",en:"to console / comfort",vi:"an ủi",
+    ex:"友人が悲しんでいたので（　）。",exvi:"Vì bạn tôi đang buồn nên tôi đã an ủi cậu ấy.",
+    rd:["なぐざめる","なごさめる","なぐさむ"],kd:["慰め","慰安","励ます"],ud:["沸かす","干す","蒸す"]},
+  {k:"避ける",r:"さける",hv:"Tỵ",en:"to avoid",vi:"tránh né",
+    ex:"彼はその話題を（　）ようにしている。",exvi:"Anh ấy cố tránh chủ đề đó.",
+    rd:["さくる","さかける","ひさける"],kd:["避難する","避けがたい","除ける"],ud:["沸かす","干す","蒸す"]},
+  {k:"助言する",r:"じょげんする",hv:"Trợ ngôn",en:"to advise",vi:"khuyên bảo",
+    ex:"先生は進路について（　）くれた。",exvi:"Thầy giáo đã khuyên bảo tôi về con đường sự nghiệp.",
+    rd:["じょごんする","じょけんする","そごんする"],kd:["助言","忠告する","提言する"],ud:["沸かす","干す","蒸す"]},
+  {k:"忠告する",r:"ちゅうこくする",hv:"Trung cáo",en:"to warn / advise earnestly",vi:"khuyên răn / cảnh cáo",
+    ex:"医者は彼にタバコをやめるよう（　）。",exvi:"Bác sĩ đã khuyên anh ấy nên bỏ thuốc lá.",
+    rd:["ちゅうごくする","ちゅうこうする","じゅうこくする"],kd:["忠告","助言する","警告する"],ud:["沸かす","干す","蒸す"]},
+  {k:"言いつける",r:"いいつける",hv:"",en:"to tell on / order",vi:"mách lẻo / ra lệnh",
+    ex:"弟が母に私のいたずらを（　）。",exvi:"Em trai đã mách mẹ về trò nghịch của tôi.",
+    rd:["いいづける","いいつげる","いいつくる"],kd:["言い付け","命じる","告げ口する"],ud:["沸かす","干す","蒸す"]},
+  {k:"皮肉を言う",r:"ひにくをいう",hv:"",en:"to be sarcastic",vi:"nói mỉa mai / châm biếm",
+    ex:"彼はよく人に（　）癖がある。",exvi:"Anh ấy có thói quen hay nói mỉa mai người khác.",
+    rd:["ひにくをいお","ひにぐをいう","ひにくをゆう"],kd:["皮肉を込める","文句を言う","嫌味を言う"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"不平を言う",r:"ふへいをいう",hv:"",en:"to complain",vi:"kêu ca / phàn nàn",
+    ex:"彼はいつも待遇について（　）。",exvi:"Anh ấy luôn phàn nàn về đãi ngộ.",
+    rd:["ふへいをいお","ふうへいをいう","ふへえをいう"],kd:["文句を言う","不満を言う","不平不満"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"自慢する",r:"じまんする",hv:"Tự mãn",en:"to boast / brag",vi:"khoe khoang",
+    ex:"彼は自分の成績をいつも（　）。",exvi:"Anh ấy luôn khoe khoang về thành tích của mình.",
+    rd:["じまむする","じまんずる","しまんする"],kd:["自慢話","自慢げ","自信"],ud:["沸かす","干す","蒸す"]},
+  {k:"怒鳴る",r:"どなる",hv:"",en:"to shout / yell",vi:"quát tháo / hét lên",
+    ex:"上司が部下に（　）のを見た。",exvi:"Tôi đã thấy sếp quát mắng cấp dưới.",
+    rd:["どなろ","どんなる","どなある"],kd:["怒る","怒鳴り声","叫ぶ"],ud:["沸かす","干す","蒸す"]},
+  {k:"秘密",r:"ひみつ",hv:"Bí mật",en:"secret",vi:"bí mật",
+    ex:"これは二人だけの（　）にしよう。",exvi:"Hãy giữ đây là bí mật chỉ giữa hai chúng ta.",
+    rd:["ひめつ","ひみっ","びみつ"],kd:["秘密裏","内緒","極秘"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"隠す",r:"かくす",hv:"Ẩn",en:"to hide",vi:"giấu / che giấu",
+    ex:"彼は本当の気持ちを（　）のが上手だ。",exvi:"Anh ấy giỏi che giấu cảm xúc thật của mình.",
+    rd:["かぐす","かくざす","がくす"],kd:["隠れる","隠し事","隠居"],ud:["沸かす","干す","蒸す"]},
+  {k:"広める",r:"ひろめる",hv:"",en:"to spread / disseminate",vi:"truyền bá / phổ biến",
+    ex:"彼はその技術を世界中に（　）たいと考えている。",exvi:"Anh ấy muốn truyền bá kỹ thuật đó ra toàn thế giới.",
+    rd:["ひろむ","ひらめる","ひろめろ"],kd:["広まる","広い","広告"],ud:["沸かす","干す","蒸す"]},
+  {k:"解く",r:"とく",hv:"Giải",en:"to solve / untie",vi:"giải quyết / tháo",
+    ex:"この問題を（　）のは難しい。",exvi:"Giải bài toán này thật khó.",
+    rd:["とぐ","どく","とうく"],kd:["解ける","解決する","溶く"],ud:["沸かす","干す","蒸す"]},
+  {k:"解ける",r:"とける",hv:"Giải",en:"to be solved",vi:"được giải quyết",
+    ex:"この謎はなかなか（　）ない。",exvi:"Câu đố này mãi không được giải.",
+    rd:["とかる","どける","とえける"],kd:["解く","溶ける","融ける"],ud:["沸かす","干す","蒸す"]},
+  {k:"仲直り",r:"なかなおり",hv:"",en:"reconciliation",vi:"hòa giải",
+    ex:"二人はけんかの後、すぐに（　）した。",exvi:"Hai người đã làm hòa ngay sau khi cãi nhau.",
+    rd:["なかのおり","なかなおいり","なこなおり"],kd:["仲直りする","仲間","仲良し"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"礼儀",r:"れいぎ",hv:"Lễ nghĩa",en:"manners / courtesy",vi:"lễ nghĩa / lịch sự",
+    ex:"彼はいつも（　）を大切にしている。",exvi:"Anh ấy luôn coi trọng lễ nghĩa.",
+    rd:["れいき","れえぎ","らいぎ"],kd:["礼儀正しい","作法","儀礼"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"作法",r:"さほう",hv:"Tác pháp",en:"etiquette / rules of behavior",vi:"phép tắc / nghi thức",
+    ex:"茶道には独特の（　）がある。",exvi:"Trà đạo có những quy tắc, phép tắc độc đáo riêng.",
+    rd:["さくほう","さぼう","さっぽう"],kd:["方法","作法家","礼儀作法"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"敬語",r:"けいご",hv:"Kính ngữ",en:"honorific language",vi:"ngôn ngữ kính ngữ",
+    ex:"目上の人には（　）を使うべきだ。",exvi:"Nên sử dụng kính ngữ khi nói với người bề trên.",
+    rd:["けえご","きょうご","けいこ"],kd:["謙譲語","尊敬語","敬語表現"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"反抗的",r:"はんこうてき",hv:"Phản kháng",en:"rebellious / defiant",vi:"nổi loạn / phản kháng",
+    ex:"思春期の子供は（　）な態度を取ることがある。",exvi:"Trẻ ở tuổi dậy thì đôi khi có thái độ nổi loạn.",
+    rd:["はんごうてき","はんこうでき","ばんこうてき"],kd:["反抗心","反抗期","反発的"],ud:["便利な","新鮮な","高価な"]},
+  {k:"態度を取る",r:"たいどをとる",hv:"",en:"to take an attitude",vi:"có thái độ",
+    ex:"彼はいつも冷たい（　）。",exvi:"Anh ấy luôn có thái độ lạnh lùng.",
+    rd:["たいどをとろ","たいとをとる","たいどをどる"],kd:["態度を示す","姿勢を取る","態度に出す"],ud:["天気が回復する","電車が遅れる","荷物を発送する"]},
+  {k:"道徳",r:"どうとく",hv:"Đạo đức",en:"morality / ethics",vi:"đạo đức",
+    ex:"学校では（　）の授業がある。",exvi:"Ở trường có tiết học đạo đức.",
+    rd:["どうどく","とうとく","どおとく"],kd:["道徳的","倫理","道徳心"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"重視する",r:"じゅうしする",hv:"Trọng thị",en:"to emphasize / value",vi:"coi trọng",
+    ex:"この会社は社員の意見を（　）。",exvi:"Công ty này coi trọng ý kiến của nhân viên.",
+    rd:["じゅうしずる","じゅうじする","ちょうしする"],kd:["重要視する","軽視する","重視"],ud:["沸かす","干す","蒸す"]},
+  {k:"姿勢",r:"しせい",hv:"Tư thế",en:"posture / attitude",vi:"tư thế / thái độ",
+    ex:"彼の勉強に対する（　）は真剣だ。",exvi:"Thái độ của anh ấy đối với việc học rất nghiêm túc.",
+    rd:["しせえ","じせい","しぜい"],kd:["姿","態度","姿形"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"服装",r:"ふくそう",hv:"Phục trang",en:"clothing / attire",vi:"trang phục",
+    ex:"面接では（　）に気をつけるべきだ。",exvi:"Nên chú ý đến trang phục khi phỏng vấn.",
+    rd:["ふくそ","ぶくそう","ふうくそう"],kd:["服装規定","衣装","服飾"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"恋愛",r:"れんあい",hv:"Luyến ái",en:"romance / love affair",vi:"tình yêu lãng mạn",
+    ex:"彼らは大学時代に（　）関係にあった。",exvi:"Họ đã có mối quan hệ yêu đương thời đại học.",
+    rd:["れんない","れいあい","れんああい"],kd:["恋愛感情","恋人","失恋"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"理想のタイプ",r:"りそうのタイプ",hv:"",en:"ideal type (partner)",vi:"mẫu người lý tưởng",
+    ex:"彼女の（　）は優しくて頼もしい人だそうだ。",exvi:"Nghe nói mẫu người lý tưởng của cô ấy là người dịu dàng và đáng tin cậy.",
+    rd:["りそうのたいぷ","りそおのタイプ","りっそうのタイプ"],kd:["理想的なタイプ","理想の相手","好みのタイプ"],ud:["洗濯機","蛍光灯","自動販売機"]},
+  {k:"偶然",r:"ぐうぜん",hv:"Ngẫu nhiên",en:"by chance / coincidence",vi:"ngẫu nhiên / tình cờ",
+    ex:"駅で昔の同級生に（　）会った。",exvi:"Tôi tình cờ gặp bạn học cũ ở nhà ga.",
+    rd:["ぐぜん","ぐうねん","くうぜん"],kd:["偶然性","必然","当然"],ud:["徐々に","一時的に","定期的に"]},
+  {k:"見かける",r:"みかける",hv:"",en:"to happen to see",vi:"tình cờ nhìn thấy",
+    ex:"昨日、駅で有名人を（　）。",exvi:"Hôm qua tôi tình cờ nhìn thấy người nổi tiếng ở nhà ga.",
+    rd:["みかげる","みっかける","みかえける"],kd:["見かけ","見つける","出かける"],ud:["沸かす","干す","蒸す"]},
+  {k:"冷める",r:"さめる",hv:"Lãnh",en:"to cool down (feelings)",vi:"nguội lạnh (cảm xúc)",
+    ex:"二人の関係は次第に（　）いった。",exvi:"Mối quan hệ của hai người dần trở nên nguội lạnh.",
+    rd:["さめろ","さべる","さがめる"],kd:["冷ます","覚める","冷たい"],ud:["沸かす","干す","蒸す"]},
+  {k:"振る",r:"ふる",hv:"",en:"to dump (romantically)",vi:"chia tay / đá (người yêu)",
+    ex:"彼女は彼を一方的に（　）た。",exvi:"Cô ấy đã đơn phương chia tay anh ấy.",
+    rd:["ふろ","ふうる","ふえる"],kd:["振られる","降る","触る"],ud:["沸かす","干す","蒸す"]},
+  {k:"失恋する",r:"しつれんする",hv:"Thất luyến",en:"to have a broken heart",vi:"thất tình",
+    ex:"彼は初めて（　）て、しばらく落ち込んでいた。",exvi:"Lần đầu tiên thất tình, anh ấy đã buồn bã một thời gian.",
+    rd:["しつれんずる","しっれんする","じつれんする"],kd:["失恋","恋愛","失望する"],ud:["沸かす","干す","蒸す"]},
+  {k:"寒がる",r:"さむがる",hv:"",en:"to feel cold / act cold",vi:"tỏ ra lạnh",
+    ex:"彼女は冬になるといつも（　）。",exvi:"Cứ đến mùa đông là cô ấy luôn tỏ ra lạnh.",
+    rd:["さむかる","さぶがる","さむがろ"],kd:["寒い","寒がり","暑がる"],ud:["沸かす","干す","蒸す"]},
+  {k:"欲しがる",r:"ほしがる",hv:"",en:"to want / show desire",vi:"tỏ ra muốn có",
+    ex:"子供は新しいおもちゃを（　）。",exvi:"Đứa trẻ tỏ ra muốn có đồ chơi mới.",
+    rd:["ほしかる","ほっしがる","ほしがろ"],kd:["欲しい","欲張る","欲求"],ud:["沸かす","干す","蒸す"]},
+  {k:"結びつける",r:"むすびつける",hv:"",en:"to connect / link",vi:"kết nối / liên kết",
+    ex:"この出来事が二人を（　）きっかけとなった。",exvi:"Sự việc này đã trở thành cơ hội kết nối hai người.",
+    rd:["むすびづける","むすびつげる","むすびつくる"],kd:["結びつく","結ぶ","関連づける"],ud:["沸かす","干す","蒸す"]},
+  {k:"強める",r:"つよめる",hv:"Cường",en:"to strengthen",vi:"tăng cường",
+    ex:"彼はその主張をさらに（　）た。",exvi:"Anh ấy đã củng cố thêm lập luận đó.",
+    rd:["きょうめる","つおめる","つよめろ"],kd:["強まる","強い","強化する"],ud:["沸かす","干す","蒸す"]},
+  {k:"高める",r:"たかめる",hv:"Cao",en:"to raise / enhance",vi:"nâng cao",
+    ex:"この研修は社員のスキルを（　）ために行われる。",exvi:"Khóa đào tạo này được tổ chức để nâng cao kỹ năng nhân viên.",
+    rd:["こうめる","たがめる","たかめろ"],kd:["高まる","高い","向上させる"],ud:["沸かす","干す","蒸す"]},
+  {k:"思い切って",r:"おもいきって",hv:"",en:"resolutely / boldly",vi:"dứt khoát / quyết tâm",
+    ex:"彼は（　）会社を辞めることにした。",exvi:"Anh ấy đã quyết tâm dứt khoát nghỉ việc.",
+    rd:["おもいぎって","おもいきいて","おもいきて"],kd:["思い切り","思い切る","思いがけず"],ud:["徐々に","一時的に","定期的に"]},
+  {k:"思い切り",r:"おもいきり",hv:"",en:"with all one's might",vi:"hết sức / thoải mái",
+    ex:"休みの日は（　）遊びたい。",exvi:"Vào ngày nghỉ tôi muốn chơi hết mình, thoải mái.",
+    rd:["おもいぎり","おもいきる","おもいきいり"],kd:["思い切って","思いのまま","力一杯"],ud:["徐々に","一時的に","定期的に"]},
+  {k:"いつの間にか",r:"いつのまにか",hv:"",en:"before one knows it",vi:"lúc nào không hay",
+    ex:"（　）、もう夜になっていた。",exvi:"Không hay biết, trời đã tối lúc nào không rõ.",
+    rd:["いつのあいだにか","いつのまにが","いづのまにか"],kd:["いつしか","いつまでも","知らぬ間に"],ud:["徐々に","一時的に","定期的に"]},
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u1-3_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>
