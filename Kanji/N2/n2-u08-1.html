@@ -1,0 +1,2817 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 8.1 — 自然</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">自</div>
+    <div>
+      <h1>N2 · 8.1 — 自然</h1>
+      <p>Vocabulaire · 92 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">92</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 8.1</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u8-1";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DONNÉES — VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {
+    "k": "環境問題",
+    "r": "かんきょうもんだい",
+    "hv": "Hoàn cảnh vấn đề",
+    "en": "environmental issue",
+    "vi": "vấn đề môi trường",
+    "ex": "世界中で（　）への関心が高まっている。",
+    "exvi": "Sự quan tâm đến vấn đề môi trường đang tăng lên trên toàn thế giới.",
+    "rd": [
+      "かんきょうもんたい",
+      "かんぎょうもんだい",
+      "かんきょもんだい"
+    ],
+    "kd": [
+      "公害問題",
+      "自然環境",
+      "環境保護"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "古新聞",
+    "r": "ふるしんぶん",
+    "hv": "",
+    "en": "old newspaper",
+    "vi": "báo cũ",
+    "ex": "（　）は資源ごみとして出してください。",
+    "exvi": "Hãy bỏ báo cũ như rác tái chế.",
+    "rd": [
+      "こしんぶん",
+      "ふるしんもん",
+      "ふるじんぶん"
+    ],
+    "kd": [
+      "古雑誌",
+      "新聞紙",
+      "古本"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "競う",
+    "r": "きそう",
+    "hv": "",
+    "en": "to compete",
+    "vi": "cạnh tranh, thi đua",
+    "ex": "二匹の犬が速さを（　）っていた。",
+    "exvi": "Hai chú chó đang thi đua về tốc độ.",
+    "rd": [
+      "けそう",
+      "きぞう",
+      "きあう"
+    ],
+    "kd": [
+      "競争する",
+      "争う",
+      "競技"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "植物",
+    "r": "しょくぶつ",
+    "hv": "Thực vật",
+    "en": "plant",
+    "vi": "thực vật",
+    "ex": "この温室には珍しい（　）が育てられている。",
+    "exvi": "Trong nhà kính này có trồng những loài thực vật quý hiếm.",
+    "rd": [
+      "しょうくぶつ",
+      "しょくもつ",
+      "しょくぶち"
+    ],
+    "kd": [
+      "植物園",
+      "動物",
+      "作物"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "自然破壊",
+    "r": "しぜんはかい",
+    "hv": "Tự nhiên phá hoại",
+    "en": "destruction of nature",
+    "vi": "phá hủy thiên nhiên",
+    "ex": "開発による（　）が深刻化している。",
+    "exvi": "Việc phá hủy thiên nhiên do phát triển đang trở nên nghiêm trọng.",
+    "rd": [
+      "しぜんはがい",
+      "じぜんはかい",
+      "しぜんばかい"
+    ],
+    "kd": [
+      "環境破壊",
+      "自然環境",
+      "破壊する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "保護",
+    "r": "ほご",
+    "hv": "Bảo hộ",
+    "en": "protection",
+    "vi": "bảo vệ",
+    "ex": "絶滅危惧種の（　）が急務だ。",
+    "exvi": "Việc bảo vệ các loài có nguy cơ tuyệt chủng là việc cấp bách.",
+    "rd": [
+      "ほうご",
+      "ぼご",
+      "ほこ"
+    ],
+    "kd": [
+      "保護区",
+      "保存",
+      "救護"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "牛乳パック",
+    "r": "ぎゅうにゅうパック",
+    "hv": "",
+    "en": "milk carton",
+    "vi": "hộp sữa",
+    "ex": "（　）は洗って乾かしてから捨てる。",
+    "exvi": "Hộp sữa được rửa và phơi khô trước khi bỏ đi.",
+    "rd": [
+      "ぎゅにゅうパック",
+      "ぎゅうにゅパック",
+      "きゅうにゅうパック"
+    ],
+    "kd": [
+      "紙パック",
+      "牛乳瓶",
+      "缶"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "豚",
+    "r": "ぶた",
+    "hv": "",
+    "en": "pig",
+    "vi": "con lợn",
+    "ex": "この農場では（　）を飼育している。",
+    "exvi": "Trang trại này chăn nuôi lợn.",
+    "rd": [
+      "とん",
+      "ぶだ",
+      "ぶうた"
+    ],
+    "kd": [
+      "豚肉",
+      "家畜",
+      "子牛"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "動物",
+    "r": "どうぶつ",
+    "hv": "Động vật",
+    "en": "animal",
+    "vi": "động vật",
+    "ex": "この森には様々な（　）が生息している。",
+    "exvi": "Trong khu rừng này có nhiều loài động vật sinh sống.",
+    "rd": [
+      "どうもつ",
+      "どぶつ",
+      "どうぶち"
+    ],
+    "kd": [
+      "動物園",
+      "植物",
+      "生物"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "環境破壊",
+    "r": "かんきょうはかい",
+    "hv": "Hoàn cảnh phá hoại",
+    "en": "environmental destruction",
+    "vi": "phá hủy môi trường",
+    "ex": "無計画な開発は（　）を招く。",
+    "exvi": "Việc phát triển thiếu quy hoạch sẽ dẫn đến phá hủy môi trường.",
+    "rd": [
+      "かんきょうはがい",
+      "かんぎょうはかい",
+      "かんきょはかい"
+    ],
+    "kd": [
+      "自然破壊",
+      "環境問題",
+      "公害"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "取り組む",
+    "r": "とりくむ",
+    "hv": "",
+    "en": "to tackle, to address",
+    "vi": "giải quyết, nỗ lực với",
+    "ex": "企業は環境保護に積極的に（　）んでいる。",
+    "exvi": "Doanh nghiệp đang tích cực giải quyết vấn đề bảo vệ môi trường.",
+    "rd": [
+      "とりぐむ",
+      "とりこむ",
+      "とりくもう"
+    ],
+    "kd": [
+      "取り組み",
+      "組み込む",
+      "取り入れる"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "地球",
+    "r": "ちきゅう",
+    "hv": "Địa cầu",
+    "en": "Earth",
+    "vi": "trái đất",
+    "ex": "（　）の温暖化が進んでいる。",
+    "exvi": "Sự nóng lên toàn cầu của trái đất đang tiến triển.",
+    "rd": [
+      "ちぎゅう",
+      "じきゅう",
+      "ちきょう"
+    ],
+    "kd": [
+      "地球温暖化",
+      "地表",
+      "惑星"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "瓶",
+    "r": "びん",
+    "hv": "",
+    "en": "bottle",
+    "vi": "chai, lọ",
+    "ex": "使い終わった（　）はリサイクルに出す。",
+    "exvi": "Chai đã dùng xong được đem đi tái chế.",
+    "rd": [
+      "へい",
+      "ぴん",
+      "びいん"
+    ],
+    "kd": [
+      "缶",
+      "瓶詰め",
+      "容器"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "次第に",
+    "r": "しだいに",
+    "hv": "",
+    "en": "gradually",
+    "vi": "dần dần",
+    "ex": "気温が（　）上がってきた。",
+    "exvi": "Nhiệt độ đã dần dần tăng lên.",
+    "rd": [
+      "じだいに",
+      "しだえに",
+      "しでいに"
+    ],
+    "kd": [
+      "徐々に",
+      "次第",
+      "順次"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "植える",
+    "r": "うえる",
+    "hv": "",
+    "en": "to plant",
+    "vi": "trồng",
+    "ex": "庭に桜の木を（　）えた。",
+    "exvi": "Tôi đã trồng cây anh đào trong sân.",
+    "rd": [
+      "おえる",
+      "うへる",
+      "うわえる"
+    ],
+    "kd": [
+      "植樹",
+      "栽培する",
+      "埋める"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "栽培する",
+    "r": "さいばいする",
+    "hv": "Tài bồi",
+    "en": "to cultivate, to grow",
+    "vi": "trồng trọt, canh tác",
+    "ex": "この地方ではぶどうを（　）している。",
+    "exvi": "Ở vùng này, người ta trồng nho.",
+    "rd": [
+      "さいはいする",
+      "ざいばいする",
+      "さいばえする"
+    ],
+    "kd": [
+      "栽培技術",
+      "耕作する",
+      "育成する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "古雑誌",
+    "r": "ふるざっし",
+    "hv": "",
+    "en": "old magazine",
+    "vi": "tạp chí cũ",
+    "ex": "（　）を紐で束ねて資源ごみに出した。",
+    "exvi": "Tôi đã buộc tạp chí cũ bằng dây và bỏ vào rác tái chế.",
+    "rd": [
+      "こざっし",
+      "ふるざつし",
+      "ふるさっし"
+    ],
+    "kd": [
+      "古新聞",
+      "雑誌",
+      "古本"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "缶",
+    "r": "かん",
+    "hv": "",
+    "en": "can (container)",
+    "vi": "lon",
+    "ex": "空き（　）は分別して捨ててください。",
+    "exvi": "Hãy phân loại lon rỗng trước khi vứt.",
+    "rd": [
+      "がん",
+      "かあん",
+      "かんん"
+    ],
+    "kd": [
+      "缶詰",
+      "瓶",
+      "容器"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "群がる",
+    "r": "むらがる",
+    "hv": "",
+    "en": "to swarm, to flock together",
+    "vi": "tụ tập, bầy đàn",
+    "ex": "蟻が砂糖の周りに（　）っていた。",
+    "exvi": "Đàn kiến đã tụ tập xung quanh đường.",
+    "rd": [
+      "ぐんがる",
+      "むれがる",
+      "むらかる"
+    ],
+    "kd": [
+      "群れ",
+      "集まる",
+      "密集する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "羊",
+    "r": "ひつじ",
+    "hv": "",
+    "en": "sheep",
+    "vi": "con cừu",
+    "ex": "牧場でたくさんの（　）が草を食べている。",
+    "exvi": "Nhiều con cừu đang ăn cỏ trên đồng cỏ.",
+    "rd": [
+      "よう",
+      "ひづじ",
+      "ひつぢ"
+    ],
+    "kd": [
+      "羊毛",
+      "家畜",
+      "牧羊"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "作物",
+    "r": "さくもつ",
+    "hv": "Tác vật",
+    "en": "crop",
+    "vi": "nông sản, cây trồng",
+    "ex": "この土地は様々な（　）の栽培に適している。",
+    "exvi": "Vùng đất này thích hợp để trồng nhiều loại cây trồng khác nhau.",
+    "rd": [
+      "さくぶつ",
+      "さっくもつ",
+      "さくもの"
+    ],
+    "kd": [
+      "農作物",
+      "産物",
+      "穀物"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "紙パック",
+    "r": "かみパック",
+    "hv": "",
+    "en": "paper carton",
+    "vi": "hộp giấy",
+    "ex": "ジュースの（　）はすすいでから出す。",
+    "exvi": "Hộp giấy đựng nước ép được rửa sạch trước khi bỏ.",
+    "rd": [
+      "がみパック",
+      "かみぱっく",
+      "かみパッグ"
+    ],
+    "kd": [
+      "牛乳パック",
+      "紙袋",
+      "段ボール"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "種",
+    "r": "たね",
+    "hv": "",
+    "en": "seed",
+    "vi": "hạt giống",
+    "ex": "花壇にひまわりの（　）をまいた。",
+    "exvi": "Tôi đã gieo hạt hoa hướng dương vào bồn hoa.",
+    "rd": [
+      "しゅ",
+      "たに",
+      "たあね"
+    ],
+    "kd": [
+      "種類",
+      "種子",
+      "品種"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "見分ける",
+    "r": "みわける",
+    "hv": "",
+    "en": "to distinguish, to tell apart",
+    "vi": "phân biệt",
+    "ex": "双子は顔だけでは（　）けにくい。",
+    "exvi": "Rất khó phân biệt cặp sinh đôi chỉ bằng khuôn mặt.",
+    "rd": [
+      "みわかる",
+      "みぶんける",
+      "みいわける"
+    ],
+    "kd": [
+      "見誤る",
+      "区別する",
+      "識別する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "温暖化",
+    "r": "おんだんか",
+    "hv": "Ôn ấm hóa",
+    "en": "global warming",
+    "vi": "hiện tượng ấm lên toàn cầu",
+    "ex": "地球（　）が異常気象の原因の一つだ。",
+    "exvi": "Sự ấm lên toàn cầu là một trong những nguyên nhân của thời tiết bất thường.",
+    "rd": [
+      "おんだんが",
+      "おんたんか",
+      "おんだんかい"
+    ],
+    "kd": [
+      "温暖な",
+      "気候変動",
+      "高温化"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "公害問題",
+    "r": "こうがいもんだい",
+    "hv": "Công hại vấn đề",
+    "en": "pollution problem",
+    "vi": "vấn đề ô nhiễm công nghiệp",
+    "ex": "1960年代、日本では深刻な（　）が起きた。",
+    "exvi": "Vào những năm 1960, Nhật Bản đã xảy ra vấn đề ô nhiễm công nghiệp nghiêm trọng.",
+    "rd": [
+      "こうがいもんたい",
+      "こうかいもんだい",
+      "こおがいもんだい"
+    ],
+    "kd": [
+      "環境問題",
+      "大気汚染問題",
+      "騒音問題"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "小屋",
+    "r": "こや",
+    "hv": "",
+    "en": "hut, shed",
+    "vi": "chòi, lều",
+    "ex": "山の中に古い（　）が建っていた。",
+    "exvi": "Có một túp lều cũ dựng trong núi.",
+    "rd": [
+      "しょうおく",
+      "こおや",
+      "こうや"
+    ],
+    "kd": [
+      "物置",
+      "牛舎",
+      "山小屋"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "気候",
+    "r": "きこう",
+    "hv": "Khí hậu",
+    "en": "climate",
+    "vi": "khí hậu",
+    "ex": "この地域は温暖な（　）で知られている。",
+    "exvi": "Khu vực này nổi tiếng với khí hậu ôn hòa.",
+    "rd": [
+      "きこ",
+      "ぎこう",
+      "きこお"
+    ],
+    "kd": [
+      "気候変動",
+      "天候",
+      "風土"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "大気",
+    "r": "たいき",
+    "hv": "Đại khí",
+    "en": "atmosphere",
+    "vi": "khí quyển",
+    "ex": "工場からの排気ガスが（　）を汚染している。",
+    "exvi": "Khí thải từ nhà máy đang làm ô nhiễm khí quyển.",
+    "rd": [
+      "だいき",
+      "たいぎ",
+      "たいけ"
+    ],
+    "kd": [
+      "大気汚染",
+      "空気",
+      "気圧"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "群れ",
+    "r": "むれ",
+    "hv": "",
+    "en": "herd, flock, group",
+    "vi": "đàn, bầy",
+    "ex": "鹿の（　）が森の中を移動していた。",
+    "exvi": "Một đàn hươu đã di chuyển trong rừng.",
+    "rd": [
+      "ぐんれ",
+      "むうれ",
+      "むれい"
+    ],
+    "kd": [
+      "群がる",
+      "集団",
+      "一群"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "行動する",
+    "r": "こうどうする",
+    "hv": "Hành động",
+    "en": "to act, to behave",
+    "vi": "hành động",
+    "ex": "動物は本能に従って（　）する。",
+    "exvi": "Động vật hành động theo bản năng.",
+    "rd": [
+      "ごうどうする",
+      "こおどうする",
+      "こうとうする"
+    ],
+    "kd": [
+      "行動範囲",
+      "動作する",
+      "活動する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "汚染する",
+    "r": "おせんする",
+    "hv": "Ô nhiễm",
+    "en": "to pollute",
+    "vi": "gây ô nhiễm",
+    "ex": "工場の排水が川を（　）した。",
+    "exvi": "Nước thải nhà máy đã làm ô nhiễm dòng sông.",
+    "rd": [
+      "おぜんする",
+      "おうせんする",
+      "おせんずる"
+    ],
+    "kd": [
+      "汚染物質",
+      "大気汚染",
+      "公害"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "深刻な",
+    "r": "しんこくな",
+    "hv": "Thâm khắc",
+    "en": "serious, severe",
+    "vi": "nghiêm trọng",
+    "ex": "この地域は水不足が（　）問題になっている。",
+    "exvi": "Tình trạng thiếu nước ở khu vực này đang trở thành vấn đề nghiêm trọng.",
+    "rd": [
+      "しんこうくな",
+      "じんこくな",
+      "しんごくな"
+    ],
+    "kd": [
+      "深刻化",
+      "重大な",
+      "深刻さ"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "解決する",
+    "r": "かいけつする",
+    "hv": "Giải quyết",
+    "en": "to resolve, to solve",
+    "vi": "giải quyết",
+    "ex": "この問題を早急に（　）しなければならない。",
+    "exvi": "Vấn đề này cần được giải quyết gấp.",
+    "rd": [
+      "かいけずする",
+      "がいけつする",
+      "かいけつずる"
+    ],
+    "kd": [
+      "解決策",
+      "解消する",
+      "解答する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "騒音問題",
+    "r": "そうおんもんだい",
+    "hv": "Táo âm vấn đề",
+    "en": "noise problem",
+    "vi": "vấn đề tiếng ồn",
+    "ex": "工事現場の（　）で近隣住民が苦情を言った。",
+    "exvi": "Cư dân xung quanh đã phàn nàn về vấn đề tiếng ồn từ công trường.",
+    "rd": [
+      "そうおんもんたい",
+      "そうんもんだい",
+      "そおんもんだい"
+    ],
+    "kd": [
+      "公害問題",
+      "大気汚染問題",
+      "振動問題"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "鶏",
+    "r": "にわとり",
+    "hv": "",
+    "en": "chicken",
+    "vi": "con gà",
+    "ex": "農家では（　）を飼って卵を取っている。",
+    "exvi": "Nhà nông nuôi gà để lấy trứng.",
+    "rd": [
+      "けい",
+      "にわとうり",
+      "にわどり"
+    ],
+    "kd": [
+      "鶏肉",
+      "家禽",
+      "雛鳥"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "大気汚染問題",
+    "r": "たいきおせんもんだい",
+    "hv": "",
+    "en": "air pollution problem",
+    "vi": "vấn đề ô nhiễm không khí",
+    "ex": "都市部では（　）が深刻化している。",
+    "exvi": "Vấn đề ô nhiễm không khí đang trở nên nghiêm trọng ở khu vực thành thị.",
+    "rd": [
+      "たいきおせんもんたい",
+      "たいぎおせんもんだい",
+      "たいきおぜんもんだい"
+    ],
+    "kd": [
+      "公害問題",
+      "大気汚染",
+      "環境問題"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "飼育する",
+    "r": "しいくする",
+    "hv": "Tự dục",
+    "en": "to raise, to keep (animals)",
+    "vi": "nuôi dưỡng (động vật)",
+    "ex": "動物園ではパンダを（　）している。",
+    "exvi": "Sở thú đang nuôi gấu trúc.",
+    "rd": [
+      "しいぐする",
+      "じいくする",
+      "しゆくする"
+    ],
+    "kd": [
+      "飼育係",
+      "飼う",
+      "繁殖する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "下水道",
+    "r": "げすいどう",
+    "hv": "Hạ thủy đạo",
+    "en": "sewer system",
+    "vi": "hệ thống thoát nước",
+    "ex": "この地域は（　）の整備が遅れている。",
+    "exvi": "Việc hoàn thiện hệ thống thoát nước ở khu vực này còn chậm trễ.",
+    "rd": [
+      "げすいとう",
+      "げずいどう",
+      "かすいどう"
+    ],
+    "kd": [
+      "水道",
+      "排水",
+      "上水道"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "育児",
+    "r": "いくじ",
+    "hv": "Dục nhi",
+    "en": "child-rearing",
+    "vi": "nuôi con",
+    "ex": "共働き夫婦にとって（　）は大変だ。",
+    "exvi": "Việc nuôi con là điều vất vả đối với các cặp vợ chồng cùng đi làm.",
+    "rd": [
+      "いくに",
+      "いくじい",
+      "いっくじ"
+    ],
+    "kd": [
+      "育児休暇",
+      "子育て",
+      "保育"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "整備する",
+    "r": "せいびする",
+    "hv": "Chỉnh bị",
+    "en": "to maintain, to set up (infrastructure)",
+    "vi": "hoàn thiện, chỉnh trang",
+    "ex": "市は道路を（　）することを決めた。",
+    "exvi": "Thành phố đã quyết định chỉnh trang đường sá.",
+    "rd": [
+      "せいひする",
+      "せいびずる",
+      "せえびする"
+    ],
+    "kd": [
+      "整備士",
+      "整理する",
+      "設備"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "子育て",
+    "r": "こそだて",
+    "hv": "",
+    "en": "child-raising",
+    "vi": "nuôi dạy con",
+    "ex": "彼女は仕事と（　）を両立させている。",
+    "exvi": "Cô ấy đang cân bằng giữa công việc và việc nuôi dạy con.",
+    "rd": [
+      "こそだち",
+      "こだそて",
+      "こそたて"
+    ],
+    "kd": [
+      "育児",
+      "子供",
+      "教育"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "道路",
+    "r": "どうろ",
+    "hv": "Đạo lộ",
+    "en": "road",
+    "vi": "đường",
+    "ex": "新しい（　）が建設される予定だ。",
+    "exvi": "Một con đường mới dự kiến sẽ được xây dựng.",
+    "rd": [
+      "どおろ",
+      "どうろう",
+      "どろ"
+    ],
+    "kd": [
+      "道路工事",
+      "高速道路",
+      "歩道"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "危害",
+    "r": "きがい",
+    "hv": "Nguy hại",
+    "en": "harm, danger",
+    "vi": "nguy hại",
+    "ex": "この化学物質は人体に（　）を与える恐れがある。",
+    "exvi": "Chất hóa học này có nguy cơ gây hại cho cơ thể con người.",
+    "rd": [
+      "きかい",
+      "ぎがい",
+      "きがえ"
+    ],
+    "kd": [
+      "危険",
+      "有害",
+      "被害"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "工場",
+    "r": "こうじょう",
+    "hv": "Công xưởng",
+    "en": "factory",
+    "vi": "nhà máy",
+    "ex": "この（　）は自動車部品を製造している。",
+    "exvi": "Nhà máy này sản xuất linh kiện ô tô.",
+    "rd": [
+      "こうしょう",
+      "こおじょう",
+      "こうじょ"
+    ],
+    "kd": [
+      "工場長",
+      "製造業",
+      "工房"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "加える",
+    "r": "くわえる",
+    "hv": "",
+    "en": "to add",
+    "vi": "thêm vào",
+    "ex": "スープに塩を少し（　）えた。",
+    "exvi": "Tôi đã thêm một chút muối vào súp.",
+    "rd": [
+      "かえる",
+      "くわある",
+      "くあえる"
+    ],
+    "kd": [
+      "加わる",
+      "追加する",
+      "加算する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "繁殖する",
+    "r": "はんしょくする",
+    "hv": "Phồn thực",
+    "en": "to breed, to reproduce",
+    "vi": "sinh sản",
+    "ex": "この魚は水温が高いと活発に（　）する。",
+    "exvi": "Loài cá này sinh sản mạnh khi nhiệt độ nước cao.",
+    "rd": [
+      "はんそくする",
+      "ばんしょくする",
+      "はんしょうくする"
+    ],
+    "kd": [
+      "繁殖期",
+      "増殖する",
+      "生殖"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "加わる",
+    "r": "くわわる",
+    "hv": "",
+    "en": "to be added, to join",
+    "vi": "được thêm vào, tham gia",
+    "ex": "新しいメンバーがチームに（　）った。",
+    "exvi": "Một thành viên mới đã tham gia vào đội.",
+    "rd": [
+      "かわわる",
+      "くあわる",
+      "くわあわる"
+    ],
+    "kd": [
+      "加える",
+      "参加する",
+      "加入する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "絶滅する",
+    "r": "ぜつめつする",
+    "hv": "Tuyệt diệt",
+    "en": "to become extinct",
+    "vi": "tuyệt chủng",
+    "ex": "この動物はまもなく（　）するかもしれない。",
+    "exvi": "Loài động vật này có thể sẽ tuyệt chủng trong thời gian tới.",
+    "rd": [
+      "ぜつべつする",
+      "せつめつする",
+      "ぜつめいする"
+    ],
+    "kd": [
+      "絶滅危惧種",
+      "滅びる",
+      "死滅する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "思いのほか",
+    "r": "おもいのほか",
+    "hv": "",
+    "en": "unexpectedly, more than expected",
+    "vi": "ngoài dự đoán",
+    "ex": "実験は（　）うまくいった。",
+    "exvi": "Thí nghiệm đã diễn ra thuận lợi ngoài dự đoán.",
+    "rd": [
+      "おもいのほうか",
+      "おもいのおか",
+      "おもいのほが"
+    ],
+    "kd": [
+      "案外と",
+      "意外と",
+      "思いがけず"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "恐竜",
+    "r": "きょうりゅう",
+    "hv": "Khủng long",
+    "en": "dinosaur",
+    "vi": "khủng long",
+    "ex": "博物館で（　）の化石が展示されている。",
+    "exvi": "Hóa thạch khủng long đang được trưng bày tại bảo tàng.",
+    "rd": [
+      "きょうりゅ",
+      "きょりゅう",
+      "きょうりゆう"
+    ],
+    "kd": [
+      "恐竜時代",
+      "化石",
+      "古生物"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "雌",
+    "r": "めす",
+    "hv": "",
+    "en": "female (animal)",
+    "vi": "con cái (động vật)",
+    "ex": "この鳥は（　）の方が体が大きい。",
+    "exvi": "Ở loài chim này, con cái có cơ thể lớn hơn.",
+    "rd": [
+      "し",
+      "めうす",
+      "めっす"
+    ],
+    "kd": [
+      "雄",
+      "雌雄",
+      "母親"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "子うさぎ",
+    "r": "こうさぎ",
+    "hv": "",
+    "en": "baby rabbit",
+    "vi": "thỏ con",
+    "ex": "庭で（　）が跳ねているのを見た。",
+    "exvi": "Tôi đã thấy một chú thỏ con nhảy trong sân.",
+    "rd": [
+      "こうざぎ",
+      "こおうさぎ",
+      "こうさき"
+    ],
+    "kd": [
+      "子牛",
+      "うさぎ",
+      "子猫"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "花粉",
+    "r": "かふん",
+    "hv": "Hoa phấn",
+    "en": "pollen",
+    "vi": "phấn hoa",
+    "ex": "春になると（　）症に悩む人が増える。",
+    "exvi": "Khi mùa xuân đến, số người mắc dị ứng phấn hoa tăng lên.",
+    "rd": [
+      "かぶん",
+      "がふん",
+      "かふうん"
+    ],
+    "kd": [
+      "花粉症",
+      "受粉",
+      "花びら"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "雄",
+    "r": "おす",
+    "hv": "",
+    "en": "male (animal)",
+    "vi": "con đực (động vật)",
+    "ex": "（　）のライオンはたてがみが特徴的だ。",
+    "exvi": "Sư tử đực có đặc điểm là có bờm.",
+    "rd": [
+      "ゆう",
+      "おうす",
+      "おっす"
+    ],
+    "kd": [
+      "雌",
+      "雄雌",
+      "父親"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "菌",
+    "r": "きん",
+    "hv": "Khuẩn",
+    "en": "bacteria, fungus",
+    "vi": "vi khuẩn, nấm",
+    "ex": "この食品は（　）の繁殖を防ぐ加工がされている。",
+    "exvi": "Thực phẩm này được xử lý để ngăn ngừa vi khuẩn sinh sôi.",
+    "rd": [
+      "ぎん",
+      "きに",
+      "きぬ"
+    ],
+    "kd": [
+      "細菌",
+      "菌類",
+      "殺菌"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "徐々に",
+    "r": "じょじょに",
+    "hv": "Từ từ",
+    "en": "gradually",
+    "vi": "dần dần",
+    "ex": "患者の容態は（　）回復している。",
+    "exvi": "Tình trạng của bệnh nhân đang dần dần hồi phục.",
+    "rd": [
+      "じょうじょに",
+      "じょじょうに",
+      "しょじょに"
+    ],
+    "kd": [
+      "徐行",
+      "次第に",
+      "少しずつ"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "細菌",
+    "r": "さいきん",
+    "hv": "Tế khuẩn",
+    "en": "bacteria",
+    "vi": "vi khuẩn",
+    "ex": "この水には有害な（　）が含まれている。",
+    "exvi": "Nước này chứa vi khuẩn có hại.",
+    "rd": [
+      "さいぎん",
+      "ざいきん",
+      "さいけん"
+    ],
+    "kd": [
+      "菌",
+      "感染症",
+      "病原菌"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "子牛",
+    "r": "こうし",
+    "hv": "",
+    "en": "calf",
+    "vi": "bê con",
+    "ex": "牧場で生まれたばかりの（　）を見た。",
+    "exvi": "Tôi đã thấy một chú bê con vừa mới sinh ở trang trại.",
+    "rd": [
+      "こぎゅう",
+      "こうじ",
+      "こううし"
+    ],
+    "kd": [
+      "子うさぎ",
+      "牛",
+      "家畜"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "感染する",
+    "r": "かんせんする",
+    "hv": "Cảm nhiễm",
+    "en": "to become infected",
+    "vi": "bị nhiễm",
+    "ex": "このウイルスは空気中で（　）する。",
+    "exvi": "Loại virus này lây nhiễm qua không khí.",
+    "rd": [
+      "かんぜんする",
+      "がんせんする",
+      "かんせんずる"
+    ],
+    "kd": [
+      "感染症",
+      "伝染する",
+      "罹患する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "現状",
+    "r": "げんじょう",
+    "hv": "Hiện trạng",
+    "en": "current situation",
+    "vi": "tình trạng hiện tại",
+    "ex": "専門家が環境の（　）について報告した。",
+    "exvi": "Chuyên gia đã báo cáo về tình trạng hiện tại của môi trường.",
+    "rd": [
+      "げんじょお",
+      "げんしょう",
+      "けんじょう"
+    ],
+    "kd": [
+      "現状維持",
+      "状況",
+      "実情"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "獲物",
+    "r": "えもの",
+    "hv": "",
+    "en": "prey, catch",
+    "vi": "con mồi",
+    "ex": "ライオンは（　）を追いかけていた。",
+    "exvi": "Sư tử đã đuổi theo con mồi.",
+    "rd": [
+      "かくぶつ",
+      "えぶつ",
+      "えもん"
+    ],
+    "kd": [
+      "猟",
+      "狩り",
+      "餌食"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "一頭",
+    "r": "いっとう",
+    "hv": "",
+    "en": "one (animal, counter)",
+    "vi": "một con (đơn vị đếm)",
+    "ex": "牧場に牛が（　）いた。",
+    "exvi": "Có một con bò ở trang trại.",
+    "rd": [
+      "いちとう",
+      "いっとお",
+      "いつとう"
+    ],
+    "kd": [
+      "一匹",
+      "一羽",
+      "頭数"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "昆虫",
+    "r": "こんちゅう",
+    "hv": "Côn trùng",
+    "en": "insect",
+    "vi": "côn trùng",
+    "ex": "夏休みに息子は（　）採集をした。",
+    "exvi": "Vào kỳ nghỉ hè, con trai tôi đã đi bắt côn trùng.",
+    "rd": [
+      "こんちゅ",
+      "こんじゅう",
+      "こんちょう"
+    ],
+    "kd": [
+      "昆虫採集",
+      "虫",
+      "昆虫類"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "観察する",
+    "r": "かんさつする",
+    "hv": "Quan sát",
+    "en": "to observe",
+    "vi": "quan sát",
+    "ex": "子供たちは植物の成長を（　）した。",
+    "exvi": "Bọn trẻ đã quan sát sự phát triển của cây.",
+    "rd": [
+      "かんざつする",
+      "がんさつする",
+      "かんさっする"
+    ],
+    "kd": [
+      "観察日記",
+      "観測する",
+      "観覧する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "襲う",
+    "r": "おそう",
+    "hv": "",
+    "en": "to attack",
+    "vi": "tấn công",
+    "ex": "野生のクマが人を（　）った事件が報じられた。",
+    "exvi": "Sự việc gấu hoang tấn công người đã được đưa tin.",
+    "rd": [
+      "おうそう",
+      "おそる",
+      "おっそう"
+    ],
+    "kd": [
+      "襲撃する",
+      "攻撃する",
+      "侵略する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "収納する",
+    "r": "しゅうのうする",
+    "hv": "Thu nạp",
+    "en": "to store, to put away",
+    "vi": "cất giữ, lưu trữ",
+    "ex": "使わない道具は棚に（　）した。",
+    "exvi": "Những dụng cụ không dùng đến đã được cất vào tủ.",
+    "rd": [
+      "しゅのうする",
+      "しゅうのおする",
+      "しゅうのする"
+    ],
+    "kd": [
+      "収納スペース",
+      "保管する",
+      "収蔵する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "回収する",
+    "r": "かいしゅうする",
+    "hv": "Hồi thu",
+    "en": "to collect, to recover",
+    "vi": "thu gom, thu hồi",
+    "ex": "使用済みの電池を（　）している。",
+    "exvi": "Pin đã qua sử dụng đang được thu gom.",
+    "rd": [
+      "かいしゅする",
+      "がいしゅうする",
+      "かいしゅうずる"
+    ],
+    "kd": [
+      "回収箱",
+      "収集する",
+      "リサイクル"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "破壊する",
+    "r": "はかいする",
+    "hv": "Phá hoại",
+    "en": "to destroy",
+    "vi": "phá hủy",
+    "ex": "台風は多くの建物を（　）した。",
+    "exvi": "Cơn bão đã phá hủy nhiều tòa nhà.",
+    "rd": [
+      "はがいする",
+      "ばかいする",
+      "はかいずる"
+    ],
+    "kd": [
+      "自然破壊",
+      "破壊行為",
+      "破損する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "自然環境",
+    "r": "しぜんかんきょう",
+    "hv": "Tự nhiên hoàn cảnh",
+    "en": "natural environment",
+    "vi": "môi trường tự nhiên",
+    "ex": "この島の（　）は非常に豊かだ。",
+    "exvi": "Môi trường tự nhiên của hòn đảo này vô cùng phong phú.",
+    "rd": [
+      "しぜんかんきょ",
+      "じぜんかんきょう",
+      "しせんかんきょう"
+    ],
+    "kd": [
+      "自然破壊",
+      "環境問題",
+      "生態系"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "影響",
+    "r": "えいきょう",
+    "hv": "Ảnh hưởng",
+    "en": "influence, effect",
+    "vi": "ảnh hưởng",
+    "ex": "気候変動は農業に大きな（　）を及ぼしている。",
+    "exvi": "Biến đổi khí hậu đang gây ảnh hưởng lớn đến nông nghiệp.",
+    "rd": [
+      "えいぎょう",
+      "えいきょお",
+      "えいけょう"
+    ],
+    "kd": [
+      "影響力",
+      "反響",
+      "波及"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "及ぼす",
+    "r": "およぼす",
+    "hv": "",
+    "en": "to exert (an influence)",
+    "vi": "gây ra (ảnh hưởng)",
+    "ex": "この決定は多くの人に影響を（　）す。",
+    "exvi": "Quyết định này sẽ gây ảnh hưởng đến nhiều người.",
+    "rd": [
+      "おいよぼす",
+      "およぶす",
+      "おおよぼす"
+    ],
+    "kd": [
+      "及ぶ",
+      "影響",
+      "波及する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "及ぶ",
+    "r": "およぶ",
+    "hv": "",
+    "en": "to reach, to extend to",
+    "vi": "lan đến, kéo dài đến",
+    "ex": "被害は広範囲に（　）んだ。",
+    "exvi": "Thiệt hại đã lan rộng ra một phạm vi lớn.",
+    "rd": [
+      "おいよぶ",
+      "おおよぶ",
+      "およむ"
+    ],
+    "kd": [
+      "及ぼす",
+      "達する",
+      "広がる"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "茎",
+    "r": "くき",
+    "hv": "",
+    "en": "stem (of a plant)",
+    "vi": "thân cây",
+    "ex": "このバラは（　）にとげがある。",
+    "exvi": "Cây hoa hồng này có gai trên thân.",
+    "rd": [
+      "けい",
+      "くぎ",
+      "くうき"
+    ],
+    "kd": [
+      "茎葉",
+      "幹",
+      "根"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "伸びる",
+    "r": "のびる",
+    "hv": "",
+    "en": "to grow, to extend",
+    "vi": "mọc dài ra, phát triển",
+    "ex": "この植物は日光を浴びるとよく（　）びる。",
+    "exvi": "Loài cây này phát triển tốt khi được phơi nắng.",
+    "rd": [
+      "のひる",
+      "のぴる",
+      "のべる"
+    ],
+    "kd": [
+      "延びる",
+      "成長する",
+      "伸ばす"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "延びる",
+    "r": "のびる",
+    "hv": "",
+    "en": "to be extended, to be prolonged",
+    "vi": "kéo dài ra",
+    "ex": "工事の期間が予定より（　）びた。",
+    "exvi": "Thời gian thi công đã kéo dài hơn dự kiến.",
+    "rd": [
+      "のひる",
+      "のべる",
+      "のぴる"
+    ],
+    "kd": [
+      "伸びる",
+      "延期する",
+      "延長する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "つぼみ",
+    "r": "つぼみ",
+    "hv": "",
+    "en": "flower bud",
+    "vi": "nụ hoa",
+    "ex": "桜の（　）が膨らんできた。",
+    "exvi": "Nụ hoa anh đào đã bắt đầu phình to.",
+    "rd": [
+      "つぼめ",
+      "つぽみ",
+      "つぼぼみ"
+    ],
+    "kd": [
+      "花",
+      "蕾",
+      "若葉"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "膨らむ",
+    "r": "ふくらむ",
+    "hv": "",
+    "en": "to swell, to expand",
+    "vi": "phồng lên",
+    "ex": "風船が空気で（　）んだ。",
+    "exvi": "Quả bóng bay đã phồng lên nhờ không khí.",
+    "rd": [
+      "ふうくらむ",
+      "ふくらぬ",
+      "ふくむら"
+    ],
+    "kd": [
+      "膨張する",
+      "膨らみ",
+      "広がる"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "開花する",
+    "r": "かいかする",
+    "hv": "Khai hoa",
+    "en": "to bloom",
+    "vi": "nở hoa",
+    "ex": "今年の桜は例年より早く（　）した。",
+    "exvi": "Hoa anh đào năm nay đã nở sớm hơn mọi năm.",
+    "rd": [
+      "かいけする",
+      "がいかする",
+      "かいかずる"
+    ],
+    "kd": [
+      "開花時期",
+      "満開",
+      "咲く"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "船",
+    "r": "ふね",
+    "hv": "",
+    "en": "ship, boat",
+    "vi": "tàu, thuyền",
+    "ex": "港からたくさんの（　）が出航していった。",
+    "exvi": "Rất nhiều tàu đã xuất phát từ cảng.",
+    "rd": [
+      "せん",
+      "ふな",
+      "ふうね"
+    ],
+    "kd": [
+      "漁船",
+      "船舶",
+      "風船"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "風船",
+    "r": "ふうせん",
+    "hv": "Phong thuyền",
+    "en": "balloon",
+    "vi": "bóng bay",
+    "ex": "子供が赤い（　）を持って歩いていた。",
+    "exvi": "Đứa trẻ đã đi bộ với quả bóng bay màu đỏ.",
+    "rd": [
+      "ふせん",
+      "ふうぜん",
+      "ふうせえん"
+    ],
+    "kd": [
+      "風",
+      "船",
+      "気球"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "杉",
+    "r": "すぎ",
+    "hv": "",
+    "en": "cedar",
+    "vi": "cây tuyết tùng",
+    "ex": "春は（　）の花粉が多く飛ぶ。",
+    "exvi": "Vào mùa xuân, phấn hoa tuyết tùng bay rất nhiều.",
+    "rd": [
+      "さん",
+      "すき",
+      "すうぎ"
+    ],
+    "kd": [
+      "杉花粉",
+      "松",
+      "檜"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "地球温暖化",
+    "r": "ちきゅうおんだんか",
+    "hv": "",
+    "en": "global warming",
+    "vi": "hiện tượng nóng lên toàn cầu",
+    "ex": "（　）の対策が世界的な課題だ。",
+    "exvi": "Đối phó với hiện tượng nóng lên toàn cầu là vấn đề mang tính toàn cầu.",
+    "rd": [
+      "ちきゅうおんだんが",
+      "ちぎゅうおんだんか",
+      "ちきゅおんだんか"
+    ],
+    "kd": [
+      "温暖化",
+      "気候変動",
+      "異常気象"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "深刻化",
+    "r": "しんこくか",
+    "hv": "Thâm khắc hóa",
+    "en": "worsening, intensification",
+    "vi": "sự trầm trọng hóa",
+    "ex": "砂漠化の（　）が懸念されている。",
+    "exvi": "Người ta lo ngại về sự trầm trọng hóa của hiện tượng sa mạc hóa.",
+    "rd": [
+      "しんこっか",
+      "しんこくが",
+      "じんこくか"
+    ],
+    "kd": [
+      "深刻な",
+      "悪化",
+      "激化"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "産出量",
+    "r": "さんしゅつりょう",
+    "hv": "Sản xuất lượng",
+    "en": "output volume",
+    "vi": "sản lượng",
+    "ex": "この鉱山の金の（　）は年々減少している。",
+    "exvi": "Sản lượng vàng của mỏ này đang giảm dần theo từng năm.",
+    "rd": [
+      "さんしゅつりよう",
+      "さんしゅうつりょう",
+      "さんしゅつりょお"
+    ],
+    "kd": [
+      "生産量",
+      "収穫量",
+      "排出量"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "気候変動",
+    "r": "きこうへんどう",
+    "hv": "Khí hậu biến động",
+    "en": "climate change",
+    "vi": "biến đổi khí hậu",
+    "ex": "（　）の影響で異常気象が増えている。",
+    "exvi": "Do ảnh hưởng của biến đổi khí hậu, hiện tượng thời tiết bất thường đang gia tăng.",
+    "rd": [
+      "きこうへんとう",
+      "きごうへんどう",
+      "きこうべんどう"
+    ],
+    "kd": [
+      "気候",
+      "地球温暖化",
+      "異常気象"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "砂漠化",
+    "r": "さばくか",
+    "hv": "Sa mạc hóa",
+    "en": "desertification",
+    "vi": "sa mạc hóa",
+    "ex": "森林伐採が（　）を加速させている。",
+    "exvi": "Việc chặt phá rừng đang thúc đẩy nhanh quá trình sa mạc hóa.",
+    "rd": [
+      "さばくが",
+      "さばっか",
+      "しゃばくか"
+    ],
+    "kd": [
+      "砂漠",
+      "温暖化",
+      "乾燥化"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "二酸化炭素",
+    "r": "にさんかたんそ",
+    "hv": "Nhị toan hóa thán tố",
+    "en": "carbon dioxide",
+    "vi": "carbon dioxide",
+    "ex": "（　）の排出量削減が求められている。",
+    "exvi": "Việc giảm lượng khí thải carbon dioxide đang được yêu cầu.",
+    "rd": [
+      "にさんかだんそ",
+      "にさんかたんぞ",
+      "にさんかんたんそ"
+    ],
+    "kd": [
+      "酸素",
+      "排出量",
+      "二酸化炭素排出"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "制限する",
+    "r": "せいげんする",
+    "hv": "Chế hạn",
+    "en": "to limit, to restrict",
+    "vi": "hạn chế",
+    "ex": "市内での車の通行を（　）することにした。",
+    "exvi": "Đã quyết định hạn chế việc đi lại của xe trong thành phố.",
+    "rd": [
+      "せいけんする",
+      "せえげんする",
+      "せいげんずる"
+    ],
+    "kd": [
+      "制限速度",
+      "制約する",
+      "規制する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "酸素",
+    "r": "さんそ",
+    "hv": "Toan tố",
+    "en": "oxygen",
+    "vi": "oxy",
+    "ex": "植物は光合成によって（　）を作り出す。",
+    "exvi": "Thực vật tạo ra oxy thông qua quá trình quang hợp.",
+    "rd": [
+      "さんぞ",
+      "さんす",
+      "ざんそ"
+    ],
+    "kd": [
+      "二酸化炭素",
+      "酸性",
+      "窒素"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "有害な",
+    "r": "ゆうがいな",
+    "hv": "Hữu hại",
+    "en": "harmful",
+    "vi": "có hại",
+    "ex": "この物質は人体に（　）だ。",
+    "exvi": "Chất này có hại cho cơ thể con người.",
+    "rd": [
+      "ゆうかいな",
+      "ゆがいな",
+      "ゆうがえな"
+    ],
+    "kd": [
+      "有害物質",
+      "有毒な",
+      "無害な"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "物質",
+    "r": "ぶっしつ",
+    "hv": "Vật chất",
+    "en": "substance, matter",
+    "vi": "vật chất",
+    "ex": "この工場から有害な（　）が排出されている。",
+    "exvi": "Nhà máy này đang thải ra chất có hại.",
+    "rd": [
+      "ぶつしつ",
+      "もっしつ",
+      "ぶしつ"
+    ],
+    "kd": [
+      "有害物質",
+      "物質的な",
+      "化学物質"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u8-1_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>

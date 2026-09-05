@@ -1,0 +1,3225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 · 9.2 — 時間・空間を表す言葉</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">時</div>
+    <div>
+      <h1>N2 · 9.2 — 時間・空間を表す言葉</h1>
+      <p>Vocabulaire · 109 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">109</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 · Unité 9.2</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "n2-u9-2";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DONNÉES — VOCAB
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {
+    "k": "前後",
+    "r": "ぜんご",
+    "hv": "Tiền hậu",
+    "en": "around, before and after",
+    "vi": "trước sau, khoảng chừng",
+    "ex": "到着時刻は3時（　）になる予定だ。",
+    "exvi": "Thời gian đến dự kiến sẽ là khoảng 3 giờ.",
+    "rd": [
+      "ぜんこう",
+      "せんご",
+      "ぜんぐ"
+    ],
+    "kd": [
+      "前後関係",
+      "先後",
+      "上下"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "経過",
+    "r": "けいか",
+    "hv": "Kinh quá",
+    "en": "passage of time, progress",
+    "vi": "quá trình, diễn biến",
+    "ex": "手術後の（　）は順調だ。",
+    "exvi": "Diễn biến sau phẫu thuật đang thuận lợi.",
+    "rd": [
+      "けえか",
+      "けいが",
+      "けいこう"
+    ],
+    "kd": [
+      "経過報告",
+      "経過時間",
+      "進行"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "主に",
+    "r": "おもに",
+    "hv": "",
+    "en": "mainly, primarily",
+    "vi": "chủ yếu",
+    "ex": "この地域は（　）農業で成り立っている。",
+    "exvi": "Khu vực này chủ yếu dựa vào nông nghiệp.",
+    "rd": [
+      "しゅに",
+      "おうもに",
+      "おもうに"
+    ],
+    "kd": [
+      "主要な",
+      "主とする",
+      "中心に"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "決して",
+    "r": "けっして",
+    "hv": "Quyết",
+    "en": "never, by no means",
+    "vi": "tuyệt đối không",
+    "ex": "彼は（　）嘘をつかない。",
+    "exvi": "Anh ấy tuyệt đối không nói dối.",
+    "rd": [
+      "けつして",
+      "けしして",
+      "けっしで"
+    ],
+    "kd": [
+      "決意",
+      "絶対に",
+      "断じて"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "次第に",
+    "r": "しだいに",
+    "hv": "",
+    "en": "gradually",
+    "vi": "dần dần",
+    "ex": "天気は（　）回復するでしょう。",
+    "exvi": "Thời tiết sẽ dần dần được cải thiện.",
+    "rd": [
+      "じだいに",
+      "しだえに",
+      "しでいに"
+    ],
+    "kd": [
+      "徐々に",
+      "次第",
+      "順次"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "逃す",
+    "r": "のがす",
+    "hv": "",
+    "en": "to miss (a chance), to let escape",
+    "vi": "bỏ lỡ",
+    "ex": "彼は絶好の機会を（　）した。",
+    "exvi": "Anh ấy đã bỏ lỡ cơ hội tuyệt vời.",
+    "rd": [
+      "のがせる",
+      "にがす",
+      "のうがす"
+    ],
+    "kd": [
+      "逃げる",
+      "見逃す",
+      "逃亡する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "失う",
+    "r": "うしなう",
+    "hv": "",
+    "en": "to lose",
+    "vi": "mất đi",
+    "ex": "事故で大切な家族を（　）った。",
+    "exvi": "Anh ấy đã mất đi người thân yêu quý trong tai nạn.",
+    "rd": [
+      "しつなう",
+      "うしのう",
+      "うしなる"
+    ],
+    "kd": [
+      "喪失",
+      "失敗",
+      "損失"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "与える",
+    "r": "あたえる",
+    "hv": "",
+    "en": "to give, to grant",
+    "vi": "ban cho, gây ra",
+    "ex": "この決定は社会に大きな影響を（　）えた。",
+    "exvi": "Quyết định này đã gây ra ảnh hưởng lớn đến xã hội.",
+    "rd": [
+      "あだえる",
+      "あたいる",
+      "あたえう"
+    ],
+    "kd": [
+      "提供する",
+      "授ける",
+      "及ぼす"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "生かす",
+    "r": "いかす",
+    "hv": "",
+    "en": "to make use of, to put to good use",
+    "vi": "tận dụng, phát huy",
+    "ex": "彼は自分の経験を仕事に（　）している。",
+    "exvi": "Anh ấy đang phát huy kinh nghiệm của mình vào công việc.",
+    "rd": [
+      "いがす",
+      "いかせる",
+      "いかず"
+    ],
+    "kd": [
+      "生きる",
+      "活用する",
+      "応用する"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "作業",
+    "r": "さぎょう",
+    "hv": "Tác nghiệp",
+    "en": "work, task",
+    "vi": "công việc, thao tác",
+    "ex": "この（　）には時間がかかる。",
+    "exvi": "Công việc này tốn nhiều thời gian.",
+    "rd": [
+      "さきょう",
+      "さごう",
+      "さぎょお"
+    ],
+    "kd": [
+      "作業員",
+      "業務",
+      "仕事"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "一時",
+    "r": "いちじ",
+    "hv": "Nhất thời",
+    "en": "temporarily, for a while",
+    "vi": "tạm thời",
+    "ex": "雨は（　）的なもので、すぐやんだ。",
+    "exvi": "Cơn mưa chỉ mang tính tạm thời và đã tạnh ngay sau đó.",
+    "rd": [
+      "いちどき",
+      "いつじ",
+      "いちし"
+    ],
+    "kd": [
+      "一時的",
+      "一時間",
+      "当時"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "中断する",
+    "r": "ちゅうだんする",
+    "hv": "Trung đoạn",
+    "en": "to interrupt, to suspend",
+    "vi": "tạm dừng",
+    "ex": "悪天候のため試合を（　）した。",
+    "exvi": "Do thời tiết xấu, trận đấu đã bị tạm dừng.",
+    "rd": [
+      "ちゅうたんする",
+      "ちゅうだんずる",
+      "ちゆうだんする"
+    ],
+    "kd": [
+      "中断",
+      "中止する",
+      "一時停止"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "意外と",
+    "r": "いがいと",
+    "hv": "Ý ngoại",
+    "en": "surprisingly",
+    "vi": "bất ngờ, ngoài mong đợi",
+    "ex": "この仕事は（　）楽しい。",
+    "exvi": "Công việc này bất ngờ thú vị.",
+    "rd": [
+      "いかいと",
+      "いがえと",
+      "いがいど"
+    ],
+    "kd": [
+      "案外と",
+      "思いのほか",
+      "予想外に"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "案外と",
+    "r": "あんがいと",
+    "hv": "Án ngoại",
+    "en": "unexpectedly",
+    "vi": "ngoài dự đoán",
+    "ex": "難しそうに見えたが（　）簡単だった。",
+    "exvi": "Trông có vẻ khó nhưng lại đơn giản ngoài dự đoán.",
+    "rd": [
+      "あんかいと",
+      "あんがえと",
+      "あんがいど"
+    ],
+    "kd": [
+      "意外と",
+      "思いのほか",
+      "予想外"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "思いのほか",
+    "r": "おもいのほか",
+    "hv": "",
+    "en": "unexpectedly, more than expected",
+    "vi": "ngoài dự đoán",
+    "ex": "実験は（　）うまくいった。",
+    "exvi": "Thí nghiệm đã diễn ra thuận lợi ngoài dự đoán.",
+    "rd": [
+      "おもいのほうか",
+      "おもいのおか",
+      "おもいのほが"
+    ],
+    "kd": [
+      "案外と",
+      "意外と",
+      "思いがけず"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "一層",
+    "r": "いっそう",
+    "hv": "Nhất tằng",
+    "en": "all the more, even more",
+    "vi": "càng thêm",
+    "ex": "努力すれば（　）良い結果が出るだろう。",
+    "exvi": "Nếu nỗ lực thì kết quả sẽ càng thêm tốt đẹp.",
+    "rd": [
+      "いちそう",
+      "いっそお",
+      "いつそう"
+    ],
+    "kd": [
+      "一段と",
+      "より一層",
+      "更に"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "今に",
+    "r": "いまに",
+    "hv": "",
+    "en": "soon, before long",
+    "vi": "chẳng bao lâu nữa",
+    "ex": "（　）分かる時が来るだろう。",
+    "exvi": "Chẳng bao lâu nữa sẽ đến lúc bạn hiểu ra.",
+    "rd": [
+      "こんに",
+      "いまい",
+      "いまね"
+    ],
+    "kd": [
+      "今にも",
+      "そのうち",
+      "やがて"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "年月",
+    "r": "ねんげつ",
+    "hv": "Niên nguyệt",
+    "en": "years, a long time",
+    "vi": "năm tháng",
+    "ex": "この技術が完成するまで長い（　）がかかった。",
+    "exvi": "Đã mất nhiều năm tháng để công nghệ này hoàn thiện.",
+    "rd": [
+      "ねんがつ",
+      "ねんげづ",
+      "ねねんげつ"
+    ],
+    "kd": [
+      "年月日",
+      "歳月",
+      "期間"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "出来上がる",
+    "r": "できあがる",
+    "hv": "",
+    "en": "to be completed, to be finished",
+    "vi": "hoàn thành",
+    "ex": "ようやく新しい建物が（　）った。",
+    "exvi": "Cuối cùng tòa nhà mới cũng đã hoàn thành.",
+    "rd": [
+      "できやがる",
+      "できあかる",
+      "できあがう"
+    ],
+    "kd": [
+      "出来上がり",
+      "完成する",
+      "仕上がる"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "事前に",
+    "r": "じぜんに",
+    "hv": "Sự tiền",
+    "en": "in advance, beforehand",
+    "vi": "trước khi, từ trước",
+    "ex": "会議の資料は（　）配布された。",
+    "exvi": "Tài liệu cuộc họp đã được phân phát trước.",
+    "rd": [
+      "じぜんい",
+      "しぜんに",
+      "じせんに"
+    ],
+    "kd": [
+      "事後に",
+      "前もって",
+      "予め"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "前もって",
+    "r": "まえもって",
+    "hv": "",
+    "en": "in advance, beforehand",
+    "vi": "trước khi",
+    "ex": "旅行の予約は（　）しておいた方がいい。",
+    "exvi": "Nên đặt trước vé du lịch từ sớm.",
+    "rd": [
+      "まいもって",
+      "まえもうって",
+      "まえもいって"
+    ],
+    "kd": [
+      "事前に",
+      "予め",
+      "あらかじめ"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "一切〜ない",
+    "r": "いっさい〜ない",
+    "hv": "Nhất thiết",
+    "en": "not at all, none whatsoever",
+    "vi": "hoàn toàn không",
+    "ex": "彼はその件について（　）語らなかった。",
+    "exvi": "Anh ấy hoàn toàn không nói gì về việc đó.",
+    "rd": [
+      "いっさえ〜ない",
+      "いつさい〜ない",
+      "いっさいい〜ない"
+    ],
+    "kd": [
+      "全く〜ない",
+      "決して〜ない",
+      "一切合切"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "以前",
+    "r": "いぜん",
+    "hv": "Dĩ tiền",
+    "en": "before, previously",
+    "vi": "trước đây",
+    "ex": "（　）は毎日残業していたが、今は違う。",
+    "exvi": "Trước đây tôi làm thêm giờ mỗi ngày, nhưng bây giờ thì khác.",
+    "rd": [
+      "いせん",
+      "いぜい",
+      "いぜんい"
+    ],
+    "kd": [
+      "以来",
+      "以後",
+      "従来"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "墓地",
+    "r": "ぼち",
+    "hv": "Mộ địa",
+    "en": "cemetery",
+    "vi": "nghĩa trang",
+    "ex": "この（　）には多くの著名人が眠っている。",
+    "exvi": "Nhiều người nổi tiếng đang yên nghỉ tại nghĩa trang này.",
+    "rd": [
+      "はかち",
+      "ぼじ",
+      "ぼうち"
+    ],
+    "kd": [
+      "墓参り",
+      "墓石",
+      "霊園"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "以来",
+    "r": "いらい",
+    "hv": "Dĩ lai",
+    "en": "since, ever since",
+    "vi": "kể từ",
+    "ex": "卒業（　）、彼とは一度も会っていない。",
+    "exvi": "Kể từ khi tốt nghiệp, tôi chưa gặp lại anh ấy lần nào.",
+    "rd": [
+      "いれい",
+      "いらえ",
+      "いらいい"
+    ],
+    "kd": [
+      "以前",
+      "以後",
+      "従来"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "従来",
+    "r": "じゅうらい",
+    "hv": "Tòng lai",
+    "en": "conventional, up to now",
+    "vi": "theo lệ cũ, từ trước tới nay",
+    "ex": "（　）の方法では対応できない問題が出てきた。",
+    "exvi": "Đã xuất hiện vấn đề mà phương pháp cũ không thể xử lý được.",
+    "rd": [
+      "じゅらい",
+      "じゅうれい",
+      "じゅうらえ"
+    ],
+    "kd": [
+      "従来通り",
+      "以前",
+      "旧来"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "見直す",
+    "r": "みなおす",
+    "hv": "",
+    "en": "to reconsider, to review",
+    "vi": "xem xét lại",
+    "ex": "計画をもう一度（　）すことにした。",
+    "exvi": "Đã quyết định xem xét lại kế hoạch một lần nữa.",
+    "rd": [
+      "みおなす",
+      "みなおる",
+      "みたおす"
+    ],
+    "kd": [
+      "見直し",
+      "改める",
+      "再検討する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "今後",
+    "r": "こんご",
+    "hv": "Kim hậu",
+    "en": "from now on, in the future",
+    "vi": "từ nay về sau",
+    "ex": "（　）の計画についてまだ決まっていない。",
+    "exvi": "Kế hoạch từ nay về sau vẫn chưa được quyết định.",
+    "rd": [
+      "こんこう",
+      "こごん",
+      "こんぐ"
+    ],
+    "kd": [
+      "今後の",
+      "以後",
+      "将来"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "従来通り",
+    "r": "じゅうらいどおり",
+    "hv": "",
+    "en": "as before, in the same way as always",
+    "vi": "như trước đây, theo lệ cũ",
+    "ex": "このやり方を（　）続けるつもりだ。",
+    "exvi": "Tôi định tiếp tục cách làm này như trước đây.",
+    "rd": [
+      "じゅうらいとおり",
+      "じゅらいどおり",
+      "じゅうらいどうり"
+    ],
+    "kd": [
+      "従来",
+      "予定通り",
+      "従前通り"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "実施する",
+    "r": "じっしする",
+    "hv": "Thực thi",
+    "en": "to implement, to carry out",
+    "vi": "thực hiện, thi hành",
+    "ex": "新しい制度を来月から（　）する。",
+    "exvi": "Chế độ mới sẽ được thực hiện từ tháng sau.",
+    "rd": [
+      "じつしする",
+      "じっしずる",
+      "じいしする"
+    ],
+    "kd": [
+      "実施日",
+      "実行する",
+      "施行する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "実践する",
+    "r": "じっせんする",
+    "hv": "Thực tiễn",
+    "en": "to put into practice",
+    "vi": "thực hành",
+    "ex": "学んだことを（　）することが大切だ。",
+    "exvi": "Việc thực hành những gì đã học là rất quan trọng.",
+    "rd": [
+      "じつせんする",
+      "じっせんずる",
+      "じいっせんする"
+    ],
+    "kd": [
+      "実践的な",
+      "実行する",
+      "実施する"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "過去",
+    "r": "かこ",
+    "hv": "Quá khứ",
+    "en": "the past",
+    "vi": "quá khứ",
+    "ex": "彼は（　）のことをあまり話さない。",
+    "exvi": "Anh ấy ít khi nói về chuyện quá khứ.",
+    "rd": [
+      "かごう",
+      "かこう",
+      "がこ"
+    ],
+    "kd": [
+      "過去形",
+      "現在",
+      "経過"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "出来事",
+    "r": "できごと",
+    "hv": "",
+    "en": "event, incident",
+    "vi": "sự việc, sự kiện",
+    "ex": "今日は忘れられない（　）があった。",
+    "exvi": "Hôm nay đã có một sự việc không thể quên.",
+    "rd": [
+      "できこと",
+      "できごとう",
+      "でぎこと"
+    ],
+    "kd": [
+      "事件",
+      "事柄",
+      "事故"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "思い出す",
+    "r": "おもいだす",
+    "hv": "",
+    "en": "to recall, to remember",
+    "vi": "nhớ lại",
+    "ex": "昔のことをふと（　）した。",
+    "exvi": "Bỗng nhiên tôi đã nhớ lại chuyện ngày xưa.",
+    "rd": [
+      "おもいたす",
+      "おもいだず",
+      "おもいでる"
+    ],
+    "kd": [
+      "思い出",
+      "回想する",
+      "記憶する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "日頃",
+    "r": "ひごろ",
+    "hv": "",
+    "en": "usually, ordinarily",
+    "vi": "ngày thường, thường ngày",
+    "ex": "（　）の努力が結果につながった。",
+    "exvi": "Nỗ lực thường ngày đã dẫn đến kết quả tốt.",
+    "rd": [
+      "ひころ",
+      "にちごろ",
+      "ひごうろ"
+    ],
+    "kd": [
+      "普段",
+      "平素",
+      "日常"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "食生活",
+    "r": "しょくせいかつ",
+    "hv": "Thực sinh hoạt",
+    "en": "dietary habits",
+    "vi": "chế độ ăn uống",
+    "ex": "健康のために（　）を見直した。",
+    "exvi": "Tôi đã xem xét lại chế độ ăn uống vì sức khỏe.",
+    "rd": [
+      "しょくせえかつ",
+      "しょくせいがつ",
+      "しょくせいかづ"
+    ],
+    "kd": [
+      "食習慣",
+      "生活習慣",
+      "栄養"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "過ごす",
+    "r": "すごす",
+    "hv": "",
+    "en": "to spend (time)",
+    "vi": "trải qua (thời gian)",
+    "ex": "休日は家族とゆっくり（　）した。",
+    "exvi": "Tôi đã trải qua ngày nghỉ một cách thư thái cùng gia đình.",
+    "rd": [
+      "すこす",
+      "すごせる",
+      "すぐごす"
+    ],
+    "kd": [
+      "過ごし方",
+      "経過する",
+      "暮らす"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "月日",
+    "r": "つきひ",
+    "hv": "",
+    "en": "days and months, time",
+    "vi": "ngày tháng, thời gian",
+    "ex": "長い（　）が経つのは早いものだ。",
+    "exvi": "Ngày tháng dài trôi qua thật nhanh.",
+    "rd": [
+      "げつじつ",
+      "つきび",
+      "つぎひ"
+    ],
+    "kd": [
+      "年月",
+      "歳月",
+      "時間"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "経つ",
+    "r": "たつ",
+    "hv": "",
+    "en": "to pass (of time)",
+    "vi": "trôi qua (thời gian)",
+    "ex": "彼と会ってからもう十年が（　）った。",
+    "exvi": "Đã mười năm trôi qua kể từ khi tôi gặp anh ấy.",
+    "rd": [
+      "けいつ",
+      "たづ",
+      "たてる"
+    ],
+    "kd": [
+      "経過する",
+      "過ぎる",
+      "経る"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "経過する",
+    "r": "けいかする",
+    "hv": "Kinh quá",
+    "en": "to pass, to elapse (of time)",
+    "vi": "trôi qua",
+    "ex": "事故から一年が（　）した。",
+    "exvi": "Đã một năm trôi qua kể từ vụ tai nạn.",
+    "rd": [
+      "けえかする",
+      "けいがする",
+      "けいかずる"
+    ],
+    "kd": [
+      "経過",
+      "経る",
+      "経由する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "期間中",
+    "r": "きかんちゅう",
+    "hv": "Kỳ gian trung",
+    "en": "during the period",
+    "vi": "trong thời gian",
+    "ex": "セール（　）は特別価格で販売する。",
+    "exvi": "Trong thời gian giảm giá, sản phẩm được bán với giá đặc biệt.",
+    "rd": [
+      "きかんじゅう",
+      "きがんちゅう",
+      "きかんちゅお"
+    ],
+    "kd": [
+      "期間限定",
+      "期間内",
+      "在任期間"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "地球",
+    "r": "ちきゅう",
+    "hv": "Địa cầu",
+    "en": "Earth",
+    "vi": "trái đất",
+    "ex": "（　）の環境を守ることが大切だ。",
+    "exvi": "Việc bảo vệ môi trường trái đất là rất quan trọng.",
+    "rd": [
+      "ちぎゅう",
+      "じきゅう",
+      "ちきょう"
+    ],
+    "kd": [
+      "地球儀",
+      "地表",
+      "惑星"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "一定",
+    "r": "いってい",
+    "hv": "Nhất định",
+    "en": "fixed, constant",
+    "vi": "nhất định, cố định",
+    "ex": "この機械は（　）の温度を保つ。",
+    "exvi": "Chiếc máy này duy trì nhiệt độ cố định.",
+    "rd": [
+      "いちてい",
+      "いつてい",
+      "いっでい"
+    ],
+    "kd": [
+      "一定額",
+      "不定",
+      "規則的"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "周期",
+    "r": "しゅうき",
+    "hv": "Chu kỳ",
+    "en": "cycle, period",
+    "vi": "chu kỳ",
+    "ex": "この星は約100年の（　）で公転する。",
+    "exvi": "Ngôi sao này quay quanh với chu kỳ khoảng 100 năm.",
+    "rd": [
+      "しゆうき",
+      "しゅき",
+      "しゅうぎ"
+    ],
+    "kd": [
+      "周期的な",
+      "一周",
+      "循環"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "回る",
+    "r": "まわる",
+    "hv": "",
+    "en": "to go around, to rotate",
+    "vi": "quay, đi vòng",
+    "ex": "地球は太陽の周りを（　）っている。",
+    "exvi": "Trái đất quay quanh mặt trời.",
+    "rd": [
+      "まありる",
+      "まうわる",
+      "まわある"
+    ],
+    "kd": [
+      "回転する",
+      "巡る",
+      "一回り"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "正午過ぎ",
+    "r": "しょうごすぎ",
+    "hv": "",
+    "en": "just after noon",
+    "vi": "sau giờ trưa",
+    "ex": "（　）に約束の場所に着いた。",
+    "exvi": "Tôi đã đến điểm hẹn sau giờ trưa.",
+    "rd": [
+      "しょうごうすぎ",
+      "しょうごずぎ",
+      "しょごすぎ"
+    ],
+    "kd": [
+      "正午",
+      "午後",
+      "昼過ぎ"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "目的地",
+    "r": "もくてきち",
+    "hv": "Mục đích địa",
+    "en": "destination",
+    "vi": "điểm đến",
+    "ex": "長い旅の末、ようやく（　）に着いた。",
+    "exvi": "Sau chuyến đi dài, cuối cùng tôi cũng đã đến điểm đến.",
+    "rd": [
+      "もくてきぢ",
+      "もっくてきち",
+      "もくでんきち"
+    ],
+    "kd": [
+      "行き先",
+      "目標",
+      "到着地"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "到着する",
+    "r": "とうちゃくする",
+    "hv": "Đáo trước",
+    "en": "to arrive",
+    "vi": "đến nơi",
+    "ex": "飛行機は定刻に（　）した。",
+    "exvi": "Máy bay đã đến đúng giờ.",
+    "rd": [
+      "とおちゃくする",
+      "とうじゃくする",
+      "とうちゃくずる"
+    ],
+    "kd": [
+      "到着時刻",
+      "出発する",
+      "到達する"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "時間帯",
+    "r": "じかんたい",
+    "hv": "Thời gian đới",
+    "en": "time zone, time slot",
+    "vi": "khung giờ",
+    "ex": "この（　）は電車がとても混雑する。",
+    "exvi": "Vào khung giờ này, tàu điện rất đông đúc.",
+    "rd": [
+      "じかんだい",
+      "じいかんたい",
+      "じかんてい"
+    ],
+    "kd": [
+      "時刻表",
+      "時間割",
+      "時差"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "上旬",
+    "r": "じょうじゅん",
+    "hv": "Thượng tuần",
+    "en": "the beginning of the month",
+    "vi": "đầu tháng",
+    "ex": "来月（　）に出張する予定だ。",
+    "exvi": "Dự kiến sẽ đi công tác vào đầu tháng sau.",
+    "rd": [
+      "じょうしゅん",
+      "じょうじゅうん",
+      "しょうじゅん"
+    ],
+    "kd": [
+      "中旬",
+      "下旬",
+      "月初め"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "初旬",
+    "r": "しょじゅん",
+    "hv": "Sơ tuần",
+    "en": "early part of the month",
+    "vi": "đầu tháng",
+    "ex": "4月（　）に桜が満開になる。",
+    "exvi": "Vào đầu tháng 4, hoa anh đào sẽ nở rộ.",
+    "rd": [
+      "しょうじゅん",
+      "しょじゅうん",
+      "しょしゅん"
+    ],
+    "kd": [
+      "上旬",
+      "中旬",
+      "月初め"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "中旬",
+    "r": "ちゅうじゅん",
+    "hv": "Trung tuần",
+    "en": "the middle of the month",
+    "vi": "giữa tháng",
+    "ex": "7月（　）に梅雨が明ける。",
+    "exvi": "Mùa mưa sẽ kết thúc vào giữa tháng 7.",
+    "rd": [
+      "ちゅじゅん",
+      "ちゅうじゅうん",
+      "じゅうじゅん"
+    ],
+    "kd": [
+      "上旬",
+      "下旬",
+      "月半ば"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "下旬",
+    "r": "げじゅん",
+    "hv": "Hạ tuần",
+    "en": "the end of the month",
+    "vi": "cuối tháng",
+    "ex": "8月（　）から夏休みが始まる。",
+    "exvi": "Kỳ nghỉ hè bắt đầu từ cuối tháng 8.",
+    "rd": [
+      "かじゅん",
+      "げじゅうん",
+      "げしゅん"
+    ],
+    "kd": [
+      "上旬",
+      "中旬",
+      "月末"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "月末",
+    "r": "げつまつ",
+    "hv": "Nguyệt mạt",
+    "en": "the end of the month",
+    "vi": "cuối tháng",
+    "ex": "家賃は（　）に支払うことになっている。",
+    "exvi": "Tiền thuê nhà được quy định thanh toán vào cuối tháng.",
+    "rd": [
+      "げつまづ",
+      "げっまつ",
+      "げつばつ"
+    ],
+    "kd": [
+      "年末",
+      "月初め",
+      "下旬"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "年末",
+    "r": "ねんまつ",
+    "hv": "Niên mạt",
+    "en": "the end of the year",
+    "vi": "cuối năm",
+    "ex": "（　）は大掃除で忙しい。",
+    "exvi": "Vào cuối năm, mọi người bận rộn với việc dọn dẹp lớn.",
+    "rd": [
+      "ねんまづ",
+      "ねんばつ",
+      "ねんまっつ"
+    ],
+    "kd": [
+      "年始",
+      "月末",
+      "年度末"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "年の暮れ",
+    "r": "としのくれ",
+    "hv": "",
+    "en": "the end of the year",
+    "vi": "cuối năm",
+    "ex": "（　）は何かと慌ただしい。",
+    "exvi": "Cuối năm luôn có nhiều việc bận rộn.",
+    "rd": [
+      "としのぐれ",
+      "ねんのくれ",
+      "としのくらい"
+    ],
+    "kd": [
+      "年末",
+      "歳末",
+      "年始"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "深夜",
+    "r": "しんや",
+    "hv": "Thâm dạ",
+    "en": "late at night",
+    "vi": "đêm khuya",
+    "ex": "彼は（　）まで働いていた。",
+    "exvi": "Anh ấy đã làm việc đến tận đêm khuya.",
+    "rd": [
+      "じんや",
+      "しんよる",
+      "しいんや"
+    ],
+    "kd": [
+      "深夜番組",
+      "真夜中",
+      "夜中"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "夜中",
+    "r": "よなか",
+    "hv": "",
+    "en": "the middle of the night",
+    "vi": "giữa đêm",
+    "ex": "（　）に電話が鳴って驚いた。",
+    "exvi": "Tôi đã giật mình vì điện thoại reo giữa đêm.",
+    "rd": [
+      "やちゅう",
+      "よるなか",
+      "よなが"
+    ],
+    "kd": [
+      "深夜",
+      "真夜中",
+      "夜間"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "明け方",
+    "r": "あけがた",
+    "hv": "",
+    "en": "dawn, daybreak",
+    "vi": "rạng sáng",
+    "ex": "（　）に鳥の声で目が覚めた。",
+    "exvi": "Tôi đã tỉnh giấc vào lúc rạng sáng bởi tiếng chim hót.",
+    "rd": [
+      "あけかた",
+      "あきがた",
+      "あけがだ"
+    ],
+    "kd": [
+      "夜明け",
+      "早朝",
+      "日の出"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "早朝",
+    "r": "そうちょう",
+    "hv": "Tảo triêu",
+    "en": "early morning",
+    "vi": "sáng sớm",
+    "ex": "（　）から並んで整理券をもらった。",
+    "exvi": "Tôi đã xếp hàng từ sáng sớm để lấy vé số thứ tự.",
+    "rd": [
+      "そうじょう",
+      "そちょう",
+      "そうちょお"
+    ],
+    "kd": [
+      "早朝出勤",
+      "明け方",
+      "朝方"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "正午",
+    "r": "しょうご",
+    "hv": "Chính ngọ",
+    "en": "noon",
+    "vi": "giữa trưa",
+    "ex": "（　）にランチの予約をしている。",
+    "exvi": "Tôi đã đặt chỗ ăn trưa vào giữa trưa.",
+    "rd": [
+      "せいご",
+      "しょうごう",
+      "しょご"
+    ],
+    "kd": [
+      "正午過ぎ",
+      "午前",
+      "午後"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "夕暮れ時",
+    "r": "ゆうぐれじ",
+    "hv": "",
+    "en": "dusk, twilight",
+    "vi": "lúc chạng vạng tối",
+    "ex": "（　）の空は美しいオレンジ色になる。",
+    "exvi": "Bầu trời lúc chạng vạng tối chuyển sang màu cam tuyệt đẹp.",
+    "rd": [
+      "ゆうくれじ",
+      "ゆうぐれじい",
+      "ようぐれじ"
+    ],
+    "kd": [
+      "夕方",
+      "日暮れ",
+      "黄昏"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "日中",
+    "r": "にっちゅう",
+    "hv": "Nhật trung",
+    "en": "daytime",
+    "vi": "ban ngày",
+    "ex": "（　）は気温が上がるので注意が必要だ。",
+    "exvi": "Cần chú ý vì nhiệt độ tăng cao vào ban ngày.",
+    "rd": [
+      "にちちゅう",
+      "にっちゅ",
+      "にちゅう"
+    ],
+    "kd": [
+      "昼間",
+      "日没",
+      "夜間"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "終日",
+    "r": "しゅうじつ",
+    "hv": "Chung nhật",
+    "en": "all day",
+    "vi": "cả ngày",
+    "ex": "この道路は（　）通行止めになっている。",
+    "exvi": "Con đường này bị cấm đi lại cả ngày.",
+    "rd": [
+      "しゅうにち",
+      "しゅじつ",
+      "しゅうしつ"
+    ],
+    "kd": [
+      "終日営業",
+      "一日中",
+      "全日"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "位置",
+    "r": "いち",
+    "hv": "Vị trí",
+    "en": "position, location",
+    "vi": "vị trí",
+    "ex": "地図でこの店の（　）を確認した。",
+    "exvi": "Tôi đã kiểm tra vị trí của cửa hàng này trên bản đồ.",
+    "rd": [
+      "いぢ",
+      "いっち",
+      "いちい"
+    ],
+    "kd": [
+      "位置関係",
+      "場所",
+      "方角"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "動かす",
+    "r": "うごかす",
+    "hv": "",
+    "en": "to move (something)",
+    "vi": "di chuyển (vật)",
+    "ex": "重い机を一人で（　）した。",
+    "exvi": "Tôi đã tự mình di chuyển chiếc bàn nặng.",
+    "rd": [
+      "うごがす",
+      "うこかす",
+      "うごかせる"
+    ],
+    "kd": [
+      "動く",
+      "移動する",
+      "操作する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "家具",
+    "r": "かぐ",
+    "hv": "Gia cụ",
+    "en": "furniture",
+    "vi": "đồ nội thất",
+    "ex": "新居のために新しい（　）を買った。",
+    "exvi": "Tôi đã mua đồ nội thất mới cho nhà mới.",
+    "rd": [
+      "かく",
+      "かぐう",
+      "がぐ"
+    ],
+    "kd": [
+      "家具屋",
+      "調度品",
+      "什器"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "元",
+    "r": "もと",
+    "hv": "Nguyên",
+    "en": "origin, former",
+    "vi": "trước đây, gốc",
+    "ex": "彼は（　）教師だった。",
+    "exvi": "Anh ấy trước đây từng là giáo viên.",
+    "rd": [
+      "げん",
+      "もどう",
+      "もどと"
+    ],
+    "kd": [
+      "元々",
+      "根元",
+      "基本"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "戻す",
+    "r": "もどす",
+    "hv": "",
+    "en": "to put back, to return (something)",
+    "vi": "trả lại, đặt lại",
+    "ex": "本を棚に（　）した。",
+    "exvi": "Tôi đã đặt sách trở lại kệ.",
+    "rd": [
+      "もとす",
+      "もどせる",
+      "もうどす"
+    ],
+    "kd": [
+      "戻る",
+      "返す",
+      "元に戻す"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "配置",
+    "r": "はいち",
+    "hv": "Phối trí",
+    "en": "arrangement, placement",
+    "vi": "bố trí, sắp xếp",
+    "ex": "家具の（　）を変えて部屋を広く見せた。",
+    "exvi": "Tôi đã thay đổi cách bố trí đồ nội thất để phòng trông rộng hơn.",
+    "rd": [
+      "はいぢ",
+      "はいっち",
+      "はいちい"
+    ],
+    "kd": [
+      "配置図",
+      "配列",
+      "人員配置"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "空間",
+    "r": "くうかん",
+    "hv": "Không gian",
+    "en": "space",
+    "vi": "không gian",
+    "ex": "このカフェは落ち着いた（　）が魅力だ。",
+    "exvi": "Điểm hấp dẫn của quán cà phê này là không gian yên tĩnh.",
+    "rd": [
+      "くうがん",
+      "くかん",
+      "くうかに"
+    ],
+    "kd": [
+      "空間デザイン",
+      "時間",
+      "余白"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "快適な",
+    "r": "かいてきな",
+    "hv": "Khoái thích",
+    "en": "comfortable",
+    "vi": "thoải mái",
+    "ex": "このホテルは（　）な滞在ができる。",
+    "exvi": "Khách sạn này mang lại kỳ nghỉ thoải mái.",
+    "rd": [
+      "かいできな",
+      "がいてきな",
+      "かいてぎな"
+    ],
+    "kd": [
+      "快適さ",
+      "快適性",
+      "不快な"
+    ],
+    "ud": [
+      "静かな",
+      "元気な",
+      "便利な"
+    ]
+  },
+  {
+    "k": "最高気温",
+    "r": "さいこうきおん",
+    "hv": "Tối cao khí ôn",
+    "en": "highest temperature",
+    "vi": "nhiệt độ cao nhất",
+    "ex": "今日の（　）は35度になる見込みだ。",
+    "exvi": "Nhiệt độ cao nhất hôm nay dự kiến sẽ đạt 35 độ.",
+    "rd": [
+      "さいこうきうおん",
+      "さいごうきおん",
+      "さいこうぎおん"
+    ],
+    "kd": [
+      "最低気温",
+      "気温",
+      "平均気温"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "所々",
+    "r": "ところどころ",
+    "hv": "",
+    "en": "here and there",
+    "vi": "chỗ này chỗ kia",
+    "ex": "道路の（　）に水たまりができていた。",
+    "exvi": "Có vũng nước ở chỗ này chỗ kia trên đường.",
+    "rd": [
+      "どころどころ",
+      "ところところ",
+      "ところどこおろ"
+    ],
+    "kd": [
+      "あちこち",
+      "部分的に",
+      "一部"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "枠",
+    "r": "わく",
+    "hv": "",
+    "en": "frame, framework",
+    "vi": "khung",
+    "ex": "この（　）の中に写真を入れた。",
+    "exvi": "Tôi đã đặt ảnh vào trong khung này.",
+    "rd": [
+      "わあく",
+      "わっく",
+      "わこ"
+    ],
+    "kd": [
+      "枠組み",
+      "額縁",
+      "範囲"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "長方形",
+    "r": "ちょうほうけい",
+    "hv": "Trường phương hình",
+    "en": "rectangle",
+    "vi": "hình chữ nhật",
+    "ex": "この土地は（　）をしている。",
+    "exvi": "Mảnh đất này có hình chữ nhật.",
+    "rd": [
+      "ちょうほうげい",
+      "ちょほうけい",
+      "ちょうぼうけい"
+    ],
+    "kd": [
+      "正方形",
+      "円",
+      "立方体"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "東京方面",
+    "r": "とうきょうほうめん",
+    "hv": "",
+    "en": "direction of Tokyo",
+    "vi": "hướng Tokyo",
+    "ex": "このバスは（　）に向かう。",
+    "exvi": "Chiếc xe buýt này đi về hướng Tokyo.",
+    "rd": [
+      "とうきょうほおめん",
+      "とうきょほうめん",
+      "とおきょうほうめん"
+    ],
+    "kd": [
+      "都心方面",
+      "方角",
+      "方面"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "向かう",
+    "r": "むかう",
+    "hv": "",
+    "en": "to head towards",
+    "vi": "hướng về, đi về phía",
+    "ex": "彼は駅に（　）って歩いていった。",
+    "exvi": "Anh ấy đã đi bộ hướng về phía ga.",
+    "rd": [
+      "むこう",
+      "むかあう",
+      "むかる"
+    ],
+    "kd": [
+      "向く",
+      "向こう",
+      "進む"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "正方形",
+    "r": "せいほうけい",
+    "hv": "Chính phương hình",
+    "en": "square (shape)",
+    "vi": "hình vuông",
+    "ex": "この紙を（　）に切った。",
+    "exvi": "Tôi đã cắt tờ giấy này thành hình vuông.",
+    "rd": [
+      "せいほうげい",
+      "せえほうけい",
+      "せいぼうけい"
+    ],
+    "kd": [
+      "長方形",
+      "円",
+      "立方体"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "円",
+    "r": "えん",
+    "hv": "Viên",
+    "en": "circle; yen",
+    "vi": "hình tròn; đồng yên",
+    "ex": "コンパスで（　）を描いた。",
+    "exvi": "Tôi đã dùng compa để vẽ hình tròn.",
+    "rd": [
+      "まる",
+      "えいん",
+      "えんう"
+    ],
+    "kd": [
+      "円形",
+      "正方形",
+      "楕円"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "単位",
+    "r": "たんい",
+    "hv": "Đơn vị",
+    "en": "unit",
+    "vi": "đơn vị",
+    "ex": "メートルは長さの（　）だ。",
+    "exvi": "Mét là đơn vị đo chiều dài.",
+    "rd": [
+      "たんに",
+      "だんい",
+      "たんいい"
+    ],
+    "kd": [
+      "単位系",
+      "基準",
+      "規格"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "恐らく",
+    "r": "おそらく",
+    "hv": "",
+    "en": "probably",
+    "vi": "có lẽ",
+    "ex": "（　）明日は雨になるだろう。",
+    "exvi": "Có lẽ ngày mai trời sẽ mưa.",
+    "rd": [
+      "おそうらく",
+      "おそらぐ",
+      "おうそらく"
+    ],
+    "kd": [
+      "多分",
+      "もしかしたら",
+      "きっと"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "平方センチメートル",
+    "r": "へいほうセンチメートル",
+    "hv": "",
+    "en": "square centimeter",
+    "vi": "centimet vuông",
+    "ex": "この部屋の面積は20（　）だ。",
+    "exvi": "Diện tích của căn phòng này là 20 centimet vuông.",
+    "rd": [
+      "へえほうセンチメートル",
+      "へいぼうセンチメートル",
+      "へいほうセンチメトル"
+    ],
+    "kd": [
+      "立方センチメートル",
+      "面積",
+      "平方メートル"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "立方センチメートル",
+    "r": "りっぽうセンチメートル",
+    "hv": "",
+    "en": "cubic centimeter",
+    "vi": "centimet khối",
+    "ex": "この箱の体積は500（　）だ。",
+    "exvi": "Thể tích của chiếc hộp này là 500 centimet khối.",
+    "rd": [
+      "りつぽうセンチメートル",
+      "りっぽおセンチメートル",
+      "りっぽうセンチメトル"
+    ],
+    "kd": [
+      "平方センチメートル",
+      "体積",
+      "立方メートル"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "十度",
+    "r": "じゅうど",
+    "hv": "",
+    "en": "ten degrees",
+    "vi": "mười độ",
+    "ex": "今朝の気温は（　）だった。",
+    "exvi": "Nhiệt độ sáng nay là mười độ.",
+    "rd": [
+      "とお",
+      "じゅうと",
+      "じゆうど"
+    ],
+    "kd": [
+      "温度",
+      "度数",
+      "角度"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "横切る",
+    "r": "よこぎる",
+    "hv": "",
+    "en": "to cross (a road/space)",
+    "vi": "băng qua",
+    "ex": "猫が道路を（　）った。",
+    "exvi": "Con mèo đã băng qua đường.",
+    "rd": [
+      "よこきる",
+      "よこぎれる",
+      "よこぎろ"
+    ],
+    "kd": [
+      "横断する",
+      "渡る",
+      "突っ切る"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "沿う",
+    "r": "そう",
+    "hv": "",
+    "en": "to run along, to follow (a road/river)",
+    "vi": "men theo",
+    "ex": "川に（　）って散歩した。",
+    "exvi": "Tôi đã đi dạo men theo dòng sông.",
+    "rd": [
+      "ぞう",
+      "そい",
+      "そお"
+    ],
+    "kd": [
+      "沿岸",
+      "沿線",
+      "並行する"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "予定通り",
+    "r": "よていどおり",
+    "hv": "",
+    "en": "as planned",
+    "vi": "theo đúng kế hoạch",
+    "ex": "イベントは（　）に開催された。",
+    "exvi": "Sự kiện đã được tổ chức theo đúng kế hoạch.",
+    "rd": [
+      "よていとおり",
+      "よてえどおり",
+      "よじていどおり"
+    ],
+    "kd": [
+      "予想通り",
+      "計画通り",
+      "従来通り"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "予想通り",
+    "r": "よそうどおり",
+    "hv": "",
+    "en": "as expected",
+    "vi": "đúng như dự đoán",
+    "ex": "結果は（　）だった。",
+    "exvi": "Kết quả đúng như dự đoán.",
+    "rd": [
+      "よそうとおり",
+      "よぞうどおり",
+      "よそおどおり"
+    ],
+    "kd": [
+      "予定通り",
+      "案の定",
+      "期待通り"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "都心方面",
+    "r": "としんほうめん",
+    "hv": "",
+    "en": "towards the city center",
+    "vi": "hướng trung tâm thành phố",
+    "ex": "この電車は（　）に向かう。",
+    "exvi": "Chuyến tàu này đi về hướng trung tâm thành phố.",
+    "rd": [
+      "としんほおめん",
+      "とうしんほうめん",
+      "としんぼうめん"
+    ],
+    "kd": [
+      "東京方面",
+      "市街地",
+      "中心部"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "幅",
+    "r": "はば",
+    "hv": "",
+    "en": "width",
+    "vi": "chiều rộng",
+    "ex": "この道路は（　）が広い。",
+    "exvi": "Con đường này có chiều rộng lớn.",
+    "rd": [
+      "はぱ",
+      "はんば",
+      "はあば"
+    ],
+    "kd": [
+      "幅広い",
+      "横幅",
+      "範囲"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "間隔",
+    "r": "かんかく",
+    "hv": "Gian cách",
+    "en": "interval, spacing",
+    "vi": "khoảng cách",
+    "ex": "電車は10分（　）で発車する。",
+    "exvi": "Tàu điện xuất phát với khoảng cách 10 phút.",
+    "rd": [
+      "かんがく",
+      "がんかく",
+      "かんかぐ"
+    ],
+    "kd": [
+      "時間間隔",
+      "距離",
+      "隔たり"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "距離",
+    "r": "きょり",
+    "hv": "Cự ly",
+    "en": "distance",
+    "vi": "khoảng cách",
+    "ex": "駅までの（　）は約2キロだ。",
+    "exvi": "Khoảng cách đến ga là khoảng 2 km.",
+    "rd": [
+      "きょうり",
+      "ぎょり",
+      "きょうい"
+    ],
+    "kd": [
+      "距離感",
+      "間隔",
+      "道のり"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "立体",
+    "r": "りったい",
+    "hv": "Lập thể",
+    "en": "three-dimensional shape, solid",
+    "vi": "hình khối, lập thể",
+    "ex": "この作品は（　）的なデザインだ。",
+    "exvi": "Tác phẩm này có thiết kế mang tính lập thể.",
+    "rd": [
+      "りつたい",
+      "りっだい",
+      "りったえ"
+    ],
+    "kd": [
+      "立体的な",
+      "立方体",
+      "平面"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "立方体",
+    "r": "りっぽうたい",
+    "hv": "Lập phương thể",
+    "en": "cube",
+    "vi": "hình lập phương",
+    "ex": "サイコロは（　）の形をしている。",
+    "exvi": "Con xúc xắc có hình dạng khối lập phương.",
+    "rd": [
+      "りつぽうたい",
+      "りっほうたい",
+      "りっぽうだい"
+    ],
+    "kd": [
+      "立体",
+      "正方形",
+      "直方体"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "球",
+    "r": "きゅう",
+    "hv": "Cầu",
+    "en": "sphere, ball",
+    "vi": "hình cầu",
+    "ex": "地球はほぼ（　）の形をしている。",
+    "exvi": "Trái đất có hình dạng gần như hình cầu.",
+    "rd": [
+      "たま",
+      "きゅお",
+      "ぎゅう"
+    ],
+    "kd": [
+      "球体",
+      "地球儀",
+      "円"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "体積",
+    "r": "たいせき",
+    "hv": "Thể tích",
+    "en": "volume",
+    "vi": "thể tích",
+    "ex": "この容器の（　）を計算した。",
+    "exvi": "Tôi đã tính thể tích của chiếc hộp này.",
+    "rd": [
+      "たいせぎ",
+      "だいせき",
+      "たいしゃく"
+    ],
+    "kd": [
+      "面積",
+      "容積",
+      "立方体"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "面積",
+    "r": "めんせき",
+    "hv": "Diện tích",
+    "en": "area",
+    "vi": "diện tích",
+    "ex": "この土地の（　）は100平方メートルだ。",
+    "exvi": "Diện tích của mảnh đất này là 100 mét vuông.",
+    "rd": [
+      "めんせぎ",
+      "めんぜき",
+      "めいんせき"
+    ],
+    "kd": [
+      "体積",
+      "敷地",
+      "広さ"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "多少",
+    "r": "たしょう",
+    "hv": "Đa thiểu",
+    "en": "somewhat, more or less",
+    "vi": "ít nhiều",
+    "ex": "値段が（　）高くても品質を優先する。",
+    "exvi": "Dù giá có đắt hơn một chút, tôi vẫn ưu tiên chất lượng.",
+    "rd": [
+      "たしょお",
+      "たしょ",
+      "だしょう"
+    ],
+    "kd": [
+      "多少差",
+      "少々",
+      "若干"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "まれに",
+    "r": "まれに",
+    "hv": "",
+    "en": "rarely",
+    "vi": "hiếm khi",
+    "ex": "（　）このような事故が起きる。",
+    "exvi": "Hiếm khi xảy ra tai nạn như thế này.",
+    "rd": [
+      "まうれに",
+      "まれい",
+      "まれいに"
+    ],
+    "kd": [
+      "稀に",
+      "滅多に",
+      "たまに"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "風邪気味",
+    "r": "かぜぎみ",
+    "hv": "",
+    "en": "feeling like catching a cold",
+    "vi": "có triệu chứng cảm nhẹ",
+    "ex": "最近少し（　）だ。",
+    "exvi": "Gần đây tôi có triệu chứng cảm nhẹ.",
+    "rd": [
+      "かぜきみ",
+      "かざぎみ",
+      "かぜぎび"
+    ],
+    "kd": [
+      "疲れ気味",
+      "風邪をひく",
+      "体調不良"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "疲れ気味",
+    "r": "つかれぎみ",
+    "hv": "",
+    "en": "feeling somewhat tired",
+    "vi": "có vẻ mệt mỏi",
+    "ex": "最近仕事が忙しくて（　）だ。",
+    "exvi": "Gần đây công việc bận rộn nên tôi có vẻ mệt mỏi.",
+    "rd": [
+      "つかれきみ",
+      "つがれぎみ",
+      "つかれぎび"
+    ],
+    "kd": [
+      "風邪気味",
+      "疲労",
+      "体調不良"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "次々に",
+    "r": "つぎつぎに",
+    "hv": "",
+    "en": "one after another",
+    "vi": "lần lượt, liên tiếp",
+    "ex": "新しいアイデアが（　）浮かんだ。",
+    "exvi": "Những ý tưởng mới đã lần lượt nảy ra.",
+    "rd": [
+      "つぎつきに",
+      "つきつぎに",
+      "つぎづぎに"
+    ],
+    "kd": [
+      "続々と",
+      "相次いで",
+      "順々に"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "続々と",
+    "r": "ぞくぞくと",
+    "hv": "Tục tục",
+    "en": "one after another, in succession",
+    "vi": "liên tiếp",
+    "ex": "観光客が（　）押し寄せた。",
+    "exvi": "Khách du lịch đã liên tiếp đổ về.",
+    "rd": [
+      "そくぞくと",
+      "ぞくそくと",
+      "ぞぐぞぐと"
+    ],
+    "kd": [
+      "次々に",
+      "相次いで",
+      "陸続と"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "徐々に",
+    "r": "じょじょに",
+    "hv": "Từ từ",
+    "en": "gradually",
+    "vi": "dần dần",
+    "ex": "患者の容態は（　）回復している。",
+    "exvi": "Tình trạng của bệnh nhân đang dần dần hồi phục.",
+    "rd": [
+      "じょうじょに",
+      "じょじょうに",
+      "しょじょに"
+    ],
+    "kd": [
+      "徐行",
+      "次第に",
+      "少しずつ"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  },
+  {
+    "k": "大いに",
+    "r": "おおいに",
+    "hv": "",
+    "en": "greatly, very much",
+    "vi": "rất nhiều, hết sức",
+    "ex": "彼のスピーチは（　）会場を沸かせた。",
+    "exvi": "Bài phát biểu của anh ấy đã làm hội trường sôi động hết sức.",
+    "rd": [
+      "だいいに",
+      "おういに",
+      "おおいい"
+    ],
+    "kd": [
+      "大変",
+      "非常に",
+      "たいそう"
+    ],
+    "ud": [
+      "蛍光灯",
+      "自動販売機",
+      "扇風機"
+    ]
+  },
+  {
+    "k": "常に",
+    "r": "つねに",
+    "hv": "Thường",
+    "en": "always, constantly",
+    "vi": "luôn luôn",
+    "ex": "彼は（　）冷静さを保っている。",
+    "exvi": "Anh ấy luôn luôn giữ được sự bình tĩnh.",
+    "rd": [
+      "じょうに",
+      "つうねに",
+      "つねいに"
+    ],
+    "kd": [
+      "常日頃",
+      "いつも",
+      "絶えず"
+    ],
+    "ud": [
+      "冷蔵庫",
+      "傘",
+      "自転車"
+    ]
+  },
+  {
+    "k": "極めて",
+    "r": "きわめて",
+    "hv": "",
+    "en": "extremely",
+    "vi": "cực kỳ",
+    "ex": "この状況は（　）深刻だ。",
+    "exvi": "Tình huống này cực kỳ nghiêm trọng.",
+    "rd": [
+      "きわみて",
+      "きあめて",
+      "きわめで"
+    ],
+    "kd": [
+      "極端に",
+      "非常に",
+      "極度"
+    ],
+    "ud": [
+      "洗濯機",
+      "電子レンジ",
+      "歯ブラシ"
+    ]
+  },
+  {
+    "k": "最低気温",
+    "r": "さいていきおん",
+    "hv": "Tối đê khí ôn",
+    "en": "lowest temperature",
+    "vi": "nhiệt độ thấp nhất",
+    "ex": "今朝の（　）は氷点下だった。",
+    "exvi": "Nhiệt độ thấp nhất sáng nay dưới 0 độ.",
+    "rd": [
+      "さいでいきおん",
+      "さいていぎおん",
+      "さいていきうおん"
+    ],
+    "kd": [
+      "最高気温",
+      "気温",
+      "平均気温"
+    ],
+    "ud": [
+      "靴下",
+      "鍋",
+      "カーテン"
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_n2u9-2_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>
