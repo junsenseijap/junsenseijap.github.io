@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N2 漢字 · 1.2 — 衣類</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Zen+Antique+Soft&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+:root{
+  --pink:#E84B7A;--pink-mid:#F07099;--pink-soft:#F9C0D0;--pink-pale:#FDE8EF;
+  --pink-glow:rgba(232,75,122,0.15);--blue:#7BAFD4;--blue-pale:#D6EBF7;
+  --sage:#4a8a55;--sage-pale:rgba(158,196,160,0.22);--gold:#C89B3C;
+  --bg:#FAFAFA;--bg-card:#FFFFFF;--bg-soft:#F5F0F3;
+  --border:rgba(232,75,122,0.16);--border-blue:rgba(123,175,212,0.3);
+  --ink:#2C1A22;--ink2:#5A3D4A;--gray:#9A8590;
+  --shadow:rgba(44,26,34,0.08);--shadow-pink:rgba(232,75,122,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse 60% 40% at 5% 0%,rgba(249,192,208,0.35) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 98% 5%,rgba(123,175,212,0.20) 0%,transparent 50%),
+             var(--bg);
+  color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 60px;
+}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+
+/* HEADER */
+header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.hanko{width:56px;height:56px;flex:none;background:linear-gradient(135deg,var(--pink) 0%,var(--pink-mid) 100%);color:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(232,75,122,0.35);}
+header h1{font-family:'Zen Antique Soft',serif;font-size:28px;font-weight:400;margin:0;line-height:1.2;letter-spacing:.04em;}
+header p{margin:2px 0 0;font-size:12px;color:var(--pink);letter-spacing:.14em;text-transform:uppercase;}
+#studentName{font-size:12px;color:var(--ink2);margin:3px 0 0;display:none;}
+
+/* STATS */
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center;flex:1;min-width:80px;}
+.stat b{display:block;font-size:22px;font-weight:700;color:var(--pink);}
+.stat span{font-size:11px;color:var(--gray);letter-spacing:.06em;}
+.stat.ok b{color:var(--sage);}
+.stat.pending b{color:var(--blue);}
+
+/* NAV MODES */
+nav.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+nav.modes button{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .18s;}
+nav.modes button .jp{display:block;font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:var(--ink);}
+nav.modes button .sub{display:block;font-size:9px;color:var(--gray);margin-top:3px;letter-spacing:.04em;}
+nav.modes button.active{background:var(--pink);border-color:var(--pink);color:#fff;}
+nav.modes button.active .jp,nav.modes button.active .sub{color:#fff;}
+
+/* PANEL */
+.panel{background:var(--bg-card);border-radius:20px;border:1px solid var(--border);padding:24px;min-height:200px;box-shadow:0 4px 24px var(--shadow);}
+.panel-title{font-size:13px;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin:0 0 16px;}
+.count{color:var(--pink);font-weight:700;}
+
+/* FLASHCARD 3D */
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flashcard{width:100%;max-width:420px;height:290px;perspective:900px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.face.front{background:linear-gradient(135deg,var(--pink-pale) 0%,#fff 100%);border:1.5px solid var(--border);}
+.face.back{background:linear-gradient(135deg,var(--blue-pale) 0%,#fff 100%);border:1.5px solid var(--border-blue);transform:rotateY(180deg);}
+.front-kanji{font-family:'Noto Serif JP',serif;font-size:64px;font-weight:700;color:var(--ink);line-height:1;}
+.front-kanji.mid{font-size:46px;}
+.front-kanji.long{font-size:34px;}
+.front-kanji.xlong{font-size:24px;}
+.front-hv{font-size:11px;color:var(--gray);letter-spacing:.14em;margin-top:6px;}
+.back-meaning{font-size:18px;font-weight:600;color:var(--ink);text-align:center;}
+.back-vi{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center;}
+.back-reading{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;color:var(--pink);line-height:1.1;margin-bottom:6px;}
+.back-reading.mid{font-size:28px;}.back-reading.long{font-size:22px;}.back-reading.xlong{font-size:18px;}
+.back-hv{font-size:12px;color:var(--blue);margin-top:8px;font-style:italic;}
+.quiz-sentence{font-family:'Noto Serif JP',serif;font-size:19px;line-height:1.7;color:var(--ink);text-align:center;margin:10px 0 4px;padding:14px 16px;background:var(--bg-soft);border-radius:14px;}
+.quiz-sentence b{color:var(--pink);font-weight:700;}
+.word-bank{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.match-item.bank{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-family:'Noto Serif JP',serif;font-size:17px;font-weight:500;color:var(--ink);transition:all .15s;}
+.match-item.bank:hover:not(:disabled){border-color:var(--pink);background:var(--pink-pale);}
+.match-item.bank:disabled{cursor:not-allowed;}
+.match-item.bank.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);opacity:.75;}
+.back-ex{margin-top:10px;padding:8px 12px;background:rgba(123,175,212,0.12);border-radius:10px;font-family:'Noto Serif JP',serif;font-size:13px;color:var(--ink);text-align:center;line-height:1.5;max-width:340px;}
+.back-ex b{color:var(--pink);}
+.back-ex span{display:block;margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink2);font-style:italic;}
+.hint{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:.06em;}
+.flash-controls{display:flex;gap:12px;width:100%;max-width:420px;}
+.flash-controls button{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;}
+.flash-controls .prev{background:var(--bg-soft);color:var(--gray);}
+.flash-controls .next{background:var(--pink);color:#fff;}
+.flash-done{margin-top:4px;width:100%;max-width:420px;padding:11px;border-radius:14px;border:none;background:var(--blue-pale);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;}
+
+/* QUIZ */
+.quiz-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 4px;line-height:1.2;}
+.quiz-prompt.mid{font-size:38px;}
+.quiz-prompt.long{font-size:28px;}
+.quiz-prompt.xlong{font-size:20px;}
+.quiz-sub{font-size:12px;color:var(--gray);text-align:center;margin:0 0 16px;letter-spacing:.06em;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:var(--bg-soft);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;font-size:16px;font-family:'Noto Serif JP',serif;font-weight:500;color:var(--ink);transition:all .15s;text-align:center;}
+.opt:hover{border-color:var(--pink);background:var(--pink-pale);}
+.opt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage);}
+.opt.wrong{background:#fff0f0;border-color:var(--pink);color:var(--pink);}
+.opt.meaning-opt{font-family:'DM Sans',sans-serif;font-size:13px;}
+
+/* WRITING */
+.write-prompt{font-family:'Noto Serif JP',serif;font-size:52px;font-weight:700;text-align:center;color:var(--ink);margin:8px 0 16px;line-height:1.2;}
+.write-prompt.mid{font-size:38px;}
+.write-prompt.long{font-size:28px;}
+.write-input{width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);font-size:18px;font-family:'Noto Serif JP',serif;outline:none;text-align:center;transition:border-color .2s;}
+.write-input:focus{border-color:var(--pink);}
+.write-input.correct{border-color:var(--sage);background:var(--sage-pale);}
+.write-input.wrong{border-color:var(--pink);background:#fff0f0;}
+.write-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:8px;}
+.write-submit{margin-top:12px;width:100%;padding:13px;border-radius:14px;border:none;background:var(--pink);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:14px;border-radius:14px;border:1.5px solid var(--border);cursor:pointer;text-align:center;font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500;transition:all .18s;background:var(--bg-soft);}
+.match-item.reading{font-family:'DM Sans',sans-serif;font-size:14px;}
+.match-item.selected{border-color:var(--pink);background:var(--pink-pale);}
+.match-item.solved{border-color:var(--sage);background:var(--sage-pale);color:var(--sage);pointer-events:none;}
+.match-item.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* END SCREEN */
+.end-screen{text-align:center;padding:16px 0;}
+.end-screen .big{font-family:'Zen Antique Soft',serif;font-size:32px;color:var(--pink);margin-bottom:8px;}
+.session-score{font-size:15px;color:var(--ink2);margin:6px 0 0;}
+.session-score b{font-family:'Zen Antique Soft',serif;font-weight:400;font-size:24px;color:var(--pink);}
+#restartBtn{background:var(--pink);color:#fff;border:none;border-radius:14px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;}
+
+/* AUTH BANNER */
+.auth-banner{background:#fff0f0;border:1px solid var(--pink);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;color:var(--pink);font-size:14px;}
+
+/* SUBMIT STATUS */
+.submit-status{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center;}
+.submit-status.ok{background:var(--sage-pale);color:var(--sage);}
+.submit-status.err{background:#fff0f0;color:var(--pink);}
+.submit-status.sending{background:var(--bg-soft);color:var(--gray);}
+
+footer{text-align:center;margin-top:26px;font-size:11px;color:var(--gray);letter-spacing:.08em;}
+
+@media(max-width:420px){
+  nav.modes{grid-template-columns:repeat(2,1fr);}
+  .options{grid-template-columns:1fr;}
+  .match-grid{gap:12px;}
+  .front-kanji{font-size:52px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hanko">衣</div>
+    <div>
+      <h1>N2 漢字 · 1.2 — 衣類</h1>
+      <p>Vocabulaire · 34 mots</p>
+      <p id="studentName">👤 <span id="studentNameText"></span></p>
+    </div>
+  </header>
+
+  <div id="authBanner" class="auth-banner" style="display:none">
+    ⚠️ Non connecté — les scores ne seront pas enregistrés
+  </div>
+
+  <div class="stats">
+    <div class="stat ok"><b id="statKnown">0</b><span>習得</span></div>
+    <div class="stat pending"><b id="statTotal">34</b><span>単語数</span></div>
+    <div class="stat"><b id="statStreak">0</b><span>連続正解</span></div>
+  </div>
+
+  <nav class="modes">
+    <button data-mode="flash" class="active"><span class="jp">単語帳</span><span class="sub">Flashcards</span></button>
+    <button data-mode="quiz"><span class="jp">クイズ</span><span class="sub">Quiz</span></button>
+    <button data-mode="write"><span class="jp">記入</span><span class="sub">Writing</span></button>
+    <button data-mode="match"><span class="jp">対戦</span><span class="sub">Match</span></button>
+  </nav>
+
+  <section class="panel" id="panel"></section>
+
+  <footer>🌸 Jun Sensei — N2 漢字 · Unité 1.2</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — URL PROD CORRIGÉE
+══════════════════════════════════════════════════════ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWhn1YilznQ4kyj_TxNuReB-QXSUEJ0qH1XhckfI2aSc49o9tavaGVmVKrWIwTJglPkQ/exec";
+
+/* ── AUTH ── */
+const urlParams   = new URLSearchParams(window.location.search);
+const STUDENT_ID  = urlParams.get("studentId")  || "";
+const TOKEN       = urlParams.get("token")       || "";
+const EXERCISE_ID = urlParams.get("exerciseId")  || "kn2-u1-2";
+
+if (!STUDENT_ID || !TOKEN) {
+  document.getElementById("authBanner").style.display = "block";
+}
+
+/* ── SCORE CUMULATIF DE SESSION ── */
+var sessionTotalCorrect   = 0;
+var sessionTotalQuestions = 0;
+
+/* ── CHARGER NOM ÉLÈVE ── */
+async function loadStudentName() {
+  if (!STUDENT_ID || !TOKEN) return;
+  try {
+    const url = GAS_URL + "?action=getStudentName"
+      + "&studentId=" + encodeURIComponent(STUDENT_ID)
+      + "&token="     + encodeURIComponent(TOKEN);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.success) {
+      const nameEl = document.getElementById('studentName');
+      const textEl = document.getElementById('studentNameText');
+      if (nameEl && textEl) {
+        textEl.textContent = data.name + " " + data.familyName;
+        nameEl.style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── ENVOYER SCORE AU GAS ── */
+async function submitScore(score, maxScore) {
+  if (!STUDENT_ID || !TOKEN) return { ok: false, msg: "Non connecté" };
+  try {
+    const url = GAS_URL
+      + "?action=saveInteractiveScore"
+      + "&studentId="  + encodeURIComponent(STUDENT_ID)
+      + "&token="      + encodeURIComponent(TOKEN)
+      + "&exerciseId=" + encodeURIComponent(EXERCISE_ID)
+      + "&score="      + score
+      + "&maxScore="   + maxScore;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.success ? { ok: true } : { ok: false, msg: data.message || "Erreur GAS" };
+  } catch(e) { return { ok: false, msg: e.message }; }
+}
+
+function submitStatusHTML(state, msg) {
+  if (state === "sending") return `<div class="submit-status sending">⏳ Envoi du score…</div>`;
+  if (state === "ok")      return `<div class="submit-status ok">✅ Score enregistré !</div>`;
+  if (state === "noauth")  return `<div class="submit-status err">⚠️ Non connecté — score non enregistré</div>`;
+  return `<div class="submit-status err">❌ Erreur : ${msg}</div>`;
+}
+
+async function sendScoreForMode(correct, total) {
+  sessionTotalCorrect   += correct;
+  sessionTotalQuestions += total;
+  const statusEl = document.getElementById('submitStatus');
+  if (!statusEl) return;
+  if (!STUDENT_ID || !TOKEN) { statusEl.innerHTML = submitStatusHTML('noauth'); return; }
+  statusEl.innerHTML = submitStatusHTML('sending');
+  const result = await submitScore(sessionTotalCorrect, sessionTotalQuestions);
+  if (result.ok) {
+    statusEl.innerHTML = submitStatusHTML('ok');
+    const pct = sessionTotalQuestions ? Math.round((sessionTotalCorrect / sessionTotalQuestions) * 100) : 0;
+    const detail = document.createElement('div');
+    detail.style.cssText = 'font-size:11px;color:var(--gray);margin-top:4px;text-align:center';
+    detail.textContent = 'Score total session : ' + sessionTotalCorrect + '/' + sessionTotalQuestions + ' (' + pct + '%)';
+    statusEl.appendChild(detail);
+  } else {
+    statusEl.innerHTML = submitStatusHTML('err', result.msg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   VOCAB — 48 mots N4 U1
+══════════════════════════════════════════════════════ */
+const VOCAB = [
+  {"k": "居間", "r": "いま", "hv": "Cư gian", "en": "living room", "vi": "phòng khách", "ex": "家族みんなで（　）でテレビを見る。", "exvi": "Cả nhà cùng xem ti vi ở phòng khách.", "rd": ["いかん", "きょかん", "いあいだ"], "kd": ["客間", "居室", "仲間"], "ud": ["掃除機", "炊飯器", "加湿器"]},
+  {"k": "居眠り", "r": "いねむり", "hv": "Cư miên", "en": "dozing off", "vi": "ngủ gật", "ex": "会議中に（　）をして、上司に注意された。", "exvi": "Tôi bị cấp trên nhắc nhở vì ngủ gật trong cuộc họp.", "rd": ["きねむり", "いみんり", "おねむり"], "kd": ["居残り", "居留守", "眠気"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "居酒屋", "r": "いざかや", "hv": "Cư tửu ốc", "en": "izakaya (Japanese pub)", "vi": "quán nhậu kiểu Nhật", "ex": "仕事帰りに同僚と（　）で一杯飲んだ。", "exvi": "Trên đường đi làm về, tôi uống một ly với đồng nghiệp ở quán nhậu.", "rd": ["いさかや", "いしゅや", "きょざかや"], "kd": ["酒屋", "居場所", "飲み屋"], "ud": ["図書館", "病院", "郵便局"]},
+  {"k": "住居", "r": "じゅうきょ", "hv": "Trú cư", "en": "residence, dwelling", "vi": "nơi ở, chỗ ở", "ex": "引っ越しのときは、新しい（　）の住所を役所に届けなければならない。", "exvi": "Khi chuyển nhà, phải báo địa chỉ nơi ở mới cho cơ quan hành chính.", "rd": ["じゅうこ", "ちゅうきょ", "じゅうい"], "kd": ["住所", "住宅", "同居"], "ud": ["時計", "鍵", "眼鏡"]},
+  {"k": "入居", "r": "にゅうきょ", "hv": "Nhập cư", "en": "moving in (to a residence)", "vi": "dọn vào ở", "ex": "来月から新しいマンションに（　）する予定だ。", "exvi": "Từ tháng sau tôi dự định dọn vào chung cư mới.", "rd": ["いりきょ", "にゅうこ", "にゅうい"], "kd": ["入室", "入浴", "同居"], "ud": ["洗濯", "給油", "採点"]},
+  {"k": "郊外", "r": "こうがい", "hv": "Giao ngoại", "en": "suburbs", "vi": "ngoại ô", "ex": "家賃が安いので、都心ではなく（　）に住むことにした。", "exvi": "Vì tiền thuê rẻ nên tôi quyết định sống ở ngoại ô chứ không phải trung tâm.", "rd": ["こがい", "きょうがい", "こうげ"], "kd": ["市外", "海外", "野外"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "近郊", "r": "きんこう", "hv": "Cận giao", "en": "outskirts, environs", "vi": "vùng ngoại ô lân cận", "ex": "大阪の（　）には、静かな住宅地が多い。", "exvi": "Vùng ngoại ô lân cận Osaka có nhiều khu dân cư yên tĩnh.", "rd": ["きんごう", "ちかこう", "こんこう"], "kd": ["近況", "近隣", "近視"], "ud": ["机", "椅子", "本棚"]},
+  {"k": "庭", "r": "にわ", "hv": "Đình", "en": "garden, yard", "vi": "khu vườn, sân", "ex": "（　）に桜の木を植えた。", "exvi": "Tôi đã trồng một cây anh đào ở trong vườn.", "rd": ["にば", "てい", "にや"], "kd": ["底", "店", "度"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "家庭", "r": "かてい", "hv": "Gia đình", "en": "household, home", "vi": "gia đình", "ex": "（　）の事情で、会社を休むことになった。", "exvi": "Vì hoàn cảnh gia đình, tôi phải nghỉ làm.", "rd": ["かにわ", "けてい", "かじょう"], "kd": ["家族", "家屋", "庭園"], "ud": ["時計", "鍵", "眼鏡"]},
+  {"k": "校庭", "r": "こうてい", "hv": "Hiệu đình", "en": "schoolyard", "vi": "sân trường", "ex": "放課後、子どもたちは（　）でサッカーをしている。", "exvi": "Sau giờ học, bọn trẻ chơi bóng đá ở sân trường.", "rd": ["こうにわ", "きょうてい", "こうじょう"], "kd": ["校舎", "校則", "中庭"], "ud": ["図書館", "病院", "郵便局"]},
+  {"k": "築3年", "r": "ちくさんねん", "hv": "Trúc tam niên", "en": "built 3 years ago", "vi": "xây được 3 năm", "ex": "このアパートは（　）で、まだきれいだ。", "exvi": "Chung cư này mới xây được 3 năm nên vẫn còn sạch đẹp.", "rd": ["つきさんねん", "ちくさんとし", "ちくみつねん"], "kd": ["築5年", "築10年", "築年数"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "建築", "r": "けんちく", "hv": "Kiến trúc", "en": "architecture", "vi": "kiến trúc, xây dựng", "ex": "彼は大学で（　）を学んでいる。", "exvi": "Anh ấy đang học kiến trúc ở đại học.", "rd": ["けんつく", "こんちく", "けんちゅく"], "kd": ["建設", "建国", "構築"], "ud": ["時計", "鍵", "眼鏡"]},
+  {"k": "建築家", "r": "けんちくか", "hv": "Kiến trúc gia", "en": "architect", "vi": "kiến trúc sư", "ex": "有名な（　）が設計した美術館を見に行った。", "exvi": "Tôi đã đi xem bảo tàng do một kiến trúc sư nổi tiếng thiết kế.", "rd": ["けんつくか", "けんちくけ", "こんちくか"], "kd": ["建築士", "作曲家", "専門家"], "ud": ["看護師", "弁護士", "運転手"]},
+  {"k": "新築", "r": "しんちく", "hv": "Tân trúc", "en": "newly built", "vi": "nhà mới xây", "ex": "（　）の家は、木の香りがして気持ちがいい。", "exvi": "Ngôi nhà mới xây có mùi gỗ nên rất dễ chịu.", "rd": ["しんつく", "あらちく", "しんしく"], "kd": ["新規", "改築", "新居"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "壁", "r": "かべ", "hv": "Bích", "en": "wall", "vi": "bức tường", "ex": "子どもが（　）に絵を描いてしまった。", "exvi": "Đứa trẻ lỡ vẽ tranh lên tường.", "rd": ["へき", "かび", "かへ"], "kd": ["璧", "避", "癖"], "ud": ["意見", "天気", "気温"]},
+  {"k": "床屋", "r": "とこや", "hv": "Sàng ốc", "en": "barber shop", "vi": "tiệm cắt tóc", "ex": "髪が伸びたので、（　）に行ってきた。", "exvi": "Tóc dài ra nên tôi đã đi cắt ở tiệm.", "rd": ["ゆかや", "とこおく", "しょうや"], "kd": ["肉屋", "花屋", "本屋"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "床", "r": "ゆか", "hv": "Sàng", "en": "floor", "vi": "sàn nhà", "ex": "コップを落として、（　）に水がこぼれた。", "exvi": "Tôi làm rơi cái cốc nên nước đổ ra sàn.", "rd": ["とこ", "しょう", "ゆき"], "kd": ["麻", "庁", "広"], "ud": ["意見", "天気", "気温"]},
+  {"k": "起床", "r": "きしょう", "hv": "Khởi sàng", "en": "getting up (from bed)", "vi": "thức dậy", "ex": "毎朝六時に（　）して、ジョギングをしている。", "exvi": "Mỗi sáng tôi thức dậy lúc 6 giờ rồi đi chạy bộ.", "rd": ["きとこ", "きゆか", "ぎしょう"], "kd": ["起立", "起点", "就寝"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "寝坊", "r": "ねぼう", "hv": "Tẩm phường", "en": "oversleeping", "vi": "ngủ dậy muộn", "ex": "（　）して、会議に遅れてしまった。", "exvi": "Tôi ngủ dậy muộn nên đã trễ cuộc họp.", "rd": ["しんぼう", "ねぼ", "ねほう"], "kd": ["寝室", "寝返り", "寝顔"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "寝室", "r": "しんしつ", "hv": "Tẩm thất", "en": "bedroom", "vi": "phòng ngủ", "ex": "（　）は二階にあり、窓から海が見える。", "exvi": "Phòng ngủ ở tầng hai, từ cửa sổ nhìn thấy biển.", "rd": ["ねしつ", "しんむろ", "ねむしつ"], "kd": ["寝台", "教室", "浴室"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "戸", "r": "と", "hv": "Hộ", "en": "door (sliding)", "vi": "cánh cửa (kéo)", "ex": "強い風で、（　）がガタガタと音を立てている。", "exvi": "Vì gió mạnh nên cánh cửa kêu lạch cạch.", "rd": ["こ", "へ", "ど"], "kd": ["扉", "房", "炉"], "ud": ["意見", "天気", "気温"]},
+  {"k": "一戸", "r": "いっこ", "hv": "Nhất hộ", "en": "one house", "vi": "một căn nhà", "ex": "この町には、（　）建ての家が多い。", "exvi": "Thị trấn này có nhiều nhà riêng.", "rd": ["いちと", "いっと", "ひとこ"], "kd": ["一軒", "一階", "一度"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "畳む", "r": "たたむ", "hv": "Điệp", "en": "to fold", "vi": "gấp", "ex": "洗濯物を（　）のを手伝った。", "exvi": "Tôi đã giúp gấp quần áo đã giặt.", "rd": ["ただむ", "たたく", "たたまる"], "kd": ["曇る", "豊む", "昼む"], "ud": ["沸かす", "焼く", "茹でる"]},
+  {"k": "畳", "r": "たたみ", "hv": "Điệp", "en": "tatami mat", "vi": "chiếu tatami", "ex": "和室の（　）の上に布団を敷いて寝る。", "exvi": "Tôi trải đệm trên chiếu tatami của phòng kiểu Nhật để ngủ.", "rd": ["たたも", "たたび", "だたみ"], "kd": ["曇", "豊", "畠"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "柱", "r": "はしら", "hv": "Trụ", "en": "pillar, post", "vi": "cột, trụ", "ex": "古い家の太い（　）に、子どもの身長が刻まれている。", "exvi": "Chiều cao của đứa trẻ được khắc trên cây cột to của ngôi nhà cũ.", "rd": ["ばしら", "はしろ", "はじら"], "kd": ["注", "住", "往"], "ud": ["意見", "天気", "気温"]},
+  {"k": "電柱", "r": "でんちゅう", "hv": "Điện trụ", "en": "utility pole", "vi": "cột điện", "ex": "車が（　）にぶつかって、停電した。", "exvi": "Xe đâm vào cột điện nên bị mất điện.", "rd": ["でんはしら", "てんちゅう", "でんじゅう"], "kd": ["電線", "電池", "電車"], "ud": ["意見", "天気", "気温"]},
+  {"k": "和室", "r": "わしつ", "hv": "Hòa thất", "en": "Japanese-style room", "vi": "phòng kiểu Nhật", "ex": "旅館の（　）に泊まって、畳の匂いに癒やされた。", "exvi": "Tôi ở phòng kiểu Nhật của nhà trọ và được xoa dịu bởi mùi chiếu tatami.", "rd": ["かしつ", "わむろ", "わしち"], "kd": ["洋室", "和風", "客室"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "和食", "r": "わしょく", "hv": "Hòa thực", "en": "Japanese food", "vi": "món ăn Nhật", "ex": "海外から来た友達を、おいしい（　）の店に連れて行った。", "exvi": "Tôi đã dẫn người bạn từ nước ngoài đến một quán món Nhật ngon.", "rd": ["かしょく", "わじき", "わくい"], "kd": ["洋食", "和服", "主食"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "平和", "r": "へいわ", "hv": "Bình hòa", "en": "peace", "vi": "hòa bình", "ex": "世界の（　）を願って、みんなで歌を歌った。", "exvi": "Mọi người cùng hát một bài hát để cầu mong hòa bình thế giới.", "rd": ["へいか", "ひらわ", "びょうわ"], "kd": ["平均", "平等", "和平"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "調和", "r": "ちょうわ", "hv": "Điều hòa", "en": "harmony", "vi": "sự hài hòa", "ex": "このデザインは、色と形の（　）がとれている。", "exvi": "Thiết kế này có sự hài hòa giữa màu sắc và hình dạng.", "rd": ["ちょうか", "しらべわ", "ちょわ"], "kd": ["調整", "調節", "協和"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "狭い", "r": "せまい", "hv": "Hiệp", "en": "narrow, small", "vi": "hẹp, chật", "ex": "この道は（　）ので、大きな車は通れない。", "exvi": "Con đường này hẹp nên xe lớn không đi qua được.", "rd": ["せばい", "きょうい", "せせい"], "kd": ["挟い", "頬い", "狼い"], "ud": ["甘い", "痛い", "太い"]},
+  {"k": "材料", "r": "ざいりょう", "hv": "Tài liệu", "en": "ingredients, materials", "vi": "nguyên liệu", "ex": "カレーを作るために、スーパーで（　）を買ってきた。", "exvi": "Để nấu món cà ri, tôi đã mua nguyên liệu ở siêu thị.", "rd": ["さいりょう", "ざいろう", "ざいりょ"], "kd": ["資料", "原料", "教材"], "ud": ["意見", "天気", "気温"]},
+  {"k": "木材", "r": "もくざい", "hv": "Mộc tài", "en": "lumber, timber", "vi": "gỗ (vật liệu)", "ex": "この家は国産の（　）だけで建てられている。", "exvi": "Ngôi nhà này được xây chỉ bằng gỗ sản xuất trong nước.", "rd": ["きざい", "もくさい", "ぼくざい"], "kd": ["木製", "木造", "教材"], "ud": ["冷蔵庫", "傘", "自転車"]},
+  {"k": "素材", "r": "そざい", "hv": "Tố tài", "en": "material, raw material", "vi": "chất liệu", "ex": "この鞄は丈夫な（　）で作られている。", "exvi": "Chiếc túi này được làm bằng chất liệu bền.", "rd": ["すざい", "そうざい", "そさい"], "kd": ["素質", "素直", "題材"], "ud": ["意見", "天気", "気温"]}
+];
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'jun_kn2u1-2_progress_v2';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadProgress() {
+  let p = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) p = JSON.parse(raw); } catch(e) {}
+  VOCAB.forEach(v => { if (!p[v.k]) p[v.k] = { known: false }; });
+  return p;
+}
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+let progress = loadProgress();
+let streak   = Number(localStorage.getItem(STORAGE_KEY + '_streak') || 0);
+
+function updateStats() {
+  const known = Object.values(progress).filter(p => p.known).length;
+  document.getElementById('statKnown').textContent  = known;
+  document.getElementById('statTotal').textContent  = VOCAB.length;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+// Met en évidence le mot cible dans la phrase d'exemple
+function exHighlight(item) {
+  return item.ex.replace('（　）', '<b>' + item.k + '</b>');
+}
+
+function sizeClass(text) {
+  const l = text.length;
+  if (l > 8) return 'xlong';
+  if (l > 5) return 'long';
+  if (l > 3) return 'mid';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const panel = document.getElementById('panel');
+
+document.querySelectorAll('nav.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.mode);
+  });
+});
+
+function render(mode) {
+  if (mode === 'flash') renderFlash();
+  else if (mode === 'quiz')  renderQuiz();
+  else if (mode === 'write') renderWrite();
+  else if (mode === 'match') renderMatch();
+}
+
+/* ── END SCREEN ── */
+function endScreen(title, subtitle, correct, total) {
+  const known = Object.values(progress).filter(p => p.known).length;
+  const pct   = total ? Math.round((correct / total) * 100) : null;
+  return `
+    <div class="end-screen">
+      <div class="big">${title}</div>
+      <p>${subtitle}</p>
+      ${pct !== null ? `<p class="session-score">今回のスコア <b>${correct} / ${total}</b> （${pct}%）</p>` : ''}
+      <p>${known} / ${VOCAB.length} 語 習得済み</p>
+      <div id="submitStatus"></div>
+      <button id="restartBtn">もう一度</button>
+    </div>`;
+}
+
+panel.addEventListener('click', e => {
+  if (e.target && e.target.id === 'restartBtn') {
+    const activeBtn = document.querySelector('nav.modes button.active');
+    const mode = activeBtn ? activeBtn.dataset.mode : 'flash';
+    if (mode === 'flash') { flashOrder = shuffle(VOCAB); flashIndex = 0; flashCorrect = 0; }
+    if (mode === 'quiz')  { quizPool = shuffle(VOCAB);  quizIndex = 0;  quizCorrect = 0; }
+    if (mode === 'write') { writeOrder = shuffle(VOCAB); writeIndex = 0; writeCorrect = 0; }
+    if (mode === 'match') { newMatchRound(); }
+    render(mode);
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   FLASHCARDS — recto : kanji + Hán Việt · verso : lecture + sens + exemple
+══════════════════════════════════════════════════════ */
+let flashOrder = shuffle(VOCAB), flashIndex = 0, flashCorrect = 0;
+
+function renderFlash() {
+  if (flashIndex >= flashOrder.length) {
+    panel.innerHTML = endScreen('単語帳 終了', '全部見ました！', flashCorrect, flashOrder.length);
+    sendScoreForMode(flashCorrect, flashOrder.length);
+    return;
+  }
+  const item = flashOrder[flashIndex];
+  panel.innerHTML = `
+    <p class="panel-title">単語帳 <span class="count">${flashIndex + 1} / ${flashOrder.length}</span></p>
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="face front">
+            <div class="front-kanji ${sizeClass(item.k)}">${item.k}</div>
+            ${item.hv ? `<div class="front-hv">${item.hv}</div>` : ''}
+            <div class="hint">タップして読み方を見る</div>
+          </div>
+          <div class="face back">
+            <div class="back-reading ${sizeClass(item.r)}">${item.r}</div>
+            <div class="back-meaning">${item.en}</div>
+            <div class="back-vi">${item.vi}</div>
+            ${item.ex ? `<div class="back-ex">${exHighlight(item)}${item.exvi ? `<span>${item.exvi}</span>` : ''}</div>` : ''}
+            <div class="hint">タップして戻る</div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-controls">
+        <button class="prev" id="flashPrev">← 前</button>
+        <button class="next" id="flashNext">次 →</button>
+      </div>
+      <button class="flash-done" id="flashDone">完了 ✓</button>
+    </div>`;
+
+  document.getElementById('flashcard').addEventListener('click', () =>
+    document.getElementById('flashcard').classList.toggle('flipped'));
+  document.getElementById('flashPrev').addEventListener('click', () => {
+    if (flashIndex > 0) { flashIndex--; renderFlash(); }
+  });
+  document.getElementById('flashNext').addEventListener('click', () => {
+    progress[item.k].known = true; saveProgress(); streak++; flashCorrect++;
+    updateStats(); flashIndex++; renderFlash();
+  });
+  document.getElementById('flashDone').addEventListener('click', () => {
+    flashIndex = flashOrder.length; renderFlash();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   QUIZ — pondéré : lecture, kanji et usage dominent ; sens minoritaire
+══════════════════════════════════════════════════════ */
+let quizPool = shuffle(VOCAB), quizIndex = 0, quizCorrect = 0;
+
+// Pondération : 3 lecture · 3 kanji · 3 usage · 1 sens
+const QUIZ_WEIGHTS = [
+  ['toReading', 3], ['toKanji', 3], ['usage', 3], ['toMeaning', 1]
+];
+
+// Une question d'usage n'est posée que si la phrase ET des distracteurs
+// dédiés (ud) existent. Sans ud, on ne peut pas garantir une réponse unique.
+function hasUsage(item) {
+  return !!(item.ex && item.ud && item.ud.length >= 3);
+}
+
+function pickQuizType(item) {
+  let pool = [];
+  QUIZ_WEIGHTS.forEach(function(w) {
+    if (w[0] === 'usage' && !hasUsage(item)) return;
+    for (let i = 0; i < w[1]; i++) pool.push(w[0]);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Complète une liste de distracteurs jusqu'à 3 en piochant dans la leçon.
+// Défensif : écarte la bonne réponse et les doublons, même si les données
+// fournies en contiennent — une option correcte en double rendrait la
+// question insoluble.
+function fillDistractors(pool, correct, getter) {
+  const clean = [];
+  (pool || []).forEach(x => {
+    if (x && x !== correct && clean.indexOf(x) === -1) clean.push(x);
+  });
+  const filler = shuffle(VOCAB).map(getter)
+    .filter(x => x && x !== correct && clean.indexOf(x) === -1);
+  while (clean.length < 3 && filler.length) clean.push(filler.pop());
+  return clean.slice(0, 3);
+}
+
+function renderQuiz() {
+  if (quizIndex >= VOCAB.length) {
+    panel.innerHTML = endScreen('クイズ 終了', 'クイズ終了！', quizCorrect, VOCAB.length);
+    sendScoreForMode(quizCorrect, VOCAB.length);
+    return;
+  }
+  const item  = quizPool[quizIndex % quizPool.length];
+  const qType = pickQuizType(item);
+  let promptHtml, promptLabel, optionItems, optClass = '';
+
+  if (qType === 'toReading') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい読み方を選んでください';
+    const pool  = fillDistractors((item.rd || []).slice(0, 3), item.r, v => v.r);
+    optionItems = shuffle([{ label: item.r, correct: true },
+      ...pool.map(r => ({ label: r, correct: false }))]);
+
+  } else if (qType === 'toKanji') {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.r)}">${item.r}</div>`;
+    promptLabel = '正しい漢字を選んでください';
+    const pool  = fillDistractors((item.kd || []).slice(0, 3), item.k, v => v.k);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else if (qType === 'usage') {
+    promptHtml  = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    promptLabel = '（　）に入る言葉を選んでください';
+    // Distracteurs `ud` UNIQUEMENT : piocher dans la leçon rendrait la question
+    // ambiguë, les mots d'une même leçon étant thématiquement proches.
+    const pool  = item.ud.slice(0, 3);
+    optionItems = shuffle([{ label: item.k, correct: true },
+      ...pool.map(k => ({ label: k, correct: false }))]);
+
+  } else {
+    promptHtml  = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    promptLabel = '正しい意味を選んでください（EN / VI）';
+    optClass    = 'meaning-opt';
+    const others = shuffle(VOCAB.filter(v => v.k !== item.k)).slice(0, 3);
+    optionItems  = shuffle([{ label: `${item.en} / ${item.vi}`, correct: true },
+      ...others.map(v => ({ label: `${v.en} / ${v.vi}`, correct: false }))]);
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">クイズ <span class="count">${quizIndex + 1} / ${VOCAB.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${promptLabel}</p>
+    <div class="options">
+      ${optionItems.map((o, i) => `<button class="opt ${optClass}" data-idx="${i}">${o.label}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.opt').forEach(b => b.disabled = true);
+      const isCorrect = optionItems[i].correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        panel.querySelectorAll('.opt').forEach((b, j) => {
+          if (optionItems[j].correct) b.classList.add('correct');
+        });
+      }
+      if (isCorrect) { progress[item.k].known = true; saveProgress(); streak++; quizCorrect++; }
+      else streak = 0;
+      updateStats();
+      setTimeout(() => { quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   WRITING
+══════════════════════════════════════════════════════ */
+let writeOrder = shuffle(VOCAB), writeIndex = 0, writeCorrect = 0;
+
+function renderWrite() {
+  if (writeIndex >= writeOrder.length) {
+    panel.innerHTML = endScreen('記入 終了', 'お疲れさまでした！', writeCorrect, writeOrder.length);
+    sendScoreForMode(writeCorrect, writeOrder.length);
+    return;
+  }
+  const item = writeOrder[writeIndex];
+  const sc   = sizeClass(item.k);
+  panel.innerHTML = `
+    <p class="panel-title">記入 <span class="count">${writeIndex + 1} / ${writeOrder.length}</span></p>
+    <div class="write-prompt ${sc}">${item.k}</div>
+    <p class="quiz-sub">${item.en} / ${item.vi}</p>
+    <input class="write-input" id="writeInput" type="text" placeholder="読み方を入力…" autocomplete="off">
+    <p class="write-hint">ひらがなで入力してください</p>
+    <button class="write-submit" id="writeSubmit">確認</button>`;
+
+  const input  = document.getElementById('writeInput');
+  const submit = document.getElementById('writeSubmit');
+  input.focus();
+
+  function check() {
+    const val = input.value.trim();
+    const ok  = val === item.r;
+    input.classList.add(ok ? 'correct' : 'wrong');
+    submit.disabled = true;
+    if (ok) { progress[item.k].known = true; saveProgress(); streak++; writeCorrect++; }
+    else { streak = 0; const hint = document.querySelector('.write-hint'); hint.textContent = '正解：' + item.r; hint.style.color = 'var(--pink)'; }
+    updateStats();
+    setTimeout(() => { writeIndex++; renderWrite(); }, 1000);
+  }
+  submit.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   対戦 — かっこに適当な言葉を入れる（穴埋め）
+   4 options : 1 correcte + 3 distracteurs `ud` incompatibles avec LA phrase.
+   Jamais de mots piochés dans la leçon : ils seraient souvent acceptables aussi.
+   Repli sur un exercice de lecture si la leçon ne fournit pas assez de `ud`.
+══════════════════════════════════════════════════════ */
+let matchOrder = [], matchIndex = 0, matchCorrect = 0, matchFallback = false;
+
+function newMatchRound() {
+  const usable  = VOCAB.filter(hasUsage);
+  matchFallback = usable.length < 4;
+  matchOrder    = shuffle(matchFallback ? VOCAB : usable).slice(0, 10);
+  matchIndex    = 0;
+  matchCorrect  = 0;
+}
+
+function renderMatch() {
+  if (!matchOrder.length) newMatchRound();
+  if (matchIndex >= matchOrder.length) {
+    panel.innerHTML = endScreen('対戦 終了', 'お疲れさまでした！', matchCorrect, matchOrder.length);
+    sendScoreForMode(matchCorrect, matchOrder.length);
+    return;
+  }
+  const item = matchOrder[matchIndex];
+
+  let promptHtml, label, correct, options;
+  if (matchFallback) {
+    // Repli : pas de distracteurs d'usage → question de lecture, non ambiguë
+    promptHtml = `<div class="quiz-prompt ${sizeClass(item.k)}">${item.k}</div>`;
+    label      = '正しい読み方を選んでください';
+    correct    = item.r;
+    options    = shuffle([correct].concat(
+      fillDistractors((item.rd || []).slice(0, 3), correct, v => v.r)));
+  } else {
+    promptHtml = `<div class="quiz-sentence">${item.ex.replace('（　）', '<b>（　）</b>')}</div>`;
+    label      = '（　）に適当な言葉を入れてください';
+    correct    = item.k;
+    options    = shuffle([correct].concat(item.ud.slice(0, 3)));
+  }
+
+  panel.innerHTML = `
+    <p class="panel-title">対戦 <span class="count">${matchIndex + 1} / ${matchOrder.length}</span></p>
+    ${promptHtml}
+    <p class="quiz-sub">${label}</p>
+    <div class="word-bank">
+      ${options.map((o, i) => `<button class="match-item bank" data-idx="${i}">${o}</button>`).join('')}
+    </div>`;
+
+  panel.querySelectorAll('.match-item.bank').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      panel.querySelectorAll('.match-item.bank').forEach(b => b.disabled = true);
+      const ok = options[i] === correct;
+      btn.classList.add(ok ? 'solved' : 'wrong');
+      if (!ok) {
+        panel.querySelectorAll('.match-item.bank').forEach((b, j) => {
+          if (options[j] === correct) b.classList.add('solved');
+        });
+        btn.classList.add('shake');
+        streak = 0;
+      } else {
+        progress[item.k].known = true; saveProgress();
+        streak++; matchCorrect++;
+      }
+      updateStats();
+      setTimeout(() => { matchIndex++; renderMatch(); }, ok ? 700 : 1300);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+newMatchRound();
+updateStats();
+render('flash');
+loadStudentName();
+</script>
+</body>
+</html>
